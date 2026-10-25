@@ -677,7 +677,7 @@ Os três cartões no Hub foram comparados byte a byte com os arquivos de `docs/c
 1. ~~Abrir os três repositórios do Hugging Face ao público~~ Feito em 25 de outubro e verificado.
 2. Preencher o perfil da organização `coppead` no GitHub (nome, descrição, URL da escola, local, e-mail): quem chega por `github.com/coppead` hoje não vê que é a COPPEAD.
 3. Decidir se um e-mail institucional entra no README, no código de conduta e nos cartões como contato; hoje o contato é só pelas issues.
-4. Repetir o achatamento do histórico nos três repositórios do Hub depois do reenvio dos cartões de 25 de outubro, se quiser manter um commit só (é um comando que o assistente não pode executar sozinho).
+4. ~~Repetir o achatamento do histórico nos três repositórios do Hub~~ Feito pelo André em 25 de outubro, depois do último reenvio; conferido: um commit em cada, mesmos arquivos, cartões iguais aos locais.
 5. Fornecer uma chave de API de um modelo de fronteira, se quiser a linha que falta no placar.
 
 **Trabalho de máquina, depois disso**
