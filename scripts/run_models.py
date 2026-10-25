@@ -23,58 +23,25 @@ import json
 import re
 from pathlib import Path
 
-import yaml
-
+from causalista.harness.specs import responder_of
 from causalista.harness import (
     case_worlds,
-    ADJUST_FOR_EVERYTHING,
-    ADJUST_FOR_NOTHING,
-    HFModel,
-    OllamaModel,
-    OpenAIModel,
     load_worlds,
     run,
     summarise,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-THINK = {"think": True, "nothink": False}
-BASES = ROOT / "configs" / "bases.yaml"
-
-
-def pinned_revision(repo: str) -> str | None:
-    """The commit recorded for a base in configs/bases.yaml; None for a repository that is not there."""
-    listed = yaml.safe_load(BASES.read_text(encoding="utf-8"))["bases"] if BASES.exists() else []
-    return next((base["revision"] for base in listed if base["repo"] == repo), None)
-
-
-def responder_of(spec: str, host: str, think_tokens: int = 4096, adapter: Path | None = None):
-    kind, _, rest = spec.partition(":")
-    if kind == "rule":
-        return {"tudo": ADJUST_FOR_EVERYTHING, "nada": ADJUST_FOR_NOTHING}[rest]
-    if kind == "ollama":
-        model, _, mode = rest.rpartition(":")
-        if mode not in THINK:
-            model, mode = rest, None
-        budget = {"max_tokens": 8192, "context": 16384} if mode != "nothink" else {}
-        return OllamaModel(model, think=THINK.get(mode), host=host, **budget)
-    if kind == "hf":
-        model, _, mode = rest.rpartition(":")
-        if mode not in THINK:
-            model, mode = rest, "nothink"
-        budget = {"max_new_tokens": think_tokens} if THINK[mode] else {}
-        return HFModel(model, adapter=adapter, thinking=THINK[mode], revision=pinned_revision(model), **budget)
-    if kind == "openai":
-        return OpenAIModel(rest)
-    raise SystemExit(f"unknown kind of model in {spec!r}")
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--worlds", help="name of a set under outputs/worlds")
     parser.add_argument("--cases", nargs="*", type=Path, help="files of written cases, answered instead of a set of worlds")
     parser.add_argument("--name", help="name of the folder under outputs/runs (default: the set, or \"casos\")")
-    parser.add_argument("--model", action="append", required=True)
+    parser.add_argument(
+        "--model", action="append", required=True,
+        help="a responder, repeatable: rule:tudo, rule:nada, ollama:<model>[:nothink], hf:<repository>[:nothink], openai:<model>",
+    )
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--host", default="http://localhost:11434")
     parser.add_argument("--every", type=int, default=1, help="only one world in every N, across the whole set")
@@ -111,14 +78,18 @@ def main() -> None:
         if hasattr(responder, "load"):
             responder.load()  # a model that does not load stops here, before any record is written
         file = out / (re.sub(r"[^a-z0-9.]+", "-", responder.label.lower()).strip("-") + ".jsonl")
+        unit = ("casos" if args.cases else "mundos") if os.environ.get("LANG", "").startswith("pt") else ("cases" if args.cases else "worlds")
+        print(f"{responder.label}: {len(worlds)} {unit} -> {file}", flush=True)
         records = run(responder, worlds, file, workers=args.workers, batch=args.batch, estimate=estimate)
         if len(records) < len(worlds):
             print(f"{responder.label}: only {len(records)} of {len(worlds)} worlds have an answer; run again to finish")
         numbers = summarise(records)
+        pt = os.environ.get("LANG", "").startswith("pt")
+        labels = ("nota", "acerto", "erro confiante", "abstenção indevida", "inválida") if pt else ("score", "accuracy", "confident error", "undue abstention", "invalid")
         print(
-            f"{responder.label:34s} nota {numbers['score']:+.2f} | acerto {numbers['correct']:.0%} | "
-            f"erro confiante {numbers['confident_error']:.0%} | abstenção indevida {numbers['undue_abstention']:.0%} | "
-            f"inválida {numbers['invalid']:.0%} | mundos {numbers['worlds']}"
+            f"{responder.label:34s} {labels[0]} {numbers['score']:+.2f} | {labels[1]} {numbers['correct']:.0%} | "
+            f"{labels[2]} {numbers['confident_error']:.0%} | {labels[3]} {numbers['undue_abstention']:.0%} | "
+            f"{labels[4]} {numbers['invalid']:.0%} | {unit} {numbers['worlds']}"
         )
         (out / "summary.json").write_text(
             json.dumps(
@@ -128,6 +99,7 @@ def main() -> None:
             ) + "\n",
             encoding="utf-8",
         )
+    print(f"{'registros em' if os.environ.get('LANG', '').startswith('pt') else 'records in'} {out}")
 
 
 if __name__ == "__main__":

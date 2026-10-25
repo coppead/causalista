@@ -43,7 +43,9 @@ def summarise(records: list[dict]) -> dict:
         "complete": _share(bool(r["answer"] and r["answer"]["complete"]) for r in records),
         "roles_right": (
             sum(r["roles_right"] for r in records if r["roles_right"] is not None)
-            / max(1, sum(r["roles_right"] is not None for r in records))
+            / sum(r["roles_right"] is not None for r in records)
+            if any(r["roles_right"] is not None for r in records)
+            else None  # written cases carry no roles to check
         ),
     }
 
