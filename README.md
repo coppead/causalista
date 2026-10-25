@@ -42,7 +42,7 @@ uv run --no-sync python scripts/run_models.py --cases cases/fase0.yaml --name qu
     --model ollama:hf.co/coppead/causalista-4b-GGUF:nothink
 ```
 
-The scoreboard prints in English (in Portuguese when your locale is `pt`): score, accuracy, confident errors, undue abstentions, invalid answers, and how many cases were answered. The responder label ends in `(sem raciocínio)`, "without reasoning", the mode the model was trained in. Keep `--no-sync`: without it, `uv run` would install the training group (torch included, about 7 GB), which the project enables by default for its own training runs.
+The scoreboard prints in English (in Portuguese when your locale is `pt`): score, accuracy, confident errors, undue abstentions, invalid answers, and how many cases were answered. The responder label ends in `(sem raciocínio)`, "without reasoning", the mode the model was trained in. Keep `--no-sync`: without it, `uv run` would install the training group (torch included, about 7 GB), which the project enables by default for its own training runs. Prefer the harness or `scripts/ask.py` to `ollama run` for this model: Ollama's own `--think=false` does not close the thinking block for it (Ollama 0.32), so the model reasons for about a thousand tokens before answering; the harness sends the exact prompt the model was trained on (details in the [GGUF card](docs/cards/gguf-card.md)).
 
 **On your own data.** `scripts/ask.py` builds the task from a CSV, a short story of how the data were generated and a one-sentence dictionary of the columns, asks the model, reads its answer and, when the effect is identifiable, runs the estimator on the rows:
 

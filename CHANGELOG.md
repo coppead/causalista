@@ -9,6 +9,9 @@
 - `rule:all` and `rule:none` as English aliases of the naive strategies `rule:tudo` and `rule:nada`.
 - English indexes for `docs/`, `theories/`, `cases/`, `configs/` and `scripts/`; a working-language note at the top of the README.
 
+### Fixed
+- The Ollama backend renders the thinking-off prompt itself and sends it raw (`/api/generate`, `raw: true`): Ollama 0.32's `think: false` leaves the thinking block open for this model, and the model then reasons for about a thousand tokens before answering. Checked on the five quickstart cases through the Hub: 182 to 228 tokens, same answers as the full-precision model.
+
 ### Changed
 - The console scoreboard prints in English unless the locale is Portuguese; `run_models.py` prints progress and where the records went.
 - `roles_right` is `null` in a summary when no record carries roles to check (written cases), instead of `0.0`.

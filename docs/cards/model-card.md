@@ -159,7 +159,7 @@ The model gives a confident, structured answer to any table that fits the prompt
 
 ## How to use
 
-The model expects the exact prompt format it was trained on. For a table of your own, `scripts/ask.py` in the code repository builds the task from a CSV, a story of how the data were generated and a one-sentence dictionary of the columns, asks the model and runs the estimator on its answer (`ollama pull hf.co/coppead/causalista-4b-GGUF` first; no GPU needed):
+The model expects the exact prompt format it was trained on. For a table of your own, `scripts/ask.py` in the code repository builds the task from a CSV, a story of how the data were generated and a one-sentence dictionary of the columns, asks the model and runs the estimator on its answer (`ollama pull hf.co/coppead/causalista-4b-GGUF` first; no GPU needed). Through Ollama, the harness renders the prompt itself with thinking off and sends it raw, because Ollama's own `think: false` does not close the thinking block for this model (see the GGUF card):
 
 ```bash
 uv run --no-sync python scripts/ask.py --csv table.csv --treatment email --outcome bought \

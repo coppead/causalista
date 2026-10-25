@@ -42,7 +42,7 @@ uv run --no-sync python scripts/run_models.py --cases cases/fase0.yaml --name qu
     --model ollama:hf.co/coppead/causalista-4b-GGUF:nothink
 ```
 
-O placar sai em português quando o seu sistema está em português (em inglês nos demais): nota, acerto, erros confiantes, abstenções indevidas, respostas inválidas e quantos casos foram respondidos. O rótulo do respondedor termina em `(sem raciocínio)`, o modo em que o modelo foi treinado. Mantenha o `--no-sync`: sem ele, `uv run` instalaria o grupo de treino (torch incluído, cerca de 7 GB), que o projeto liga por padrão para os próprios treinos.
+O placar sai em português quando o seu sistema está em português (em inglês nos demais): nota, acerto, erros confiantes, abstenções indevidas, respostas inválidas e quantos casos foram respondidos. O rótulo do respondedor termina em `(sem raciocínio)`, o modo em que o modelo foi treinado. Mantenha o `--no-sync`: sem ele, `uv run` instalaria o grupo de treino (torch incluído, cerca de 7 GB), que o projeto liga por padrão para os próprios treinos. Prefira o harness ou o `scripts/ask.py` ao `ollama run` para este modelo: o `--think=false` do Ollama não fecha o bloco de pensamento para ele (Ollama 0.32), e o modelo raciocina por cerca de mil tokens antes de responder; o harness manda exatamente o prompt em que o modelo foi treinado (detalhes no [cartão do GGUF](docs/cards/gguf-card.md)).
 
 **Nos seus próprios dados.** O `scripts/ask.py` monta a tarefa a partir de um CSV, de uma história curta de como os dados foram gerados e de um dicionário com uma frase por coluna, pergunta ao modelo, lê a resposta e, quando o efeito é identificável, roda o estimador nas linhas:
 
