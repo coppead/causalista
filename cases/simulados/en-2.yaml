@@ -1,0 +1,565 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Simulated human-written cases, file en-2 (English).
+#
+# Written by a large language model on 2026-10-06, in the role of six people who would plausibly describe
+# a dataset to an analyst: an operations manager at a logistics company, a quality officer
+# at a hospital network, an analyst at a regional tourism board, a performance analyst at a
+# sports club, a product manager at a telecom and the owner of a chain of coffee shops.
+# The texts imitate how such people write (meeting notes, a report excerpt, chat messages,
+# a question to a consultant, an internal wiki page); the causal diagram behind each text
+# is declared in `edges` and the answer is checked against the verifier
+# (scripts/check_cases.py).
+#
+# These cases are a TEST. They are frozen before any model answers them and are never
+# used as training data.
+
+cases:
+
+  - id: en_router_swap_rule
+    author: ai
+    status: aprovado
+    language: en
+    style: short internal wiki page
+    persona: product manager for broadband at a telecom, comfortable with dashboards, no statistics training
+    theme: Telecom, retention
+    title: Free router swap offered by a script rule, and 180-day churn
+    twin: en_router_swap_judgement
+    treatment: router_swap
+    outcome: churned_180d
+    columns:
+      account_id: Internal account identifier.
+      router_swap: Received the free Wi-Fi 6 router swap during the Q1 retention push (1 = yes, 0 = no).
+      churned_180d: Cancelled broadband service within 180 days of the end of the push window (1 = yes, 0 = no).
+      wifi_tickets_90d: Count of support tickets tagged WIFI or COVERAGE in the 90 days before the customer's call.
+      tenure_months: Months since broadband activation, at the date of the call.
+      call_centre: Centre that handled the call (LEEDS or GLASGOW).
+      plan_tier: Broadband plan at the date of the call (BASIC, PLUS or MAX).
+      speed_test_mbps: Median download speed from in-app speed tests run in the 60 days after the push window closed, in Mbps. Null if the customer ran no tests.
+      survey_answered: Answered a survey (the NPS survey sent at month 7, or the exit survey sent on cancellation) (1 = yes, 0 = no).
+    story: >-
+      Q1 Router Swap, retention push. What we did and what is in the extract.
+      Owner: Dana (Product, Broadband). Last edited 2026-04-22.
+
+      What happened. From Jan 12 to Mar 27 the Leeds call centre offered a free Wi-Fi 6 router
+      swap on inbound support calls. Glasgow didn't have it in the script (all the stock was in
+      the Leeds warehouse), so none of their callers were offered it. Calls land at whichever
+      centre has a free agent, so which one you got was luck of the draw. Script rule for Leeds
+      agents: offer the swap if the account shows two or more Wi-Fi/coverage tickets in the
+      last 90 days and the customer has been with us at least 12 months. Pretty much everyone
+      offered took it, so for our purposes offered = swapped.
+
+      Why it should matter. Customers with repeat Wi-Fi tickets churn at roughly twice the base
+      rate, and long-tenure customers churn less in general, hence the 12-month floor (finance
+      didn't want to spend kit on people who'd leave anyway, or stay anyway, I forget which
+      argument won). The new router does fix the problem: speed test results are visibly higher
+      for swapped accounts, and we know from the 2024 work that customers with faster speed
+      tests churn less.
+
+      The extract (ret_router_q1.csv, one row per customer who called support in the window,
+      41,207 rows) has the fields below. Note the survey column: we sent an NPS survey to every
+      swapped customer in month 7, and the churn team sends their "why did you leave" survey to
+      anyone who cancels; both land in the same column.
+
+      Open question for the analytics guild: what do we need to control for to get an honest
+      read on whether the swap moves 180-day churn? Plan tier is in there because MAX
+      customers churn less whatever we do.
+    edges:
+      - wifi_tickets_90d -> router_swap
+      - wifi_tickets_90d -> churned_180d
+      - tenure_months -> router_swap
+      - tenure_months -> churned_180d
+      - call_centre -> router_swap
+      - plan_tier -> churned_180d
+      - router_swap -> speed_test_mbps
+      - speed_test_mbps -> churned_180d
+      - router_swap -> churned_180d
+      - router_swap -> survey_answered
+      - churned_180d -> survey_answered
+    answer:
+      identifiable: true
+      adjust_for: [tenure_months, wifi_tickets_90d]
+      do_not_adjust_for:
+        speed_test_mbps: Measured after the swap and caused by it. It is part of the effect being measured.
+        survey_answered: Caused by the swap and by cancelling. Adjusting for it creates a false association between the swap and churn.
+      indifferent: [account_id, call_centre, plan_tier]
+    note: >-
+      The selection rule is spelled out (tickets and tenure), so both are in the table. The
+      traps are the speed test (a consequence of the swap, and the timing is only in the
+      dictionary) and the survey, which is answered by swapped customers and by leavers.
+
+  - id: en_router_swap_judgement
+    author: ai
+    status: aprovado
+    language: en
+    style: short internal wiki page
+    persona: product manager for broadband at a telecom, comfortable with dashboards, no statistics training
+    theme: Telecom, retention
+    title: Free router swap offered at the agent's discretion, and 180-day churn
+    twin: en_router_swap_rule
+    treatment: router_swap
+    outcome: churned_180d
+    columns:
+      account_id: Internal account identifier.
+      router_swap: Received the free Wi-Fi 6 router swap during the Q1 retention push (1 = yes, 0 = no).
+      churned_180d: Cancelled broadband service within 180 days of the end of the push window (1 = yes, 0 = no).
+      wifi_tickets_90d: Count of support tickets tagged WIFI or COVERAGE in the 90 days before the customer's call.
+      tenure_months: Months since broadband activation, at the date of the call.
+      call_centre: Centre that handled the call (LEEDS or GLASGOW).
+      plan_tier: Broadband plan at the date of the call (BASIC, PLUS or MAX).
+      speed_test_mbps: Median download speed from in-app speed tests run in the 60 days after the push window closed, in Mbps. Null if the customer ran no tests.
+      survey_answered: Answered a survey (the NPS survey sent at month 7, or the exit survey sent on cancellation) (1 = yes, 0 = no).
+    not_in_table:
+      agent_judgement: The agent's read, during the call, of whether the customer was about to leave. There is no disposition code for it, so it was never logged.
+    story: >-
+      Q1 Router Swap, retention push. What we did and what is in the extract.
+      Owner: Dana (Product, Broadband). Last edited 2026-04-22.
+
+      What happened. From Jan 12 to Mar 27 the Leeds call centre offered a free Wi-Fi 6 router
+      swap on inbound support calls. Glasgow didn't have it in the script (all the stock was in
+      the Leeds warehouse), so none of their callers were offered it. Calls land at whichever
+      centre has a free agent, so which one you got was luck of the draw. Script guidance for Leeds
+      agents: the customer has to have been with us at least 12 months; beyond that it was left
+      to the agent's judgement, offer it to whoever sounds like they're about to walk. Agents
+      had the ticket history on screen and I'd bet it coloured who they picked, but there is no
+      disposition code for "sounded fed up", so that call is nowhere in the extract. Pretty
+      much everyone offered took it, so for our purposes offered = swapped.
+
+      Why it should matter. Customers with repeat Wi-Fi tickets churn at roughly twice the base
+      rate, and long-tenure customers churn less in general, hence the 12-month floor (finance
+      didn't want to spend kit on people who'd leave anyway, or stay anyway, I forget which
+      argument won). To be fair to the agents, they are usually right about who is leaving. The
+      new router does fix the problem: speed test results are visibly higher for swapped
+      accounts, and we know from the 2024 work that customers with faster speed tests churn
+      less.
+
+      The extract (ret_router_q1.csv, one row per customer who called support in the window,
+      41,207 rows) has the fields below. Note the survey column: we sent an NPS survey to every
+      swapped customer in month 7, and the churn team sends their "why did you leave" survey to
+      anyone who cancels; both land in the same column.
+
+      Open question for the analytics guild: what do we need to control for to get an honest
+      read on whether the swap moves 180-day churn? Plan tier is in there because MAX
+      customers churn less whatever we do.
+    edges:
+      - agent_judgement -> router_swap
+      - agent_judgement -> churned_180d
+      - wifi_tickets_90d -> agent_judgement
+      - wifi_tickets_90d -> churned_180d
+      - tenure_months -> router_swap
+      - tenure_months -> churned_180d
+      - call_centre -> router_swap
+      - plan_tier -> churned_180d
+      - router_swap -> speed_test_mbps
+      - speed_test_mbps -> churned_180d
+      - router_swap -> churned_180d
+      - router_swap -> survey_answered
+      - churned_180d -> survey_answered
+    answer:
+      identifiable: false
+      missing: [agent_judgement]
+    note: >-
+      Same page as the twin, with the ticket rule replaced by the agent's call on who sounded
+      like leaving. That read is never logged, and the agents are said to be usually right, so
+      nothing in the table stands in for it.
+
+  - id: en_pastry_push_split
+    author: ai
+    status: aprovado
+    language: en
+    style: chat message
+    persona: owner of a chain of coffee shops in London, writing to a freelance analyst she uses now and then
+    theme: Coffee shops, loyalty app marketing
+    title: Free-pastry push sent to every other member
+    treatment: push_sent
+    outcome: visits_30d
+    columns:
+      member_id: Loyalty app member ID.
+      push_sent: Received the 14 Sept "Flat White Friday" push notification (1 = yes, 0 = no).
+      visits_30d: Number of loyalty scans in the 30 days from 14 Sept.
+      visits_prev_90d: Number of loyalty scans in the 90 days before 14 Sept.
+      app_opens_7d: App opens in the 7 days from 14 Sept, from the vendor's event log.
+      home_store: Shop where the member scans most often.
+      signup_weekday: Day of the week the member created the account.
+      rating_left: Left an in-app rating between 14 Sept and 14 Oct (1 = yes, 0 = no). The app prompts for a rating after the third scan in a calendar month, and the 14 Sept offer also carried a rating prompt.
+    not_in_table:
+      weather: The weather over the 30 days, which the owner mentions and has no data on.
+    story: >-
+      hey Priya, quick one before Thursday. The Flat White Friday push (free pastry w/ your next
+      flat white, went out 14 Sept 7:30am): Appstack split the list for us, literally every
+      other member down the list got it, so about 6,100 got the push and 6,100 didn't. I've
+      pulled the scans, 30 days after and the 90 before. People who got it opened the app way
+      more that first week (obvs) and people who open the app come in more, so that's part of how it works I
+      guess?? Also the rating thing, the app asks for a rating after your 3rd scan in a month
+      AND we sent a "how was your pastry" rating prompt to everyone on the push list, so both
+      show up in rating_left. Camden and Shoreditch are just busier shops full stop, and anyone
+      who was scanning 10+ times before the push is still scanning 10+ times, pastry or no
+      pastry. Oh and the weather was grim the last week of Sept which won't have helped
+      footfall, nothing I can give you on that. Can you tell me what I actually need to compare
+      to say the push worked, or do I just compare the two halves?
+    edges:
+      - push_sent -> app_opens_7d
+      - app_opens_7d -> visits_30d
+      - push_sent -> visits_30d
+      - visits_prev_90d -> visits_30d
+      - home_store -> visits_30d
+      - weather -> visits_30d
+      - push_sent -> rating_left
+      - visits_30d -> rating_left
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        app_opens_7d: Measured after the push and caused by it. It is part of the effect being measured.
+        rating_left: Caused by the push (the offer prompt) and by the visits themselves (the third-scan prompt). Adjusting for it creates a false association between the push and visits.
+      indifferent: [home_store, member_id, signup_weekday, visits_prev_90d]
+    note: >-
+      "Every other member down the list" is the randomization, said in passing. The simple
+      comparison is already right; the mistakes are adjusting for app opens or for the rating.
+      The unrecorded weather is a decoy: it only moves the outcome and does not break anything.
+
+  - id: en_depot_routing_wave
+    author: ai
+    status: aprovado
+    language: en
+    style: meeting notes
+    persona: operations manager at a UK parcel logistics company, taking the notes of an ops review
+    theme: Logistics, delivery operations
+    title: Dynamic routing at the March-wave depots and Q2 on-time delivery
+    treatment: dynamic_routing
+    outcome: on_time_pct_q2
+    columns:
+      depot_code: Depot identifier.
+      dynamic_routing: Depot live on the dynamic routing tool from the March wave (1 = yes, 0 = no).
+      on_time_pct_q2: Share of parcels delivered within the promised window, Q2 (Apr to Jun), in percent.
+      on_time_pct_q4: Share of parcels delivered within the promised window, Q4 of the previous year (Oct to Dec), in percent.
+      parcels_per_day: Average parcels handled per working day, Q4 of the previous year.
+      metro: Depot classified as metropolitan in the network plan (1 = yes, 0 = no).
+      stops_per_route: Average delivery stops per route, Q2.
+      late_refunds_q2: Refunds paid to customers for missed delivery windows in Q2, in GBP.
+    story: >-
+      Ops review, 14 July. Dynamic routing, March wave.
+      Present: Marcus (Ops), Fiona (Network Planning), Dev (BI), me (notes).
+
+      - Recap: 38 of 141 depots went live on the dynamic routing tool in the March wave.
+      Selection was Fiona's: all the 8k+ parcels/day sites, since that's where the pain is,
+      plus anything metro, because the tool's stop sequencing is supposed to shine with dense
+      drops. Marcus also insisted on the worst performers from Q4 going in regardless of size.
+      That was the whole list.
+
+      - Q2 on-time (delivered within promised window) is 91.4% at wave depots vs 93.0%
+      elsewhere. Marcus: "so it made things worse?" Fiona: not a fair comparison, the big
+      depots have always had the worst numbers, they were already bottom of the table in Q4,
+      and a bad Q4 tends to be followed by a bad Q2 at the same depot anyway. Metro depots
+      actually run a bit better on the on-time stat as a rule, shorter legs. Dev to look at it
+      properly.
+
+      - Mechanically the tool packs more stops per route (stops/route up 11% at wave depots
+      in Q2). Fiona's view is that tighter routes finish earlier and that's where the on-time
+      gain should come from, if there is one.
+
+      - Finance want the Q2 refund figures in the same cut. Fine, Dev will add them.
+
+      - ACTION Dev: Q2 depot-level dataset (one row per depot) to Marcus by Friday, fields
+      below, with a note on what we need to adjust for before anyone quotes a number. Marcus
+      half expects the answer to be that we can't tell from this at all.
+
+      - ACTION Fiona: September wave list, separate conversation.
+    edges:
+      - parcels_per_day -> dynamic_routing
+      - parcels_per_day -> on_time_pct_q2
+      - parcels_per_day -> on_time_pct_q4
+      - metro -> dynamic_routing
+      - metro -> on_time_pct_q2
+      - metro -> on_time_pct_q4
+      - on_time_pct_q4 -> dynamic_routing
+      - on_time_pct_q4 -> on_time_pct_q2
+      - dynamic_routing -> stops_per_route
+      - stops_per_route -> on_time_pct_q2
+      - dynamic_routing -> on_time_pct_q2
+      - on_time_pct_q2 -> late_refunds_q2
+    answer:
+      identifiable: true
+      adjust_for: [metro, on_time_pct_q4, parcels_per_day]
+      do_not_adjust_for:
+        stops_per_route: Measured after the rollout and changed by the tool. It is part of the effect being measured.
+        late_refunds_q2: Refunds are paid because deliveries were late, so this column is a consequence of the outcome. Adjusting for it distorts the effect.
+      indifferent: [depot_code]
+    note: >-
+      Three selection criteria, all in the table. The refund column is only explained in the
+      dictionary (paid for missed windows), and nobody at the meeting says what it is caused by.
+
+  - id: en_discharge_call_reach
+    author: ai
+    status: aprovado
+    language: en
+    style: quarterly report excerpt
+    persona: quality officer at a five-hospital network in the US, writing the quarterly quality report for the board
+    theme: Hospital network, care transitions
+    title: Post-discharge nurse call and 30-day readmission
+    treatment: discharge_call
+    outcome: readmit_30d
+    columns:
+      episode_id: De-identified encounter identifier.
+      discharge_call: Reached by the post-discharge nurse call within 48 hours of discharge home (1 = yes, 0 = no).
+      readmit_30d: All-cause inpatient readmission to any network hospital within 30 days of discharge (1 = yes, 0 = no).
+      hospital: Discharging hospital (RIVERSIDE, COUNTY_GENERAL, MERCY_EAST, ST_ANNE, WESTBROOK).
+      age: Patient age at discharge, in years.
+      charlson_index: Charlson comorbidity index computed from the diagnoses on the index admission.
+      pcp_visit_7d: Primary care visit within 7 days of discharge, per claims and the network EHR (1 = yes, 0 = no).
+      survey_returned: Patient experience survey, mailed 45 days after discharge, returned (1 = yes, 0 = no).
+    story: >-
+      3.2 Post-Discharge Call Program, Medical Units, Q2 FY26.
+
+      The post-discharge call program (a registered nurse call within 48 hours of discharge
+      home, covering medications, warning signs and scheduling of the primary care follow-up)
+      continued across all five hospitals this quarter. The call team works from each site's
+      daily discharge list, calling in list order until the 48-hour window closes, and reached
+      58% of eligible discharges (4,312 of 7,436). Reach varied widely by site, from 79% at
+      Riverside to 31% at County General and 36% at Mercy East, where the lists routinely come
+      over after 3 p.m. and most patients fall outside the window before the team gets to them;
+      within a site, whether a patient was reached comes down to where they fell on that day's
+      list. The sites also differ in their baseline readmission rates, as they have since the
+      FY23 case-mix review, partly because of the community services around each hospital and
+      partly because County General in particular discharges an older and more comorbid
+      population.
+
+      Among called patients, 61% had a primary care visit within 7 days of discharge versus 34%
+      of those not called; the literature and our own FY24 analysis associate early follow-up
+      with fewer 30-day readmissions. Thirty-day all-cause readmission was 11.8% among called
+      patients and 14.6% among those not called. Quality Analytics has been asked to determine
+      what adjustments are required before this difference can be attributed to the program.
+
+      Patient experience surveys are mailed at 45 days post-discharge. Return rates are lower
+      among readmitted patients, and since May the nurses have been flagging the survey during
+      the call and sending reached patients a text reminder when it mails, which has lifted
+      returns in that group. The dataset for the analysis, one row per discharge, is described
+      in Appendix C.
+    edges:
+      - hospital -> discharge_call
+      - hospital -> readmit_30d
+      - hospital -> age
+      - hospital -> charlson_index
+      - age -> readmit_30d
+      - charlson_index -> readmit_30d
+      - discharge_call -> pcp_visit_7d
+      - pcp_visit_7d -> readmit_30d
+      - discharge_call -> readmit_30d
+      - discharge_call -> survey_returned
+      - readmit_30d -> survey_returned
+    answer:
+      identifiable: true
+      adjust_for: [hospital]
+      do_not_adjust_for:
+        pcp_visit_7d: Happens after the call and is one of the things the call arranges. It is part of the effect being measured.
+        survey_returned: Returned more by reached patients (the nurses remind them) and less by readmitted ones. Adjusting for it creates a false association between the call and readmission.
+      indifferent: [age, charlson_index, episode_id]
+    note: >-
+      Who gets the call depends on the hospital's paperwork habits, not on the patient. Age
+      and comorbidity look like the obvious things to adjust for, and they do no harm, but the
+      one column that is needed is the hospital.
+
+  - id: en_destination_grants
+    author: ai
+    status: aprovado
+    language: en
+    style: question to a consultant
+    persona: analyst at a regional tourism board in Ireland, who sat on the grant panel herself
+    theme: Tourism, public grants
+    title: Destination Development grants and the change in overnight stays
+    treatment: grant_2025
+    outcome: overnight_change_pct
+    columns:
+      town_code: Town code from the national statistics office.
+      grant_2025: Received a Destination Development grant in the 2025 round (1 = yes, 0 = no).
+      overnight_change_pct: Percentage change in registered overnight stays, June to August 2025 against June to August 2024, from the bed-stock returns.
+      coastal: Town has a coastline within its boundary (1 = yes, 0 = no).
+      beds_2024: Registered visitor bed stock in the 2024 return.
+      events_summer_2025: Ticketed events held June to August 2025, from the regional listings feed.
+      site_visit_oct: Visited by the board's monitoring officer in October 2025 (1 = yes, 0 = no).
+    not_in_table:
+      panel_impression: The panel's sense, from the applications and the discussion, of which towns had tourism officers who would deliver. There was no scoring sheet.
+    story: >-
+      Subject: Destination Development Fund 2025, can we say anything about impact?
+
+      Hi Tom, following up on our chat at the forum. The regional council want a line in the
+      November report on whether the Destination Development grants "worked", and I've been
+      asked to produce it. Background, as briefly as I can manage.
+
+      62 towns in the region, 41 applied, 19 got a grant (15 to 40 thousand each) in the 2025
+      round, announced in February. The grants mostly went on events: the funded towns put on
+      about 40% more ticketed events this summer than last, which everyone is very pleased
+      about, and events obviously pull in overnight visitors. The outcome the council cares
+      about is the change in registered overnight stays, summer 2025 against summer 2024, from
+      the bed-stock returns.
+
+      How the 19 were picked is where I get nervous. I sat on the panel. We had the
+      applications and a long afternoon, and if I'm honest we leaned towards the towns whose
+      tourism officers we knew and who seemed to have their act together, the ones who would
+      clearly deliver. There was no scoring sheet, it was a conversation, so nothing from that
+      afternoon exists as data, and I suspect those same towns would have had a decent summer
+      anyway. The brief for the round also said inland towns first, so most of the coastal
+      applicants were turned down, and of course the coast had a bumper summer with the
+      weather.
+
+      One more thing you should know. Our monitoring officer visited every grantee in October
+      for the compliance report, and also went out to a handful of towns whose stays had
+      dropped sharply, grant or no grant, to find out what happened. Those visits are flagged in
+      the sheet.
+
+      Attached is one row per applicant town (the 41, funded or not) with the fields below. Bed
+      stock is in there because the small places swing around a lot in percentage terms. Is
+      there a way to adjust this to get at the grant effect, or do I have to tell the council we
+      can't say?
+
+      Thanks, Niamh
+    edges:
+      - panel_impression -> grant_2025
+      - panel_impression -> overnight_change_pct
+      - coastal -> grant_2025
+      - coastal -> overnight_change_pct
+      - beds_2024 -> overnight_change_pct
+      - grant_2025 -> events_summer_2025
+      - events_summer_2025 -> overnight_change_pct
+      - grant_2025 -> overnight_change_pct
+      - grant_2025 -> site_visit_oct
+      - overnight_change_pct -> site_visit_oct
+    answer:
+      identifiable: false
+      missing: [panel_impression]
+    note: >-
+      Coastal is in the table and can be adjusted for; the panel's impression of which towns
+      would deliver is not, and the writer herself says those towns would have done well anyway.
+      The events count is a consequence of the grant and the October visit comes after the
+      outcome and depends on it.
+
+  - id: en_cryo_protocol_physio
+    author: ai
+    status: aprovado
+    language: en
+    style: chat message
+    persona: performance analyst at a professional football club in England, messaging the head of medical before a review
+    theme: Sports, injury prevention
+    title: Post-match recovery protocol and days lost to soft-tissue injury
+    treatment: cryo_protocol
+    outcome: days_missed
+    columns:
+      squad_number: Shirt number that season.
+      cryo_protocol: On the post-match cryotherapy and compression protocol that season (1 = yes, 0 = no).
+      days_missed: Days unavailable for selection through soft-tissue injury (hamstring, calf, groin, quad) that season.
+      age: Age on 1 July of that season, in years.
+      prev_soft_tissue: Had at least one soft-tissue injury the previous season (1 = yes, 0 = no).
+      position: Primary position (GK, CB, FB, CM, WIDE, FW).
+      gps_load_avg: Mean weekly training load from the GPS vests that season, in arbitrary units.
+      scan_count: Number of MRI and ultrasound scans that season.
+    not_in_table:
+      physio_concern: The physio team's pre-season read of which players looked likely to break down. Not recorded anywhere.
+    story: >-
+      Jamie, before the medical review tmrw. Pulled 3 seasons, one row per player per season,
+      1st team + U23s. Cryo/compression protocol: Rob and the physio team decided who went on
+      it each pre-season. From talking to Rob it was basically the lads they were nervous
+      about, heavy legs in the Tuesday runs, someone mentioning tightness, that kind of thing,
+      and none of that gets written down, it's his eye. Beyond that, anyone over 30 was on it as
+      standard and so was anyone with a soft-tissue injury the season before. Protocol lads also
+      had the Wednesday session dialled down as part of the package, you'll see it in the GPS
+      load numbers, and lower loads = fewer soft-tissue days, that much we know. Heads up on
+      scan_count: protocol players get a routine scan every 8 weeks on top of the usual scans
+      whenever someone breaks down, so it's a bit of both. Age and injury history both push
+      days missed up, and wide players and full-backs lose more days than CBs. Rob's instinct
+      is usually right about who's going to break, which is kind of the problem for the
+      comparison?? What do I adjust for, or is it a no?
+    edges:
+      - physio_concern -> cryo_protocol
+      - physio_concern -> days_missed
+      - age -> cryo_protocol
+      - age -> days_missed
+      - prev_soft_tissue -> cryo_protocol
+      - prev_soft_tissue -> days_missed
+      - cryo_protocol -> gps_load_avg
+      - gps_load_avg -> days_missed
+      - cryo_protocol -> days_missed
+      - cryo_protocol -> scan_count
+      - days_missed -> scan_count
+      - position -> days_missed
+    answer:
+      identifiable: false
+      missing: [physio_concern]
+    note: >-
+      Two of the three reasons for being on the protocol (age, injury history) are columns;
+      the third, the physio's eye, is not, and the text says it predicts injuries. Adjusting
+      for GPS load or scans would make things worse, not better.
+
+  - id: en_second_till_rush
+    author: ai
+    status: aprovado
+    language: en
+    style: meeting notes
+    persona: owner of a chain of coffee shops in London, writing up the Monday managers' call
+    theme: Coffee shops, store operations
+    title: Second till in the morning rush and transactions per day
+    treatment: second_till
+    outcome: rush_transactions
+    columns:
+      shop_id: Shop identifier.
+      week_of_year: ISO week number.
+      second_till: Second till open from 7am to 10am that week (1 = yes, 0 = no).
+      rush_transactions: Average transactions per day between 7am and 10am that week.
+      near_station: Shop within 200m of a mainline station entrance (1 = yes, 0 = no).
+      seats: Seating capacity.
+      rain_days: Days that week with more than 1mm of rain at the nearest Met Office station.
+      avg_wait_sec: Average seconds from order placed to order ready on the till system, 7am to 10am, that week.
+      overtime_hours: Overtime hours paid to the shop that week, from the rota system.
+    not_in_table:
+      crew_speed: How fast each shop's morning crew is on the machines. Mentioned by a manager; not recorded anywhere.
+    story: >-
+      Monday managers' call, 8 Sept. Second till.
+
+      - Reminder of what we did: from 1 June, 9 shops ran a second till 7 to 10am. Picked by me:
+      the station shops, all 12 of them to start with, because that's where the queue goes out
+      the door and people walk off. Didn't do Euston, Stratford or Paddington in the end because
+      the landlords there wanted silly money for the electrics, so those three stayed on one
+      till. Nothing else changed in any shop.
+
+      - Numbers: Jun to Aug the second-till shops did 288 rush transactions a day on average vs
+      194 for the rest. Sam pointed out that station shops did more before too, obviously, so
+      that gap is not the till.
+
+      - Order-ready timer: avg wait at the second-till shops is down from about 4m10 to about
+      2m50. Fewer people see a long queue and leave, which is the whole point.
+
+      - Overtime is up at the second-till shops. Partly the extra body on the till, partly that
+      busy mornings run over whatever you do. Jess to keep an eye on it.
+
+      - Rain weeks were quiet everywhere and August dipped everywhere (holidays). Seating runs
+      from 12 to 48 and the bigger shops do more covers anyway. Jess reckons the Victoria crew
+      are just faster on the machines than anyone else's and shift more cups whatever you give
+      them; fair enough, but that's not in any system.
+
+      - Ask for Priya: one row per shop per week, June through August, fields below. Which
+      columns do we adjust for to get the actual till effect? Sam reckons you can't get a clean
+      number out of this at all, so tell us if that's right.
+    edges:
+      - near_station -> second_till
+      - near_station -> rush_transactions
+      - second_till -> avg_wait_sec
+      - avg_wait_sec -> rush_transactions
+      - second_till -> rush_transactions
+      - second_till -> overtime_hours
+      - rush_transactions -> overtime_hours
+      - rain_days -> rush_transactions
+      - week_of_year -> rush_transactions
+      - seats -> rush_transactions
+      - crew_speed -> rush_transactions
+    answer:
+      identifiable: true
+      adjust_for: [near_station]
+      do_not_adjust_for:
+        avg_wait_sec: Measured after the second till went in and caused by it. It is part of the effect being measured.
+        overtime_hours: Caused by the second till (an extra person on shift) and by busy mornings. Adjusting for it creates a false association between the till and transactions.
+      indifferent: [rain_days, seats, shop_id, week_of_year]
+    note: >-
+      Only one thing drove the choice of shops, and it is in the table. Weather, week and
+      seating only move the outcome, and so does the unrecorded crew speed, which is a decoy:
+      something not in the data that does not break identification. The wait time is the
+      mechanism and the overtime is driven by both the till and the outcome.

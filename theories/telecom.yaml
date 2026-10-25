@@ -1,0 +1,326 @@
+# Ficha de teoria: telecom.
+#
+# Aprovada pelo André em 2026-10-04, a partir de um rascunho escrito pelo assistente. Nada
+# aqui vale como decidido enquanto "status" não for "aprovada".
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: telecom
+status: aprovada   # pelo André em 2026-10-04; frases corrigidas em 2026-10-05 na revisão independente (docs/status.md, seção 23)
+title: Oferta de fidelização em uma operadora de telefonia
+
+theory:
+  name: Custo de troca
+  statement: >-
+    Trocar de operadora custa ao cliente: multa de contrato, perda de benefícios
+    acumulados, trabalho de portabilidade e o hábito com o serviço atual. Quanto maior
+    esse custo, menor a chance de cancelamento. A oferta de fidelização age aumentando o
+    custo de troca: dá um desconto que se perde ao sair e amarra o cliente a um contrato
+    com multa.
+  references:   # a confirmar pelo André
+    - "Klemperer, P. (1987). Markets with consumer switching costs. The Quarterly Journal of Economics, 102(2), 375-394."
+    - "Burnham, T. A., Frels, J. K., & Mahajan, V. (2003). Consumer switching costs: a typology, antecedents, and consequences. Journal of the Academy of Marketing Science, 31(2), 109-126."
+
+context: >-
+  Uma operadora de telefonia fez uma oferta de fidelização a parte dos seus clientes:
+  desconto na mensalidade em troca de um contrato de doze meses. Ela quer saber se a
+  oferta reduz o cancelamento nos seis meses seguintes.
+randomized: Os clientes que receberam a oferta foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem recebeu a oferta.
+
+treatment:
+  column: oferta
+  label: a oferta
+  dictionary: Recebeu a oferta de fidelização (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos clientes que recebe a oferta
+
+outcome:
+  column: cancelou
+  label: o cancelamento
+  kind: binary
+  dictionary: Cancelou o plano nos seis meses seguintes à oferta (1 = sim, 0 = não).
+  scale: {rate: [0.10, 0.35]}   # fração dos clientes que cancela
+
+effect:
+  sign: "-"                  # a teoria diz que a oferta reduz o cancelamento
+
+variables:
+
+  antiguidade:
+    label: a antiguidade do cliente
+    kind: count
+    scale: {mean: 36}
+    roles:
+      confounder:
+        dictionary: Meses como cliente até a data da oferta.
+        to_treatment:
+          sign: "+"
+          fact: A operadora fez a oferta com mais frequência aos clientes mais antigos.
+        to_outcome:
+          sign: "-"
+          fact: Clientes antigos têm mais a perder ao trocar de operadora e cancelam menos.
+      outcome_cause:
+        dictionary: Meses como cliente até a data da oferta.
+        to_outcome:
+          sign: "-"
+          fact: Clientes antigos têm mais a perder ao trocar de operadora e cancelam menos.
+
+  renda:
+    label: a renda do cliente
+    kind: continuous
+    scale: {median: 4500}
+    hidden_fact: A operadora não tem a renda dos clientes, e por isso a renda não está na tabela.
+    roles:
+      confounder:
+        dictionary: Renda mensal estimada do cliente na data da oferta, em reais.
+        to_treatment:
+          sign: "+"
+          fact: Clientes de renda mais alta receberam a oferta com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Clientes de renda mais alta têm mais folga no orçamento e cancelam menos.
+      outcome_cause:
+        dictionary: Renda mensal estimada do cliente na data da oferta, em reais.
+        to_outcome:
+          sign: "-"
+          fact: Clientes de renda mais alta têm mais folga no orçamento e cancelam menos.
+
+  valor_fatura:
+    label: o valor da fatura
+    kind: continuous
+    scale: {median: 120}
+    roles:
+      confounder:
+        dictionary: Valor médio da fatura nos três meses anteriores à oferta, em reais.
+        to_treatment:
+          sign: "+"
+          fact: Clientes com fatura mais alta receberam a oferta com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Quem paga fatura mais alta cancela mais.
+      mediator:
+        dictionary: Valor médio da fatura nos três meses seguintes à oferta, em reais.
+        from_treatment:
+          sign: "-"
+          fact: A oferta dá desconto e reduz a fatura dos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem paga fatura mais alta cancela mais.
+      outcome_cause:
+        dictionary: Valor médio da fatura nos três meses anteriores à oferta, em reais.
+        to_outcome:
+          sign: "+"
+          fact: Quem paga fatura mais alta cancela mais.
+
+  reclamacao:
+    label: a reclamação
+    kind: binary
+    scale: {rate: 0.20}
+    roles:
+      confounder:
+        dictionary: Registrou reclamação nos três meses anteriores à oferta (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A operadora fez a oferta com mais frequência a quem tinha registrado reclamação.
+        to_outcome:
+          sign: "+"
+          fact: Quem reclama cancela mais.
+      mediator:
+        dictionary: Registrou reclamação nos três meses seguintes à oferta (1 = sim, 0 = não).
+        from_treatment:
+          sign: "-"
+          fact: Quem recebeu a oferta reclama menos nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem reclama cancela mais.
+      outcome_cause:
+        dictionary: Registrou reclamação nos três meses anteriores à oferta (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem reclama cancela mais.
+
+  contato_retencao:
+    label: o contato da equipe de retenção
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      treatment_cause:
+        dictionary: Recebeu ligação da equipe de retenção no mês anterior à oferta (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A operadora fez a oferta com mais frequência a quem tinha recebido ligação da equipe de retenção no mês anterior.
+      collider:
+        dictionary: Recebeu ligação da equipe de retenção nos seis meses seguintes à oferta (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: A equipe de retenção liga com mais frequência para quem recebeu a oferta, para acompanhar.
+        from_outcome:
+          sign: "+"
+          fact: A equipe de retenção liga com mais frequência para quem cancelou o plano, para registrar o motivo da saída.
+
+  chamado_atendimento:
+    label: o chamado no atendimento
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      collider:
+        dictionary: Abriu chamado no atendimento nos seis meses seguintes à oferta (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a oferta abre chamado com mais frequência, para tirar dúvidas sobre o contrato.
+        from_outcome:
+          sign: "+"
+          fact: Quem cancela o plano costuma abrir um chamado no atendimento depois, para resolver pendências do encerramento.
+      outcome_cause:
+        dictionary: Abriu chamado no atendimento nos três meses anteriores à oferta (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem precisou abrir chamado no atendimento cancela mais.
+
+  uso_dados:
+    label: o uso de dados
+    kind: continuous
+    scale: {median: 12}
+    roles:
+      confounder:
+        dictionary: Consumo médio de dados nos três meses anteriores à oferta, em GB por mês.
+        to_treatment:
+          sign: "+"
+          fact: A oferta foi dirigida com mais frequência a quem usa mais dados.
+        to_outcome:
+          sign: "-"
+          fact: Quem usa mais dados depende mais do serviço e cancela menos.
+      outcome_cause:
+        dictionary: Consumo médio de dados nos três meses anteriores à oferta, em GB por mês.
+        to_outcome:
+          sign: "-"
+          fact: Quem usa mais dados depende mais do serviço e cancela menos.
+
+  multa_contratual:
+    label: a multa de saída
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      mediator:
+        dictionary: Passou a ter contrato com multa de saída no mês seguinte à oferta (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a oferta passa, com mais frequência, a ter contrato com multa de saída.
+        to_outcome:
+          sign: "-"
+          fact: Quem tem multa de saída cancela menos.
+
+  proposta_concorrente:
+    label: a proposta de uma concorrente
+    kind: binary
+    scale: {rate: 0.20}
+    hidden_fact: >-
+      A operadora não sabe quem recebeu proposta de concorrente, e por isso essa
+      informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Recebeu proposta de outra operadora nos três meses anteriores à oferta (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Quem tinha recebido proposta de uma concorrente recebeu a oferta com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Quem recebe proposta de concorrente cancela mais.
+      outcome_cause:
+        dictionary: Recebeu proposta de outra operadora nos três meses anteriores à oferta (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem recebe proposta de concorrente cancela mais.
+
+  satisfacao:
+    label: a satisfação do cliente
+    kind: score
+    scale: {mean: 7}
+    hidden_fact: >-
+      A satisfação não foi medida antes da oferta, e por isso ela não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota de satisfação na pesquisa feita antes da oferta, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: Clientes menos satisfeitos receberam a oferta com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Clientes mais satisfeitos cancelam menos.
+      mediator:
+        dictionary: Nota de satisfação na pesquisa feita três meses depois da oferta, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a oferta fica mais satisfeito nos meses seguintes.
+        to_outcome:
+          sign: "-"
+          fact: Clientes mais satisfeitos cancelam menos.
+
+  debito_automatico:
+    label: o débito automático
+    kind: binary
+    scale: {rate: 0.40}
+    roles:
+      confounder:
+        dictionary: Pagava a fatura por débito automático na data da oferta (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: A oferta foi enviada com mais frequência a quem paga por débito automático.
+        to_outcome:
+          sign: "-"
+          fact: Quem paga por débito automático cancela menos.
+      outcome_cause:
+        dictionary: Pagava a fatura por débito automático na data da oferta (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Quem paga por débito automático cancela menos.
+
+  cidade_piloto:
+    label: a cidade-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Mora em uma das cidades escolhidas para o piloto da oferta (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A oferta começou por algumas cidades-piloto, e quem mora nelas recebeu a
+            oferta com mais frequência.
+
+  dia_vencimento:
+    label: o dia de vencimento da fatura
+    kind: count
+    scale: {mean: 14, min: 1, max: 28}
+    roles:
+      unrelated:
+        dictionary: Dia do mês em que a fatura vence.
+        fact: O dia de vencimento da fatura não tem relação com a oferta nem com o cancelamento.

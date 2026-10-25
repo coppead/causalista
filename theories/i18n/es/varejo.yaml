@@ -1,0 +1,292 @@
+# Tradução da ficha de teoria 'varejo' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente a partir da
+# ficha em português, theories/varejo.yaml, que é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado: esta tradução serve só aos testes (a avaliação em
+# idioma não visto no treino) e não entra em nenhum conjunto de treino.
+
+language: es
+status: revisada
+title: Cupón de descuento en una cadena minorista
+context: >-
+  Una cadena minorista envió un cupón de descuento a una parte de sus clientes: 15% de
+  descuento en la próxima compra, válido por 60 días. Quiere saber si el cupón aumenta la
+  recompra, es decir, la fracción de clientes que vuelve a comprar en los 60 días
+  siguientes al envío.
+randomized: Los clientes que recibieron el cupón fueron elegidos al azar.
+closing: Nada más que lo descrito influyó en la elección de quiénes recibieron el cupón.
+treatment:
+  label: el cupón
+  dictionary: Recibió el cupón de descuento (1 = sí, 0 = no).
+outcome:
+  label: la recompra
+  dictionary: >-
+    Volvió a comprar en la cadena en los 60 días siguientes al envío del cupón (1 = sí, 0 =
+    no).
+variables:
+  gasto_anual:
+    label: el gasto del cliente
+    roles:
+      confounder:
+        dictionary: >-
+          Monto gastado en la cadena en los doce meses anteriores al envío del cupón,
+          en reales.
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a los clientes que gastaban más en la cadena.
+        to_outcome: >-
+          Los clientes que gastan más en la cadena tienen más probabilidad de volver a
+          comprar.
+      outcome_cause:
+        dictionary: >-
+          Monto gastado en la cadena en los doce meses anteriores al envío del cupón,
+          en reales.
+        to_outcome: >-
+          Los clientes que gastan más en la cadena tienen más probabilidad de volver a
+          comprar.
+  frequencia_compras:
+    label: la frecuencia de compra
+    roles:
+      confounder:
+        dictionary: Número de compras en la cadena en los doce meses anteriores al envío del cupón.
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a los clientes que compraban más veces al año.
+        to_outcome: >-
+          Los clientes que compran más veces al año tienen más probabilidad de volver
+          a comprar.
+      outcome_cause:
+        dictionary: Número de compras en la cadena en los doce meses anteriores al envío del cupón.
+        to_outcome: >-
+          Los clientes que compran más veces al año tienen más probabilidad de volver
+          a comprar.
+  dias_sem_comprar:
+    label: el tiempo sin comprar
+    roles:
+      confounder:
+        dictionary: Días entre la última compra en la cadena y el envío del cupón.
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a quienes llevaban más tiempo sin
+          comprar, para intentar recuperar a esos clientes.
+        to_outcome: >-
+          Quienes llevan más tiempo sin comprar en la cadena tienen menos probabilidad
+          de volver a comprar.
+      outcome_cause:
+        dictionary: Días entre la última compra en la cadena y el envío del cupón.
+        to_outcome: >-
+          Quienes llevan más tiempo sin comprar en la cadena tienen menos probabilidad
+          de volver a comprar.
+  programa_fidelidade:
+    label: el programa de lealtad
+    roles:
+      confounder:
+        dictionary: >-
+          Participaba en el programa de lealtad de la cadena en la fecha del envío del cupón
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a quienes participaban en el
+          programa de lealtad.
+        to_outcome: >-
+          Quienes participan en el programa de lealtad tienen más probabilidad de
+          volver a comprar.
+      mediator:
+        dictionary: >-
+          Participaba en el programa de lealtad de la cadena 30 días después del envío del cupón
+          (1 = sí, 0 = no).
+        from_treatment: >-
+          El mensaje del cupón invita al cliente a unirse al programa de lealtad, y por eso
+          quienes reciben el cupón se unen más al programa de lealtad.
+        to_outcome: >-
+          Quienes participan en el programa de lealtad tienen más probabilidad de
+          volver a comprar.
+      outcome_cause:
+        dictionary: >-
+          Participaba en el programa de lealtad de la cadena en la fecha del envío del cupón
+          (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes participan en el programa de lealtad tienen más probabilidad de
+          volver a comprar.
+  abriu_app:
+    label: el uso de la aplicación
+    roles:
+      confounder:
+        dictionary: >-
+          Abrió la aplicación de la cadena en los 30 días anteriores al envío del
+          cupón (1 = sí, 0 = no).
+        to_treatment: >-
+          Parte de los cupones se envió por notificación de la aplicación, y por eso quienes
+          venían abriendo la aplicación recibieron el cupón con más frecuencia.
+        to_outcome: >-
+          Quienes abren la aplicación de la cadena tienen más probabilidad de volver a
+          comprar.
+      mediator:
+        dictionary: >-
+          Abrió la aplicación de la cadena en los 30 días siguientes al envío del
+          cupón (1 = sí, 0 = no).
+        from_treatment: >-
+          El cupón queda guardado en la aplicación, y por eso quienes reciben el cupón abren
+          más la aplicación en las semanas siguientes.
+        to_outcome: >-
+          Quienes abren la aplicación de la cadena tienen más probabilidad de volver a
+          comprar.
+  visitas_site:
+    label: las visitas al sitio web
+    roles:
+      mediator:
+        dictionary: >-
+          Número de visitas al sitio web de la cadena en los 30 días siguientes al
+          envío del cupón.
+        from_treatment: >-
+          Quienes reciben el cupón visitan más el sitio web de la cadena en las semanas
+          siguientes, para elegir qué comprar con el descuento.
+        to_outcome: >-
+          Quienes visitan más el sitio web de la cadena tienen más probabilidad de volver a comprar.
+      outcome_cause:
+        dictionary: >-
+          Número de visitas al sitio web de la cadena en los 30 días anteriores al
+          envío del cupón.
+        to_outcome: >-
+          Quienes visitan más el sitio web de la cadena tienen más probabilidad de volver a comprar.
+  avaliacao_precos:
+    label: la calificación de los precios
+    roles:
+      confounder:
+        dictionary: >-
+          Nota de 0 a 10 de cuán convenientes le parecen al cliente los precios de la cadena,
+          en la encuesta sobre precios realizada antes del envío del cupón.
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a los clientes que consideraban poco
+          convenientes los precios de la cadena.
+        to_outcome: >-
+          Los clientes que consideran convenientes los precios de la cadena tienen más
+          probabilidad de volver a comprar.
+      mediator:
+        dictionary: >-
+          Nota de 0 a 10 de cuán convenientes le parecen al cliente los precios de la cadena,
+          en la encuesta sobre precios realizada 30 días después del envío del cupón.
+        from_treatment: >-
+          Quienes reciben el cupón pasan a considerar más convenientes los precios de
+          la cadena.
+        to_outcome: >-
+          Los clientes que consideran convenientes los precios de la cadena tienen más
+          probabilidad de volver a comprar.
+  sensibilidade_preco:
+    label: la sensibilidad al precio
+    hidden_fact: >-
+      La cadena no guardó el índice de sensibilidad al precio de sus clientes, y por eso la
+      sensibilidad al precio no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Índice de sensibilidad al precio del cliente, de 0 a 10, calculado con las compras
+          anteriores al envío del cupón (cuanto más alto, más compara precios el cliente antes
+          de comprar).
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a los clientes más sensibles al
+          precio.
+        to_outcome: >-
+          Los clientes más sensibles al precio tienen menos probabilidad de volver a comprar,
+          porque buscan la tienda más barata en cada compra.
+      outcome_cause:
+        dictionary: >-
+          Índice de sensibilidad al precio del cliente, de 0 a 10, calculado con las compras
+          anteriores al envío del cupón (cuanto más alto, más compara precios el cliente antes
+          de comprar).
+        to_outcome: >-
+          Los clientes más sensibles al precio tienen menos probabilidad de volver a comprar,
+          porque buscan la tienda más barata en cada compra.
+  renda:
+    label: el ingreso del cliente
+    hidden_fact: >-
+      La cadena no tiene el ingreso de sus clientes, y por eso el ingreso no está en la
+      tabla.
+    roles:
+      confounder:
+        dictionary: Ingreso mensual estimado del cliente, en reales.
+        to_treatment: >-
+          Los clientes de menores ingresos se registran más para recibir ofertas de la cadena,
+          y por eso recibieron el cupón con más frecuencia.
+        to_outcome: Los clientes de mayores ingresos tienen más probabilidad de volver a comprar.
+      outcome_cause:
+        dictionary: Ingreso mensual estimado del cliente, en reales.
+        to_outcome: Los clientes de mayores ingresos tienen más probabilidad de volver a comprar.
+  lista_desejos:
+    label: la lista de deseos
+    hidden_fact: >-
+      La cadena no guarda el historial de las listas de deseos de sus clientes, y por eso la
+      lista de deseos no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Tenía algún producto guardado en la lista de deseos del sitio web o de la aplicación
+          en la fecha del envío del cupón (1 = sí, 0 = no).
+        to_treatment: >-
+          La cadena envió el cupón con más frecuencia a quienes tenían algún producto guardado
+          en la lista de deseos.
+        to_outcome: >-
+          Quienes tienen algún producto guardado en la lista de deseos ya piensan comprar y
+          tienen más probabilidad de volver a comprar.
+      outcome_cause:
+        dictionary: >-
+          Tenía algún producto guardado en la lista de deseos del sitio web o de la aplicación
+          en la fecha del envío del cupón (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes tienen algún producto guardado en la lista de deseos ya piensan comprar y
+          tienen más probabilidad de volver a comprar.
+  contato_atendimento:
+    label: el contacto con servicio al cliente
+    roles:
+      collider:
+        dictionary: >-
+          Se comunicó con servicio al cliente en los 60 días siguientes al envío del cupón
+          (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben el cupón se comunican más con servicio al cliente, para resolver
+          dudas sobre cómo usar el descuento.
+        from_outcome: >-
+          Quienes vuelven a comprar se comunican más con servicio al cliente, para hacer
+          seguimiento de la entrega o pedir un cambio.
+      outcome_cause:
+        dictionary: >-
+          Se comunicó con servicio al cliente en los tres meses anteriores al envío del cupón
+          (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes tuvieron que comunicarse con servicio al cliente tienen menos probabilidad
+          de volver a comprar.
+  respondeu_pesquisa:
+    label: la respuesta a la encuesta de satisfacción
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Respondió la encuesta de satisfacción de la cadena en los tres meses anteriores al
+          envío del cupón (1 = sí, 0 = no).
+        to_treatment: >-
+          La cadena usó el cupón como agradecimiento a quienes habían respondido la encuesta
+          de satisfacción, y por eso quienes habían respondido recibieron el cupón con más
+          frecuencia.
+      collider:
+        dictionary: >-
+          Respondió la encuesta de satisfacción de la cadena en los 60 días siguientes al
+          envío del cupón (1 = sí, 0 = no).
+        from_treatment: >-
+          El mensaje del cupón trae la invitación a la encuesta de satisfacción, y por eso
+          quienes reciben el cupón responden más la encuesta de satisfacción.
+        from_outcome: >-
+          La cadena invita a la encuesta de satisfacción después de cada compra, y por eso
+          quienes vuelven a comprar responden más la encuesta de satisfacción.
+  loja_piloto:
+    label: la tienda piloto
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Tiene como tienda principal una de las tiendas elegidas para el piloto del cupón
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          El envío del cupón comenzó por algunas tiendas piloto, y los clientes de esas
+          tiendas recibieron el cupón con más frecuencia.
+  mes_aniversario:
+    label: el mes de cumpleaños
+    roles:
+      unrelated:
+        dictionary: Mes de cumpleaños del cliente (1 = enero, 12 = diciembre).
+        fact: El mes de cumpleaños del cliente no tiene relación con el cupón ni con la recompra.

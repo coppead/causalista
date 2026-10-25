@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use Causalista, please cite it as below."
+type: software
+title: "Causalista: a small, local model that decides what to adjust for, and says when the data cannot answer"
+version: 0.1.0
+date-released: 2026-10-24
+license: Apache-2.0
+repository-code: "https://github.com/coppead/causalista"
+url: "https://huggingface.co/coppead/causalista-4b"
+authors:
+  - family-names: Fonseca
+    given-names: André
+    affiliation: "COPPEAD Graduate School of Business, Federal University of Rio de Janeiro (UFRJ)"
+keywords:
+  - causal inference
+  - adjustment set
+  - abstention
+  - synthetic data
+  - reinforcement learning with verifiable rewards
+  - small language models
+  - management
+abstract: >-
+  Causalista 0.1 is a 4B-parameter model, fine-tuned from Qwen3-4B, for one decision in
+  causal analysis: given a table's column dictionary and a story of how the data were
+  generated, which columns to adjust for to measure the effect of an intervention, or
+  whether the effect is not identifiable with these columns. It was trained on synthetic
+  worlds with a known answer, scored by a verifier that knows the true causal graph, and
+  measured on held-out worlds in three languages and on cases that simulate text written
+  by people. Model, GGUF files and dataset are published under the coppead organisation
+  on the Hugging Face Hub; the generator, verifier, estimator and evaluation harness are
+  in this repository. The project was built by the author with an AI coding assistant; the model
+  and dataset cards record who wrote what.

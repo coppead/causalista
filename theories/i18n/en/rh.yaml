@@ -1,0 +1,234 @@
+# Tradução da ficha de teoria 'rh' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. A ficha em português,
+# theories/rh.yaml, é a que vale: este arquivo só traz as palavras, e a sua
+# estrutura tem de espelhar a da ficha.
+#
+# Lida por inteiro e corrigida pelo assistente em 2026-10-06, por delegação do André:
+# cada frase foi conferida contra a ficha em português, inclusive as trocas feitas
+# na revisão independente de 2026-10-05 (theories/i18n/pendentes-2026-10-05.json).
+# Por isso o "status" é "revisada".
+
+language: en
+status: revisada
+title: Training program at a company
+context: >-
+  A large service company created a training program paid for by the company, with three
+  months of classes, and some of its employees participated. The company wants to know if the
+  program reduces voluntary turnover, that is, resignations, in the twelve months after the
+  program ended.
+randomized: The employees who participated in the program were selected by lottery.
+closing: Nothing other than what was described influenced the choice of who participated in the program.
+treatment:
+  label: the training program
+  dictionary: Participated in the training program (1 = yes, 0 = no).
+outcome:
+  label: voluntary turnover
+  dictionary: Resigned in the twelve months after the program ended (1 = yes, 0 = no).
+variables:
+  tempo_empresa:
+    label: tenure with the company
+    roles:
+      confounder:
+        dictionary: Months of tenure with the company until the start of the program.
+        to_treatment: >-
+          The company offered the training program more frequently to employees with less
+          tenure with the company.
+        to_outcome: Employees with more tenure with the company resign less frequently.
+      outcome_cause:
+        dictionary: Months of tenure with the company until the start of the program.
+        to_outcome: Employees with more tenure with the company resign less frequently.
+  avaliacao_desempenho:
+    label: performance evaluation
+    roles:
+      confounder:
+        dictionary: >-
+          Score on the performance evaluation conducted in the semester before the start of the
+          program, from 0 to 10.
+        to_treatment: >-
+          The company chose employees with higher scores on the performance evaluation more
+          frequently for the training program.
+        to_outcome: Employees with higher scores on the performance evaluation resign less frequently.
+      mediator:
+        dictionary: >-
+          Score on the performance evaluation conducted in the semester after the program ended,
+          from 0 to 10.
+        from_treatment: >-
+          People who take the training program receive a higher score on the following
+          performance evaluation.
+        to_outcome: Employees with higher scores on the performance evaluation resign less frequently.
+      outcome_cause:
+        dictionary: >-
+          Score on the performance evaluation conducted in the semester before the start of the
+          program, from 0 to 10.
+        to_outcome: Employees with higher scores on the performance evaluation resign less frequently.
+  salario:
+    label: salary
+    roles:
+      confounder:
+        dictionary: Monthly salary in the month before the start of the program, in reais.
+        to_treatment: >-
+          The company offered the training program more frequently to employees with higher
+          salaries.
+        to_outcome: Employees with higher salaries resign less frequently.
+      mediator:
+        dictionary: Monthly salary three months after the program ended, in reais.
+        from_treatment: >-
+          Employees who take the training program receive a qualification allowance and move to
+          a higher salary.
+        to_outcome: Employees with higher salaries resign less frequently.
+      outcome_cause:
+        dictionary: Monthly salary in the month before the start of the program, in reais.
+        to_outcome: Employees with higher salaries resign less frequently.
+  promocao:
+    label: promotion
+    roles:
+      confounder:
+        dictionary: Was promoted in the twelve months before the start of the program (1 = yes, 0 = no).
+        to_treatment: >-
+          The company enrolled employees who had been promoted in the preceding months in the
+          training program more frequently, to prepare them for the new position.
+        to_outcome: Promoted employees resign less frequently.
+      mediator:
+        dictionary: Was promoted in the six months after the program ended (1 = yes, 0 = no).
+        from_treatment: >-
+          Employees who take the training program are promoted more frequently in the following
+          months.
+        to_outcome: Promoted employees resign less frequently.
+  engajamento:
+    label: employee engagement
+    hidden_fact: >-
+      No survey the company conducted before the start of the training program measured
+      employee engagement, and therefore engagement is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Score on the engagement survey conducted in the month before the start of the program,
+          from 0 to 10.
+        to_treatment: More engaged employees enrolled in the training program more frequently.
+        to_outcome: More engaged employees resign less frequently.
+      mediator:
+        dictionary: >-
+          Score on the engagement survey conducted three months after the program ended, from 0
+          to 10.
+        from_treatment: Employees who take the training program become more engaged in the following months.
+        to_outcome: More engaged employees resign less frequently.
+  procura_emprego:
+    label: the search for another job
+    hidden_fact: >-
+      The company does not know which employees were looking for another job, and therefore
+      this information is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Declared in the internal survey conducted in the month before the start of the program
+          that they were looking for another job (1 = yes, 0 = no).
+        to_treatment: >-
+          Employees who were looking for another job enrolled in the training program more
+          frequently.
+        to_outcome: Employees who are looking for another job resign more frequently.
+      outcome_cause:
+        dictionary: >-
+          Declared in the internal survey conducted in the month before the start of the program
+          that they were looking for another job (1 = yes, 0 = no).
+        to_outcome: Employees who are looking for another job resign more frequently.
+  proposta_externa:
+    label: the offer from another company
+    hidden_fact: >-
+      The company does not know which employees received an offer from another company, and
+      therefore this information is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Declared in the internal survey conducted in the month before the start of the program
+          that they had received a job offer from another company in the previous six months
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          Employees who had received an offer from another company enrolled in the training
+          program less frequently.
+        to_outcome: Employees who receive an offer from another company resign more frequently.
+      outcome_cause:
+        dictionary: >-
+          Declared in the internal survey conducted in the month before the start of the program
+          that they had received a job offer from another company in the previous six months
+          (1 = yes, 0 = no).
+        to_outcome: Employees who receive an offer from another company resign more frequently.
+  indicacao_gestor:
+    label: the manager's recommendation
+    roles:
+      treatment_cause:
+        dictionary: Was recommended by the manager for the program, before classes started (1 = yes, 0 = no).
+        to_treatment: >-
+          Employees recommended by their manager were given priority for the available places and
+          participated in the training program more frequently.
+  unidade_piloto:
+    label: pilot unit
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Was working, at the start of the program, in one of the units chosen for the pilot
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The training program started in a few pilot units, and employees who worked there
+          participated in the program more frequently.
+  conversa_rh:
+    label: conversation with HR
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Had a one-on-one conversation with HR in the three months before the start of the
+          program (1 = yes, 0 = no).
+        to_treatment: >-
+          HR promoted the training program during one-on-one conversations, and therefore
+          employees who had talked with HR participated in the program more frequently.
+      collider:
+        dictionary: >-
+          Had a one-on-one conversation with HR in the twelve months after the program ended
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          Employees who took the training program are called by HR for a one-on-one conversation
+          more frequently, to evaluate the program.
+        from_outcome: >-
+          Employees who resign have a one-on-one conversation with HR more frequently, because HR
+          conducts the exit interview.
+  pesquisa_clima:
+    label: response to the workplace climate survey
+    roles:
+      collider:
+        dictionary: >-
+          Responded to the workplace climate survey conducted twelve months after the program
+          ended (1 = yes, 0 = no).
+        from_treatment: >-
+          Employees who took the training program respond to the workplace climate survey more
+          frequently, because the survey includes questions about the program.
+        from_outcome: >-
+          Employees who resign tend to leave the company before the workplace climate survey is
+          conducted and, therefore, respond to the survey less frequently.
+      outcome_cause:
+        dictionary: >-
+          Responded to the workplace climate survey conducted in the year before the start of the
+          program (1 = yes, 0 = no).
+        to_outcome: >-
+          Employees who had responded to the workplace climate survey of the year before the start
+          of the program resign less frequently.
+  horas_extras:
+    label: overtime hours
+    roles:
+      confounder:
+        dictionary: Overtime hours per month, on average, in the three months before the start of the program.
+        to_treatment: >-
+          Employees with more overtime hours had less time for classes and participated in the
+          training program less frequently.
+        to_outcome: Employees who work more overtime hours resign more frequently.
+      outcome_cause:
+        dictionary: Overtime hours per month, on average, in the three months before the start of the program.
+        to_outcome: Employees who work more overtime hours resign more frequently.
+  mes_aniversario:
+    label: birthday month
+    roles:
+      unrelated:
+        dictionary: The employee's birthday month (1 = January, 12 = December).
+        fact: >-
+          The employee's birthday month has no relation to the training program or to voluntary
+          turnover.

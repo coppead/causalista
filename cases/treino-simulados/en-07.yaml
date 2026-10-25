@@ -1,0 +1,514 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-07, oito casos em inglês
+# (vozes do Reino Unido, dos EUA e da Irlanda).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (gerente de produto de uma
+# empresa de kits de refeição no Reino Unido, dono de uma rede de lava-rápidos na Flórida,
+# diretor executivo de uma rede de escolas charter em Memphis, gerente de frota de uma
+# companhia de água no norte da Inglaterra, analista de uma corretora de seguros em Dublin)
+# descrevendo um conjunto de dados do jeito que essa pessoa escreveria: mensagem de Slack,
+# mensagem de chat, post em fórum, trecho de documento para o conselho, notas de reunião.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_mealkit_chefs_picks_evenodd
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: product manager at a UK meal-kit subscription company (about 90,000 active subscribers), owns the menu experience, sets up the tests herself and hands the analysis to the data scientist
+    theme: Meal-kit subscription / menu default
+    title: Chef's Picks default by account-number parity and skipped weeks
+    treatment: chefs_picks
+    outcome: skips_8w
+    columns:
+      chefs_picks: 1 if the account's weekly menu was pre-filled with Chef's Picks from w/c 2 June 2025 (even account numbers), 0 if it kept the previous "most popular" default (odd account numbers).
+      skips_8w: Number of delivery weeks the account skipped from w/c 2 June to w/c 21 July 2025 (0 to 8).
+      menu_edits_8w: Number of weeks in the same window in which the account changed at least one recipe from the pre-filled menu before the Wednesday cut-off.
+      tenure_wks: Weeks since the account's first delivery, as of 1 June 2025.
+      plan_meals: Meals per week on the plan as of 1 June 2025 (2, 3, 4 or 5).
+      signup_channel: Acquisition channel recorded at sign-up (paid_social, referral, organic, tv, other).
+      summer_survey: 1 if the account responded to the summer feedback survey emailed on 4 August 2025.
+    story: >-
+      @Tomasz before you build the Chef's Picks readout, some context on how the test ran so
+      nobody relitigates it in Thursday's review. From the w/c 2 June the weekly menu for half
+      the base was pre-filled with Chef's Picks instead of the old "most popular" default. The
+      split was by account number, evens got Chef's Picks, odds stayed as they were; Priya set
+      it in config on the Friday and nobody touched it after. Window is the 8 delivery weeks to
+      27 July. The number I care about is skips, every skipped week is a box we don't ship.
+      What I've seen in Looker so far: the Chef's Picks accounts went into the menu and swapped
+      recipes a lot more (half expected, a default you didn't choose makes you look), and
+      accounts that fiddle with the menu skip less, they've already put the five minutes in.
+      Longer-tenured accounts skip less full stop, the 4- and 5-meal plans skip more over
+      summer because of holidays, and referral customers skip less than paid social, same as
+      every year. One more thing before you include it by reflex: the summer feedback survey
+      went to everyone on 4 Aug. The Chef's Picks group got a version that asked about the new
+      default and the subject line said so, which pulled a lot more opens, and anyone who had
+      skipped three weeks or more got the "did something go wrong?" version, which people
+      answer much more. Can you give me the clean Chef's Picks vs not number on skips, and tell
+      me whether I should be splitting it by anything?
+    edges:
+      - chefs_picks -> menu_edits_8w
+      - menu_edits_8w -> skips_8w
+      - chefs_picks -> skips_8w
+      - tenure_wks -> skips_8w
+      - plan_meals -> skips_8w
+      - signup_channel -> skips_8w
+      - chefs_picks -> summer_survey
+      - skips_8w -> summer_survey
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        menu_edits_8w: Counted during the test window and driven by the new default. Editing the menu is one of the ways the default changes skipping, so it is part of the effect being measured.
+        summer_survey: Answered in August, after the window, and driven by both the Chef's Picks version of the survey and by having skipped. Adjusting for it creates a false link between the default and skipping.
+      indifferent: [plan_meals, signup_channel, tenure_wks]
+    note: >-
+      Odd or even account number is as good as a coin flip, so the plain comparison is right.
+      The traps are the menu-edits KPI, which is the mechanism, and the survey response, which
+      came after and depends on both sides.
+
+  - id: en_mealkit_flexday_routes
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: product manager at a UK meal-kit subscription company, messaging the head of operations at the end of the day before briefing an outside agency
+    theme: Meal-kit subscription / delivery
+    title: Pick-your-day delivery switched on by courier route, and 12-week cancellation
+    treatment: flex_day
+    outcome: cancelled_12w
+    columns:
+      flex_day: 1 if "pick your delivery day" was switched on for the customer from 1 March 2025, 0 if the customer stayed on a fixed Tuesday or Wednesday.
+      cancelled_12w: 1 if the subscription was cancelled between 1 March and 24 May 2025.
+      late_deliveries_12w: Number of boxes delivered after the promised slot, or not delivered at all, in the same 12 weeks.
+      tenure_wks: Weeks since first delivery as of 1 March 2025.
+      meals_pw: Meals per week on the plan as of 1 March 2025.
+      cancel_reason: Reason selected in the cancellation flow (price, delivery, recipes, other). Blank where the customer did not cancel.
+    not_in_table:
+      courier_slack: Whether the customer's delivery route was one where the courier had spare capacity in early 2025. Came as a route list from the courier and was matched on their side; routes are not held in our warehouse.
+    story: >-
+      hey, sorry, one more before I log off. the flex delivery day thing, I'm briefing the
+      agency tomorrow and want to describe the data right. from 1 March customers on the
+      courier's routes with slack got "pick your day" switched on, everyone else stayed on fixed
+      Tue/Wed. the courier gave us the route list and matched it on their side; we never got
+      routes back and we don't hold them, the extract is customer level only. my worry: the
+      routes with slack are the routes where they're not drowning, so those customers were
+      already getting fewer late boxes, and late boxes are the number one reason people quit on
+      us. flex day should help lateness too, spreading the week out was the courier's whole
+      pitch. table has cancelled within 12 weeks, count of late deliveries in those 12 weeks,
+      tenure and meals per week (the longer-standing accounts and the bigger plans always hang
+      on better), and the reason picked in the cancel flow by anyone who did cancel. is that
+      enough for the agency to say flex day cut cancellations, or do I need to go back to the
+      courier?
+    edges:
+      - courier_slack -> flex_day
+      - courier_slack -> late_deliveries_12w
+      - flex_day -> late_deliveries_12w
+      - late_deliveries_12w -> cancelled_12w
+      - flex_day -> cancelled_12w
+      - tenure_wks -> cancelled_12w
+      - meals_pw -> cancelled_12w
+      - cancelled_12w -> cancel_reason
+      - late_deliveries_12w -> cancel_reason
+    answer:
+      identifiable: false
+      missing: [courier_slack]
+    note: >-
+      The courier's spare capacity decided who got flex day and also drives late boxes, which
+      drive cancellation. Late deliveries would block that path but flex day changes them too,
+      so adjusting for them removes part of the effect and opens a false one. The route list
+      stayed with the courier.
+
+  - id: en_carwash_lpr_members
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: owner-operator of 11 express car washes around Tampa, Florida (about 19,000 unlimited members), posting on a car wash operators' forum, no analyst on staff
+    theme: Car wash memberships
+    title: Plate-reader lane for members and 6-month retention
+    treatment: lpr_registered
+    outcome: active_6m
+    columns:
+      lpr_registered: 1 if the member's license plate was registered for the plate-reader lane by the end of their first month, 0 otherwise. Members who joined Jan-Mar 2025.
+      active_6m: 1 if the membership was still active 6 months after sign-up.
+      signup_channel: How the membership was sold (online, kiosk).
+      home_site: Site where the membership was sold (11 sites).
+      washes_pm: Average washes per month over the 6 months after sign-up, from the gate counts.
+      plan_tier: Membership plan at sign-up (basic, ceramic).
+      refund_issued: 1 if any refund was issued to the member's card during the 6 months after sign-up.
+      signup_week: ISO week of sign-up.
+    story: >-
+      LPR for members, anyone looked at whether it actually keeps them? Owner/operator here, 11
+      express tunnels around Tampa, about 19k unlimited members. We put plate readers on the
+      member lane at 6 of the 11 sites in January (the other 5 don't have the lane geometry
+      for it, it's a wrong-way-in problem, not a budget thing). Members whose plate is
+      registered just roll up and the gate opens, no RFID sticker, no stopping. Here's the
+      thing about who ended up registered: if you signed up online the plate came in from the
+      form and got registered automatically; if you signed up at the pay station the attendant
+      was supposed to send you inside to register and most of the kiosk folks never bothered.
+      Online sign-ups are a different animal anyway, younger, more of them on the $35 ceramic
+      plan (and the ceramic people cancel less), and in my experience they stick around longer
+      than the impulse kiosk sign-up who was just trying to get out of the sun. My gut says LPR
+      keeps members because it makes washing frictionless: the registered members are washing
+      more times a month, I can see that in the counts, and a member who washes 4x a month
+      doesn't cancel, a member who washes once does. Our 6 LPR sites are also our better sites
+      in general, nicer neighborhoods, the memberships there have always had less churn than
+      the two on Hillsborough. Refunds are the one thing I'd flag in my export: we refunded a
+      bunch of LPR members early on when the camera misread a plate and double-charged, and we
+      also refund the remaining month for anyone who cancels mid-cycle, so that column is a
+      mix. I pulled every member who signed up Jan through Mar with: LPR registered y/n, still
+      active at 6 months y/n, how they signed up, home site, average washes per month, plan
+      tier, whether we ever refunded them, and the week they signed up. Before I pay someone
+      to look at this: which of those do I compare within, and which do I leave alone? I don't
+      want to fool myself into buying cameras for the other 5.
+    edges:
+      - signup_channel -> lpr_registered
+      - signup_channel -> active_6m
+      - signup_channel -> plan_tier
+      - plan_tier -> active_6m
+      - home_site -> lpr_registered
+      - home_site -> active_6m
+      - lpr_registered -> washes_pm
+      - washes_pm -> active_6m
+      - lpr_registered -> active_6m
+      - lpr_registered -> refund_issued
+      - active_6m -> refund_issued
+    answer:
+      identifiable: true
+      adjust_for: [home_site, signup_channel]
+      do_not_adjust_for:
+        washes_pm: Counted over the six months after sign-up and raised by the plate reader. Washing more often is how the lane is supposed to keep members, so it is part of the effect being measured.
+        refund_issued: Issued during the same six months for misread plates (the reader) and for mid-cycle cancellations (the outcome). Adjusting for it creates a false link between the lane and staying.
+      indifferent: [plan_tier, signup_week]
+    note: >-
+      Who got registered depends on how they signed up and on which site, and both also move
+      churn. Plan tier follows from the channel and is harmless once the channel is in. The
+      washes-per-month count the owner is proud of is the mechanism, and the refunds column
+      mixes a consequence of the reader with a consequence of cancelling.
+
+  - id: en_charter_stipend_board
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: executive director of a charter school network of five campuses in Memphis, Tennessee (about 2,400 students, 184 teachers), writing a paper for the Board of Directors
+    theme: Charter school network / staff retention
+    title: Retention stipend for well-rated teachers in hard-to-staff subjects, and fall return
+    treatment: stipend
+    outcome: returned_fall25
+    columns:
+      stipend: 1 if the teacher received the $4,000 retention stipend, paid in January and June 2025.
+      returned_fall25: 1 if the teacher signed the intent-to-return form and was present on staff reporting day, 4 August 2025.
+      subject_area: Primary assignment in 2024-25 (math, science, sped, humanities, specials, other).
+      eval_rating_24: Summative rating on the 2023-24 evaluation (Ineffective, Developing, Effective, Highly Effective).
+      years_at_network: Completed years with the network as of June 2025.
+      mentor_assigned: 1 if the teacher was assigned as mentor to a first-year teacher for the spring 2025 semester.
+      campus: Campus code (five campuses).
+      hr_interview: 1 if HR held a stay conversation or an exit interview with the teacher between June and August 2025.
+    story: >-
+      Paper 6.2, Teacher Retention Stipend: evaluation approach (for discussion). Prepared by
+      the Executive Director for the Board of Directors, 19 August 2025. 1. Background. In
+      November 2024 the Board approved a one-time $4,000 retention stipend, paid in two
+      instalments (January and June 2025), for teachers in our hard-to-staff areas
+      (mathematics, science and special education) who were rated Effective or Highly Effective
+      on the 2023-24 evaluation. 61 of our 184 eligible-to-return teachers met both criteria
+      and received it; the criteria were applied uniformly across the five campuses. 2.
+      Conditions attached. Recipients were asked to mentor one first-year teacher during the
+      spring semester, and 52 of the 61 did so. Several principals report that mentoring has
+      deepened recipients' investment in their campus, and in prior years staff who mentored
+      have returned at higher rates. 3. What the Board should keep in mind when reading the
+      numbers. Math and science teachers have the most outside options and have left us at
+      roughly twice the rate of humanities teachers in each of the last three years; special
+      education sits between. Teachers rated Effective or above also return at higher rates,
+      with or without a payment. Tenure with the network works in the same direction, and
+      return rates differ by campus for reasons that predate the stipend (Frayser has lost its
+      principal twice in four years). 4. Data. The People team has assembled a teacher-level
+      file: stipend received, returned for 2025-26, subject area, 2023-24 rating, years with
+      the network, mentor assignment, campus, and whether HR held a conversation with the
+      teacher over the summer. On the last item, HR conducts exit interviews with every
+      departing teacher and, this year, also scheduled stay conversations with stipend
+      recipients to understand how the payment landed. 5. Request. Management asks the Board's
+      analytics committee to advise on the comparison that would isolate the effect of the
+      stipend on return rates before we decide whether to fund it again for 2025-26.
+    edges:
+      - subject_area -> stipend
+      - subject_area -> returned_fall25
+      - eval_rating_24 -> stipend
+      - eval_rating_24 -> returned_fall25
+      - years_at_network -> returned_fall25
+      - campus -> returned_fall25
+      - stipend -> mentor_assigned
+      - mentor_assigned -> returned_fall25
+      - stipend -> returned_fall25
+      - stipend -> hr_interview
+      - returned_fall25 -> hr_interview
+    answer:
+      identifiable: true
+      adjust_for: [eval_rating_24, subject_area]
+      do_not_adjust_for:
+        mentor_assigned: Assigned in the spring because of the stipend, and mentoring is one of the ways the stipend is meant to keep teachers. It is part of the effect being measured.
+        hr_interview: Held over the summer, after the return decision, with departing teachers and with stipend recipients. Adjusting for it creates a false link between the stipend and returning.
+      indifferent: [campus, years_at_network]
+    note: >-
+      The two eligibility criteria are both in the file and both move return rates, so they
+      are the comparison. The mentoring condition is the mechanism, and the summer HR
+      conversation is recorded after the outcome for both reasons.
+
+  - id: en_charter_restorative_notes
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: executive director of a charter school network in Memphis; notes of the monthly culture and discipline review, taken by the chief of staff
+    theme: Charter school network / student discipline
+    title: Restorative conference instead of suspension, at the dean's read of the student
+    treatment: restorative
+    outcome: repeat_referral_90d
+    columns:
+      restorative: 1 if the Level 2 incident was resolved by a restorative conference, 0 if by out-of-school suspension.
+      repeat_referral_90d: 1 if the student received another office referral within 90 calendar days of the incident.
+      prior_referrals_sy: Office referrals for the student earlier in the same school year, as of the date of the incident.
+      incident_type: Category on the referral form (defiance, disruption, altercation).
+      grade_level: Grade at the time of the incident (5 to 12).
+      counselor_checkins: Counselor check-ins logged for the student in the 30 days after the incident.
+      days_absent_pre: Days absent in the school year before the date of the incident.
+      student_id: Network student identifier.
+    not_in_table:
+      dean_read: The dean's read of the student in the moment (owned it, a parent could be reached that afternoon, seemed to want a way back in). Not captured on the referral form.
+    story: >-
+      Culture & Discipline Review, network office, Tue 30 Sep 2025, 7:30am. Present: JL (Exec
+      Director), deans of students from all 5 campuses, MR (data), notes by DA. JL opened on
+      restorative conferences. Since August 2024, deans may route a Level 2 incident (defiance,
+      class disruption, minor altercation) to a restorative conference instead of the 1-3 day
+      out-of-school suspension. Question for the group: are the conferences actually cutting
+      repeat behavior, or do they just look like it? Deans described how they decide. Anything
+      physical goes to suspension, no conference, that's policy. For the rest it is the dean's
+      call in the moment. Students with a stack of prior referrals this year get suspended more
+      and, no surprise, keep getting referred; first-time kids get the conference. Deans were
+      candid that a lot of it is the read in the room: whether the student owns it, whether
+      they can get a parent on the phone that afternoon, whether the kid seems to want a way
+      back in. Several deans felt the "owns it" kids were going to do fine regardless. JL: that
+      is exactly the problem for the numbers. MR confirmed none of that is captured anywhere,
+      the referral form has a dropdown for the consequence and that's it. Conference students
+      are also assigned 2-4 counselor check-ins over the following month as part of the
+      protocol; suspended students are not. Counselors believe the check-ins themselves are
+      what reduce the next referral. MR pulled the file for incidents Aug 2024 to Jun 2025:
+      conference vs suspension, repeat referral within 90 days (y/n), prior referrals this
+      school year at the time of the incident, incident type, grade level, counselor check-ins
+      logged in the 30 days after, days absent this year before the incident, student id. Noted
+      that the older grades and students with poor attendance generate more referrals in
+      general, and that incident type matters for repeats on its own (disruption repeats far
+      more than altercations). ACTION: MR to advise whether the file supports a conference vs
+      suspension comparison on repeat referrals and, if not, what would have to be added to
+      the referral form.
+    edges:
+      - dean_read -> restorative
+      - dean_read -> repeat_referral_90d
+      - prior_referrals_sy -> restorative
+      - prior_referrals_sy -> repeat_referral_90d
+      - incident_type -> restorative
+      - incident_type -> repeat_referral_90d
+      - grade_level -> repeat_referral_90d
+      - days_absent_pre -> repeat_referral_90d
+      - restorative -> counselor_checkins
+      - counselor_checkins -> repeat_referral_90d
+      - restorative -> repeat_referral_90d
+    answer:
+      identifiable: false
+      missing: [dean_read]
+    note: >-
+      Prior referrals and incident type are in the file and account for part of the dean's
+      decision. The rest, the read in the room, also predicts whether the student will be
+      referred again and sits nowhere in the data. The counselor check-ins are the mechanism,
+      not a column to adjust for.
+
+  - id: en_utility_antiidle_impression
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: fleet manager at a water utility in the north of England (about 1,100 vans and trucks), messaging the finance analyst on Teams, no statistics background
+    theme: Utility fleet / fuel
+    title: Anti-idle kits on the vans the supervisors pointed at, with no idle figure from before
+    twin: en_utility_antiidle_report
+    treatment: antiidle_kit
+    outcome: l_per_100km
+    columns:
+      antiidle_kit: 1 if the van had the anti-idle kit fitted in April 2025 (engine cuts out after 90 seconds stationary in neutral).
+      l_per_100km: Litres per 100 km from April to September 2025, fuel card litres over telematics mileage.
+      idle_hrs_apr_sep: Engine hours stationary from April to September 2025, from the new telematics system.
+      van_type: Model group (Transit Custom, Transit 350, Sprinter, 7.5t).
+      depot: Home depot (14 depots).
+      reg_year: Year of first registration.
+      fleet_no: Fleet number.
+    not_in_table:
+      idle_habit: How much each van's crew left the engine running when stationary before April 2025. The supervisors' impression; the previous telematics provider's idle history was not kept.
+    story: >-
+      Afternoon Ruth, quick one on the stop-start kits for your fuel report. We fitted the
+      anti-idle kit (engine cuts after 90 seconds stationary in neutral) to 120 vans last
+      April. Kit only fits the Transit Custom and the Transit 350, so the Sprinters and the 7.5
+      tonners were never in the frame. Of the Transits, the 120 were the ones the depot
+      supervisors put forward, basically "the crews who sit at the kerb with the engine running
+      and the heater on all day", and those crews go through diesel like nobody's business,
+      kit or no kit they'll still idle more than the rest. Fair enough as a way to pick, but
+      it's the supervisors' impression, we'd just moved telematics provider and the old lot
+      took the idle history with them, so there is no idle figure for anyone before April, I've
+      asked twice. What you've got in the sheet is litres per 100 km over Apr to Sep from fuel
+      cards against telematics mileage, idle hours Apr to Sep from the new system, kit fitted
+      y/n, van type, depot, registration year and fleet number. Idle hours is obviously where
+      the kit does its work, less idling less diesel. Bigger vans drink more whatever you do,
+      the rural depots do longer runs so their figures sit differently, and the older plates
+      are thirstier. Can you tell me honestly whether we can put a litres-saved number on the
+      kit from this, or whether I'm going to be arguing with Finance about it?
+    edges:
+      - idle_habit -> antiidle_kit
+      - idle_habit -> l_per_100km
+      - idle_habit -> idle_hrs_apr_sep
+      - van_type -> antiidle_kit
+      - van_type -> l_per_100km
+      - antiidle_kit -> idle_hrs_apr_sep
+      - idle_hrs_apr_sep -> l_per_100km
+      - antiidle_kit -> l_per_100km
+      - depot -> l_per_100km
+      - reg_year -> l_per_100km
+    answer:
+      identifiable: false
+      missing: [idle_habit]
+    note: >-
+      The vans were picked for idling a lot, and idling a lot burns diesel, but the only idle
+      figure in the sheet is from after the kit went in, when the kit itself was changing it.
+      Van type is in the sheet and handles the other half of the selection.
+
+  - id: en_utility_antiidle_report
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: fleet manager at a water utility in the north of England (about 1,100 vans and trucks), messaging the finance analyst on Teams, no statistics background
+    theme: Utility fleet / fuel
+    title: Anti-idle kits on the worst idlers in the old provider's report
+    twin: en_utility_antiidle_impression
+    treatment: antiidle_kit
+    outcome: l_per_100km
+    columns:
+      antiidle_kit: 1 if the van had the anti-idle kit fitted in April 2025 (engine cuts out after 90 seconds stationary in neutral).
+      l_per_100km: Litres per 100 km from April to September 2025, fuel card litres over telematics mileage.
+      idle_hrs_apr_sep: Engine hours stationary from April to September 2025, from the new telematics system.
+      idle_hrs_baseline: Engine hours stationary from November 2024 to March 2025, from the previous telematics provider's final report.
+      van_type: Model group (Transit Custom, Transit 350, Sprinter, 7.5t).
+      depot: Home depot (14 depots).
+      reg_year: Year of first registration.
+      fleet_no: Fleet number.
+    story: >-
+      Afternoon Ruth, quick one on the stop-start kits for your fuel report. We fitted the
+      anti-idle kit (engine cuts after 90 seconds stationary in neutral) to 120 vans last
+      April. Kit only fits the Transit Custom and the Transit 350, so the Sprinters and the 7.5
+      tonners were never in the frame. Of the Transits, the 120 were the ones at the top of the
+      idle report Gary ran off the old telematics before we switched provider, Nov to Mar, the
+      crews who sit at the kerb with the engine running and the heater on all day, and those
+      crews go through diesel like nobody's business, kit or no kit they'll still idle more
+      than the rest. I've kept that report, so every van has its Nov to Mar idle hours in the
+      sheet. What you've got otherwise is litres per 100 km over Apr to Sep from fuel cards
+      against telematics mileage, idle hours Apr to Sep from the new system, kit fitted y/n,
+      van type, depot, registration year and fleet number. Idle hours after the fit is
+      obviously where the kit does its work, less idling less diesel. Bigger vans drink more
+      whatever you do, the rural depots do longer runs so their figures sit differently, and
+      the older plates are thirstier. Can you tell me honestly whether we can put a
+      litres-saved number on the kit from this, or whether I'm going to be arguing with Finance
+      about it?
+    edges:
+      - idle_hrs_baseline -> antiidle_kit
+      - idle_hrs_baseline -> l_per_100km
+      - idle_hrs_baseline -> idle_hrs_apr_sep
+      - van_type -> antiidle_kit
+      - van_type -> l_per_100km
+      - antiidle_kit -> idle_hrs_apr_sep
+      - idle_hrs_apr_sep -> l_per_100km
+      - antiidle_kit -> l_per_100km
+      - depot -> l_per_100km
+      - reg_year -> l_per_100km
+    answer:
+      identifiable: true
+      adjust_for: [idle_hrs_baseline, van_type]
+      do_not_adjust_for:
+        idle_hrs_apr_sep: Measured after the kit went in and cut by it. Less idling is how the kit saves diesel, so it is part of the effect being measured.
+      indifferent: [depot, fleet_no, reg_year]
+    note: >-
+      Same story as the twin, but the idle hours from before the fit were kept, so the reason
+      the vans were picked is in the sheet. The trap is the post-fit idle hours, which look
+      like the natural thing to adjust for and are the mechanism.
+
+  - id: en_broker_remarketing
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: analyst at an insurance brokerage in Dublin (about 60 staff, personal and commercial lines), messaging the head of personal lines on Slack
+    theme: Insurance brokerage / renewals
+    title: Remarketing at renewal and staying with the brokerage
+    treatment: remarketed
+    outcome: renewed
+    columns:
+      remarketed: 1 if the handler obtained alternative quotes at the 2024 renewal instead of letting the policy roll over with the holding insurer.
+      renewed: 1 if the policy was renewed through the brokerage, with the holding insurer or another.
+      premium_change_pct: Holding insurer's renewal premium as a percentage change on the expiring premium.
+      claims_3y: Number of claims on the policy in the 3 years before the renewal date.
+      tenure_yrs: Years the client has held a policy with the brokerage.
+      quotes_sent: Number of alternative quotes sent to the client before the renewal date.
+      commission_eur: Commission earned on the policy for the 2024-25 policy year, in euro. Zero where the policy lapsed.
+      handler_id: Account handler on the policy.
+      policy_ref: Policy reference.
+    story: >-
+      @Niamh re the remarketing question Conor raised at the personal lines meeting. Pulled the
+      2024 home renewals (policies renewing Jan to Dec 2024, 6,310 of them) so we can look at
+      whether remarketing actually holds clients. For anyone reading this later, remarketing
+      means the handler goes to market for alternative quotes at renewal instead of letting the
+      policy roll over with the holding insurer. It's the handler's call. From the notes and
+      from talking to the team, the main trigger is the holding insurer's renewal premium, if
+      it's up 15% or more on last year they'll nearly always remarket, if it's flat they rarely
+      bother, and they tend not to remarket anything with claims in the last 3 years because
+      the other insurers won't quote or come back dearer (the claims being half of why the
+      holding premium went up in the first place). Both of those obviously move the client too:
+      a client who gets a big increase shops around themselves or lapses, and clients with
+      recent claims tend to stay put because they know nobody else wants them. Some handlers
+      remarket far more than others, that's just habit, Dervla does nearly everything, Paul
+      almost nothing. Longer-standing clients renew with us more whatever happens. When a case
+      is remarketed the handler sends the client 1 to 3 alternative quotes, and the client
+      having options in hand seems to be what keeps them, so the quotes count is in there.
+      Commission is in the extract too, careful with it, it's the commission on the 2024-25
+      year, so it's zero where the client lapsed, and the remarketed cases that moved insurer
+      are on different commission rates from the holding book. Columns: remarketed y/n, renewed
+      with us y/n, holding insurer's premium change %, claims in prior 3 years, client tenure,
+      quotes sent, commission in euro, handler id, policy ref. Which of those are we cutting the
+      renewal rate by, and which are we leaving out? Want to get this right before Conor puts
+      it in the board pack.
+    edges:
+      - premium_change_pct -> remarketed
+      - premium_change_pct -> renewed
+      - claims_3y -> remarketed
+      - claims_3y -> renewed
+      - claims_3y -> premium_change_pct
+      - handler_id -> remarketed
+      - tenure_yrs -> renewed
+      - remarketed -> quotes_sent
+      - quotes_sent -> renewed
+      - remarketed -> renewed
+      - remarketed -> commission_eur
+      - renewed -> commission_eur
+    answer:
+      identifiable: true
+      adjust_for: [claims_3y, premium_change_pct]
+      do_not_adjust_for:
+        quotes_sent: Sent because the case was remarketed, and having quotes in hand is how remarketing is meant to keep the client. It is part of the effect being measured.
+        commission_eur: Earned on the policy year that starts at renewal, so it depends on whether the client stayed and on whether the case moved insurer. Adjusting for it creates a false link between remarketing and renewing.
+      indifferent: [handler_id, policy_ref, tenure_yrs]
+    note: >-
+      The premium increase and the claims history drive both the handler's decision and the
+      client's. Handler habit only drives the decision and is harmless. Quotes are the
+      mechanism, and the commission figure is recorded after the outcome for both reasons.

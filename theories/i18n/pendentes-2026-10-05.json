@@ -1,0 +1,524 @@
+[
+ {
+  "theory": "software",
+  "old": "A empresa de software deu o treinamento com mais frequência às empresas clientes cuja equipe tinha menos familiaridade com sistemas digitais.",
+  "new": "Empresas clientes cuja equipe tinha menos familiaridade com sistemas digitais pediram o treinamento mais vezes, e por isso receberam o treinamento com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A empresa de software deu o treinamento com mais frequência às empresas clientes menos satisfeitas com o sistema.",
+  "new": "Empresas clientes menos satisfeitas com o sistema aceitaram o convite para o treinamento mais vezes, e por isso receberam o treinamento com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A empresa de software deu o treinamento com mais frequência às empresas clientes com menos usuários ativos no sistema, para tentar aumentar o uso.",
+  "new": "A empresa de software deu o treinamento com mais frequência às empresas clientes com menos usuários ativos no sistema.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A empresa de software não sabe em quais empresas clientes há um gestor que defende o uso do sistema, e por isso essa informação não está na tabela.",
+  "new": "A empresa de software não registra em quais empresas clientes há um gestor que defende o uso do sistema, e por isso essa informação não está na tabela.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A equipe de sucesso do cliente liga para as empresas clientes que receberam o treinamento, para acompanhar o uso do sistema.",
+  "new": "A equipe de sucesso do cliente liga para as empresas clientes que receberam o treinamento, para saber como foi o treinamento.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "porque o gestor pede o treinamento para a equipe.",
+  "new": "porque esse gestor pediu o treinamento para a equipe.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A oferta foi dirigida com mais frequência a clientes de renda mais alta.",
+  "new": "Clientes de renda mais alta receberam a oferta com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A oferta foi dirigida com mais frequência a clientes menos satisfeitos.",
+  "new": "Clientes menos satisfeitos receberam a oferta com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A operadora fez a oferta com mais frequência a quem tinha recebido proposta de uma concorrente.",
+  "new": "Quem tinha recebido proposta de uma concorrente recebeu a oferta com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Quem tinha reclamado recebeu a oferta com mais frequência, porque a operadora usou a oferta para tentar segurar clientes insatisfeitos.",
+  "new": "A operadora fez a oferta com mais frequência a quem tinha registrado reclamação.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A equipe de retenção também liga para quem pede o cancelamento.",
+  "new": "A equipe de retenção liga para quem cancelou o plano, para registrar o motivo da saída.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A oferta era apresentada durante a ligação da equipe de retenção, e por isso quem tinha sido contatado recebeu a oferta com mais frequência.",
+  "new": "A operadora fez a oferta com mais frequência a quem tinha recebido ligação da equipe de retenção no mês anterior.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Quem cancela precisa abrir um chamado para encerrar o plano.",
+  "new": "Quem cancela o plano costuma abrir um chamado no atendimento depois, para resolver pendências do encerramento.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Quem aceita a oferta passa a ter contrato com multa de saída.",
+  "new": "Quem recebe a oferta passa, com mais frequência, a ter contrato com multa de saída.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Tinha contrato com multa de saída nos seis meses seguintes à oferta (1 = sim, 0 = não).",
+  "new": "Passou a ter contrato com multa de saída no mês seguinte à oferta (1 = sim, 0 = não).",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Clientes de renda mais alta cancelam menos por causa de preço.",
+  "new": "Clientes de renda mais alta têm mais folga no orçamento e cancelam menos.",
+  "times": 2
+ },
+ {
+  "theory": "telecom",
+  "old": "A operadora não tem a renda dos clientes, e por isso ela não está na tabela.",
+  "new": "A operadora não tem a renda dos clientes, e por isso a renda não está na tabela.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Renda mensal estimada do cliente, em reais.",
+  "new": "Renda mensal estimada do cliente na data da oferta, em reais.",
+  "times": 2
+ },
+ {
+  "theory": "telecom",
+  "old": "Com o desconto, quem recebeu a oferta reclama menos nos meses seguintes.",
+  "new": "Quem recebeu a oferta reclama menos nos meses seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A equipe de retenção liga para quem recebeu a oferta, para acompanhar.",
+  "new": "A equipe de retenção liga com mais frequência para quem recebeu a oferta, para acompanhar.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "A equipe de retenção liga para quem cancelou o plano, para registrar o motivo da saída.",
+  "new": "A equipe de retenção liga com mais frequência para quem cancelou o plano, para registrar o motivo da saída.",
+  "times": 1
+ },
+ {
+  "theory": "telecom",
+  "old": "Quem recebe a oferta abre chamado para tirar dúvidas sobre o contrato.",
+  "new": "Quem recebe a oferta abre chamado com mais frequência, para tirar dúvidas sobre o contrato.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A equipe de sucesso do cliente liga para as empresas clientes que receberam o treinamento, para saber como foi o treinamento.",
+  "new": "A equipe de sucesso do cliente liga com mais frequência para as empresas clientes que receberam o treinamento, para saber como foi o treinamento.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A equipe de sucesso do cliente liga para as empresas clientes que não renovam, para entender o motivo da saída.",
+  "new": "A equipe de sucesso do cliente liga com mais frequência para as empresas clientes que não renovam, para entender o motivo da saída.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A empresa de software marca reunião de acompanhamento com as empresas clientes que receberam o treinamento, para avaliar o que foi aprendido.",
+  "new": "A empresa de software marca reunião de acompanhamento com mais frequência com as empresas clientes que receberam o treinamento, para avaliar o que foi aprendido.",
+  "times": 1
+ },
+ {
+  "theory": "software",
+  "old": "A empresa de software marca reunião de acompanhamento com as empresas clientes que renovam, para planejar o novo período de contrato.",
+  "new": "A empresa de software marca reunião de acompanhamento com mais frequência com as empresas clientes que renovam, para planejar o novo período de contrato.",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "Quem clica em link de e-mail da loja vai direto à página das ofertas e compra mais.",
+  "new": "Quem clica em link de e-mail da loja compra mais.",
+  "times": 2
+ },
+ {
+  "theory": "email",
+  "old": "Quem recebe a campanha procura mais o chat de atendimento, para tirar dúvidas sobre as ofertas.",
+  "new": "Quem recebe a campanha procura mais o chat de atendimento, para pedir que a loja pare de enviar e-mails.",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "Quem precisou procurar o chat de atendimento por problema com um pedido compra menos.",
+  "new": "Quem precisou procurar o chat de atendimento compra menos.",
+  "times": 2
+ },
+ {
+  "theory": "email",
+  "old": "que o cliente abriu nos 14 dias seguintes ao envio da campanha.",
+  "new": "que o cliente abriu nos 7 dias seguintes ao envio da campanha.",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "Número de visitas ao site da loja nos 14 dias seguintes ao envio da campanha.",
+  "new": "Número de visitas ao site da loja nos 7 dias seguintes ao envio da campanha.",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "Colocou item no carrinho do site nos 14 dias seguintes ao envio da campanha",
+  "new": "Colocou item no carrinho do site nos 7 dias seguintes ao envio da campanha",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "Quem recebe a campanha coloca mais itens no carrinho do site nos dias seguintes.",
+  "new": "Quem recebe a campanha coloca item no carrinho do site com mais frequência nos dias seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "email",
+  "old": "na loja nos últimos 12 meses",
+  "new": "na loja nos 12 meses anteriores ao envio da campanha",
+  "times": 3
+ },
+ {
+  "theory": "banco",
+  "old": "O aumento de limite era oferecido durante a ligação da central de relacionamento, e por isso quem tinha recebido a ligação recebeu o aumento de limite com mais frequência.",
+  "new": "O banco aproveitava a ligação da central de relacionamento para conceder o aumento de limite, e por isso quem tinha recebido a ligação recebeu o aumento de limite com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "Recebeu ligação da central de relacionamento do banco nos doze meses seguintes",
+  "new": "Recebeu ligação da central de relacionamento do banco nos dezoito meses seguintes",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "Renegociou dívida com o banco nos doze meses seguintes ao aumento de limite",
+  "new": "Renegociou dívida com o banco nos dezoito meses seguintes ao aumento de limite",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "A central de relacionamento liga para quem recebeu o aumento de limite, para avisar do novo limite.",
+  "new": "A central de relacionamento liga com mais frequência para quem recebeu o aumento de limite, para avisar do novo limite.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "A central de relacionamento liga para quem fica inadimplente, para cobrar a dívida.",
+  "new": "A central de relacionamento liga com mais frequência para quem fica inadimplente, para cobrar a dívida.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "Quem recebe o aumento de limite passa a dever mais ao banco e renegocia dívida com mais frequência.",
+  "new": "Quem recebe o aumento de limite renegocia dívida com o banco com mais frequência nos meses seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "O banco chama quem fica inadimplente para renegociar a dívida.",
+  "new": "Quem fica inadimplente renegocia dívida com o banco com mais frequência, porque o banco chama esses clientes para renegociar.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "Quem tem mais compras parceladas em aberto compromete as faturas futuras com parcelas e fica inadimplente com mais frequência.",
+  "new": "Quem tem mais compras parceladas em aberto tem mais parcelas a vencer e fica inadimplente com mais frequência.",
+  "times": 2
+ },
+ {
+  "theory": "banco",
+  "old": "Quem recebe o aumento de limite acumula saldo maior no cartão e parcela a fatura com mais frequência.",
+  "new": "Quem recebe o aumento de limite parcela a fatura do cartão com mais frequência nos meses seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "Quem recebe o aumento de limite entra no crédito rotativo com mais frequência nos meses seguintes, por não conseguir pagar a fatura inteira.",
+  "new": "Quem recebe o aumento de limite entra no crédito rotativo com mais frequência nos meses seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "banco",
+  "old": "O banco só registra a renda na abertura da conta e não tem a renda atual dos clientes, e por isso a renda não está na tabela.",
+  "new": "O banco não tem a renda atual dos clientes, e por isso a renda não está na tabela.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "o pedido de demissão, nos doze meses seguintes.",
+  "new": "o pedido de demissão, nos doze meses seguintes ao fim do programa.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "A empresa não mediu o engajamento dos funcionários antes do programa de capacitação, e por isso o engajamento não está na tabela.",
+  "new": "Nenhuma pesquisa feita pela empresa antes do início do programa de capacitação mediu o engajamento dos funcionários, e por isso o engajamento não está na tabela.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "Nota de engajamento na pesquisa feita no mês anterior ao programa, de 0 a 10.",
+  "new": "Nota na pesquisa de engajamento feita no mês anterior ao início do programa, de 0 a 10.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "Nota de engajamento na pesquisa feita três meses depois do programa, de 0 a 10.",
+  "new": "Nota na pesquisa de engajamento feita três meses depois do fim do programa, de 0 a 10.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "Quem conclui o programa",
+  "new": "Quem faz o programa",
+  "times": 2
+ },
+ {
+  "theory": "rh",
+  "old": "se inscreveram no programa de capacitação com mais frequência, para melhorar o currículo.",
+  "new": "se inscreveram no programa de capacitação com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "Funcionários que respondem à pesquisa de clima pedem demissão com menos frequência.",
+  "new": "Funcionários que tinham respondido à pesquisa de clima do ano anterior ao início do programa pedem demissão com menos frequência.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "Trabalha em uma das unidades escolhidas para o piloto do programa (1 = sim, 0 = não).",
+  "new": "Trabalhava, no início do programa, em uma das unidades escolhidas para o piloto (1 = sim, 0 = não).",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "quem trabalha nelas participou do programa com mais frequência.",
+  "new": "quem trabalhava nelas participou do programa com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "os funcionários que tinham acabado de ser promovidos",
+  "new": "os funcionários promovidos nos meses anteriores",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "O RH chama para uma conversa individual quem fez o programa de capacitação, para avaliar o programa.",
+  "new": "Quem fez o programa de capacitação é chamado pelo RH para uma conversa individual com mais frequência, para avaliar o programa.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "O RH faz uma conversa individual de desligamento com quem pede demissão.",
+  "new": "Quem pede demissão tem conversa individual com o RH com mais frequência, porque o RH faz a conversa de desligamento.",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "anterior ao programa",
+  "new": "anterior ao início do programa",
+  "times": 9
+ },
+ {
+  "theory": "rh",
+  "old": "anteriores ao programa",
+  "new": "anteriores ao início do programa",
+  "times": 4
+ },
+ {
+  "theory": "rh",
+  "old": "seguinte ao programa",
+  "new": "seguinte ao fim do programa",
+  "times": 1
+ },
+ {
+  "theory": "rh",
+  "old": "seguintes ao programa",
+  "new": "seguintes ao fim do programa",
+  "times": 3
+ },
+ {
+  "theory": "rh",
+  "old": "depois do programa",
+  "new": "depois do fim do programa",
+  "times": 2
+ },
+ {
+  "theory": "saude",
+  "old": "Quem tinha sido internado no ano anterior foi inscrito no programa de acompanhamento com mais frequência, porque a operadora procurou primeiro os beneficiários de maior risco.",
+  "new": "Quem tinha sido internado no ano anterior foi inscrito no programa de acompanhamento com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "Quem foi internado no ano anterior volta a ser internado com mais frequência.",
+  "new": "Quem foi internado no ano anterior ao programa de acompanhamento volta a ser internado com mais frequência.",
+  "times": 2
+ },
+ {
+  "theory": "saude",
+  "old": "Quem vai ao pronto-socorro é internado com mais frequência, porque parte dos atendimentos de urgência termina em internação.",
+  "new": "Quem vai ao pronto-socorro é internado com mais frequência.",
+  "times": 3
+ },
+ {
+  "theory": "saude",
+  "old": "Quem participa do programa de acompanhamento resolve dúvidas com a enfermeira e vai menos ao pronto-socorro nos meses seguintes.",
+  "new": "Quem participa do programa de acompanhamento vai menos ao pronto-socorro nos meses seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "A central de enfermagem liga para quem está no programa de acompanhamento, para saber como o beneficiário está.",
+  "new": "A central de enfermagem liga com mais frequência para quem está no programa de acompanhamento, para fazer a pesquisa de satisfação do programa.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "A central de enfermagem liga para quem recebe alta de uma internação, para acompanhar a recuperação.",
+  "new": "A central de enfermagem liga com mais frequência para quem recebeu alta de uma internação, para acompanhar a recuperação.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "A auditoria médica revisa uma parte dos atendimentos de quem está no programa de acompanhamento, para avaliar o programa.",
+  "new": "A auditoria médica revisa com mais frequência os atendimentos de quem está no programa de acompanhamento, para avaliar o programa.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "A auditoria médica revisa os atendimentos de quem é internado, para conferir a conta do hospital.",
+  "new": "A auditoria médica revisa com mais frequência os atendimentos de quem foi internado, para conferir a conta do hospital.",
+  "times": 1
+ },
+ {
+  "theory": "saude",
+  "old": "Beneficiários mais frágeis foram inscritos no programa de acompanhamento com mais frequência.",
+  "new": "Beneficiários mais frágeis aceitaram o convite para o programa de acompanhamento com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "varejo",
+  "old": "Quem precisou procurar o atendimento ao cliente por causa de um problema tem menos chance de voltar a comprar.",
+  "new": "Quem precisou procurar o atendimento ao cliente tem menos chance de voltar a comprar.",
+  "times": 1
+ },
+ {
+  "theory": "varejo",
+  "old": "Índice de sensibilidade a preço do cliente, de 0 a 10, calculado na data do envio do cupom (quanto maior, mais o cliente depende de promoção para comprar).",
+  "new": "Índice de sensibilidade a preço do cliente, de 0 a 10, calculado com as compras anteriores ao envio do cupom (quanto maior, mais o cliente compara preços antes de comprar).",
+  "times": 2
+ },
+ {
+  "theory": "varejo",
+  "old": "A rede não guardou o índice de sensibilidade a preço que usou na época do envio do cupom, e por isso a sensibilidade a preço não está na tabela.",
+  "new": "A rede não guardou o índice de sensibilidade a preço dos clientes, e por isso a sensibilidade a preço não está na tabela.",
+  "times": 1
+ },
+ {
+  "theory": "varejo",
+  "old": "pesquisa de opinião",
+  "new": "pesquisa de preços",
+  "times": 2
+ },
+ {
+  "theory": "varejo",
+  "old": "para escolher onde usar o desconto.",
+  "new": "para escolher o que comprar com o desconto.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "Alunos que trabalham têm menos tempo para estudar e tiram nota final mais baixa.",
+  "new": "Alunos que trabalham chegam mais cansados às provas e tiram nota final mais baixa.",
+  "times": 2
+ },
+ {
+  "theory": "educacao",
+  "old": "para tirar dúvidas e resolver exercícios.",
+  "new": "para tirar dúvidas sobre a matéria.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "Alunos com nota final mais baixa procuram mais a coordenação do curso, para pedir revisão de nota ou orientação sobre a reprovação.",
+  "new": "Alunos com nota final mais baixa procuram mais a coordenação do curso depois da divulgação das notas, para pedir orientação sobre como refazer a disciplina.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "participaram da monitoria com mais frequência, porque o professor os encaminhou.",
+  "new": "participaram da monitoria com mais frequência, porque sentiram mais dificuldade e procuraram a monitoria.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "Quem participa da monitoria acompanha melhor a matéria e fica mais presente nas aulas nas semanas seguintes.",
+  "new": "Quem participa da monitoria fica mais presente nas aulas da disciplina nas semanas seguintes.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "o trabalho do aluno",
+  "new": "o emprego ou estágio do aluno",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "Bolsistas precisam manter bom rendimento para não perder a bolsa e tiram nota final mais alta.",
+  "new": "Bolsistas perdem a bolsa se forem mal na disciplina, e por isso tiram nota final mais alta.",
+  "times": 2
+ },
+ {
+  "theory": "educacao",
+  "old": "porque a coordenação do curso os convidou primeiro.",
+  "new": "porque receberam o convite antes dos demais alunos.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "A monitoria começou por algumas turmas-piloto da disciplina, e os alunos dessas turmas participaram da monitoria com mais frequência.",
+  "new": "Algumas turmas da disciplina foram escolhidas para um piloto e tiveram mais vagas de monitoria, e os alunos dessas turmas participaram da monitoria com mais frequência.",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "A coordenação do curso avisava das vagas de monitoria durante os atendimentos",
+  "new": "A coordenação do curso avisava os alunos das vagas de monitoria durante os atendimentos",
+  "times": 1
+ },
+ {
+  "theory": "educacao",
+  "old": "A coordenação do curso chama os alunos que participam da monitoria para um atendimento de acompanhamento.",
+  "new": "A coordenação do curso chama com mais frequência os alunos que participam da monitoria, para um atendimento de acompanhamento.",
+  "times": 1
+ }
+]

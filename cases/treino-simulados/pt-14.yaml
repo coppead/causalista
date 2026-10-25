@@ -1,0 +1,560 @@
+# Casos simulados para TREINO, lote pt-14: oito casos em português do Brasil escritos como
+# se fossem de uma pessoa (a dona de uma clínica odontológica com três unidades, o gerente
+# de frota de uma locadora de carros, um síndico profissional, um analista de crédito de
+# uma financeira de veículos, uma professora de pós-graduação em administração), cada um
+# no estilo em que essa pessoa escreveria: transcrição de áudio informal, briefing para
+# uma consultoria, e-mail para o chefe, ata de reunião, trecho de dissertação de mestrado.
+#
+# Escritos pelo assistente em 2026-10-07, no papel de cada pessoa, sem acesso às fichas de
+# teoria. Idioma: pt.
+#
+# Estes casos são de TREINO (reforço: o modelo responde, o verificador dá a nota). Não
+# são teste e não reutilizam os cenários do conjunto de teste congelado em
+# cases/simulados/. As setas ("causa -> efeito") declaram o diagrama que o texto, as
+# descrições das colunas e o bom senso implicam; o verificador confere a resposta a
+# partir delas (scripts/check_cases.py). Status rascunho até a aprovação.
+
+cases:
+
+  - id: pt_odonto_sedacao_sem_questionario
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: dona de uma clínica odontológica com três unidades no Rio, dentista de formação, hoje só na gestão, mandando áudio para a sobrinha que faz mestrado em estatística
+    theme: Saúde (odontologia, clínica particular)
+    title: Sedação consciente e conclusão do plano de tratamento, sem registro da ansiedade
+    twin: pt_odonto_sedacao_com_questionario
+    treatment: sedacao_oxido
+    outcome: concluiu_plano
+    columns:
+      id_paciente: Código do paciente no sistema da clínica.
+      unidade: Unidade onde o plano de tratamento foi aberto (Barra, Centro ou Tijuca).
+      n_procedimentos_plano: Quantidade de procedimentos previstos no plano de tratamento aprovado pelo paciente.
+      sedacao_oxido: Fez as sessões do plano com sedação consciente por óxido nitroso (1 = sim, 0 = não).
+      faltas_durante: Número de consultas do plano em que o paciente faltou sem avisar, contadas da aprovação do plano até a conclusão ou até completar seis meses.
+      concluiu_plano: Concluiu todos os procedimentos do plano em até seis meses da aprovação (1 = sim, 0 = não).
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada por WhatsApp seis meses depois da aprovação do plano (1 = sim, 0 = não).
+    not_in_table:
+      ansiedade_percebida: O quanto o paciente pareceu nervoso ao dentista nas primeiras consultas. Não é anotado em lugar nenhum.
+    story: >-
+      Oi Dani, tudo bem? Então, deixa eu te explicar o que eu queria que você olhasse, que eu
+      sei que você mexe com esses dados aí no mestrado. A gente tem o óxido nitroso na Barra e
+      na Tijuca desde 2024, no Centro não tem, o aparelho é caro e lá o espaço é pequeno. E a
+      minha dúvida é se a sedação faz o paciente terminar o tratamento, porque o nosso problema
+      número um é paciente que aprova o plano, faz dois, três procedimentos e some. Eu puxei do
+      sistema todo mundo que aprovou plano em 2025, uns mil e duzentos pacientes, com a
+      unidade, quantos procedimentos tinha no plano, se usou sedação, quantas vezes faltou sem
+      avisar, se concluiu em seis meses e se respondeu a pesquisa de satisfação que a gente
+      manda no WhatsApp depois dos seis meses. Agora, umas coisas que você precisa saber. Quem
+      decide oferecer a sedação é o dentista: o paciente senta na cadeira, tá suando, agarrado
+      no braço, o dentista oferece, e como a gente não cobra à parte quase todo mundo aceita.
+      E paciente nervoso assim falta mais e abandona mais, isso eu te garanto, trinta anos de
+      consultório. Os dentistas também oferecem mais quando o plano é longo, que o paciente
+      vai ter que vir muitas vezes, e plano longo a pessoa termina menos mesmo, com sedação ou
+      sem. Da unidade, o Centro tem muito paciente de passagem, gente que trabalha ali perto,
+      muda de emprego e some; a Barra e a Tijuca são mais de bairro. Uma coisa que eu vi e
+      fiquei bem contente: quem fez sedação faltou muito menos, e aí claro, quem falta menos
+      termina mais. A pesquisa quem responde mais é quem terminou, e quem fez sedação também
+      responde mais porque a gente pergunta da sedação especificamente, aí a pessoa se sente
+      na obrigação. Dá pra tirar alguma coisa disso ou eu tô perdendo meu tempo? Me liga
+      quando puder, beijo. Ah, esqueci: sobre o paciente nervoso, não tem questionário, não
+      tem nada anotado, é o olho do dentista mesmo, cada um com o seu.
+    edges:
+      - ansiedade_percebida -> sedacao_oxido
+      - ansiedade_percebida -> faltas_durante
+      - ansiedade_percebida -> concluiu_plano
+      - unidade -> sedacao_oxido
+      - unidade -> concluiu_plano
+      - n_procedimentos_plano -> sedacao_oxido
+      - n_procedimentos_plano -> concluiu_plano
+      - sedacao_oxido -> faltas_durante
+      - faltas_durante -> concluiu_plano
+      - sedacao_oxido -> concluiu_plano
+      - sedacao_oxido -> respondeu_pesquisa
+      - concluiu_plano -> respondeu_pesquisa
+    answer:
+      identifiable: false
+      missing: [ansiedade_percebida]
+    note: >-
+      O dentista oferece a sedação a quem parece nervoso, e isso não está em coluna nenhuma.
+      As faltas carregam parte da ansiedade, mas são consequência da sedação e não servem
+      para ajustar. O gêmeo tem o questionário de ansiedade na tabela.
+
+  - id: pt_odonto_sedacao_com_questionario
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: dona de uma clínica odontológica com três unidades no Rio, dentista de formação, hoje só na gestão, mandando áudio para a sobrinha que faz mestrado em estatística
+    theme: Saúde (odontologia, clínica particular)
+    title: Sedação consciente e conclusão do plano de tratamento, com o questionário de ansiedade
+    twin: pt_odonto_sedacao_sem_questionario
+    treatment: sedacao_oxido
+    outcome: concluiu_plano
+    columns:
+      id_paciente: Código do paciente no sistema da clínica.
+      unidade: Unidade onde o plano de tratamento foi aberto (Barra, Centro ou Tijuca).
+      escala_ansiedade: Pontuação na escala de ansiedade odontológica de Corah, de 4 a 20, respondida pelo paciente na primeira consulta, antes de aprovar o plano.
+      n_procedimentos_plano: Quantidade de procedimentos previstos no plano de tratamento aprovado pelo paciente.
+      sedacao_oxido: Fez as sessões do plano com sedação consciente por óxido nitroso (1 = sim, 0 = não).
+      faltas_durante: Número de consultas do plano em que o paciente faltou sem avisar, contadas da aprovação do plano até a conclusão ou até completar seis meses.
+      concluiu_plano: Concluiu todos os procedimentos do plano em até seis meses da aprovação (1 = sim, 0 = não).
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada por WhatsApp seis meses depois da aprovação do plano (1 = sim, 0 = não).
+    story: >-
+      Oi Dani, tudo bem? Então, deixa eu te explicar o que eu queria que você olhasse, que eu
+      sei que você mexe com esses dados aí no mestrado. A gente tem o óxido nitroso na Barra e
+      na Tijuca desde 2024, no Centro não tem, o aparelho é caro e lá o espaço é pequeno. E a
+      minha dúvida é se a sedação faz o paciente terminar o tratamento, porque o nosso problema
+      número um é paciente que aprova o plano, faz dois, três procedimentos e some. Eu puxei do
+      sistema todo mundo que aprovou plano em 2025, uns mil e duzentos pacientes, com a
+      unidade, a pontuação do questionário de ansiedade, quantos procedimentos tinha no plano,
+      se usou sedação, quantas vezes faltou sem avisar, se concluiu em seis meses e se
+      respondeu a pesquisa de satisfação que a gente manda no WhatsApp depois dos seis meses.
+      Agora, umas coisas que você precisa saber. Desde 2024 todo paciente responde na primeira
+      consulta aquele questionário de ansiedade de dentista, o de Corah, e a regra da clínica
+      é oferecer a sedação pra quem pontua treze ou mais, e também em plano com mais de oito
+      procedimentos, que o paciente vai ter que vir muitas vezes. Padronizei isso justamente
+      pra não ficar no feeling de cada dentista, e eles seguem, eu confiro no sistema; como a
+      gente não cobra à parte, quase todo mundo aceita. E paciente nervoso assim falta mais e
+      abandona mais, isso eu te garanto, trinta anos de consultório. Plano longo a pessoa
+      termina menos mesmo, com sedação ou sem. Da unidade, o Centro tem muito paciente de
+      passagem, gente que trabalha ali perto, muda de emprego e some; a Barra e a Tijuca são
+      mais de bairro. Uma coisa que eu vi e fiquei bem contente: quem fez sedação faltou muito
+      menos, e aí claro, quem falta menos termina mais. A pesquisa quem responde mais é quem
+      terminou, e quem fez sedação também responde mais porque a gente pergunta da sedação
+      especificamente, aí a pessoa se sente na obrigação. Dá pra tirar alguma coisa disso ou eu
+      tô perdendo meu tempo? Me liga quando puder, beijo.
+    edges:
+      - escala_ansiedade -> sedacao_oxido
+      - escala_ansiedade -> faltas_durante
+      - escala_ansiedade -> concluiu_plano
+      - unidade -> sedacao_oxido
+      - unidade -> concluiu_plano
+      - n_procedimentos_plano -> sedacao_oxido
+      - n_procedimentos_plano -> concluiu_plano
+      - sedacao_oxido -> faltas_durante
+      - faltas_durante -> concluiu_plano
+      - sedacao_oxido -> concluiu_plano
+      - sedacao_oxido -> respondeu_pesquisa
+      - concluiu_plano -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: [escala_ansiedade, n_procedimentos_plano, unidade]
+      do_not_adjust_for:
+        faltas_durante: É consequência da sedação, que faz o paciente faltar menos; esse é um dos caminhos pelos quais a sedação age sobre a conclusão.
+        respondeu_pesquisa: Foi registrada seis meses depois e depende da sedação e de ter concluído. Ajustar por ela cria uma associação falsa entre as duas.
+      indifferent: [id_paciente]
+    note: >-
+      A mesma história do gêmeo, com a ansiedade medida por questionário antes do plano e a
+      oferta da sedação seguindo a pontuação. Com a escala na tabela, o efeito pode ser medido.
+
+  - id: pt_locadora_revisao_concessionaria
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de frota de uma locadora de carros com 11 filiais no Sudeste e no Centro-Oeste, engenheiro mecânico, escrevendo o briefing para uma consultoria de dados
+    theme: Logística (locação de veículos, manutenção de frota)
+    title: Revisão na concessionária e paradas não programadas
+    treatment: revisao_concessionaria
+    outcome: parada_nao_programada_6m
+    columns:
+      placa: Placa do veículo.
+      filial: Filial à qual o carro estava alocado na data da revisão (11 filiais).
+      km_na_revisao: Quilometragem do hodômetro no dia da revisão.
+      mes_campanha: A revisão caiu em mês de campanha de revisão da montadora, com desconto nas concessionárias (1 = sim, 0 = não).
+      revisao_concessionaria: Revisão periódica feita em concessionária da marca (1) ou em oficina parceira (0).
+      itens_trocados: Quantidade de itens substituídos na revisão, conforme a ordem de serviço.
+      parada_nao_programada_6m: O carro teve ao menos uma parada não programada por falha mecânica ou elétrica (guincho acionado ou carro retido na filial) nos seis meses seguintes à revisão (1 = sim, 0 = não).
+      custo_manutencao_6m: Custo total de manutenção do carro nos seis meses seguintes à revisão, em reais, incluindo a própria revisão e as corretivas.
+    not_in_table:
+      perfil_locatarios: Como os clientes que alugaram o carro no período dirigiram. Não há registro.
+    story: >-
+      BRIEFING PARA A CONSULTORIA - MANUTENÇÃO PREVENTIVA DA FROTA
+
+      Contexto. Somos uma locadora com 3.800 carros em 11 filiais (São Paulo capital e
+      interior, Rio, Belo Horizonte, Goiânia, Cuiabá e outras). As revisões periódicas podem
+      ser feitas na concessionária da marca ou em oficinas parceiras, bem mais baratas. Hoje a
+      escolha é meio orgânica: carro novo, dentro da garantia, vai pra concessionária pra não
+      perder a garantia; carro com mais quilometragem vai pro parceiro. Também pesa a filial:
+      em Cuiabá e Goiânia não há concessionária de duas das nossas marcas, então quase tudo vai
+      pro parceiro; em São Paulo é o contrário. E em alguns meses a montadora faz campanha de
+      revisão com desconto e a gente manda mais carro pra concessionária, independente do
+      resto.
+
+      O que queremos saber. Se a revisão na concessionária reduz as paradas não programadas
+      (guincho ou carro retido por falha) nos seis meses seguintes. A diretoria quer decidir se
+      vale pagar mais por isso.
+
+      Dados. Uma linha por revisão feita entre janeiro e junho de 2025, com placa, filial,
+      quilometragem no dia, se foi mês de campanha, onde a revisão foi feita, quantos itens
+      foram trocados, se o carro teve parada não programada nos seis meses seguintes e o custo
+      total de manutenção do carro nesses seis meses.
+
+      Observações que me parecem relevantes. (a) A concessionária segue o plano da montadora
+      à risca e troca muito mais item preventivo (fluido de freio, velas, correia); o parceiro
+      troca o que o carro pede. Acredito que boa parte do benefício, se existir, venha daí. (b)
+      Carro com mais km quebra mais, óbvio. A quilometragem varia muito de filial pra filial:
+      em Mato Grosso e Goiás o carro roda mais e em estrada pior, e quebra mais também. (c) O
+      custo dos seis meses inclui a corretiva da quebra, quando ela acontece, e inclui a
+      revisão em si, que na concessionária é uns 40% mais cara, com mais itens trocados. (d)
+      Não temos como saber como cada cliente dirigiu o carro no período; isso certamente pesa
+      nas quebras, mas não entra em nenhuma base.
+
+      Precisamos de uma proposta até o dia 20.
+    edges:
+      - km_na_revisao -> revisao_concessionaria
+      - km_na_revisao -> parada_nao_programada_6m
+      - filial -> revisao_concessionaria
+      - filial -> km_na_revisao
+      - filial -> parada_nao_programada_6m
+      - mes_campanha -> revisao_concessionaria
+      - revisao_concessionaria -> itens_trocados
+      - itens_trocados -> parada_nao_programada_6m
+      - revisao_concessionaria -> parada_nao_programada_6m
+      - revisao_concessionaria -> custo_manutencao_6m
+      - itens_trocados -> custo_manutencao_6m
+      - parada_nao_programada_6m -> custo_manutencao_6m
+      - perfil_locatarios -> parada_nao_programada_6m
+    answer:
+      identifiable: true
+      adjust_for: [filial, km_na_revisao]
+      do_not_adjust_for:
+        itens_trocados: É consequência de onde a revisão foi feita e é o caminho pelo qual ela deve agir sobre as quebras.
+        custo_manutencao_6m: Foi apurado depois e inclui a corretiva da própria quebra; depende da revisão e da quebra ao mesmo tempo.
+      indifferent: [mes_campanha, placa]
+    note: >-
+      O mês de campanha só influencia onde a revisão é feita; a forma de dirigir dos clientes
+      só influencia as quebras. Nenhum dos dois estraga nada. O que falta na tabela não
+      impede a medição.
+
+  - id: pt_sindico_assembleia_hibrida
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: síndico profissional, dono de uma pequena administradora com 38 condomínios na zona norte de São Paulo, redigindo a ata da reunião mensal da equipe
+    theme: Gestão condominial
+    title: Assembleia em formato híbrido e comparecimento
+    treatment: assembleia_hibrida
+    outcome: comparecimento_2026_pct
+    columns:
+      cod_condominio: Código do condomínio na administradora.
+      n_unidades: Número de unidades autônomas do condomínio.
+      comparecimento_2025_pct: Percentual de unidades presentes ou representadas por procuração na assembleia geral ordinária de 2025.
+      pauta_rateio: A pauta da AGO de 2026 incluía aprovação de rateio extra (1 = sim, 0 = não).
+      dia_semana: Dia da semana em que a AGO de 2026 foi realizada.
+      assembleia_hibrida: AGO de 2026 realizada em formato híbrido, presencial com participação e voto pelo aplicativo (1 = sim, 0 = só presencial).
+      comparecimento_2026_pct: Percentual de unidades presentes ou representadas na AGO de 2026, somando presenciais, procurações e participantes pelo aplicativo.
+      duracao_min: Duração da AGO de 2026, em minutos, da abertura ao encerramento registrado em ata.
+    not_in_table:
+      conselho_atuante: O quanto o conselho do condomínio é participativo e mobiliza os vizinhos. Percepção da equipe, sem registro.
+    story: >-
+      ATA DA REUNIÃO MENSAL DA EQUIPE - 12 DE MARÇO DE 2026
+
+      Presentes: Marcelo (síndico profissional), Dra. Renata (jurídico), Priscila (financeiro)
+      e Jonas (TI e aplicativo).
+
+      1. Pauta única: avaliação do formato híbrido nas assembleias gerais ordinárias de 2026.
+
+      2. Marcelo relatou que, dos 38 condomínios da carteira, 16 fizeram a AGO deste ano em
+      formato híbrido (presencial com participação e voto pelo aplicativo) e 22 no formato
+      presencial de sempre. A escolha foi feita no fim de 2025: entraram no híbrido os
+      condomínios cujos conselhos pediram, que no geral são os conselhos mais participativos,
+      que fazem grupo do prédio, chamam vizinho no corredor, cobram presença; e Marcelo deu
+      preferência também aos condomínios maiores, onde é mais difícil fechar quórum, e aos que
+      tiveram comparecimento baixo em 2025.
+
+      3. Priscila apresentou a planilha (uma linha por condomínio, colunas conforme o
+      dicionário anexo). Dra. Renata perguntou se há como medir a atuação dos conselhos.
+      Marcelo respondeu que não: é percepção da equipe, não existe registro disso em lugar
+      nenhum. Observou que esses conselhos já traziam mais gente antes do aplicativo e devem
+      continuar trazendo, com híbrido ou sem.
+
+      4. Jonas observou que (i) pauta com rateio extra sempre lota a assembleia; (ii) as
+      híbridas duraram mais, por problemas de conexão e de habilitação de voto, e assembleia
+      cheia também dura mais, pelas inscrições para fala; (iii) nos condomínios maiores o
+      percentual tende a ser menor, e quem compareceu em 2025 tende a comparecer de novo.
+
+      5. Deliberou-se encaminhar a planilha ao estagiário de estatística para dizer se é
+      possível medir o efeito do híbrido sobre o comparecimento com esses dados.
+
+      Nada mais havendo a tratar, a reunião foi encerrada às 11h40.
+    edges:
+      - conselho_atuante -> assembleia_hibrida
+      - conselho_atuante -> comparecimento_2026_pct
+      - conselho_atuante -> comparecimento_2025_pct
+      - n_unidades -> assembleia_hibrida
+      - n_unidades -> comparecimento_2026_pct
+      - comparecimento_2025_pct -> assembleia_hibrida
+      - comparecimento_2025_pct -> comparecimento_2026_pct
+      - pauta_rateio -> comparecimento_2026_pct
+      - assembleia_hibrida -> duracao_min
+      - comparecimento_2026_pct -> duracao_min
+      - assembleia_hibrida -> comparecimento_2026_pct
+    answer:
+      identifiable: false
+      missing: [conselho_atuante]
+    note: >-
+      Os conselhos participativos pediram o híbrido e trazem gente de qualquer jeito, e a
+      atuação do conselho não está na planilha. O comparecimento de 2025 carrega parte disso,
+      mas não tudo. A duração foi registrada depois e depende do formato e do comparecimento.
+
+  - id: pt_financeira_carencia_cpf_par
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: analista de crédito de uma financeira de veículos usados, economista, escrevendo ao gerente de risco
+    theme: Crédito (financiamento de veículos)
+    title: Carência de 60 dias na primeira parcela e atraso
+    treatment: carencia_60
+    outcome: atraso_60d_12m
+    columns:
+      id_contrato: Número do contrato.
+      cpf_par: O CPF do cliente termina em dígito par (1 = sim, 0 = não).
+      score_bureau: Score de crédito do bureau consultado na data da proposta, de 0 a 1000.
+      renda_declarada: Renda mensal declarada na proposta, em reais.
+      ano_veiculo: Ano-modelo do veículo financiado.
+      carencia_60: Primeira parcela com vencimento em 60 dias após a contratação, em vez dos 30 dias padrão (1 = sim, 0 = não).
+      valor_parcela: Valor da parcela mensal do contrato, em reais.
+      atraso_60d_12m: Teve alguma parcela com 60 dias ou mais de atraso nos 12 primeiros meses do contrato (1 = sim, 0 = não).
+      acionou_sac: O cliente acionou o SAC (telefone ou chat) ao menos uma vez nos 12 primeiros meses do contrato (1 = sim, 0 = não).
+    story: >-
+      Fábio, bom dia.
+
+      Segue a base do piloto da carência pro comitê de quinta. Lembrando: em março e abril de
+      2025, em todos os contratos de usados fechados, a primeira parcela ficou pra 60 dias
+      quando o CPF do cliente terminava em dígito par, e pra 30 dias quando terminava em
+      ímpar. Foi o jeito que o TI achou de separar os grupos sem mexer na esteira, e no fim
+      das contas é como se tivesse sorteado. A carência entrava no contrato já fechado, o
+      cliente só ficava sabendo pelo carnê. Deu 2.140 contratos com carência e 2.207 sem, e
+      score, renda e ano do veículo ficaram praticamente iguais nos dois grupos, como era de
+      esperar.
+
+      Dois pontos que vão aparecer na discussão. A parcela de quem teve carência sai uns 2%
+      maior, porque o juro do mês a mais entra no saldo, e parcela maior, a gente sabe, atrasa
+      mais. E o SAC: muita gente da carência ligou confusa com a data da primeira parcela, e
+      quem atrasa liga pra negociar. Tenho a flag, mas não sei se serve pra alguma coisa. Fora
+      isso, o de sempre: score baixo, renda baixa e carro mais velho atrasam mais.
+
+      A pergunta do comitê é uma só: a carência de 60 dias aumenta o atraso ou não? A
+      comercial quer transformar isso em argumento de venda.
+
+      Abraço,
+      Lucas
+    edges:
+      - cpf_par -> carencia_60
+      - carencia_60 -> valor_parcela
+      - valor_parcela -> atraso_60d_12m
+      - carencia_60 -> atraso_60d_12m
+      - carencia_60 -> acionou_sac
+      - atraso_60d_12m -> acionou_sac
+      - score_bureau -> atraso_60d_12m
+      - renda_declarada -> atraso_60d_12m
+      - ano_veiculo -> atraso_60d_12m
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        valor_parcela: A carência aumenta a parcela, e a parcela maior é um dos caminhos pelos quais a carência pode causar o atraso.
+        acionou_sac: Registrado ao longo dos 12 meses e causado tanto pela carência quanto pelo atraso. Ajustar por ele cria uma associação falsa entre os dois.
+      indifferent: [ano_veiculo, cpf_par, id_contrato, renda_declarada, score_bureau]
+    note: >-
+      A paridade do CPF faz as vezes de sorteio: a comparação simples já dá o efeito. O erro
+      possível é ajustar pela parcela ou pelo SAC, que vêm depois da carência.
+
+  - id: pt_dissertacao_gestao_a_vista
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: professora de pós-graduação em administração (operações), orientadora, reescrevendo a seção de dados da dissertação de um orientando
+    theme: Operações (rede de laboratórios de análises clínicas)
+    title: Gestão à vista e tempo de liberação de laudos
+    treatment: gestao_a_vista
+    outcome: tat_2025s2_h
+    columns:
+      cod_unidade: Código da unidade de atendimento.
+      regional: Regional a que a unidade pertence (seis regionais).
+      volume_exames_2024: Volume médio mensal de exames realizados pela unidade em 2024.
+      tat_2024_h: Tempo médio entre a coleta e a liberação do laudo em 2024, em horas.
+      n_funcionarios: Quantidade de funcionários lotados na unidade em dezembro de 2024.
+      gestao_a_vista: Unidade implantou a gestão à vista no primeiro semestre de 2025 (1 = sim, 0 = não).
+      retrabalho_2025s2_pct: Percentual de exames recoletados ou reprocessados no segundo semestre de 2025.
+      tat_2025s2_h: Tempo médio entre a coleta e a liberação do laudo no segundo semestre de 2025, em horas.
+    not_in_table:
+      auditoria_2024: Resultado da auditoria interna de qualidade de 2024 (não conformidades apontadas). Classificado como confidencial pela empresa e não disponibilizado à pesquisa.
+    story: >-
+      3.2 Contexto empírico e dados
+
+      A pesquisa utiliza dados de uma rede de laboratórios de análises clínicas com 91
+      unidades de atendimento no Sul e no Sudeste, aqui denominada Empresa A. No primeiro
+      semestre de 2025, a Empresa A implantou em 38 unidades a prática de gestão à vista
+      (quadros de indicadores diários acompanhados de reuniões de quinze minutos no início de
+      cada turno), mantendo as demais 53 unidades na rotina anterior. O objetivo desta
+      dissertação é estimar o efeito da prática sobre o tempo médio de liberação de laudos no
+      segundo semestre de 2025.
+
+      A unidade de análise é a unidade de atendimento. As variáveis disponibilizadas pela
+      Empresa A constam do Quadro 3. Os resultados da auditoria interna de qualidade de 2024
+      foram solicitados, mas não foram disponibilizados, por serem classificados como
+      confidenciais pela companhia.
+
+      A seleção das unidades não foi aleatória. Segundo entrevista com a diretoria de
+      operações, a implantação seguiu uma ordem de regionais definida pela diretoria (as
+      regionais do interior paulista e do Paraná iniciaram) e, dentro de cada regional,
+      priorizaram-se as unidades de maior volume, as de maior tempo de liberação em 2024 e
+      aquelas com não conformidades apontadas na auditoria interna de 2024.
+
+      Cabe registrar o que a literatura e a própria Empresa A indicam sobre essas variáveis.
+      Unidades de maior volume tendem a apresentar tempos de liberação maiores, por gargalos
+      na triagem (Souza e Lima, 2019), e o tempo de liberação apresenta forte persistência de
+      um ano para o outro. Unidades com não conformidades em auditoria apresentam mais
+      retrabalho e tempos maiores, por falhas de processo que já se manifestavam em 2024,
+      quando essas unidades já figuravam entre as mais lentas. As regionais diferem na
+      logística de transporte de amostras ao núcleo técnico, o que afeta diretamente o tempo
+      de liberação. A quantidade de funcionários é considerada relevante para o tempo de
+      liberação, embora não tenha sido critério de seleção.
+
+      Por fim, o mecanismo esperado da gestão à vista (Oliveira, 2021) é a redução do
+      retrabalho pela identificação diária de falhas de coleta; o retrabalho, por sua vez,
+      alonga o tempo de liberação. A taxa de retrabalho utilizada refere-se ao segundo
+      semestre de 2025 e é, portanto, posterior à implantação.
+    edges:
+      - auditoria_2024 -> gestao_a_vista
+      - auditoria_2024 -> tat_2025s2_h
+      - auditoria_2024 -> retrabalho_2025s2_pct
+      - auditoria_2024 -> tat_2024_h
+      - regional -> gestao_a_vista
+      - regional -> tat_2025s2_h
+      - volume_exames_2024 -> gestao_a_vista
+      - volume_exames_2024 -> tat_2025s2_h
+      - tat_2024_h -> gestao_a_vista
+      - tat_2024_h -> tat_2025s2_h
+      - n_funcionarios -> tat_2025s2_h
+      - gestao_a_vista -> retrabalho_2025s2_pct
+      - retrabalho_2025s2_pct -> tat_2025s2_h
+      - gestao_a_vista -> tat_2025s2_h
+    answer:
+      identifiable: false
+      missing: [auditoria_2024]
+    note: >-
+      A auditoria de 2024 orientou a seleção e explica parte do tempo de liberação, e a
+      empresa não a entregou. O tempo de 2024 carrega parte disso, mas não tudo. O retrabalho
+      de 2025 é consequência da prática e não a substitui.
+
+  - id: pt_sindico_lixeiras_andar
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: síndico profissional, dono de uma pequena administradora com 38 condomínios na zona norte de São Paulo, mandando áudio para a analista da administradora
+    theme: Gestão condominial (coleta seletiva)
+    title: Lixeira de recicláveis por andar e quilos reciclados
+    treatment: lixeiras_andar
+    outcome: kg_2025_mes
+    columns:
+      cod_condominio: Código do condomínio na administradora.
+      n_unidades: Número de unidades autônomas do condomínio.
+      kg_2024_mes: Média mensal de recicláveis pesados pela cooperativa na retirada, em 2024, em kg.
+      lixeiras_andar: Tem lixeira de recicláveis em cada andar desde janeiro de 2025 (1 = sim, 0 = só o contêiner da garagem).
+      kg_2025_mes: Média mensal de recicláveis pesados pela cooperativa na retirada, de fevereiro a dezembro de 2025, em kg.
+      repasse_2025: Valor repassado pela cooperativa ao condomínio em 2025, em reais, calculado por quilo pesado.
+    story: >-
+      Bia, é rapidinho. A cooperativa mandou a pesagem de reciclável de todos os nossos prédios,
+      mês a mês, de 2024 e de 2025, e o valor que ela repassou pra cada condomínio em 2025, que
+      é por quilo. Em janeiro de 2025 a gente colocou lixeira de reciclável em cada andar em 15
+      prédios; nos outros 23 continua só o contêiner na garagem. Quero saber se a lixeira por
+      andar aumentou o reciclável, pra levar pros outros conselhos. Só lembra que a gente
+      escolheu os prédios grandes pra pôr por andar, porque na garagem deles virava uma
+      bagunça, e prédio grande obviamente gera mais quilo. Fora isso não teve critério nenhum.
+      Monta uma coisa pra mim até sexta? Valeu.
+    edges:
+      - n_unidades -> lixeiras_andar
+      - n_unidades -> kg_2025_mes
+      - n_unidades -> kg_2024_mes
+      - kg_2024_mes -> kg_2025_mes
+      - lixeiras_andar -> kg_2025_mes
+      - kg_2025_mes -> repasse_2025
+    answer:
+      identifiable: true
+      adjust_for: [n_unidades]
+      do_not_adjust_for:
+        repasse_2025: É calculado a partir dos quilos pesados em 2025; é o próprio resultado, em reais.
+      indifferent: [cod_condominio, kg_2024_mes]
+    note: >-
+      Caso curto. O tamanho do prédio decidiu quem recebeu as lixeiras e gera mais quilo; o
+      repasse é o resultado convertido em dinheiro. A pesagem de 2024 pode entrar ou não.
+
+  - id: pt_financeira_visita_confirmacao
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: analista de crédito de uma financeira de veículos usados, economista, secretariando o comitê de crédito e cobrança
+    theme: Crédito (financiamento de veículos)
+    title: Visita de confirmação de endereço e inadimplência
+    treatment: visita_confirmacao
+    outcome: atraso_90d_12m
+    columns:
+      cod_loja: Código da loja parceira que originou a proposta.
+      sem_comprovante_renda: Proposta aprovada sem comprovante de renda, com renda declarada (1 = sim, 0 = não).
+      entrada_pct: Valor da entrada como percentual do valor do veículo.
+      visita_confirmacao: Houve visita presencial de confirmação de endereço antes da liberação do contrato (1 = sim, 0 = não).
+      prazo_aprovacao_dias: Dias corridos entre a entrada da proposta e a liberação do contrato.
+      atraso_90d_12m: Teve alguma parcela com mais de 90 dias de atraso nos 12 primeiros meses do contrato (1 = sim, 0 = não).
+      score_cadastro: Score de bureau conforme consta hoje no cadastro do cliente, de 0 a 1000. O campo é sobrescrito a cada nova consulta ao bureau, e a cobrança consulta o bureau sempre que o contrato entra em atraso.
+    not_in_table:
+      score_na_proposta: Score de bureau na data da proposta, o que de fato prevê o atraso. O sistema sobrescreve o campo a cada consulta, e o valor original não foi preservado.
+    story: >-
+      ATA - COMITÊ DE CRÉDITO E COBRANÇA - REUNIÃO DE 2 DE OUTUBRO DE 2026
+
+      Presentes: Fábio (gerente de risco), Lucas (analista de crédito, secretário), Tatiane
+      (cobrança) e Sr. Almeida (comercial).
+
+      1. O Sr. Almeida reiterou a reclamação das lojas parceiras quanto ao prazo das propostas
+      com visita de confirmação de endereço e pediu a extinção da visita. Fábio propôs que,
+      antes de qualquer decisão, se meça se a visita reduz a inadimplência.
+
+      2. Lucas descreveu a regra em vigor desde 2023, que roda automaticamente na esteira, sem
+      interferência do analista: proposta sem comprovante de renda recebe visita sempre;
+      proposta originada em loja com índice histórico de perda acima de 8% recebe visita
+      sempre; nas demais, uma em cada cinco, escolhida pelo sistema. Observou que as lojas de
+      maior perda histórica continuam a trazer clientes que atrasam mais, e que proposta sem
+      comprovante também atrasa mais, com visita ou sem.
+
+      3. Tatiane lembrou que a visita acrescenta em média quatro dias à aprovação, o que é o
+      motivo da reclamação das lojas, e que entrada maior reduz o atraso, embora a entrada não
+      entre na regra da visita.
+
+      4. Lucas apresentou a base disponível (contratos de 2024 e 2025, uma linha por contrato):
+      código da loja de origem, indicador de proposta sem comprovante de renda, percentual de
+      entrada, indicador de visita realizada, prazo de aprovação em dias, indicador de atraso
+      superior a 90 dias nos 12 primeiros meses e o score de bureau do cadastro do cliente. O
+      dicionário de dados segue anexo à ata.
+
+      5. Deliberações: Lucas fará a análise e a apresentará na próxima reunião. O Sr. Almeida
+      pediu que o relatório indique com clareza o que está sendo comparado com o quê.
+    edges:
+      - cod_loja -> visita_confirmacao
+      - cod_loja -> atraso_90d_12m
+      - sem_comprovante_renda -> visita_confirmacao
+      - sem_comprovante_renda -> atraso_90d_12m
+      - entrada_pct -> atraso_90d_12m
+      - visita_confirmacao -> prazo_aprovacao_dias
+      - visita_confirmacao -> atraso_90d_12m
+      - atraso_90d_12m -> score_cadastro
+      - score_na_proposta -> atraso_90d_12m
+      - score_na_proposta -> score_cadastro
+    answer:
+      identifiable: true
+      adjust_for: [cod_loja, sem_comprovante_renda]
+      do_not_adjust_for:
+        score_cadastro: Foi sobrescrito depois; a cobrança consulta o bureau quando o contrato atrasa, então o valor guardado já carrega o atraso.
+      indifferent: [entrada_pct, prazo_aprovacao_dias]
+    note: >-
+      A regra da visita depende só da loja e do comprovante; o score original se perdeu, mas
+      não influenciou a visita, então não faz falta. O prazo de aprovação é consequência da
+      visita que não leva ao atraso: pode entrar ou não. O score atual veio depois do atraso.

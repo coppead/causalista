@@ -1,0 +1,542 @@
+# Simulated human-written cases for TRAINING, file en-11: eight cases in English (US, Canadian
+# and UK voices).
+#
+# Written by a large language model on 2026-10-07, in the role of a real person (the director of operations at a
+# US regional airline, the principal of a charter school network, a data analyst at a ride-hailing
+# company in Toronto, the director of a regional food bank network, a marketing manager at a
+# London fitness app) describing a dataset the way that person would in a quarterly report, an
+# internal wiki page, meeting notes, notes from a call with a consultant or a chat message.
+#
+# These cases are TRAINING material: the model answers them, the verifier grades the answer,
+# nothing else is shown to it. They deliberately avoid every scenario of the frozen test set in
+# cases/simulados/. The edges declare the causal diagram the text implies; the checker
+# (scripts/check_cases.py) recomputes every answer from the edges with the verifier.
+
+cases:
+
+  - id: en_airline_proactive_delay_text
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: director of operations at a US regional airline (about 60 aircraft, flying under a mainline partner's brand), writing the customer operations section of the Q2 report to the board
+    theme: Airline operations / delay communication
+    title: Proactive delay text sent when the two-hour estimate runs long
+    treatment: proactive_text
+    outcome: complaints_per_100
+    columns:
+      flight_key: Flight date and flight number, e.g. 2026-05-14_4471.
+      proactive_text: 1 if the ops desk sent passengers the proactive delay text (delay notice plus self-service rebooking link) before the delay was posted at the gate.
+      complaints_per_100: Customer relations complaints tied to the flight, received within 14 days of travel, per 100 passengers boarded.
+      est_delay_t2h: Departure delay estimate in minutes from the ops system at two hours before scheduled departure. The same number is shown to passengers in the app at that time.
+      actual_dep_delay: Actual departure delay in minutes (negative if early).
+      self_rebook_pct: Percent of booked passengers who moved themselves to another flight through the app or the link before scheduled departure.
+      cr_case_flag: 1 if a customer relations case is attached to the flight in the CRM. A case is created automatically whenever the desk sends a proactive text, and whenever a passenger complaint is filed.
+      aircraft_type: CRJ-700 or E175.
+      day_of_week: Monday through Sunday, local date of departure.
+    not_in_table:
+      desk_agent: Who was working the ops desk when the flight became eligible. Shift records are kept on paper at the SOC and were not joined to the table.
+    story: >-
+      4. Customer Operations
+
+      4.1 Proactive delay notifications. The proactive text (delay notice plus a self-service
+      rebooking link) completed its first full quarter. The desk sends it when the two-hour-out
+      estimate exceeds 30 minutes; 2,140 of the 2,860 eligible departures received one (75%).
+      Whether an eligible flight got the text depended mostly on who was on the desk: two of the
+      five desk agents send it on nearly every eligible flight and one rarely does. We are
+      addressing this with the SOC supervisor.
+
+      4.2 Early read. Complaints per 100 passengers ran 0.9 on flights that received the text
+      against 1.4 on those that did not. Self-service rebooking before departure reached 11% of
+      passengers on texted flights, against 3% on untexted ones, and we believe this is where
+      most of the benefit comes from: a passenger who has already moved to the 6:10 does not
+      write to us about the 4:35. We flag, though, that the two-hour estimate drives both whether
+      a text goes out and how the day turns out. Long estimates become long actual delays, and
+      the same estimate appears in the app, where a 90-minute number on its own generates letters
+      before anyone has boarded.
+
+      4.3 The E175s continue to run lower complaint rates than the CRJ-700s, mostly bag-related.
+
+      4.4 The Board asked for a defensible estimate of what the text itself does to complaints,
+      flight for flight, before we commit to the mainline partner's notification platform
+      ($180k/yr). The flight-level table (one row per Q2 departure, columns below) is attached.
+    edges:
+      - desk_agent -> proactive_text
+      - est_delay_t2h -> proactive_text
+      - est_delay_t2h -> actual_dep_delay
+      - est_delay_t2h -> complaints_per_100
+      - est_delay_t2h -> self_rebook_pct
+      - actual_dep_delay -> complaints_per_100
+      - proactive_text -> self_rebook_pct
+      - self_rebook_pct -> complaints_per_100
+      - proactive_text -> complaints_per_100
+      - proactive_text -> cr_case_flag
+      - complaints_per_100 -> cr_case_flag
+      - aircraft_type -> complaints_per_100
+    answer:
+      identifiable: true
+      adjust_for: [est_delay_t2h]
+      do_not_adjust_for:
+        self_rebook_pct: Rose because of the text and is how the text prevents complaints. Adjusting for it removes most of the effect being measured.
+        cr_case_flag: Created in the CRM both when a text goes out and when a complaint comes in. Adjusting for it ties the two together artificially.
+      indifferent: [actual_dep_delay, aircraft_type, day_of_week, flight_key]
+    note: >-
+      The two-hour estimate decides eligibility and also drives the actual delay and the
+      complaints directly (passengers see it). Who was on the desk only moved the text. The traps
+      are the self-rebooking rate the director is proud of and the CRM flag, whose double origin
+      is stated only in the dictionary.
+
+  - id: en_charter_restorative_conference
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: executive principal of a charter school network of seven campuses in San Antonio, former math teacher, writing up her own notes after a call with the data consultant the board hired
+    theme: K-12 education / school discipline
+    title: Restorative conference instead of suspension and repeat referrals
+    treatment: restorative_conf
+    outcome: repeat_90d
+    columns:
+      incident_id: Network incident number.
+      restorative_conf: 1 if the dean's response was a restorative conference (student, dean, the person harmed, usually a parent), 0 if a one- to three-day out-of-school suspension.
+      repeat_90d: 1 if the same student had another Level 2 or Level 3 referral within 90 calendar days of the incident.
+      incident_level: 2 or 3 on the network Code of Conduct. Level 1 is handled in class and is not in this table; Level 4 goes to expulsion review.
+      prior_referrals_sy: Number of Level 2 or 3 referrals for the student earlier in the same school year.
+      grade_band: MS (grades 5 to 8) or HS (grades 9 to 12).
+      counselor_checkins: Counselor check-ins with the student logged in the 90 days after the incident.
+      parent_meeting: 1 if a parent or guardian meeting about the student was logged in the 90 days after the incident, for any reason.
+    story: >-
+      Call w/ Marcus (the data consultant Jen hired), Thu 10/1, about 40 min. My notes.
+
+      - He wants to use the referral table from PowerSchool, one row per Level 2/3 incident last
+      school year, all seven campuses. About 1,900 rows.
+
+      - Explained how deans decide. Nothing formal. Level 2 almost always gets a conference now;
+      Level 3 is more of a coin toss, and Level 3 kids come back more often whatever we do. A kid
+      on their third referral of the year is getting suspended, period, and those are the kids
+      who keep showing up in the office. First-timers get the conference.
+
+      - He asked whether the campuses differ. They do. The two high schools went all-in on
+      restorative in 2024 and the middle schools are still halfway there. Also middle school kids
+      repeat way more, that is just 7th grade.
+
+      - The conference ends with a plan and the plan puts the counselor on a check-in schedule, so
+      conference kids see the counselor three or four times in the next couple of months and
+      suspended kids basically don't. The counselors are convinced that is what keeps kids from
+      coming back. Marcus wrote that down.
+
+      - Parent meetings. I told him the dean meets the parent after every conference, that is part
+      of the protocol. He asked if that is the only time. No, a second referral triggers a
+      mandatory parent meeting at every campus, whatever the first response was. He asked twice.
+
+      - What I need from him: does the conference actually cut repeat referrals, or do the deans
+      just give conferences to the kids who weren't coming back anyway? Board meets Nov 12.
+
+      - He is sending a list of what to pull. Ask Rosa for the Level 3 definitions doc.
+    edges:
+      - incident_level -> restorative_conf
+      - incident_level -> repeat_90d
+      - prior_referrals_sy -> restorative_conf
+      - prior_referrals_sy -> repeat_90d
+      - grade_band -> restorative_conf
+      - grade_band -> repeat_90d
+      - restorative_conf -> counselor_checkins
+      - counselor_checkins -> repeat_90d
+      - restorative_conf -> repeat_90d
+      - restorative_conf -> parent_meeting
+      - repeat_90d -> parent_meeting
+    answer:
+      identifiable: true
+      adjust_for: [grade_band, incident_level, prior_referrals_sy]
+      do_not_adjust_for:
+        counselor_checkins: Scheduled by the conference plan and the main way the conference keeps students from coming back. Adjusting for it hides that part of the effect.
+        parent_meeting: Held after every conference and after every second referral. Adjusting for it links the conference and the repeat referral artificially.
+      indifferent: [incident_id]
+    note: >-
+      Three things decided who got a conference (level, prior referrals, grade band) and all three
+      drive repeats on their own. The check-ins are a consequence of the conference; the parent
+      meeting follows both the conference and the repeat referral.
+
+  - id: en_rh_driver_priority_line
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: data analyst on the marketplace team of a ride-hailing company in Toronto, documenting a dataset on the team wiki before anyone uses it in a deck
+    theme: Ride-hailing / driver support
+    title: Phone support pilot for drivers nominated by their account managers
+    treatment: phone_support
+    outcome: weekly_hours_aug
+    columns:
+      driver_id: Hashed driver id.
+      phone_support: 1 if the driver was enrolled in the Priority Line pilot (phone support, 7am to 11pm, in place of in-app chat) on July 6, 2026.
+      weekly_hours_aug: Mean weekly hours online, Aug 3 to Aug 30, 2026. Zero if the driver had no sessions.
+      tenure_months: Months since the driver's first completed trip, as of July 6, 2026.
+      tickets_q2: Support tickets opened by the driver, April through June 2026.
+      ticket_resolution_h: Median hours to resolution for tickets the driver opened between July 6 and Aug 30, 2026. Null if none.
+      city_zone: Home zone from the driver profile. DOWNTOWN, MIDTOWN, SCARBOROUGH, ETOBICOKE, NORTH_YORK or 905.
+      vehicle_year: Model year of the registered vehicle, self-reported.
+    not_in_table:
+      am_risk_read: The account managers' own read of which drivers were about to quit, from their check-in calls. Kept in each AM's personal spreadsheet and never loaded to the warehouse.
+    story: >-
+      Dataset: driver_priority_line_pilot_2026q3. Owner: Marketplace Analytics (Nadia). Last
+      edited Sept 9, 2026. Status: draft, do not cite yet.
+
+      Purpose. One row per active Toronto driver as of July 6 (n = 14,802). Built to answer the
+      Driver Ops question of whether the Priority Line (phone support, 7am to 11pm, in place of
+      in-app chat) keeps drivers on the road. The pilot ran July 6 to Aug 30.
+
+      How drivers got into the pilot. Driver Ops asked the four account managers to nominate
+      drivers for the 1,500 slots. The written guidance was "drivers with heavy support usage in
+      Q2 and newer drivers who are still finding their feet". In practice the AMs nominated from
+      their own check-in call notes, which is where they track who sounds like they're about to
+      pack it in. Those notes live in each AM's personal Google Sheet and are not in the
+      warehouse; we asked, and they would rather not share them. Keep this in mind when reading
+      the numbers: an AM who thinks a driver is halfway out the door is usually right about it.
+
+      Columns. See the table below. tickets_q2 and tenure_months are as of the enrolment date;
+      both were part of the guidance, and both track hours on their own (drivers who open a lot
+      of tickets are the frustrated ones, and new drivers put in fewer hours until they learn the
+      city). ticket_resolution_h covers tickets opened during the pilot window. It is where the
+      pilot showed up most clearly (median 4 h on the phone vs 31 h on chat), and drivers whose
+      tickets drag on tend to go quiet for a week or two, which is why Driver Ops cares about it.
+
+      Known issues. weekly_hours_aug is zero for 611 drivers who had no sessions in August; that
+      is the point of the metric, do not filter them out. vehicle_year is self-reported and
+      nobody has cleaned it. city_zone matters for hours (905 drivers run longer shifts) but had
+      nothing to do with nominations.
+
+      Headline so far: 22.4 h/week for pilot drivers vs 19.1 h for the rest. Before this goes in a
+      deck, someone should decide what that comparison has to account for, and whether it can be
+      made fair at all with what is in the warehouse.
+    edges:
+      - am_risk_read -> phone_support
+      - am_risk_read -> weekly_hours_aug
+      - tenure_months -> phone_support
+      - tenure_months -> weekly_hours_aug
+      - tickets_q2 -> phone_support
+      - tickets_q2 -> weekly_hours_aug
+      - phone_support -> ticket_resolution_h
+      - ticket_resolution_h -> weekly_hours_aug
+      - phone_support -> weekly_hours_aug
+      - city_zone -> weekly_hours_aug
+    answer:
+      identifiable: false
+      missing: [am_risk_read]
+    note: >-
+      Tenure and Q2 tickets are recorded and could be adjusted for, but the account managers also
+      nominated from their own read of who was about to quit, which lives in their spreadsheets
+      and predicts hours on its own. Resolution time is a result of the pilot.
+
+  - id: en_rh_pin_verify
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: data analyst at a ride-hailing company in Toronto, messaging a teammate before replying to the safety lead
+    theme: Ride-hailing / rider safety feature
+    title: PIN verification at pickup, on for half the riders on the newest app
+    treatment: pin_verify
+    outcome: wrong_car_per_100
+    columns:
+      rider_id: Hashed rider id.
+      pin_verify: 1 if PIN verification at pickup was on for the rider for all of July 2026. Shipped in rider app 9.4 behind a server flag set for roughly half of 9.4 riders by hashed id; always off below 9.4.
+      wrong_car_per_100: Reports of "got into the wrong car" or "driver picked up the wrong rider" filed by the rider, per 100 completed trips in July 2026.
+      app_major_version: Major version of the rider app on the rider's first trip in July 2026 (9.2, 9.3 or 9.4).
+      trips_q2: Completed trips, April through June 2026.
+      city: TORONTO, MISSISSAUGA, BRAMPTON, VAUGHAN or MARKHAM.
+    story: >-
+      hey, before I answer Priya on the PIN thing. wrong-car reports are 0.19 per 100 trips for
+      riders who have it vs 0.31 for riders who don't, she wants that in the safety update. the
+      catch is who has it. it shipped with 9.4 and Dev turned it on for about half the 9.4 riders
+      by hashed id (they swear it's random), nobody below 9.4 has it. and 9.2/9.3 riders are a
+      different crowd, they're the once-a-month people, the regulars update the day it drops and
+      regulars mostly know which car is theirs by now. plus on 9.2 the report flow is buried under
+      Help > Trip issues > Other, I'm not sure a 9.2 rider even finds it. I have one row per rider
+      for July with version, Q2 trips, city and the rate. what do I compare against what?
+    edges:
+      - trips_q2 -> app_major_version
+      - app_major_version -> pin_verify
+      - app_major_version -> wrong_car_per_100
+      - trips_q2 -> wrong_car_per_100
+      - pin_verify -> wrong_car_per_100
+    answer:
+      identifiable: true
+      adjust_for: [app_major_version]
+      indifferent: [city, rider_id, trips_q2]
+    note: >-
+      Random within version 9.4, but the version itself decides eligibility and changes how
+      easily a report gets filed, and frequent riders both update sooner and make fewer mistakes.
+      Adjusting for the app version is enough; Q2 trips may go in or out.
+
+  - id: en_foodbank_cooler_picked
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: executive director of a regional food bank network in western Pennsylvania (about 200 partner pantries), notes taken by a board member at the program committee
+    theme: Food bank network / cold storage grants
+    title: Cooler grants to the pantries the program director picked
+    twin: en_foodbank_cooler_lottery
+    treatment: cooler_grant
+    outcome: fresh_lbs_per_visit
+    columns:
+      agency_id: Partner agency number in the Agency Portal.
+      cooler_grant: 1 if the pantry received a two-door commercial cooler or freezer through the 2025 Cold Chain grant (all units installed by December 2025).
+      fresh_lbs_per_visit: Pounds of produce, dairy, eggs and frozen meat distributed per household visit, January through June 2026, from the pantries' monthly reports.
+      visits_2024: Household visits reported by the pantry in calendar 2024.
+      county_type: URBAN (Allegheny), SUBURBAN or RURAL, by the pantry's county.
+      produce_orders_pct: Share of the pantry's order lines placed in the Agency Portal, January through June 2026, that were produce, dairy or frozen.
+      temp_log_filed: 1 if the pantry filed at least one cold-storage incident form (temperature excursion or discarded product) between January and June 2026. Grant pantries must file the form with their monthly temperature log; any pantry files one when product is thrown out.
+      years_partner: Years as a partner agency.
+    not_in_table:
+      coordinator_readiness: Maria's read, from site visits, of how organized each pantry coordinator is and whether they would keep a cooler stocked and plugged in. Never written down.
+    story: >-
+      Program Committee, Tuesday Sept 15, 2026. Notes by K. Osei. Present: D. Reyes (chair),
+      Fr. Tom Walsh, L. Whitaker, Maria Santos (programs), Keith Osei.
+
+      3. Cold Chain grant, first six months
+
+      Maria walked us through the numbers. 60 of the 140 pantries that applied got a cooler or
+      freezer last year (Walmart Foundation money, about $4,200 per unit installed). Table is one
+      row per applicant pantry, 140 rows. Grant pantries moved 9.8 lb of fresh per household
+      visit Jan through Jun against 6.1 at the others.
+
+      Maria's point is that the grant pantries now order differently: fresh went from a quarter
+      of their order lines to over half, and what they order is what goes out the door. Fr. Tom
+      asked how the 60 were chosen. Maria said she went through the 140 applications with her own
+      sense from site visits of which coordinators would actually keep the thing plugged in and
+      stocked, and leaned toward the higher-volume pantries and the rural counties. None of that
+      is written down, it was her call. Fr. Tom noted that the organized coordinators were
+      already the ones moving produce before any cooler arrived. Maria agreed.
+
+      Lydia reminded us the rural pantries get the refrigerated truck once a week at most and the
+      big pantries get it twice, so fresh per visit was always going to look different by county
+      and by size.
+
+      Incident forms: 44 filed, most from grant pantries. Maria said that is partly because the
+      form is required with their monthly temp log, and partly because a pantry handling a lot of
+      fresh throws some of it out.
+
+      Action: Dave asked for a proper estimate, before it goes to the full board, of what the
+      coolers themselves did for fresh pounds per visit. Keith to work it up with the agency table
+      for the October meeting.
+    edges:
+      - coordinator_readiness -> cooler_grant
+      - coordinator_readiness -> fresh_lbs_per_visit
+      - visits_2024 -> cooler_grant
+      - visits_2024 -> fresh_lbs_per_visit
+      - county_type -> cooler_grant
+      - county_type -> fresh_lbs_per_visit
+      - cooler_grant -> produce_orders_pct
+      - produce_orders_pct -> fresh_lbs_per_visit
+      - cooler_grant -> fresh_lbs_per_visit
+      - cooler_grant -> temp_log_filed
+      - fresh_lbs_per_visit -> temp_log_filed
+    answer:
+      identifiable: false
+      missing: [coordinator_readiness]
+    note: >-
+      Size and county are recorded and could be adjusted for, but the program director also went
+      by her read of the coordinators, which is in nobody's table and drives fresh pounds on its
+      own. The ordering mix is a result of the cooler; the incident form follows both the grant
+      and the volume of fresh handled.
+
+  - id: en_foodbank_cooler_lottery
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: executive director of a regional food bank network in western Pennsylvania (about 200 partner pantries), notes taken by a board member at the program committee
+    theme: Food bank network / cold storage grants
+    title: Cooler grants drawn by lot, with slots held for rural counties
+    twin: en_foodbank_cooler_picked
+    treatment: cooler_grant
+    outcome: fresh_lbs_per_visit
+    columns:
+      agency_id: Partner agency number in the Agency Portal.
+      cooler_grant: 1 if the pantry received a two-door commercial cooler or freezer through the 2025 Cold Chain grant (all units installed by December 2025).
+      fresh_lbs_per_visit: Pounds of produce, dairy, eggs and frozen meat distributed per household visit, January through June 2026, from the pantries' monthly reports.
+      visits_2024: Household visits reported by the pantry in calendar 2024.
+      county_type: URBAN (Allegheny), SUBURBAN or RURAL, by the pantry's county.
+      produce_orders_pct: Share of the pantry's order lines placed in the Agency Portal, January through June 2026, that were produce, dairy or frozen.
+      temp_log_filed: 1 if the pantry filed at least one cold-storage incident form (temperature excursion or discarded product) between January and June 2026. Grant pantries must file the form with their monthly temperature log; any pantry files one when product is thrown out.
+      years_partner: Years as a partner agency.
+    not_in_table:
+      coordinator_readiness: Maria's read, from site visits, of how organized each pantry coordinator is and whether they would keep a cooler stocked and plugged in. Never written down.
+    story: >-
+      Program Committee, Tuesday Sept 15, 2026. Notes by K. Osei. Present: D. Reyes (chair),
+      Fr. Tom Walsh, L. Whitaker, Maria Santos (programs), Keith Osei.
+
+      3. Cold Chain grant, first six months
+
+      Maria walked us through the numbers. 60 of the 140 pantries that applied got a cooler or
+      freezer last year (Walmart Foundation money, about $4,200 per unit installed). Table is one
+      row per applicant pantry, 140 rows. Grant pantries moved 9.8 lb of fresh per household
+      visit Jan through Jun against 6.1 at the others.
+
+      Maria's point is that the grant pantries now order differently: fresh went from a quarter
+      of their order lines to over half, and what they order is what goes out the door. Fr. Tom
+      asked how the 60 were chosen. Maria said that with 140 applications for 60 units they drew
+      names at the June 2025 board meeting, 20 slots held for the rural applicants because so few
+      of them had applied, the other 40 drawn from the urban and suburban applicants. A couple of
+      her favorite coordinators lost out and one she worries about got a freezer. Fr. Tom noted
+      that the organized coordinators were already the ones moving produce before any cooler
+      arrived. Maria agreed, and said she could name them from site visits but none of that is
+      written down anywhere.
+
+      Lydia reminded us the rural pantries get the refrigerated truck once a week at most and the
+      big pantries get it twice, so fresh per visit was always going to look different by county
+      and by size.
+
+      Incident forms: 44 filed, most from grant pantries. Maria said that is partly because the
+      form is required with their monthly temp log, and partly because a pantry handling a lot of
+      fresh throws some of it out.
+
+      Action: Dave asked for a proper estimate, before it goes to the full board, of what the
+      coolers themselves did for fresh pounds per visit. Keith to work it up with the agency table
+      for the October meeting.
+    edges:
+      - coordinator_readiness -> fresh_lbs_per_visit
+      - visits_2024 -> fresh_lbs_per_visit
+      - county_type -> cooler_grant
+      - county_type -> fresh_lbs_per_visit
+      - cooler_grant -> produce_orders_pct
+      - produce_orders_pct -> fresh_lbs_per_visit
+      - cooler_grant -> fresh_lbs_per_visit
+      - cooler_grant -> temp_log_filed
+      - fresh_lbs_per_visit -> temp_log_filed
+    answer:
+      identifiable: true
+      adjust_for: [county_type]
+      do_not_adjust_for:
+        produce_orders_pct: Changed because of the cooler and is how the cooler puts more fresh food on the table. Adjusting for it removes the effect being measured.
+        temp_log_filed: Filed because the grant requires it and because a pantry moving a lot of fresh discards some. Adjusting for it ties the grant to the outcome artificially.
+      indifferent: [agency_id, visits_2024, years_partner]
+    note: >-
+      Same notes as the twin, with a draw in place of the program director's choice. The draw was
+      not even across counties (rural slots were held), so county must still be adjusted for;
+      size and coordinator quality drive fresh pounds but had nothing to do with who won a unit.
+
+  - id: en_fitapp_save_offer
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: marketing manager at a London fitness app with about two million users, messaging the analyst on her team before a meeting with the head of growth
+    theme: Consumer software / subscription retention
+    title: Half-price save offer made by retention agents during the cancellation chat
+    treatment: save_offer_shown
+    outcome: active_d90
+    columns:
+      user_id: Internal user id.
+      save_offer_shown: 1 if the retention agent offered the user three months at half price during the cancellation chat in May 2026.
+      active_d90: 1 if the user had an active subscription 90 days after the cancellation chat.
+      tenure_months: Months subscribed at the time of the cancellation chat.
+      workouts_30d: Workouts logged in the 30 days before the cancellation chat.
+      offer_accepted: 1 if the user took the offer (0 for everyone who was not offered it).
+      winback_email: 1 if the user received the win-back email. Sent 30 days after cancellation to anyone who left, and as a follow-up to everyone who was made the offer, whether they left or stayed.
+      agent_id: Retention agent who handled the chat (one of 11).
+    not_in_table:
+      agent_read: What the agent made of the conversation, i.e. whether the person sounded like they could be talked round. Not recorded anywhere; there is no field for why an offer was or was not made.
+    story: >-
+      Tom, quick one before my 3pm with Rachel. The save offer: of the ~9k people who went
+      through the cancellation chat in May, about 40% were offered the three-months-half-price,
+      and 90 days on 46% of them are still subscribed vs 18% of the ones who weren't offered it.
+      Rachel wants to call that a 28-point lift and tell the agents to offer it to everyone.
+
+      Thing is, right now the offer is the agent's call. They have tenure and last-30-days
+      workouts up on the screen and they do use them (nobody offers it to someone who hasn't
+      opened the app in a month), but mostly it's how the conversation goes, whether the person
+      sounds like they can be talked round. There's no field for that, we only know who got the
+      offer. And the agents are good at reading people, the ones they think are on the fence
+      mostly are. Some agents offer a lot more than others, but I don't think that matters
+      beyond who gets it.
+
+      About a third of the people offered accepted, and the ones who accepted are nearly all
+      still with us, which is the whole point. The win-back email went to the usual leavers at
+      day 30 and we also sent it to everyone who'd been made the offer, it's in the export.
+
+      Can I say anything honest about the lift with what we've got? Need an answer by Thursday.
+    edges:
+      - agent_read -> save_offer_shown
+      - agent_read -> active_d90
+      - tenure_months -> save_offer_shown
+      - tenure_months -> active_d90
+      - workouts_30d -> save_offer_shown
+      - workouts_30d -> active_d90
+      - agent_id -> save_offer_shown
+      - save_offer_shown -> offer_accepted
+      - offer_accepted -> active_d90
+      - save_offer_shown -> active_d90
+      - save_offer_shown -> winback_email
+      - active_d90 -> winback_email
+    answer:
+      identifiable: false
+      missing: [agent_read]
+    note: >-
+      Tenure and recent workouts are recorded, but the agent also went by how the conversation
+      sounded, which is in no column and predicts staying on its own. The agent only moves the
+      offer. Acceptance is a result of the offer; the win-back email follows both the offer and
+      the outcome.
+
+  - id: en_fitapp_free_month
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: marketing manager at a London fitness app, writing up her notes after a call with a freelance analytics consultant
+    theme: Consumer software / free trial of a paid tier
+    title: Free month of Premium at day 30 and paid status at month 4
+    treatment: free_month
+    outcome: paid_at_m4
+    columns:
+      user_id: Internal user id.
+      free_month: 1 if the user was granted a free month of Premium at the end of their first 30 days (March 2026 sign-up cohort).
+      paid_at_m4: 1 if the user was on a paid plan at the start of month 4 after sign-up.
+      workouts_first_30d: Workouts logged in the first 30 days after sign-up.
+      workouts_m2: Workouts logged in days 31 to 60 after sign-up.
+      support_ticket_first_30d: 1 if the user opened a support ticket in their first 30 days (billing, bugs, anything).
+      price_tier: Monthly price band for the user's country. A (12 to 14 in local currency), B (8 to 11), C (under 8).
+    story: >-
+      Notes from call with Hannah (the consultant Priya used at her last place), Tues 6 Oct.
+
+      Context I gave her: the March cohort, about 31k sign-ups on the free tier. We gave a free
+      month of Premium at day 30 to anyone who'd logged 10 or more workouts in their first month,
+      that was the "reward the keen ones" idea. Paid at month 4: 23% for free-month users vs 9%
+      for everyone else. I'd like to tell leadership the free month works.
+
+      Hannah's questions and what I said. Was 10 workouts the only way in? No. Customer care also
+      hands out free months to people who write in during the first month, mostly billing errors
+      and the Android sync bug. A few hundred of those. People who had to write to us in their
+      first month are, let's say, not our most loyal. Did anything else decide it? Not that I know
+      of. She asked when exactly each workouts column was measured; I said it's in the data
+      dictionary. She asked about price. We price by country, three bands, and the cheap-band
+      countries convert better. Nothing to do with who got the free month.
+
+      She also said the keen ones were always going to convert more, free month or not, and I
+      said yes, that's why we gave it to them, which she found funny.
+
+      Her view: answerable from what we have if we're careful about which columns go in. She'll
+      send a note. Table is one row per March sign-up, columns as in the export.
+    edges:
+      - workouts_first_30d -> free_month
+      - workouts_first_30d -> paid_at_m4
+      - workouts_first_30d -> workouts_m2
+      - support_ticket_first_30d -> free_month
+      - support_ticket_first_30d -> paid_at_m4
+      - free_month -> workouts_m2
+      - workouts_m2 -> paid_at_m4
+      - free_month -> paid_at_m4
+      - price_tier -> paid_at_m4
+    answer:
+      identifiable: true
+      adjust_for: [support_ticket_first_30d, workouts_first_30d]
+      do_not_adjust_for:
+        workouts_m2: Logged after the free month was granted and lifted by it; it is part of how the free month leads to paying. Adjusting for it hides that part of the effect.
+      indifferent: [price_tier, user_id]
+    note: >-
+      Two routes into the free month (workouts in month one, a support ticket), both recorded and
+      both tied to converting. The trap is the second workouts column, which looks like the first
+      but, by the dictionary, was measured after the free month began. Price only drives
+      conversion.

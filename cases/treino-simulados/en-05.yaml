@@ -1,0 +1,489 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-05, oito casos em inglês
+# (vozes dos EUA e do Reino Unido).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (chefe de treinamento de um
+# operador logístico, gerente de uma livraria universitária, diretor de uma liga esportiva
+# juvenil, analista de uma financeira de crédito imobiliário, diretor de operações de uma
+# companhia aérea regional) descrevendo um conjunto de dados do jeito que essa pessoa
+# escreveria: post em fórum, notas de reunião, notas de uma ligação com um consultor,
+# mensagem de Slack, memorando de uma página.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_3pl_load_right
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: head of training at a UK third-party logistics firm (about 2,100 warehouse colleagues across nine distribution centres in the Midlands and the North), writing to the operations director, no statistics training
+    theme: Logistics / warehouse training
+    title: Load Right course for the loaders the DC managers picked
+    treatment: load_right
+    outcome: claims_q3
+    columns:
+      load_right: 1 if the colleague completed the two-day Load Right course between 7 April and 30 May 2025.
+      claims_q3: Number of customer damage claims logged Jul-Sep 2025 traced to a trailer the colleague loaded (loader id taken from the dispatch note).
+      claims_q1: Same count for Jan-Mar 2025.
+      tenure_months: Months from start date to 1 April 2025.
+      night_shift: 1 if the colleague's rostered pattern for 2025 was nights. Patterns are fixed for the calendar year in the March roster.
+      pallets_q3: Pallets dispatched against the colleague's id, Jul-Sep 2025.
+      dc_code: Site code (B01, B02, L03, ...).
+    not_in_table:
+      manager_view: What the DC manager made of the colleague's care on the dock. The reason most often given for a nomination; never written down.
+    story: >-
+      MEMO. To: Operations Director. From: Head of Training. Date: 14 October 2025. Re: Load Right
+      and the Q3 claims figures, what we can and cannot say. Summary. 212 colleagues across the
+      nine DCs completed Load Right (two days: pallet build, wrap tension, trailer load plan)
+      between 7 April and 30 May, cost c. £41k including backfill. Q3 damage claims traced back to
+      those 212 came out at 0.9 per loader against 1.6 for everyone else on the dock. I would love
+      to put that in the board pack as it stands. I don't think we can, and I'd rather set out why
+      now than have Finance do it for us in November. How names were chosen. Each DC manager gave
+      me 20 to 30 names whatever the size of the site, so B01 with 410 heads put forward a far
+      smaller share than L03 with 140. I have since been round all nine and asked how they picked. Every one of
+      them started from the Q1 claims list, which is fair. Most leaned towards the newer starters,
+      and that is who we built the course for, new starters do have more claims. And every single
+      manager said some version of "and the ones I've been meaning to have a word with", meaning
+      the colleagues they watch on the dock every day and wouldn't trust with a mixed pallet. That
+      judgement is not written down anywhere, it lives in the manager's head, and those colleagues
+      would have had more claims in Q3 with or without us. If anything it cuts against the course,
+      but it is still a thumb on the scale. Shifts. The course ran 9 to 5, so the nights pattern
+      was hard to release and far fewer nights colleagues went. Nights also run higher on claims,
+      they always have, less supervision and the tail end of the inbound. What else is in the
+      extract from Analytics: tenure at 1 April, pallets dispatched against each colleague's id in
+      Q3 (more pallets, more claims, obviously), the site code (B02 has the fragile FMCG contract
+      and runs higher on claims whatever we do) and the Q1 claims count. Ask. Can Analytics tell
+      me how much of the 0.9 vs 1.6 is the course and how much is who got picked? And if the
+      honest answer is that this extract cannot settle it, I would rather say so in the pack than
+      have it taken apart in the room.
+    edges:
+      - manager_view -> load_right
+      - manager_view -> claims_q3
+      - manager_view -> claims_q1
+      - claims_q1 -> load_right
+      - tenure_months -> load_right
+      - tenure_months -> claims_q3
+      - night_shift -> load_right
+      - night_shift -> claims_q3
+      - pallets_q3 -> claims_q3
+      - dc_code -> load_right
+      - dc_code -> claims_q3
+      - load_right -> claims_q3
+    answer:
+      identifiable: false
+      missing: [manager_view]
+    note: >-
+      Three of the four reasons a name went on the list are in the extract (Q1 claims, tenure,
+      shift). The fourth, the manager's own read of who is careless, is not, and no column stands
+      in for it. The memo even says the bias runs against the course; it is still a bias.
+
+  - id: en_bookstore_buyback_card
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: manager of an independent university bookstore (state university of about 16,000 students, Mountain West), posting on a college stores association member forum, no analyst on staff
+    theme: Retail / university bookstore
+    title: Buyback Promise card handed to every other customer
+    treatment: promise_card
+    outcome: sold_back_dec
+    columns:
+      promise_card: 1 if the customer was handed a Buyback Promise card with their receipt during rush week, Aug 18-24, 2025.
+      sold_back_dec: 1 if the customer sold back at least one title at the Dec 8-13 buyback.
+      rush_spend: Dollar total of the rush-week transaction before tax.
+      class_year: Freshman, sophomore, junior, senior or grad, from the student ID scan.
+      alert_signup: 1 if the customer signed up for buyback text alerts by Nov 30, through the QR code (printed on the card and on the store website).
+      dec_survey: 1 if the customer answered the December customer survey.
+      register_no: Register where the rush-week transaction was rung, 1 to 6.
+    story: >-
+      Subject: Did our Buyback Promise card actually move sellback? (and how would I know). Hi
+      all, independent store, ~16k students, no data person, so be gentle. We tried something
+      during August rush and I'd love a sanity check. The card: wallet-size "Buyback Promise" with
+      our guaranteed December minimum for the three biggest gen-ed titles and a QR code to sign up
+      for buyback text alerts. Because I wanted to be able to compare afterwards, I told the six
+      cashiers to hand one to every other customer, period, no judgment calls, one yes one no
+      down the line. They grumbled but the receipts show close to 50/50 at every register. What I
+      see: alert signups went way up among the card customers (the QR did its job), and alert
+      signups come back to sell at a much higher rate, we knew that from last year. Sellback
+      among card customers was 31% vs 24% for the rest. Our GM wants to print 20,000 more cards
+      for January. Things that nag me: 1) freshmen sell back at a much higher rate than anybody,
+      they don't keep anything; 2) a bigger August basket obviously means more to sell back in
+      December; 3) we emailed a customer survey in December to everyone who got a card and to
+      everyone who came through the buyback line, and a colleague at another store told me to
+      "control for survey response" since it's in the file. That felt off but I can't say why.
+      What I have per customer: card y/n, sold back y/n, August basket $, class year, alert
+      signup, survey answered, register number. Does the every-other-customer thing mean I can
+      just compare the two groups, or do I need to slice by some of this first? Thanks in
+      advance, happy to share the spreadsheet with anyone who wants to look.
+    edges:
+      - promise_card -> alert_signup
+      - alert_signup -> sold_back_dec
+      - promise_card -> sold_back_dec
+      - rush_spend -> sold_back_dec
+      - class_year -> sold_back_dec
+      - promise_card -> dec_survey
+      - sold_back_dec -> dec_survey
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        alert_signup: Signing up came after the card and because of it, and it is the main way the card brings people back in December. It is part of the effect being measured.
+        dec_survey: Answered in December, after the buyback, by people who got a card and by people who sold back. Adjusting for it creates a false link between the card and selling back.
+      indifferent: [class_year, register_no, rush_spend]
+    note: >-
+      Every other customer is as good as a draw, so the plain comparison is already right. The
+      traps are the alert-signup KPI the manager is proud of, which is the mechanism, and the
+      survey a colleague told her to control for, which was sent to both groups after the fact.
+
+  - id: en_youth_soccer_signup
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: executive director of a youth soccer league (about 3,200 players and 240 volunteer head coaches, suburban county in New Jersey), typing up notes after an intro call with a consultant who will look at the league's data
+    theme: Youth sports / volunteer coaching
+    title: Positive Sideline workshop, open sign-up
+    twin: en_youth_soccer_assigned
+    treatment: sideline_workshop
+    outcome: reg_spring_pct
+    columns:
+      sideline_workshop: 1 if the team's head coach completed the Positive Sideline workshop (3 hours, August 2025) before the fall season.
+      reg_spring_pct: Percent of the team's fall 2025 roster registered for spring 2026 by the Jan 31 deadline.
+      first_year_coach: 1 if fall 2025 was the head coach's first season with the league.
+      ref_reports_fall24: Referee incident reports filed against the team's sideline in fall 2024. 0 if the coach did not coach in fall 2024.
+      age_group: U8, U10, U12 or U14.
+      plan_app_sessions: Number of practice plans the coach opened in the league's practice-plan app during the fall 2025 season.
+      team_id: Team identifier.
+    not_in_table:
+      coach_engagement: How plugged-in the coach is, the kind who reads the newsletter and shows up to the coaches meeting. Nothing in the registration system captures it.
+    story: >-
+      Notes from call w/ Priya (consultant), Oct 6, 2025, 45 min. On the call: me, Dana
+      (volunteer coordinator). Background I gave her: Positive Sideline workshop, 3 hrs, ran four
+      Saturdays in August at the high school, 71 of our 240 head coaches took it, $6,800 with the
+      facilitator. Spring registration closes Jan 31 and the board wants to know if it's worth
+      running again. How coaches ended up in it: it was open sign-up. First-year coaches mostly
+      took it because they have to do three hours of something anyway. Dana emailed every coach
+      who had a ref report against their sideline last fall and leaned on them, and most of
+      those signed up too. The rest were, in Dana's words, "the coaches who sign up for
+      everything", the ones who read the newsletter and show up to the coaches meeting. Those are
+      also the coaches whose teams come back every year, we have known that forever, but there is
+      nothing in the system that captures it. Priya asked twice if there was a column for that.
+      There isn't. Things Priya asked about: first-year coaches' teams come back at maybe 60% vs
+      80% for the rest, that's just how it is. Teams with a ref report lose kids, parents don't
+      re-up with a screaming sideline. U14 falls off a cliff regardless, that's travel soccer and
+      high school taking them. The workshop walks coaches through the practice-plan app and app
+      use went way up in that group; coaches who actually run the plans run better practices and
+      the kids come back. Priya is sending a data request, per team: workshop y/n, % of fall
+      roster registered for spring, first-year flag, ref reports fall '24, age group, app
+      sessions, team id. She'll tell us what she needs to adjust for and whether the data can
+      answer the question at all. Next call Oct 20.
+    edges:
+      - coach_engagement -> sideline_workshop
+      - coach_engagement -> reg_spring_pct
+      - first_year_coach -> sideline_workshop
+      - first_year_coach -> reg_spring_pct
+      - first_year_coach -> ref_reports_fall24
+      - ref_reports_fall24 -> sideline_workshop
+      - ref_reports_fall24 -> reg_spring_pct
+      - age_group -> reg_spring_pct
+      - sideline_workshop -> plan_app_sessions
+      - plan_app_sessions -> reg_spring_pct
+      - sideline_workshop -> reg_spring_pct
+    answer:
+      identifiable: false
+      missing: [coach_engagement]
+    note: >-
+      Two of the three reasons a coach signed up are columns. The third, being the kind of coach
+      who signs up for everything, also keeps kids coming back and is not recorded. Twin of the
+      case where Dana assigned the workshop strictly from the two lists.
+
+  - id: en_youth_soccer_assigned
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: executive director of a youth soccer league (about 3,200 players and 240 volunteer head coaches, suburban county in New Jersey), typing up notes after an intro call with a consultant who will look at the league's data
+    theme: Youth sports / volunteer coaching
+    title: Positive Sideline workshop, assigned from two lists
+    twin: en_youth_soccer_signup
+    treatment: sideline_workshop
+    outcome: reg_spring_pct
+    columns:
+      sideline_workshop: 1 if the team's head coach completed the Positive Sideline workshop (3 hours, August 2025) before the fall season.
+      reg_spring_pct: Percent of the team's fall 2025 roster registered for spring 2026 by the Jan 31 deadline.
+      first_year_coach: 1 if fall 2025 was the head coach's first season with the league.
+      ref_reports_fall24: Referee incident reports filed against the team's sideline in fall 2024. 0 if the coach did not coach in fall 2024.
+      age_group: U8, U10, U12 or U14.
+      plan_app_sessions: Number of practice plans the coach opened in the league's practice-plan app during the fall 2025 season.
+      team_id: Team identifier.
+    story: >-
+      Notes from call w/ Priya (consultant), Oct 6, 2025, 45 min. On the call: me, Dana
+      (volunteer coordinator). Background I gave her: Positive Sideline workshop, 3 hrs, ran four
+      Saturdays in August at the high school, 71 of our 240 head coaches took it, $6,800 with the
+      facilitator. Spring registration closes Jan 31 and the board wants to know if it's worth
+      running again. How coaches ended up in it: Dana assigned it. Every first-year coach and
+      every coach who had a ref report against their sideline last fall was told to be there,
+      nobody else. A handful of other coaches asked to come and she told them next season, so it
+      was strictly the two lists. Priya asked twice whether anything else went into who was in
+      the room. Dana says no, and I believe her, she kept the list in the registration system.
+      Things Priya asked about: first-year coaches' teams come back at maybe 60% vs 80% for the
+      rest, that's just how it is. Teams with a ref report lose kids, parents don't re-up with a
+      screaming sideline. U14 falls off a cliff regardless, that's travel soccer and high school
+      taking them. The workshop walks coaches through the practice-plan app and app use went way
+      up in that group; coaches who actually run the plans run better practices and the kids come
+      back. Priya is sending a data request, per team: workshop y/n, % of fall roster registered
+      for spring, first-year flag, ref reports fall '24, age group, app sessions, team id. She'll
+      tell us what she needs to adjust for and whether the data can answer the question at all.
+      Next call Oct 20.
+    edges:
+      - first_year_coach -> sideline_workshop
+      - first_year_coach -> reg_spring_pct
+      - first_year_coach -> ref_reports_fall24
+      - ref_reports_fall24 -> sideline_workshop
+      - ref_reports_fall24 -> reg_spring_pct
+      - age_group -> reg_spring_pct
+      - sideline_workshop -> plan_app_sessions
+      - plan_app_sessions -> reg_spring_pct
+      - sideline_workshop -> reg_spring_pct
+    answer:
+      identifiable: true
+      adjust_for: [first_year_coach, ref_reports_fall24]
+      do_not_adjust_for:
+        plan_app_sessions: Counted during the fall season and pushed up by the workshop. Running the plans is how the workshop keeps kids coming back, so it is part of the effect being measured.
+      indifferent: [age_group, team_id]
+    note: >-
+      One fact changed from the twin: the workshop was assigned strictly from the first-year list
+      and the ref-report list, both in the table. The app-usage KPI is the mechanism and stays out.
+
+  - id: en_mortgage_escrow_cushion
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: analyst on the servicing analytics team at a mid-size nonbank mortgage servicer (about 300,000 loans), messaging the VP of servicing
+    theme: Mortgage servicing / escrow
+    title: 24-month escrow cushion applied by a dollar threshold
+    treatment: cushion_24m
+    outcome: dq60_12m
+    columns:
+      cushion_24m: 1 if the Feb 2025 escrow analysis spread the shortage over 24 months instead of the standard 12.
+      dq60_12m: 1 if the loan was 60 or more days past due at any month-end from Apr 2025 through Mar 2026.
+      shortage_amt: Escrow shortage in dollars at the Feb 2025 analysis.
+      fico_orig: Borrower FICO at origination.
+      autopay_mar25: 1 if the loan was on ACH autopay as of Mar 31, 2025, the month after the cushion letters went out.
+      hardship_contact: 1 if any inbound or outbound contact with the hardship team is logged on the loan through Mar 31, 2026.
+    story: >-
+      @Marcus re the 24-month cushion review. recap so we're aligned: in the Feb analysis the
+      system automatically spread the shortage over 24 months for every loan with a shortage over
+      $600 and left the standard 12 for everyone under, nobody in ops touched the list, I checked
+      the exception log and it's empty. dq60 through March is 4.1% on the cushion loans vs 3.3% on
+      the rest, which looks bad until you remember the cushion loans are the ones whose payment
+      jumped the most, a $1,400 shortage is a payment shock on its own, cushion or not. two more
+      things. the cushion letter had the autopay insert and ACH enrollment is way up in that group,
+      and autopay loans almost never go 60, that's a real thing the cushion did. and the letter
+      also printed the hardship line number, so we got a wave of calls from cushion borrowers who
+      didn't understand the new payment, on top of the normal 45-day outreach we do to anyone
+      who's late. FICO is in the pull because Risk always wants it, it had nothing to do with the
+      rule, though sure, weaker FICO goes late more. tell me which of those to put in the model
+      and which to leave out and I'll have a number by Thursday.
+    edges:
+      - shortage_amt -> cushion_24m
+      - shortage_amt -> dq60_12m
+      - cushion_24m -> autopay_mar25
+      - autopay_mar25 -> dq60_12m
+      - cushion_24m -> dq60_12m
+      - fico_orig -> dq60_12m
+      - cushion_24m -> hardship_contact
+      - dq60_12m -> hardship_contact
+    answer:
+      identifiable: true
+      adjust_for: [shortage_amt]
+      do_not_adjust_for:
+        autopay_mar25: Enrollment came after the cushion letter and because of it, and autopay is one way the cushion keeps loans current. It is part of the effect being measured.
+        hardship_contact: Logged through March 2026, driven by the cushion letter and by going late. Adjusting for it creates a false link between the cushion and delinquency.
+      indifferent: [fico_orig]
+    note: >-
+      The rule was a dollar threshold with no human in the loop, so the shortage amount is the
+      only thing that drove the cushion, and it also drives the payment shock. Autopay is the
+      mechanism and the hardship contact comes after both.
+
+  - id: en_mortgage_upfront_uw
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: analyst in origination analytics at a retail mortgage lender (about 2,400 purchase applications a month across 60 branches), writing to the SVP of origination
+    theme: Mortgage origination / process
+    title: Upfront underwriting by division and by rush rule, with a survey sent after closing
+    treatment: upfront_uw
+    outcome: closed_on_time
+    columns:
+      upfront_uw: 1 if the application received upfront underwriting (underwriter review within 48 hours of application, before the appraisal is ordered). Purchase applications dated May 1 to Aug 31, 2025.
+      closed_on_time: 1 if the loan funded on or before the contract closing date. 0 if it funded late or did not fund.
+      division: Southeast, Northeast, Central or West.
+      days_to_contract: Days from application date to the contract closing date.
+      loan_program: Conventional, FHA, VA or USDA.
+      fico: Representative credit score at application.
+      appraisal_order_day: Business days from application to appraisal order.
+      borrower_nps: Likelihood-to-recommend score, 0 to 10, from the borrower survey sent two weeks after the contract closing date, whether or not the loan funded.
+      app_id: Application number.
+    story: >-
+      MEMORANDUM. To: SVP, Origination. From: Origination Analytics. Date: October 9, 2025. Re:
+      Upfront underwriting pilot and on-time closing. Background. From May 1 through August 31,
+      upfront underwriting was applied to two groups of purchase applications: every purchase
+      application in the Southeast division, where the pilot was based, and, in all four
+      divisions, any purchase application whose contract closing date fell within 30 days of the
+      application date, the "rush" rule. Branches had no say in it; the LOS set the flag from the
+      division code and the contract date. 11,460 purchase applications in the window, 4,212 with
+      upfront UW. Headline. 81% of upfront-UW files funded on or before the contract date against
+      74% of the rest. Two cautions on the comparison. The Southeast closes faster than anyone
+      regardless of process, title and attorney turn times there are roughly half what we see in
+      the Northeast, so a division that was always going to do well is over-represented in the
+      pilot. In the other direction, the rush rule put our tightest timelines into the pilot, and
+      a 21-day contract misses its date far more often than a 45-day one however we underwrite
+      it. Program type matters for timing as well, FHA and VA run longer, but it played no part in
+      who received upfront UW; the same goes for credit score, which is in the file because it
+      always is, and weaker files do take longer to clear conditions. Two supporting metrics the
+      regional managers have asked to see in the model. Appraisal order timing moved exactly as
+      designed, from a median of 6 business days to 2, and an early appraisal is the single
+      biggest reason a file funds on time; the managers want it in "so we compare like with
+      like". Borrower NPS is up 9 points on upfront-UW files and they want it in as a control for
+      borrower experience (a missed closing date is the surest route to a 2, so the two are not
+      independent). I have not added either yet and would like direction before I do.
+      Request. Approval to report the on-time effect of upfront UW with the adjustments the
+      comparison needs, and nothing added for optics.
+    edges:
+      - division -> upfront_uw
+      - division -> closed_on_time
+      - days_to_contract -> upfront_uw
+      - days_to_contract -> closed_on_time
+      - loan_program -> closed_on_time
+      - fico -> closed_on_time
+      - upfront_uw -> appraisal_order_day
+      - appraisal_order_day -> closed_on_time
+      - upfront_uw -> closed_on_time
+      - upfront_uw -> borrower_nps
+      - closed_on_time -> borrower_nps
+    answer:
+      identifiable: true
+      adjust_for: [days_to_contract, division]
+      do_not_adjust_for:
+        appraisal_order_day: Set by the process after the flag and brought forward by upfront UW. It is the main way upfront UW gets a file funded on time, so it is part of the effect being measured.
+        borrower_nps: Collected two weeks after the contract closing date and driven by both the early underwriter contact and whether the loan closed on time. Adjusting for it creates a false link between the two.
+      indifferent: [app_id, fico, loan_program]
+    note: >-
+      Both assignment rules (division, contract timing) also move on-time closing. The appraisal
+      KPI is the mechanism. The survey timing is only in the column dictionary; the memo never
+      says when it was sent.
+
+  - id: en_airline_ron_tech
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: director of operations at a US regional airline (about 45 aircraft, flying for a mainline partner), notes taken by the ops coordinator at the weekly ops review
+    theme: Airline maintenance / outstations
+    title: Overnight line techs at the stations the maintenance director picked
+    treatment: ron_tech
+    outcome: first_dep_mx_delay_pct
+    columns:
+      ron_tech: 1 if a line maintenance technician has been based overnight at the station since Jun 1, 2025. Station level, the 22 stations where aircraft overnight.
+      first_dep_mx_delay_pct: Percent of the station's first departures of the day, Jul-Sep 2025, delayed 15 min or more with a maintenance delay code.
+      mx_delay_pct_q1: Same measure, Jan-Mar 2025.
+      partner_mx_onsite: 1 if the mainline partner has maintenance staff of its own based at the station.
+      ron_aircraft: Number of our aircraft scheduled to overnight at the station in the summer 2025 schedule.
+      open_mels_avg: Average number of open deferred maintenance items on the station's overnighting aircraft at 05:00 local, Jul-Sep 2025.
+      mx_control_review: 1 if the station was on Maintenance Control's October review call. The call covered every station with an overnight tech and every station above 6% on first-departure maintenance delays in Q3.
+      station_code: IATA station code.
+    story: >-
+      Weekly Ops Review, Oct 7, 2025. Notes: T. Vang. Present: Dir. Ops, Dir. Maintenance (R.),
+      Maintenance Control, Analytics (S.). Item 2, overnight line techs at outstations. Recap from
+      R.: since Jun 1 a line tech has been based overnight at 9 of the 22 stations where we
+      overnight aircraft. Placement was R.'s call. He started with the stations with the worst
+      first-departure maintenance delay rate in Q1, which are still our problem children, same
+      tails, same ground power issues, and he put techs where the partner has no maintenance
+      presence of its own, because at the partner stations their people will quietly help us out
+      at 5am and our morning numbers there have always been better. Stations with fewer than
+      three overnighting aircraft were not considered; R. will not put a head where there is one
+      airplane. Maintenance Control: open deferred items on the overnighting aircraft at 5am are
+      down a lot where there is a tech, they clear them overnight instead of carrying them, and an
+      airplane carrying open deferrals is the one that goes late in the morning. Analytics: the
+      October review flag is in the station extract, see the dictionary for who was on the call.
+      Dir. Ops: wants the effect of the tech on first-departure maintenance delays, station level,
+      Q3, with the adjustments it needs and not one more, for the budget ask for six more heads;
+      if 22 stations cannot carry an answer, say so. Also wants to know if the open-deferrals
+      number belongs in the model or in a separate slide. ACTION (S.): deliver by Oct 17. Item 3, winter ops, deferred to next week.
+    edges:
+      - mx_delay_pct_q1 -> ron_tech
+      - mx_delay_pct_q1 -> first_dep_mx_delay_pct
+      - partner_mx_onsite -> ron_tech
+      - partner_mx_onsite -> first_dep_mx_delay_pct
+      - ron_aircraft -> ron_tech
+      - ron_tech -> open_mels_avg
+      - open_mels_avg -> first_dep_mx_delay_pct
+      - ron_tech -> first_dep_mx_delay_pct
+      - ron_tech -> mx_control_review
+      - first_dep_mx_delay_pct -> mx_control_review
+    answer:
+      identifiable: true
+      adjust_for: [mx_delay_pct_q1, partner_mx_onsite]
+      do_not_adjust_for:
+        open_mels_avg: Measured each morning after the tech was in place and brought down by the tech. Clearing deferrals overnight is how the tech prevents morning delays, so it is part of the effect being measured.
+        mx_control_review: Decided in October from who had a tech and who came in above 6%. Adjusting for it creates a false link between the tech and the delay rate.
+      indifferent: [ron_aircraft, station_code]
+    note: >-
+      Both reasons R. picked a station (Q1 record, no partner maintenance) still drive morning
+      delays. The three-aircraft threshold only drove placement. Who was on the October call is
+      stated only in the column dictionary.
+
+  - id: en_airline_inhouse_ramp
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: director of operations at a US regional airline (about 45 aircraft, flying for a mainline partner), messaging the analytics lead, no statistics background
+    theme: Airline ground handling
+    title: Ramp brought in-house at the stations the partner's scorecard pointed to
+    treatment: inhouse_ramp
+    outcome: mishandled_per_1k_q3
+    columns:
+      inhouse_ramp: 1 if ramp handling at the station was brought in-house (our own employees instead of the contracted handler) effective Apr 1, 2025.
+      mishandled_per_1k_q3: Mishandled bags per 1,000 enplaned passengers at the station, Jul-Sep 2025.
+      mishandled_per_1k_q1: Same, Jan-Mar 2025.
+      contract_end_2025: 1 if the station's ground handling contract expired in 2025.
+      partner_review_oct: 1 if the station was on the partner's October station review.
+    not_in_table:
+      partner_scorecard: The mainline partner's monthly station grade, built from their audits and complaint data with some of our numbers mixed in. Arrives as a PDF; not in any of our tables.
+    story: >-
+      @Jules the in-house ramp number for the board deck. we took ramp in-house at 6 of the 14
+      stations whose handler contract was up this year, effective April. the 6 came off the
+      partner's scorecard, the stations they had us at C or D, plus a look at our own Q1
+      mishandles, which tell you most of what Q3 will look like anyway. the scorecard is their
+      audits and complaint data with some of our numbers mixed in, it lands in my inbox as a PDF
+      once a month and I don't have it as a column. a station they grade badly is bad at the
+      basics and that doesn't fix itself in a quarter. Q3 mishandles per 1,000 look better at the
+      in-house six than at the eight that stayed with the handler. the partner also put all six
+      plus any station over 8 per 1,000 on their October station review, that flag is in the
+      extract. real number on in-house vs handler? and does the scorecard not being in the data
+      matter?
+    edges:
+      - partner_scorecard -> inhouse_ramp
+      - partner_scorecard -> mishandled_per_1k_q3
+      - mishandled_per_1k_q1 -> partner_scorecard
+      - mishandled_per_1k_q1 -> inhouse_ramp
+      - mishandled_per_1k_q1 -> mishandled_per_1k_q3
+      - contract_end_2025 -> inhouse_ramp
+      - inhouse_ramp -> mishandled_per_1k_q3
+      - inhouse_ramp -> partner_review_oct
+      - mishandled_per_1k_q3 -> partner_review_oct
+    answer:
+      identifiable: false
+      missing: [partner_scorecard]
+    note: >-
+      The Q1 mishandle rate is in the table, but the scorecard that drove the choice also carries
+      the partner's audits and complaints, which keep driving mishandles and are only in a PDF.
+      The October review flag is a trap on top, decided after the quarter from both sides.

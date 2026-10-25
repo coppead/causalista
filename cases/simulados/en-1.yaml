@@ -1,0 +1,496 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Simulated human-written cases, file en-1: eight cases in English (US, UK and Canadian voices).
+#
+# Written by a large language model on 2026-10-06, in the role of a real person (a growth lead, a bank analyst,
+# a school district administrator, a nonprofit director, an HR business partner) describing a
+# dataset the way that person would in a Slack message, an e-mail, a memo, a forum post or call
+# notes. The project could not get people to write these in time; they stand in for the
+# human-written test of section 7 of the specification.
+#
+# These cases are a TEST. They are frozen before any model answers them and are never used
+# for training. The edges declare the causal diagram the text implies; the checker
+# (scripts/check_cases.py) recomputes every answer from the edges with the verifier.
+
+cases:
+
+  - id: en_saas_onboarding_call
+    author: ai
+    status: aprovado
+    language: en
+    style: Slack message
+    persona: growth lead at a US B2B SaaS startup of about 40 people, no statistics background
+    theme: Software / customer onboarding
+    title: Live onboarding call and 90-day retention
+    treatment: onboarding_call
+    outcome: retained_90d
+    columns:
+      onboarding_call: 1 if the account had the live 45-minute onboarding call with a CSM during its first week after signup, 0 otherwise.
+      retained_90d: 1 if the account was still on a paid plan on day 90 after signup.
+      plan_tier: Plan at signup (Starter, Team or Business).
+      seats_at_signup: Number of seats purchased at signup.
+      wau_month1: Average weekly active users in the account during its first 30 days.
+      case_study_flag: 1 if the account carries the "case study candidate" flag in HubSpot. Set by CSMs or Marketing at any time.
+      account_id: Internal account identifier (HubSpot record id).
+    not_in_table:
+      csm_fit_read: The CSM's own read on whether a new account was worth the time. Never written down anywhere.
+    story: >-
+      hey Priya, before Thursday's board deck can you pull a real number on the onboarding
+      calls? quick context since you joined after it started: from Q2 the CSMs began offering
+      new signups a 45-min live onboarding call in week one. they picked who got offered, and
+      when I asked Dev how, the answer was basically "the accounts that felt like they'd stick"
+      (that's not a field anywhere, it's in his head, and to be fair his gut is usually
+      right). they also skewed hard toward Business tier and bigger seat counts, which retain
+      better regardless. the stat Marco keeps quoting is that month-1 WAU is ~2x on called
+      accounts, and we all know month-1 WAU is the best predictor of an account being alive at
+      day 90. one warning: ignore the case-study flag, the CSMs tick it on every account they
+      onboard because they're hopeful, and marketing ticks it on anything still alive and
+      paying at day 90. so: is there a defensible "the call moved retention by X" in there,
+      or are we quoting the WAU thing again?
+    edges:
+      - csm_fit_read -> onboarding_call
+      - csm_fit_read -> retained_90d
+      - plan_tier -> onboarding_call
+      - plan_tier -> retained_90d
+      - seats_at_signup -> onboarding_call
+      - seats_at_signup -> retained_90d
+      - seats_at_signup -> wau_month1
+      - onboarding_call -> wau_month1
+      - wau_month1 -> retained_90d
+      - onboarding_call -> retained_90d
+      - onboarding_call -> case_study_flag
+      - retained_90d -> case_study_flag
+    answer:
+      identifiable: false
+      missing: [csm_fit_read]
+    note: >-
+      Plan tier and seats are recorded and can be adjusted for, but the CSMs also picked on a
+      gut read that is informative about retention and lives nowhere in the data. The WAU
+      number everyone quotes is a consequence of the call.
+
+  - id: en_bank_money_health_check
+    author: ai
+    status: aprovado
+    language: en
+    style: e-mail to the data team
+    persona: analyst in the retail insight team of a UK high-street bank, comfortable with dashboards, not with modelling
+    theme: Banking / financial wellbeing
+    title: Money Health Check and missed direct debits
+    treatment: health_check
+    outcome: missed_dd_6m
+    columns:
+      health_check: 1 if the customer attended a Money Health Check appointment in branch between 12 January and 27 February 2026.
+      missed_dd_6m: 1 if at least one direct debit or standing order on the current account was returned unpaid between 1 March and 31 August 2026.
+      od_days_q4: Number of days the account was within its arranged overdraft between 1 October and 31 December 2025.
+      age: Customer age in whole years at 1 January 2026.
+      region: Region of the customer's home branch (NW, NE, Midlands, London, SW, Scotland, Wales).
+      app_logins_6m: Number of mobile app logins between 1 March and 31 August 2026.
+      contacts_6m: Count of outbound contacts logged against the account between 1 March and 31 August 2026. The Health Check team's three-month follow-up calls and Collections' calls about returned payments share this field.
+      acct_open_dow: Day of the week the current account was opened (1 = Monday).
+    not_in_table:
+      adviser_slot: Whether the branch had a Money Health Check adviser slot free in the fortnight after the customer was invited. Not recorded.
+    story: >-
+      Subject: Money Health Check, can we get a proper read before the Q3 steering group?
+      Hi both, hoping you can help with the Health Check evaluation, as the deck I inherited
+      from Tom just compares attendees with everyone else and I don't think that will survive
+      the steering group. Quick recap of how it actually ran. Branches sent invitations to
+      customers who had spent 20 or more days in their arranged overdraft during Q4, the idea
+      being that these are the customers heading for trouble, and the North West did the bulk
+      of the inviting because that is where the pilot was staffed. Whether an invited customer
+      actually got seen then came down to an adviser having a free slot that fortnight, which
+      nobody wrote down anywhere, so please don't ask me for it. Uptake was much higher among
+      the over-55s, which is also the cohort that hardly ever has a direct debit bounce, so I
+      suspect that is flattering the numbers on its own. The part everyone in Retail is excited
+      about: attendees set up app alerts during the appointment and their app logins over the
+      following six months are roughly double. We know from the 2024 work that customers who
+      check the app regularly bounce far fewer payments, so presumably that is a big part of
+      how the Health Check does its job, if it does one. I have attached the data dictionary
+      for the extract Tom used; it has a couple of fields I would not have thought to include,
+      so please sanity-check those. Could you let me know what you would adjust for, and
+      whether the data we have is enough to say anything at all? Happy to jump on a call.
+      Thanks, Hannah
+    edges:
+      - od_days_q4 -> health_check
+      - od_days_q4 -> missed_dd_6m
+      - age -> health_check
+      - age -> missed_dd_6m
+      - region -> health_check
+      - adviser_slot -> health_check
+      - health_check -> app_logins_6m
+      - app_logins_6m -> missed_dd_6m
+      - health_check -> missed_dd_6m
+      - health_check -> contacts_6m
+      - missed_dd_6m -> contacts_6m
+    answer:
+      identifiable: true
+      adjust_for: [age, od_days_q4]
+      do_not_adjust_for:
+        app_logins_6m: Measured after the appointment and driven by it. It is part of the effect the bank wants to measure.
+        contacts_6m: Logged after the fact for attendees (three-month follow-up call) and for anyone whose payment was returned (Collections). Only the dictionary says so. Adjusting for it manufactures a link between the Health Check and missed payments.
+      indifferent: [region, acct_open_dow]
+    note: >-
+      Two recorded reasons for attending (overdraft days and age) both drive missed payments.
+      The region and the unrecorded adviser slot only decided who was seen; the app logins are
+      the proud KPI and a consequence of the appointment. The contacts field is a trap that the
+      story never mentions: only its dictionary entry reveals it.
+
+  - id: en_nonprofit_thank_you_calls
+    author: ai
+    status: aprovado
+    language: en
+    style: e-mail to the data team
+    persona: executive director of a small Ontario nonprofit, writing to the volunteer who runs the donor database
+    theme: Nonprofit / donor stewardship
+    title: Board thank-you calls and donor renewal
+    treatment: thank_you_call
+    outcome: renewed_2026
+    columns:
+      thank_you_call: 1 if the donor received a thank-you phone call from a board member within a week of their November or December 2025 gift.
+      renewed_2026: 1 if the donor made another gift between 1 January and 30 June 2026.
+      gift_amount_2025: Amount of the November/December 2025 gift, in CAD.
+      years_donating: Number of calendar years before 2025 in which the donor gave at least once.
+      gift_channel: How the 2025 gift arrived (online, cheque or e-transfer).
+      newsletter_opens_h1: Number of monthly e-newsletters the donor opened between January and June 2026, from the mailing platform.
+      survey_2026: 1 if the donor completed the July 2026 donor survey.
+    story: >-
+      Subject: thank-you calls, did they work? Hi Farah, thanks again for keeping the database
+      alive this year, I know it has been a lot. So Margaret and I did the thank-you calls during
+      the year-end campaign like we promised the board in November. Confession: we did not call
+      everyone. We printed the gift list in the order the gifts came in and called every second
+      name, because between the two of us we only had time for half. About 180 calls in the end,
+      most under five minutes. What I would love to know for the AGM is whether the people we
+      called gave again by June. A couple of things I noticed that may or may not matter: the
+      people we called open the newsletter a lot more (Mailchimp says roughly twice the open
+      rate), and I have always believed the newsletter is what brings people back in the spring.
+      Also the big gifts and the long-time donors renew no matter what we do, and cheque donors
+      are more loyal than online ones, which you have shown me before. One thing I would ask you
+      to leave out: the July survey. We nudged everyone we had called to fill it in, and the
+      people who had just given again were obviously keen to tell us how great we are, so I don't
+      think it says anything about the calls. Can you tell me whether the calls made a difference
+      and how you would compare the two groups? If the answer is "no difference" I would rather
+      know before it goes in the AGM slides. Warmly, Donna
+    edges:
+      - thank_you_call -> renewed_2026
+      - thank_you_call -> newsletter_opens_h1
+      - newsletter_opens_h1 -> renewed_2026
+      - thank_you_call -> survey_2026
+      - renewed_2026 -> survey_2026
+      - gift_amount_2025 -> renewed_2026
+      - years_donating -> renewed_2026
+      - gift_channel -> renewed_2026
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        newsletter_opens_h1: Happens after the call and is driven by it. It is one of the ways the call brings donors back.
+        survey_2026: Filled in after the fact by the people who were called and by the people who renewed. Adjusting for it manufactures a link between the call and renewing.
+      indifferent: [gift_amount_2025, years_donating, gift_channel]
+    note: >-
+      Calling every second name on a list ordered by arrival time is as good as a draw, so the
+      plain comparison is already right. The trap is adjusting for the newsletter opens, which
+      the director is proud of, or for the survey.
+
+  - id: en_school_bus_trackers
+    author: ai
+    status: aprovado
+    language: en
+    style: forum post
+    persona: director of operations for a school district in northeast Ohio, posting on a K-12 transportation forum
+    theme: School transportation / logistics
+    title: GPS bus trackers and late arrivals
+    treatment: tracker
+    outcome: late_pct_2526
+    columns:
+      tracker: 1 if the route ran with the GPS tracker and parent app for the whole 2025-26 school year.
+      late_pct_2526: Percentage of school-day mornings in 2025-26 on which the route's last drop-off was after the first bell.
+      late_pct_2425: Same measure for the 2024-25 school year.
+      route_miles: Scheduled one-way length of the morning run, in miles.
+      stops: Number of scheduled stops on the morning run.
+      driver_years: Years of driving experience of the regular driver assigned to the route at the start of 2025-26.
+      complaints_2526: Number of parent complaints (calls and e-mails) logged against the route by the transportation office during 2025-26.
+    story: >-
+      Did GPS trackers actually help your on-time numbers? Trying to do the math on ours.
+      District of about 4,800 students in NE Ohio, 41 routes. We put trackers (the usual box plus
+      the parent app) on 17 routes last August. We didn't have the budget for all 41, so we
+      started with the long rural runs out to the townships, since that is where the bus is late
+      most often (and the phone rings most about it), and with the routes that had the worst
+      on-time numbers in 24-25. The same routes tend to be late year after year, trackers or not, so I'm
+      not expecting miracles. The rest got nothing yet. Our board is thrilled that complaints
+      dropped on the tracker routes. I'm less convinced that means anything, because parents who
+      can see the bus on their phone don't call to ask where it is, and parents whose bus is late
+      do call, so the complaints number is kind of its own thing. The other thing that jumps out
+      of the spreadsheet is driver experience: our newer drivers are late more, every year,
+      whatever the route. We have the stop counts in there too, more stops obviously means a
+      slower run. What I want to know is whether the tracker itself got buses to school on time,
+      not whether the long routes are late (we know they are). Anyone done this properly? What
+      did you control for? Our data person is on maternity leave until January so I'm doing this
+      in Excel myself, God help me.
+    edges:
+      - route_miles -> tracker
+      - route_miles -> late_pct_2526
+      - late_pct_2425 -> tracker
+      - late_pct_2425 -> late_pct_2526
+      - driver_years -> late_pct_2526
+      - stops -> late_pct_2526
+      - tracker -> late_pct_2526
+      - tracker -> complaints_2526
+      - late_pct_2526 -> complaints_2526
+    answer:
+      identifiable: true
+      adjust_for: [late_pct_2425, route_miles]
+      do_not_adjust_for:
+        complaints_2526: Logged during the year by parents reacting to late buses, and reduced by the app itself. Adjusting for it manufactures a link between the tracker and being late.
+      indifferent: [driver_years, stops]
+    note: >-
+      Both reasons a route got a tracker (length and last year's record) also make it late this
+      year. Complaints are the board's favourite number and the one column to keep out.
+
+  - id: en_hr_mentor_match_by_review
+    author: ai
+    status: aprovado
+    language: en
+    style: one-page memo
+    persona: HR business partner at a US manufacturing company with three plants and about 1,400 hourly employees
+    theme: HR / retention
+    title: Mentor Match and 12-month attrition, nominated by review score and tenure
+    twin: en_hr_mentor_match_by_worry
+    treatment: mentor_match
+    outcome: left_12m
+    columns:
+      mentor_match: 1 if the employee was in the Mentor Match cohort that launched on February 2, 2026.
+      left_12m: 1 if the employee voluntarily separated within 12 months of the launch.
+      review_2025: Annual performance review score for the 2025 cycle (1 to 5), finalized December 2025.
+      tenure_months: Months of service at February 2, 2026.
+      shift: Shift assignment at launch (1 = first, 2 = second, 3 = third).
+      cert_12m: 1 if the employee earned a skills certification (CNC, welding, forklift, etc.) in the 12 months after launch.
+      payroll_adj_12m: 1 if any off-cycle payroll adjustment was processed for the employee in the 12 months after launch.
+      clock_no: Employee clock number.
+    story: >-
+      MEMORANDUM. To: Carla Reyes, VP Operations. From: Jason Whitfield, HR Business Partner,
+      Plants 1-3. Date: October 6, 2026. Re: Mentor Match, what the 12-month numbers can and
+      cannot tell us. Background. Mentor Match paired 212 hourly production employees with a
+      senior mentor for monthly one-hour meetings over the year that started February 2, 2026.
+      The cohort came from a rule, not from a judgment call: everyone with a 2025 review score
+      of 4 or 5 and more than two years of service, on the theory that these were the people we
+      could least afford to lose. That came to 212 names. What we are seeing. Voluntary
+      attrition in the cohort over the twelve months was 11%, against 23% for the rest of the
+      hourly population. Before this goes on a slide, two things. First, high scorers and
+      long-tenured employees have always left at lower rates than everyone else, which is part
+      of why we picked them, so the raw gap flatters the program. Second, third shift turns
+      over faster than the other two, as it does every year, and I would like Analytics to tell
+      me whether that matters here. A result I believe is real. 61% of the cohort earned a
+      skills certification during the year (CNC, welding, forklift), against 18% of
+      non-participants. The mentors push hard for it, and certified employees are noticeably
+      more likely to stay with us. I read that as part of how the program works, but Analytics
+      should tell me if it changes how the comparison is done. Data caveat. The off-cycle
+      payroll adjustment flag is no use here: it fires for the monthly Mentor Match stipend,
+      which mentees get as well as mentors, and it fires for every final paycheck. Ask. An
+      attrition estimate that accounts for how people were selected, before the November budget
+      review. Happy to walk Analytics through the selection rule.
+    edges:
+      - review_2025 -> mentor_match
+      - review_2025 -> left_12m
+      - tenure_months -> mentor_match
+      - tenure_months -> left_12m
+      - shift -> left_12m
+      - mentor_match -> cert_12m
+      - cert_12m -> left_12m
+      - mentor_match -> left_12m
+      - mentor_match -> payroll_adj_12m
+      - left_12m -> payroll_adj_12m
+    answer:
+      identifiable: true
+      adjust_for: [review_2025, tenure_months]
+      do_not_adjust_for:
+        cert_12m: Earned after the launch and pushed by the mentors. It is part of the effect the memo wants measured.
+        payroll_adj_12m: Fires for participants (the stipend) and for anyone who left (final paycheck). Adjusting for it manufactures a link between the program and leaving.
+      indifferent: [shift, clock_no]
+    note: >-
+      The selection rule names two recorded columns, both of which drive attrition on their
+      own. Its twin changes only the selection rule.
+
+  - id: en_hr_mentor_match_by_worry
+    author: ai
+    status: aprovado
+    language: en
+    style: one-page memo
+    persona: HR business partner at a US manufacturing company with three plants and about 1,400 hourly employees
+    theme: HR / retention
+    title: Mentor Match and 12-month attrition, nominated by the supervisor's worry
+    twin: en_hr_mentor_match_by_review
+    treatment: mentor_match
+    outcome: left_12m
+    columns:
+      mentor_match: 1 if the employee was in the Mentor Match cohort that launched on February 2, 2026.
+      left_12m: 1 if the employee voluntarily separated within 12 months of the launch.
+      review_2025: Annual performance review score for the 2025 cycle (1 to 5), finalized December 2025.
+      tenure_months: Months of service at February 2, 2026.
+      shift: Shift assignment at launch (1 = first, 2 = second, 3 = third).
+      cert_12m: 1 if the employee earned a skills certification (CNC, welding, forklift, etc.) in the 12 months after launch.
+      payroll_adj_12m: 1 if any off-cycle payroll adjustment was processed for the employee in the 12 months after launch.
+      clock_no: Employee clock number.
+    not_in_table:
+      supervisor_worry: Each supervisor's own sense of which of their people were likely to leave. Never recorded.
+    story: >-
+      MEMORANDUM. To: Carla Reyes, VP Operations. From: Jason Whitfield, HR Business Partner,
+      Plants 1-3. Date: October 6, 2026. Re: Mentor Match, what the 12-month numbers can and
+      cannot tell us. Background. Mentor Match paired 212 hourly production employees with a
+      senior mentor for monthly one-hour meetings over the year that started February 2, 2026.
+      Supervisors made the nominations. We asked them to put forward the people they were most
+      worried about losing, and we deliberately did not ask them to document the reasoning, so
+      all I have is the list of names. What we are seeing. Voluntary attrition in the cohort
+      over the twelve months was 19%, against 23% for the rest of the hourly population. Before
+      this goes on a slide, three things. First, in my experience supervisors are usually right
+      about who has one foot out the door, which cuts against the program in the raw
+      comparison. Second, high scorers and long-tenured employees have always left at lower
+      rates than everyone else, and I have not checked how the cohort compares on either.
+      Third, third shift turns over faster than the other two, as it does every year, and I
+      would like Analytics to tell me whether that matters here. A result I believe is real. 61%
+      of the cohort earned a skills certification during the year (CNC, welding, forklift),
+      against 18% of non-participants. The mentors push hard for it, and certified employees are
+      noticeably more likely to stay with us. I read that as part of how the program works, but
+      Analytics should tell me if it changes how the comparison is done. Data caveat. The
+      off-cycle payroll adjustment flag is no use here: it fires for the monthly Mentor Match
+      stipend, which mentees get as well as mentors, and it fires for every final paycheck.
+      Ask. An attrition estimate that accounts for how people were selected, before the
+      November budget review. Happy to walk Analytics through the nomination lists.
+    edges:
+      - supervisor_worry -> mentor_match
+      - supervisor_worry -> left_12m
+      - review_2025 -> left_12m
+      - tenure_months -> left_12m
+      - shift -> left_12m
+      - mentor_match -> cert_12m
+      - cert_12m -> left_12m
+      - mentor_match -> left_12m
+      - mentor_match -> payroll_adj_12m
+      - left_12m -> payroll_adj_12m
+    answer:
+      identifiable: false
+      missing: [supervisor_worry]
+    note: >-
+      Same memo as its twin, with the selection rule changed. The supervisors picked on their
+      own sense of who was about to leave, which predicts leaving and was never written down;
+      review score and tenure are in the table but do not stand in for it.
+
+  - id: en_garden_drip_kits
+    author: ai
+    status: aprovado
+    language: en
+    style: notes from a call with a consultant
+    persona: executive director of a Canadian nonprofit that runs six community gardens in Hamilton, Ontario
+    theme: Agriculture / community gardens
+    title: Drip irrigation kits and plot harvest
+    treatment: drip_kit
+    outcome: harvest_kg
+    columns:
+      drip_kit: 1 if a drip irrigation kit was installed on the plot in May 2026.
+      harvest_kg: Total weight of produce the plot holder logged at the shed scale between June and October 2026, in kg.
+      seasons: Number of seasons the plot holder had gardened with us before 2026.
+      plot_m2: Plot area in square metres.
+      site: Garden site (Barton, Kenilworth, Gage, Ottawa St, Locke or Westdale).
+      gate_signins: Number of times the plot holder signed in at the gate between June and October 2026.
+      renewed_2027: 1 if the plot holder had renewed the plot for the 2027 season when the register was exported. Renewals opened October 1, 2026.
+    story: >-
+      Call with Ruth (evaluation consultant the funder assigned us), Oct 5, about 45 min. - She
+      needs some kind of comparison on the drip kits for the final report, due Nov 15.
+      Before/after won't work, we only have one season of scale data. - Recap I gave her: 60
+      kits, installed the week of May 11, $14k from the water utility grant. Only three of our
+      six sites have a tap close enough to run the lines, so the kits went to plots at those
+      three sites only. Within them, returning gardeners (three or more seasons with us) got
+      first pick and newcomers got whatever was left, so most of the 60 ended up with returning
+      folks. - She asked whether the three tap sites are better ground than the other three.
+      Not that anyone has ever noticed; all six are the same fill the city trucked in when the
+      lots were converted. - Ruth: returning gardeners harvest more regardless, they know what
+      they're doing. Also bigger plots harvest more, obviously. Both in the plot register. - The
+      thing I'm a bit proud of: kit holders signed in at the gate about half as often as
+      everyone else, since they don't have to come water every evening. Ruth pointed out that
+      the people who come most often also harvest the most, they pick on time and keep up with
+      the weeding, so the kits may have taken away with one hand what they gave with the other.
+      Not sure whether we're supposed to compare people with similar sign-in counts or not; she
+      didn't say. - Renewals for 2027 opened Oct 1 and the register already has the flag. Kit
+      holders are renewing like crazy, nobody wants to hand the kit back, and the people who had
+      a good year always come back anyway. - Action: send her the plot register (renewal flag
+      included), the scale log and the gate sign-in log by Friday.
+    edges:
+      - site -> drip_kit
+      - seasons -> drip_kit
+      - seasons -> harvest_kg
+      - plot_m2 -> harvest_kg
+      - drip_kit -> gate_signins
+      - gate_signins -> harvest_kg
+      - drip_kit -> harvest_kg
+      - drip_kit -> renewed_2027
+      - harvest_kg -> renewed_2027
+    answer:
+      identifiable: true
+      adjust_for: [seasons]
+      do_not_adjust_for:
+        gate_signins: Changed by the kit (fewer watering trips) and a driver of the harvest. It is one of the routes through which the kit acts, even if a negative one.
+        renewed_2027: Decided after the season by people who want to keep the kit and by people who had a good year. Adjusting for it ties the kit to the harvest artificially.
+      indifferent: [site, plot_m2]
+    note: >-
+      One recorded reason for getting a kit (seasons with the program) drives the harvest; the
+      site only decided who was eligible, and the text says the ground is the same everywhere.
+      The gate sign-ins are a consequence of the kit that pulls the harvest the other way; the
+      renewal flag is recorded after the harvest and driven by both.
+
+  - id: en_school_breakfast_bell
+    author: ai
+    status: aprovado
+    language: en
+    style: notes from a call with a consultant
+    persona: assistant superintendent of a school district in Ohio, fourteen elementary schools
+    theme: Public policy / school meals and attendance
+    title: Breakfast After the Bell and chronic absenteeism
+    treatment: bab_school
+    outcome: chronic_absent_2526
+    columns:
+      bab_school: 1 if the student's school ran Breakfast After the Bell during 2025-26.
+      chronic_absent_2526: 1 if the student missed 10% or more of enrolled days in 2025-26.
+      school_frl_pct: Percentage of the school's students eligible for free or reduced-price meals, from the October 2024 count used in the grant application.
+      school_chronic_2425: The school's chronic absenteeism rate in 2024-25, in percent.
+      frl_student: 1 if the student was eligible for free or reduced-price meals in 2025-26.
+      grade: Grade level in 2025-26 (K through 5).
+      tardies_2526: Number of tardies recorded for the student in 2025-26.
+    not_in_table:
+      principal_drive: How hard the principal pushes on attendance (calls home, assemblies, follow-up). Not measured anywhere.
+    story: >-
+      Notes from call w/ Dana M. (consultant on the state attendance grant), Fri 10/3, 30 min.
+      - State wants an attendance outcome for the Breakfast After the Bell report, due 11/14. We
+      have chronic absenteeism by student for 25-26, plus the usual demographics. - How schools
+      got picked (she asked twice). Grant rule: 60% or more free/reduced lunch to be eligible,
+      which was 9 of our 14 elementaries. Of the 9, six went ahead with it and three passed.
+      Principal's choice. The six who said yes are, to be honest, the principals who already do
+      everything, the ones who call a family after two absences and run the perfect-attendance
+      assemblies. Dana asked whether we measure anything like that about principals. We don't.
+      It's a vibe. - We also pushed the buildings with the worst chronic absence rates in 24-25
+      to say yes, and two of them did. Those buildings are still the worst this year. - Dana
+      also wants the building-level free/reduced percentage, since the high-poverty buildings
+      have worse attendance across the board and the grant rule picked exactly those. -
+      Student-level: FRL status (FRL kids are absent more), grade (our K and 1st graders are the
+      worst for absences, every year). - Tardies: way down at the BAB schools, kids aren't stuck
+      in the cafeteria line before the bell. Dana says kids who are tardy a lot drift into being
+      absent a lot, so if BAB works this is probably one of the ways it does. - She wants the
+      pull by Wednesday. Question I didn't get to ask: is what we have enough?
+    edges:
+      - principal_drive -> bab_school
+      - principal_drive -> chronic_absent_2526
+      - school_frl_pct -> bab_school
+      - school_frl_pct -> chronic_absent_2526
+      - school_chronic_2425 -> bab_school
+      - school_chronic_2425 -> chronic_absent_2526
+      - frl_student -> chronic_absent_2526
+      - grade -> chronic_absent_2526
+      - bab_school -> tardies_2526
+      - tardies_2526 -> chronic_absent_2526
+      - bab_school -> chronic_absent_2526
+    answer:
+      identifiable: false
+      missing: [principal_drive]
+    note: >-
+      Two recorded reasons for a school taking part (meal eligibility and last year's rate) can
+      be adjusted for, but the principals who opted in are the ones who already push on
+      attendance, and nothing in the table measures that. Tardies are a consequence of the
+      program.

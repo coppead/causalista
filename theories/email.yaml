@@ -1,0 +1,378 @@
+# Ficha de teoria: email.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: email
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Campanha de e-mail em uma loja online
+
+theory:
+  name: Hierarquia de efeitos
+  statement: >-
+    A comunicação leva o cliente por degraus: do conhecimento da loja ao interesse, do
+    interesse ao desejo e do desejo à ação de comprar. Uma campanha de e-mail traz a loja
+    à lembrança e leva o cliente ao site, onde o interesse vira compra. Cada degrau é uma
+    passagem: o e-mail só vende se for aberto, clicado e seguido de uma visita ao site.
+  references:   # a confirmar pelo André
+    - "Lavidge, R. J., & Steiner, G. A. (1961). A model for predictive measurements of advertising effectiveness. Journal of Marketing, 25(6), 59-62."
+    - "Fader, P. S., Hardie, B. G. S., & Lee, K. L. (2005). RFM and CLV: using iso-value curves for customer base analysis. Journal of Marketing Research, 42(4), 415-430."
+
+context: >-
+  Uma loja online enviou uma campanha de e-mail a parte dos seus clientes: uma mensagem
+  com as ofertas da semana e um link para o site. A loja quer saber se a campanha aumenta
+  as compras nos 14 dias seguintes ao envio.
+randomized: Os clientes que receberam a campanha foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem recebeu a campanha.
+
+treatment:
+  column: campanha
+  label: a campanha de e-mail
+  dictionary: Recebeu a campanha de e-mail (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos clientes que recebe a campanha
+
+outcome:
+  column: comprou
+  label: a compra
+  kind: binary
+  dictionary: Comprou na loja nos 14 dias seguintes ao envio da campanha (1 = sim, 0 = não).
+  scale: {rate: [0.05, 0.20]}   # fração dos clientes que compra
+
+effect:
+  sign: "+"                  # a teoria diz que a campanha aumenta as compras
+
+variables:
+
+  dias_ultima_compra:
+    label: os dias desde a última compra
+    kind: count
+    scale: {mean: 60}
+    roles:
+      confounder:
+        dictionary: Dias entre a última compra do cliente na loja e o envio da campanha.
+        to_treatment:
+          sign: "-"
+          fact: A loja enviou a campanha com mais frequência a quem tinha comprado há menos tempo.
+        to_outcome:
+          sign: "-"
+          fact: Quem está há mais tempo sem comprar na loja compra menos.
+      outcome_cause:
+        dictionary: Dias entre a última compra do cliente na loja e o envio da campanha.
+        to_outcome:
+          sign: "-"
+          fact: Quem está há mais tempo sem comprar na loja compra menos.
+
+  compras_12m:
+    label: o número de compras em 12 meses
+    kind: count
+    scale: {mean: 4}
+    roles:
+      confounder:
+        dictionary: Número de compras na loja nos 12 meses anteriores ao envio da campanha.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A campanha foi enviada com mais frequência a clientes que compraram mais
+            vezes na loja nos 12 meses anteriores ao envio da campanha.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que compraram mais vezes na loja nos 12 meses anteriores ao envio da campanha compram mais.
+      outcome_cause:
+        dictionary: Número de compras na loja nos 12 meses anteriores ao envio da campanha.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que compraram mais vezes na loja nos 12 meses anteriores ao envio da campanha compram mais.
+
+  emails_abertos:
+    label: os e-mails abertos
+    kind: count
+    scale: {mean: 3}
+    roles:
+      confounder:
+        dictionary: Número de e-mails da loja que o cliente abriu nos 14 dias anteriores ao envio da campanha.
+        to_treatment:
+          sign: "+"
+          fact: A loja enviou a campanha com mais frequência a quem mais abria os e-mails da loja.
+        to_outcome:
+          sign: "+"
+          fact: Quem abre mais e-mails da loja compra mais.
+      mediator:
+        dictionary: Número de e-mails da loja que o cliente abriu nos 7 dias seguintes ao envio da campanha.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a campanha abre mais e-mails da loja nos dias seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem abre mais e-mails da loja compra mais.
+      outcome_cause:
+        dictionary: Número de e-mails da loja que o cliente abriu nos 14 dias anteriores ao envio da campanha.
+        to_outcome:
+          sign: "+"
+          fact: Quem abre mais e-mails da loja compra mais.
+
+  visitas_site:
+    label: as visitas ao site
+    kind: count
+    scale: {mean: 3}
+    roles:
+      confounder:
+        dictionary: Número de visitas ao site da loja nos 14 dias anteriores ao envio da campanha.
+        to_treatment:
+          sign: "+"
+          fact: A campanha foi dirigida com mais frequência a quem tinha visitado mais o site da loja.
+        to_outcome:
+          sign: "+"
+          fact: Quem visita mais o site da loja compra mais.
+      mediator:
+        dictionary: Número de visitas ao site da loja nos 7 dias seguintes ao envio da campanha.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a campanha visita mais o site da loja nos dias seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem visita mais o site da loja compra mais.
+      outcome_cause:
+        dictionary: Número de visitas ao site da loja nos 14 dias anteriores ao envio da campanha.
+        to_outcome:
+          sign: "+"
+          fact: Quem visita mais o site da loja compra mais.
+
+  item_carrinho:
+    label: o item no carrinho
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      confounder:
+        dictionary: Tinha item no carrinho do site na véspera do envio da campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A loja enviou a campanha com mais frequência a quem tinha deixado item no
+            carrinho do site.
+        to_outcome:
+          sign: "+"
+          fact: Quem coloca item no carrinho do site compra mais.
+      mediator:
+        dictionary: Colocou item no carrinho do site nos 7 dias seguintes ao envio da campanha (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a campanha coloca item no carrinho do site com mais frequência nos dias seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem coloca item no carrinho do site compra mais.
+      outcome_cause:
+        dictionary: Tinha item no carrinho do site na véspera do envio da campanha (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem coloca item no carrinho do site compra mais.
+
+  clique_email:
+    label: o clique em e-mail da loja
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      confounder:
+        dictionary: Clicou em link de algum e-mail da loja nos 30 dias anteriores ao envio da campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A loja enviou a campanha com mais frequência a quem tinha clicado em links de
+            e-mails anteriores da loja.
+        to_outcome:
+          sign: "+"
+          fact: Quem clica em link de e-mail da loja compra mais.
+      mediator:
+        dictionary: Clicou em link de algum e-mail da loja nos 3 dias seguintes ao envio da campanha (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a campanha clica mais em links de e-mail da loja nos dias seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem clica em link de e-mail da loja compra mais.
+
+  intencao_compra:
+    label: a intenção de compra
+    kind: score
+    scale: {mean: 5}
+    hidden_fact: >-
+      A loja não mediu a intenção de compra dos clientes antes do envio da campanha, e
+      por isso essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota de intenção de compra na pesquisa feita antes do envio da campanha, de 0 a 10.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Clientes com maior intenção de compra se inscrevem mais nos avisos de ofertas
+            da loja e, por isso, receberam a campanha com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Clientes com maior intenção de compra compram mais.
+      mediator:
+        dictionary: Nota de intenção de compra na pesquisa feita 3 dias depois do envio da campanha, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe a campanha fica com maior intenção de compra nos dias seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Clientes com maior intenção de compra compram mais.
+
+  renda:
+    label: a renda do cliente
+    kind: continuous
+    scale: {median: 4500}
+    hidden_fact: A loja não tem a renda dos clientes, e por isso a renda não está na tabela.
+    roles:
+      confounder:
+        dictionary: Renda mensal estimada do cliente, em reais.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A loja dirigiu a campanha a bairros de renda mais alta, e por isso clientes
+            de renda mais alta receberam a campanha com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Clientes de renda mais alta compram mais.
+      outcome_cause:
+        dictionary: Renda mensal estimada do cliente, em reais.
+        to_outcome:
+          sign: "+"
+          fact: Clientes de renda mais alta compram mais.
+
+  propaganda_concorrente:
+    label: a propaganda de concorrentes
+    kind: binary
+    scale: {rate: 0.30}
+    hidden_fact: >-
+      A loja não sabe quem viu propaganda de lojas concorrentes, e por isso essa
+      informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Viu propaganda de lojas concorrentes nos 30 dias anteriores ao envio da campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A loja enviou a campanha principalmente a compradores das categorias de
+            produto em que as concorrentes mais anunciavam, e por isso quem viu
+            propaganda de concorrentes recebeu a campanha com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Quem vê propaganda de lojas concorrentes compra menos na loja.
+      outcome_cause:
+        dictionary: Viu propaganda de lojas concorrentes nos 30 dias anteriores ao envio da campanha (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Quem vê propaganda de lojas concorrentes compra menos na loja.
+
+  chat_atendimento:
+    label: a conversa no chat de atendimento
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      confounder:
+        dictionary: Abriu conversa no chat de atendimento nos 30 dias anteriores ao envio da campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            A loja enviou a campanha com menos frequência a quem tinha procurado o chat
+            de atendimento, para não incomodar clientes com problema em algum pedido.
+        to_outcome:
+          sign: "-"
+          fact: Quem precisou procurar o chat de atendimento compra menos.
+      collider:
+        dictionary: Abriu conversa no chat de atendimento nos 30 dias seguintes ao envio da campanha (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe a campanha procura mais o chat de atendimento, para pedir que a loja pare de enviar e-mails.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            Quem compra procura mais o chat de atendimento, para acompanhar a entrega do
+            pedido.
+      outcome_cause:
+        dictionary: Abriu conversa no chat de atendimento nos 30 dias anteriores ao envio da campanha (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Quem precisou procurar o chat de atendimento compra menos.
+
+  avaliacao_loja:
+    label: a avaliação da loja
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      collider:
+        dictionary: Respondeu ao pedido de avaliação da loja nos 30 dias seguintes ao envio da campanha (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O e-mail da campanha traz um pedido de avaliação da loja, e quem recebe a
+            campanha avalia a loja com mais frequência.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A loja pede uma avaliação depois de cada compra, e quem compra avalia a loja
+            com mais frequência.
+
+  segmento_marketing:
+    label: o segmento priorizado pelo marketing
+    kind: binary
+    scale: {rate: 0.35}
+    roles:
+      treatment_cause:
+        dictionary: Pertence ao segmento de clientes que a equipe de marketing priorizou na campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A equipe de marketing priorizou um segmento de clientes na campanha, e quem
+            pertence a esse segmento recebeu a campanha com mais frequência.
+
+  lista_piloto:
+    label: a lista-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Estava na lista de clientes usada no piloto da campanha (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A campanha começou por uma lista-piloto de clientes, e quem estava na
+            lista-piloto recebeu a campanha com mais frequência.
+
+  provedor_email:
+    label: o provedor de e-mail
+    kind: binary
+    scale: {rate: 0.60}
+    roles:
+      unrelated:
+        dictionary: O endereço de e-mail do cliente é do Gmail (1 = sim, 0 = não).
+        fact: O provedor de e-mail do cliente não tem relação com a campanha nem com a compra.

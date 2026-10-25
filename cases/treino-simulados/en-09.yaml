@@ -1,0 +1,491 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-09, oito casos em inglês
+# (vozes dos EUA e do Reino Unido).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (planejador de transporte de
+# uma agência municipal de ônibus nos EUA, dona de três clínicas veterinárias no Colorado,
+# gerente de compras de um grupo hoteleiro britânico, chefe de treinamento de uma empresa
+# de logística inglesa, gerente da livraria de uma universidade pública americana)
+# descrevendo um conjunto de dados do jeito que essa pessoa escreveria: página de wiki
+# interna, mensagem de chat, notas de reunião, trecho de papel para o conselho, post em
+# fórum.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_transit_rtpi_site_visits
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: service planner at a mid-size US city bus agency (about 130 buses), writes the dataset pages on the planning wiki, comfortable with spreadsheets, no statistics training
+    theme: Urban mobility / bus stop amenities
+    title: Real-time arrival displays at the stops the planners picked on foot
+    treatment: rtpi_display
+    outcome: boardings_2025
+    columns:
+      rtpi_display: 1 if a real-time arrival display was installed at the stop under the pilot (installs Nov 2024 to Jan 2025).
+      boardings_2025: Average weekday boardings at the stop, Apr to Jun 2025, from APC. All counters working in 2025.
+      boardings_2024: Average weekday boardings at the stop in 2024 from APC where available. Blank for 412 stops whose buses had counters down most of the year.
+      shelter: 1 if the stop has a shelter.
+      routes_serving: Number of routes serving the stop in the Jan 2025 schedule.
+      council_district: Council district the stop sits in, 1 to 9.
+      stop_id: Stop identifier in the GTFS feed.
+    not_in_table:
+      field_notes: What the planners saw at each candidate stop on the fall 2024 site visits, how many people were waiting at peak and how long the wait felt. On paper in the planning office, never entered anywhere.
+    story: >-
+      Dataset: rtpi_stop_pilot_2025. Owner: Service Planning (Dana Whitcomb). One row per
+      weekday-served stop (1,184). Sixty real-time arrival displays went in Nov 2024 to Jan
+      2025. Selection was done on foot: Dana and two of us walked the candidate corridors in
+      Sep and Oct 2024 and picked the stops where a lot of people were visibly waiting at peak.
+      The APC numbers were glanced at where we had them and settled a couple of close calls,
+      but they were patchy and the walk decided most of it. The site notes are on paper and
+      were never typed up, and those stops would be
+      among our busiest in 2025 with or without a sign. Displays need a shelter post, so
+      unsheltered stops were out; Districts 3 and 7 got extras after their council members
+      wrote in. Sheltered and multi-route stops board more regardless, and a stop that boarded
+      well in 2024 still does. Do not join on stop_id before 2023, the ids were renumbered.
+    edges:
+      - field_notes -> rtpi_display
+      - field_notes -> boardings_2025
+      - boardings_2024 -> rtpi_display
+      - boardings_2024 -> boardings_2025
+      - shelter -> rtpi_display
+      - shelter -> boardings_2025
+      - routes_serving -> boardings_2025
+      - council_district -> rtpi_display
+      - rtpi_display -> boardings_2025
+    answer:
+      identifiable: false
+      missing: [field_notes]
+    note: >-
+      The 2024 counts are in the table and were glanced at, but the choice was made on foot,
+      and what the planners saw drives 2025 boardings on its own. No column stands in for the
+      paper notes.
+
+  - id: en_transit_fare_cap_odd_serial
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: service planner at a mid-size US city bus agency, notes taken by a colleague at the fare policy working group
+    theme: Urban mobility / fare policy
+    title: Daily fare cap given to the smartcards with an odd serial number
+    treatment: fare_cap
+    outcome: trips_may
+    columns:
+      fare_cap: 1 if the card was in the daily cap pilot from March 2025 (pays nothing after the third tap of the day).
+      trips_may: Trips taken on the card in May 2025 (taps, transfers included).
+      trips_feb: Trips taken on the card in February 2025, before the pilot.
+      autoload_apr: 1 if auto-reload was active on the card at 30 Apr 2025.
+      survey_jun: 1 if the cardholder completed the June 2025 rider survey.
+      home_zone: Fare zone of the card's most frequent first tap of the day, A to D.
+      fare_category: Adult, senior, disabled or student.
+      serial_last_digit: Last digit of the card serial number, 0 to 9.
+    story: >-
+      Fare Policy Working Group, notes, 12 June 2025. Taken by K. Osei. Present: Planning (2),
+      Finance, Customer Service, IT (Rafael). Item 3, daily cap pilot, first read. Rafael
+      reminded the group how the pilot group was built in March: every registered smartcard
+      whose serial ends in an odd digit got the $5 daily cap, even-digit cards stayed on
+      pay-per-ride. Nothing else went into it, about 46,000 cards each side. Finance asked
+      whether the heavy riders could have ended up on one side; Rafael said the serial is
+      assigned at manufacture and has nothing to do with who ends up holding the card.
+      Planning showed May taps: capped cards took about 9% more trips than the others. Two
+      caveats raised in the room. First, the pilot welcome email also pushed auto-reload, and
+      sign-ups on capped cards roughly doubled by end of April; cards on auto-reload ride more
+      because they never run dry, and the frequent riders were mostly on it already anyway.
+      Second, Customer Service sent the June rider survey to every capped card plus a sample
+      of the rest, and the people who answer that survey are the ones riding every day.
+      Finance noted that trips vary a lot by home zone, that senior and disabled cards ride
+      less overall, and that a card's February count is the best guide to its May count; all
+      three are in the extract. ACTION (Planning): produce the effect of the cap on May trips
+      per card, state what should and should not be adjusted for, bring to the July board.
+    edges:
+      - serial_last_digit -> fare_cap
+      - fare_cap -> autoload_apr
+      - trips_feb -> autoload_apr
+      - autoload_apr -> trips_may
+      - fare_cap -> trips_may
+      - trips_feb -> trips_may
+      - home_zone -> trips_may
+      - fare_category -> trips_may
+      - fare_cap -> survey_jun
+      - trips_may -> survey_jun
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        autoload_apr: Recorded after the pilot started and pushed up by the pilot's own welcome email. Riding more because the card never runs dry is one of the ways the cap adds trips, so it is part of the effect being measured.
+        survey_jun: Sent after May and answered more by capped cards and by frequent riders. Adjusting for it creates a false link between the cap and the trips.
+      indifferent: [fare_category, home_zone, serial_last_digit, trips_feb]
+    note: >-
+      The serial digit is as good as a coin flip, so the plain comparison is already right. The
+      traps are the auto-reload KPI, which is part of how the cap works, and the survey, which
+      came after the outcome and is answered for both reasons.
+
+  - id: en_vet_bloodwork_vets_call
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: owner of three small-animal veterinary clinics in the Denver suburbs, a vet herself, texting a college friend who works in epidemiology
+    theme: Veterinary clinics / pre-operative screening
+    title: Pre-op blood panel at the surgeon's discretion and complications in ten days
+    twin: en_vet_bloodwork_clinic_rule
+    treatment: preop_bloodwork
+    outcome: complication_10d
+    columns:
+      preop_bloodwork: 1 if a CBC and chemistry panel was run in the 7 days before the procedure.
+      complication_10d: 1 if any complication was recorded within 10 days of surgery (incision problem, vomiting over 24 hours, unscheduled re-visit, hospitalization).
+      pet_age_yrs: Age at surgery, years.
+      procedure_type: spay, neuter, dental or mass removal.
+      clinic: Littleton, Parker or Centennial.
+      protocol_modified: 1 if the anesthesia plan was changed from the standard protocol before surgery. Tickbox on the surgery form.
+      breed_size: Small, medium, large or giant, derived from the breed field.
+      patient_id: Patient number in the practice management system.
+    not_in_table:
+      vet_impression: Whether the animal looked a bit off to the surgeon on the pre-op exam. Free text in the exam notes, never a field.
+    story: >-
+      hey, work question when you have a sec. we pulled every elective surgery across the three
+      clinics for 2024, about 2,100 (spays, neuters, dentals, lump removals). trying to figure
+      out if the pre-op blood panel is actually buying us anything, because clients push back
+      on the $140 and I want to be able to say something honest. right now whoever's doing the
+      surgery decides. we all run it more on older pets and before dentals, and older pets and
+      dentals have more issues anyway. Ashley at Littleton runs it on practically everything
+      while Ken at Parker almost never does, and Ken's complication rate is higher for a bunch
+      of reasons that have nothing to do with bloodwork. the part that bugs me: a lot of the
+      time you run it because the animal just looks a bit off on the pre-op exam, nothing you'd
+      put a number on, and those are the ones that go sideways after. that goes into the exam
+      notes as free text and nowhere else. when the panel does flag something we change the
+      anesthesia plan, which is kind of the whole point, and that's a tickbox on the surgery
+      form. outcome I'm using is any complication in 10 days. big dogs have more issues post-op,
+      that's just how it is. is there a way to get a real answer out of this or am I kidding
+      myself?
+    edges:
+      - vet_impression -> preop_bloodwork
+      - vet_impression -> complication_10d
+      - pet_age_yrs -> preop_bloodwork
+      - pet_age_yrs -> complication_10d
+      - procedure_type -> preop_bloodwork
+      - procedure_type -> complication_10d
+      - clinic -> preop_bloodwork
+      - clinic -> complication_10d
+      - preop_bloodwork -> protocol_modified
+      - protocol_modified -> complication_10d
+      - preop_bloodwork -> complication_10d
+      - breed_size -> complication_10d
+    answer:
+      identifiable: false
+      missing: [vet_impression]
+    note: >-
+      Age, procedure and clinic are all in the table and all drive the decision, but so does
+      the surgeon's read of the animal, which lives in free text. Twin of the clinic-rule case.
+
+  - id: en_vet_bloodwork_clinic_rule
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: owner of three small-animal veterinary clinics in the Denver suburbs, a vet herself, texting a college friend who works in epidemiology
+    theme: Veterinary clinics / pre-operative screening
+    title: Pre-op blood panel set by clinic rule and complications in ten days
+    twin: en_vet_bloodwork_vets_call
+    treatment: preop_bloodwork
+    outcome: complication_10d
+    columns:
+      preop_bloodwork: 1 if a CBC and chemistry panel was run in the 7 days before the procedure.
+      complication_10d: 1 if any complication was recorded within 10 days of surgery (incision problem, vomiting over 24 hours, unscheduled re-visit, hospitalization).
+      pet_age_yrs: Age at surgery, years.
+      procedure_type: spay, neuter, dental or mass removal.
+      clinic: Littleton, Parker or Centennial.
+      protocol_modified: 1 if the anesthesia plan was changed from the standard protocol before surgery. Tickbox on the surgery form.
+      breed_size: Small, medium, large or giant, derived from the breed field.
+      patient_id: Patient number in the practice management system.
+    story: >-
+      hey, work question when you have a sec. we pulled every elective surgery across the three
+      clinics for 2024, about 2,100 (spays, neuters, dentals, lump removals). trying to figure
+      out if the pre-op blood panel is actually buying us anything, because clients push back
+      on the $140 and I want to be able to say something honest. the way it works: Littleton
+      has the in-house analyzer, so since 2023 the rule there is a panel on every elective, no
+      exceptions, and Parker and Centennial don't have one and don't run it for electives at
+      all (send-out takes two days, nobody waits). so it's really a clinic thing, not a patient
+      thing. problem is Littleton is Ashley and Parker is Ken, and Ken's complication rate is
+      higher for a bunch of reasons that have nothing to do with bloodwork. when the panel does
+      flag something we change the anesthesia plan, which is kind of the whole point, and
+      that's a tickbox on the surgery form. outcome I'm using is any complication in 10 days.
+      older pets and dentals have more issues, and big dogs too, that's just how it is. is
+      there a way to get a real answer out of this or am I kidding myself?
+    edges:
+      - clinic -> preop_bloodwork
+      - clinic -> complication_10d
+      - pet_age_yrs -> complication_10d
+      - procedure_type -> complication_10d
+      - preop_bloodwork -> protocol_modified
+      - protocol_modified -> complication_10d
+      - preop_bloodwork -> complication_10d
+      - breed_size -> complication_10d
+    answer:
+      identifiable: true
+      adjust_for: [clinic]
+      do_not_adjust_for:
+        protocol_modified: Ticked after the panel comes back and changed because of what the panel found. Changing the plan is how the bloodwork prevents complications, so it is part of the effect being measured.
+      indifferent: [breed_size, patient_id, pet_age_yrs, procedure_type]
+    note: >-
+      Once the panel is a clinic rule, the only thing that drives both the panel and the
+      outcome is the clinic itself. The protocol tickbox is the mechanism and must stay out.
+      Twin of the surgeon's-call case.
+
+  - id: en_hotel_led_phase1
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: group procurement manager at a UK hotel group (38 hotels, three and four star, England and Scotland), writing a paper for the Operations Board; a buyer by background, no statistics training
+    theme: Hospitality / energy procurement
+    title: LED retrofit at the hotels with the oldest fittings and the biggest bills
+    treatment: led_retrofit
+    outcome: kwh_por_2025
+    columns:
+      led_retrofit: 1 if the hotel completed the Phase 1 LED retrofit of guest-room and corridor lighting (works finished by March 2025).
+      kwh_por_2025: Electricity consumption per occupied room-night in the month, kWh. One row per hotel per month, April to September 2025.
+      lighting_age_2024: Average age in years of the hotel's lighting stock at October 2024, from the asset register.
+      kwh_por_2024: Electricity consumption per occupied room-night in calendar 2024, kWh, from utility bills.
+      energy_audit_oct25: 1 if the hotel received an external energy audit in October 2025.
+      hotel_tier: 3 or 4 (star rating).
+      region: Scotland, North, Midlands or South.
+      month: Calendar month of the row, 4 to 9.
+    story: >-
+      Paper 7, Operations Board, 21 October 2025. Group LED Retrofit Programme: Phase 1 outcome
+      and Phase 2 approval. Author: Group Procurement. 1. Background. In September 2024 the
+      Board approved the Phase 1 retrofit of guest-room and corridor lighting to LED at fourteen
+      hotels under the Luminex framework contract. Works completed between November 2024 and
+      March 2025. Phase 2 (the remaining twenty-four hotels, £2.3m) is before the Board for
+      approval. 2. Selection of Phase 1 hotels. Procurement ranked the estate on two measures
+      only: average age of the lighting stock at October 2024, from the asset register, and
+      electricity consumption per occupied room-night in calendar 2024, from the utility bills.
+      The fourteen hotels with the oldest fittings and the highest consumption were taken
+      first. 3. Data. Energy and Sustainability has supplied one row per hotel per month for
+      April to September 2025 (228 rows) with consumption per occupied room-night, the Phase 1
+      flag, the two selection measures, tier, region and month, and a flag for the October
+      2025 external energy audits. The Board should note the following when reading the
+      figures. The oldest fittings were, as expected, the hungriest in 2024, and old stock
+      continues to inflate consumption where it has not been replaced. Hotels that ran high in
+      2024 still run high in 2025 for reasons the retrofit does not touch (plant, glazing, pool
+      and kitchen loads). Four-star properties consume more per room-night across the board,
+      Scottish hotels heat for longer, and consumption follows the season. The audit programme
+      covered every Phase 1 hotel, to evidence the saving for the lender's covenant, together
+      with any hotel whose summer consumption came in above budget. 4. Early reading. Phase 1
+      hotels averaged 27.4 kWh per occupied room-night against 33.1 at other hotels.
+      Procurement does not regard this as the effect of the retrofit, for the reasons in
+      paragraph 2, and asks the Board to commission Finance Analytics to produce a
+      like-for-like saving before the Phase 2 commitment, specifying which columns in the
+      extract are to be adjusted for and which left alone.
+    edges:
+      - lighting_age_2024 -> led_retrofit
+      - lighting_age_2024 -> kwh_por_2025
+      - lighting_age_2024 -> kwh_por_2024
+      - kwh_por_2024 -> led_retrofit
+      - kwh_por_2024 -> kwh_por_2025
+      - led_retrofit -> kwh_por_2025
+      - led_retrofit -> energy_audit_oct25
+      - kwh_por_2025 -> energy_audit_oct25
+      - hotel_tier -> kwh_por_2025
+      - region -> kwh_por_2025
+      - month -> kwh_por_2025
+    answer:
+      identifiable: true
+      adjust_for: [kwh_por_2024, lighting_age_2024]
+      do_not_adjust_for:
+        energy_audit_oct25: Decided in October on the summer figures. Phase 1 hotels were audited because of the retrofit and the others because their consumption ran high, so adjusting for it creates a false link between the retrofit and the consumption.
+      indifferent: [hotel_tier, month, region]
+    note: >-
+      Both selection measures are in the extract and both still drive consumption, so both are
+      needed. The audit flag looks like a quality marker but was triggered by the outcome and
+      by the treatment.
+
+  - id: en_logistics_vr_picking_struggling
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: head of training at a UK third-party logistics firm (nine warehouses in the Midlands and the North, about 4,000 staff), posting on an L&D practitioners' forum; HR background, no analytics training
+    theme: Logistics / warehouse induction training
+    title: VR picking module given to the new starters the trainers thought were struggling
+    treatment: vr_module
+    outcome: pph_week8
+    columns:
+      vr_module: 1 if the starter completed the 90-minute VR picking simulation during induction week.
+      pph_week8: Picks per hour in the starter's eighth week, from the WMS.
+      pph_week2: Picks per hour in the starter's second week, from the WMS.
+      site: Site code, nine sites.
+      shift: Days, lates or nights.
+      prior_warehouse_exp: 1 if previous warehouse work was ticked on the application form.
+      employee_id: Payroll number.
+    not_in_table:
+      trainer_read: Whether the starter looked to the trainer like they were struggling in their first two days on the floor. A judgement call on the day, not written down anywhere.
+    story: >-
+      Did our VR picking module do anything? Sense-check my data please. We put a 90-minute VR
+      picking simulation into induction week this year for new pickers. Headsets are only at
+      four of our nine sites (the budget ran out, long story), so nobody at the other five got
+      it. At the four sites it wasn't everyone either: the trainers would watch the new
+      starters on the floor for the first couple of days and put through the ones who looked
+      like they were struggling, plus they'd generally skip anyone who'd done warehouse work
+      before (that's a tickbox on the application, we have it). Nights hardly got it at all,
+      the VR room is only staffed days. What the trainers saw on the floor isn't written down
+      anywhere, it was a judgement call on the day. I've got a WMS extract for the 1,140
+      starters from March to August: picks per hour in week 2 and in week 8, site, shift, the
+      prior-experience flag, payroll number. Week 2 numbers already differ by site, shift and
+      experience, and the people who were struggling early are still slower in week 8, VR or
+      not; a fast week 2 is a fast week 8. Week 8 is what I care about, that's when they come
+      off probation, and sites run at very different rates anyway (layout, product mix), as do
+      shifts. Raw numbers: VR group 71 pph in week 8, everyone else 78. My director is reading
+      that as "VR made them slower". I don't think that's fair but I can't articulate why, and
+      I'm not sure what I'd compare against. Does the week 2 figure help here? Is this
+      analysable at all or do I go back and ask for a proper trial?
+    edges:
+      - site -> vr_module
+      - site -> pph_week2
+      - site -> pph_week8
+      - shift -> vr_module
+      - shift -> pph_week2
+      - shift -> pph_week8
+      - prior_warehouse_exp -> vr_module
+      - prior_warehouse_exp -> pph_week2
+      - prior_warehouse_exp -> pph_week8
+      - trainer_read -> vr_module
+      - trainer_read -> pph_week2
+      - trainer_read -> pph_week8
+      - vr_module -> pph_week2
+      - pph_week2 -> pph_week8
+      - vr_module -> pph_week8
+    answer:
+      identifiable: false
+      missing: [trainer_read]
+    note: >-
+      Site, shift and prior experience are all recorded and all drive the selection. The
+      trainers' read of who was struggling is not, and week 2 picks cannot stand in for it: they
+      come after the module and are moved by it.
+
+  - id: en_logistics_eco_driving_depot_order
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: head of training at a UK third-party logistics firm, writing up the monthly Driver Standards meeting
+    theme: Logistics / HGV driver training
+    title: Eco-driving course rolled out by depot fuel ranking and tractor emissions class
+    treatment: eco_course
+    outcome: l100km_q3
+    columns:
+      eco_course: 1 if the driver completed the one-day eco-driving course between January and June 2025.
+      l100km_q3: Litres per 100 km, July to September 2025, from telematics and fuel cards.
+      depot_l100_2024: Average litres per 100 km of the driver's depot in calendar 2024.
+      euro_class: Emissions class of the driver's regular tractor unit, Euro V or Euro VI.
+      idle_pct_q3: Percentage of engine-on time spent idling, July to September 2025, from telematics.
+      fuel_bonus_q3: 1 if any payment under payroll code FUEL-BON was made to the driver in the October run. The code covers the Q3 fuel-target bonus, paid when the driver's Q3 litres per 100 km beat target, and the £50 eco-course attendance payment, which went through the same code in the same run.
+      driver_years: Years with the company at 1 July 2025.
+      trailer_type: Curtainsider, box or fridge, the driver's usual trailer.
+      driver_id: Payroll number.
+    story: >-
+      Driver Standards meeting, 14 Oct 2025, Leicester. Notes: A. Brennan (Head of Training).
+      Attending: Fleet, Transport Managers x4, Finance (Priya). Item 2, eco-driving course,
+      results so far. Reminder of how the H1 cohort was picked, for Priya's benefit: we went
+      depot by depot in order of last year's fuel figure, worst depots first (Doncaster, then
+      Tilbury), and within each depot the drivers on the Euro V units went through before the
+      Euro VI drivers because that's where the litres are. 212 drivers through by end of June
+      out of 540. Fleet confirmed the Euro V units still burn more and Doncaster's work is
+      still mostly the hilly A1 trunk, so a straight course-vs-no-course comparison flatters
+      us. Telematics Q3 (Jul to Sep): trained drivers 29.1 l/100km against 31.4 for the rest.
+      Idling time is down sharply on the trained group, which is the first thing the course
+      goes after and is most of the saving on a tramping shift. Transport Managers raised the
+      usual: trailer type (curtainsider vs fridge) swings fuel more than anything a driver
+      does, and the long-serving drivers were already decent before any of this. Priya: the
+      Q3 fuel bonus went out in the October payroll and she needs to know whether to count the
+      bonus flag as a training outcome; see the extract notes on what the code covers. Action
+      (AB): send Priya the driver-level extract with the course flag, Q3 l/100km, depot 2024
+      figure, Euro class, Q3 idle %, bonus flag, years with the company, trailer type, and say
+      which of these she should adjust for and which she should leave out. Item 3 deferred.
+    edges:
+      - depot_l100_2024 -> eco_course
+      - depot_l100_2024 -> l100km_q3
+      - euro_class -> eco_course
+      - euro_class -> l100km_q3
+      - eco_course -> idle_pct_q3
+      - idle_pct_q3 -> l100km_q3
+      - eco_course -> l100km_q3
+      - eco_course -> fuel_bonus_q3
+      - l100km_q3 -> fuel_bonus_q3
+      - driver_years -> l100km_q3
+      - trailer_type -> l100km_q3
+    answer:
+      identifiable: true
+      adjust_for: [depot_l100_2024, euro_class]
+      do_not_adjust_for:
+        idle_pct_q3: Measured in the same quarter as the fuel figure and cut by the course itself. Less idling is the main way the course saves fuel, so it is part of the effect being measured.
+        fuel_bonus_q3: Paid in October on the Q3 figures, to drivers who beat target and to drivers who attended the course. Adjusting for it creates a false link between the course and the fuel figure.
+      indifferent: [driver_id, driver_years, trailer_type]
+    note: >-
+      The two selection rules are both in the extract and both still drive fuel. The idle KPI
+      is the mechanism. The bonus flag's second cause, the attendance payment, is only in the
+      column description.
+
+  - id: en_bookstore_used_copies_wholesaler
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: manager of the campus bookstore at a mid-size US public university (about 14,000 students), writing the notes page for a business-school practicum student; twenty years in college retail
+    theme: Retail / course materials
+    title: Used copies on the shelf when the wholesaler had them, and sell-through by week 3
+    treatment: used_option
+    outcome: sell_through_wk3
+    columns:
+      used_option: 1 if used copies of the title were on the shelf at the start of Fall 2025.
+      sell_through_wk3: Units sold or rented (new, used and rental) by the end of week 3 of Fall 2025, divided by enrollment in the sections adopting the title.
+      nat_adoptions: Number of institutions adopting the title for Fall 2025, from the wholesaler feed.
+      edition_year: Copyright year of the edition on the shelf.
+      faculty_rating: Instructor's rating, 1 to 5, on the question "Were course materials available to your students when they needed them?", from the faculty survey emailed in the second week of December 2025.
+      enrollment: Total enrollment at census date across the sections adopting the title.
+      list_price: Publisher list price of a new copy, dollars.
+      required_flag: 1 if the instructor marked the title Required, 0 if Recommended.
+      isbn: ISBN-13.
+    story: >-
+      Fall 2025 adoptions table: notes for Jordan (practicum project). What it is: one row per
+      adopted title for Fall 2025, 1,312 rows, pulled from the POS and the adoption system on
+      Sept 19, end of week 3. The question the dean's office keeps asking is whether stocking
+      used copies helps us keep the sale on campus, so that's the project. How a title ended
+      up with used copies: we don't choose, really. We order used from the wholesaler in June
+      and they have it or they don't. They have it when a lot of schools use the book and when
+      the edition has been around a while. Those are the same titles the students can find for
+      ten bucks on Amazon or Chegg, which is why our sell-through on those is awful whether or
+      not we have used on the shelf. Both things are in the table from the wholesaler feed.
+      Other stuff you'll notice: big sections sell through worse (the kids share), expensive
+      books sell through worse, and Recommended titles barely sell at all. The faculty rating
+      column is from our survey, see the dictionary for the wording and timing; faculty love
+      us when there's a used option and love us when their students actually have the book in
+      hand. Please don't just compare the two groups. Figure out what to adjust for and what
+      to leave alone, and write it up so I can show the dean.
+    edges:
+      - nat_adoptions -> used_option
+      - nat_adoptions -> sell_through_wk3
+      - edition_year -> used_option
+      - edition_year -> sell_through_wk3
+      - used_option -> sell_through_wk3
+      - used_option -> faculty_rating
+      - sell_through_wk3 -> faculty_rating
+      - enrollment -> sell_through_wk3
+      - list_price -> sell_through_wk3
+      - required_flag -> sell_through_wk3
+    answer:
+      identifiable: true
+      adjust_for: [edition_year, nat_adoptions]
+      do_not_adjust_for:
+        faculty_rating: Collected in December, after the week 3 figure, and raised both by the used option and by students having the book. Adjusting for it creates a false link between the used option and sell-through.
+      indifferent: [enrollment, isbn, list_price, required_flag]
+    note: >-
+      The wholesaler's stock decided the treatment, and the two things that drive their stock
+      also drive students to buy elsewhere. The only sign that the faculty rating came after
+      the outcome is the survey date in the column description.

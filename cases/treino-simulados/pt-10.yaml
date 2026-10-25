@@ -1,0 +1,546 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria, para o modelo responder durante o treino por reforço (ele responde,
+# o verificador dá a nota). Não são teste: ficam fora da medição final e não repetem
+# nenhum cenário dos casos congelados de cases/simulados/.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: a
+# gerente de assinaturas de um jornal, o coordenador de atendimento de um plano
+# odontológico, uma analista de uma companhia de água e esgoto, a gerente de um
+# e-commerce de moda e o gerente de segurança do trabalho de uma mineradora. Cada texto
+# tem o estilo do canal em que a pessoa escreveria (wiki interna, relatório trimestral,
+# e-mail com anexo, ata, Slack).
+#
+# As setas declaram o diagrama que o texto implica; o verificador confere a resposta a
+# partir delas (scripts/check_cases.py). Status rascunho até revisão.
+
+cases:
+
+  - id: pt_jornal_impresso_domingo_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente de assinaturas de um jornal
+    theme: Mídia, assinatura digital de jornal
+    title: Edição impressa de domingo sorteada e renovação em 12 meses
+    treatment: recebeu_impresso_domingo
+    outcome: renovou_12m
+    columns:
+      id_assinante: Identificador do assinante no sistema de cobrança.
+      recebeu_impresso_domingo: >-
+        Sorteado para receber em casa a edição impressa de domingo por três meses a partir
+        da ativação da assinatura digital (1 = sim, 0 = não).
+      renovou_12m: Renovou a assinatura ao fim dos primeiros 12 meses (1 = sim, 0 = não).
+      canal_aquisicao: >-
+        Canal pelo qual o assinante chegou (busca, redes sociais, indicação, outro),
+        registrado na ativação.
+      faixa_etaria: Faixa etária informada no cadastro (18–29, 30–44, 45–59, 60+).
+      leituras_app_meses_4_6: Matérias abertas no app entre o quarto e o sexto mês de assinatura.
+      respondeu_pesquisa_mes13: >-
+        Respondeu à pesquisa de satisfação enviada no 13º mês de assinatura (1 = sim,
+        0 = não).
+    story: >-
+      RELATÓRIO TRIMESTRAL DE ASSINATURAS – 3T2026 – Seção 4: Teste da edição impressa de
+      domingo. No 1T de 2025 lançamos o teste com os 6.240 assinantes digitais novos do
+      trimestre: metade, escolhida por sorteio na planilha de cadastro, passou a receber
+      em casa a edição impressa de domingo por três meses, sem custo; a outra metade
+      seguiu só com o digital. Agora que todos fecharam 12 meses, temos a renovação.
+      Resultados: renovação de 61% no grupo com impresso contra 54% no grupo só digital.
+      O indicador que mais nos animou foi o de leitura: entre o quarto e o sexto mês, já
+      sem receber o jornal, quem teve o impresso abriu 38% mais matérias no app, e
+      sabemos há anos que leitura no app é o que segura o assinante na hora da renovação.
+      A pesquisa de satisfação enviada no 13º mês teve resposta de 41% entre quem recebeu
+      o impresso e 23% entre os demais; como de costume, quem renovou respondeu muito
+      mais do que quem saiu. Observação: a origem do assinante (busca, redes sociais,
+      indicação) e a faixa etária continuam pesando na renovação como nos trimestres
+      anteriores, e vieram no extrato. A área de dados pediu que especifiquemos por quais
+      colunas a comparação entre os dois grupos deve ser ajustada antes de levarmos o
+      número à diretoria.
+    edges:
+      - recebeu_impresso_domingo -> leituras_app_meses_4_6
+      - leituras_app_meses_4_6 -> renovou_12m
+      - recebeu_impresso_domingo -> renovou_12m
+      - canal_aquisicao -> renovou_12m
+      - faixa_etaria -> renovou_12m
+      - recebeu_impresso_domingo -> respondeu_pesquisa_mes13
+      - renovou_12m -> respondeu_pesquisa_mes13
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        leituras_app_meses_4_6: >-
+          A leitura entre o quarto e o sexto mês é consequência de ter recebido o impresso
+          e é um dos caminhos pelos quais ele segura o assinante.
+        respondeu_pesquisa_mes13: >-
+          A pesquisa foi enviada depois da renovação, e responder depende tanto de ter
+          recebido o impresso quanto de ter renovado.
+      indifferent: [canal_aquisicao, faixa_etaria, id_assinante]
+    note: >-
+      Sorteio: nada a ajustar. O texto oferece dois indicadores que estragariam a conta,
+      um apresentado como o resultado mais animador e outro como pesquisa de satisfação.
+
+  - id: pt_odonto_programa_periodontal_pt10
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenador de atendimento de um plano odontológico
+    theme: Plano odontológico, programa de acompanhamento periodontal
+    title: Programa periodontal e custo curativo, sem a avaliação da gengiva
+    treatment: programa_periodontal
+    outcome: custo_curativo_12m
+    columns:
+      id_beneficiario: Código do beneficiário na operadora.
+      idade: Idade do beneficiário, em anos, na data da consulta de rotina.
+      tipo_contrato: Tipo de contrato (PF = pessoa física, PJ = empresarial).
+      consultas_ano_anterior: Número de consultas odontológicas no ano anterior à consulta de rotina.
+      programa_periodontal: >-
+        Beneficiário indicado pelo dentista e inscrito no Programa de Acompanhamento
+        Periodontal na consulta de rotina de 2025 (1 = sim, 0 = não).
+      limpezas_12m: Número de profilaxias realizadas nos 12 meses seguintes à consulta de rotina.
+      custo_curativo_12m: >-
+        Soma, em reais, dos procedimentos curativos (restauração, endodontia, extração,
+        urgência) pagos pela operadora nos 12 meses seguintes à consulta de rotina. Não
+        inclui profilaxia nem consultas.
+    not_in_table:
+      condicao_gengival: >-
+        Avaliação da gengiva feita pelo dentista na cadeira (inflamação, sangramento), que
+        motiva a indicação ao programa. A guia da consulta não tem campo para isso.
+    story: >-
+      ATA – Reunião mensal de Atendimento e Rede, 14/08/2026, sala 2. Presentes: Rogério
+      (coordenação de atendimento), Dra. Lúcia (auditoria odontológica), Fabiana (dados),
+      Marcos (comercial). Pauta 2 – Programa de Acompanhamento Periodontal. Rogério lembrou
+      que o programa começou em janeiro de 2025 e consiste em limpezas trimestrais e
+      orientação de higiene para beneficiários indicados pelo dentista da rede na consulta
+      de rotina. Dra. Lúcia explicou que a indicação é critério do dentista: ele olha a
+      gengiva na cadeira e indica quem está com inflamação ou sangramento, e que esse
+      quadro, sem acompanhamento, costuma virar canal e extração mais adiante. Fabiana
+      informou que a guia da consulta não tem campo para essa avaliação, então nada disso
+      chega ao sistema; o que a base traz é idade, tipo de contrato, quantas consultas o
+      beneficiário fez no ano anterior, se entrou no programa, quantas limpezas fez nos 12
+      meses seguintes e o custo dos procedimentos curativos nesses mesmos 12 meses.
+      Marcos observou que quem já ia mais ao dentista no ano anterior foi mais indicado,
+      simplesmente porque passou mais vezes pela cadeira, e que esse público também gasta
+      mais em procedimento, por hábito de uso. Rogério destacou como ponto positivo que os
+      participantes fizeram em média 3,1 limpezas no ano contra 0,8 dos demais, e que
+      limpeza regular reduz procedimento curativo. Dra. Lúcia acrescentou que o custo
+      curativo varia também com a idade e com o tipo de contrato (PJ tem cobertura mais
+      ampla). Encaminhamento: Fabiana verifica se, com as colunas disponíveis, dá para
+      medir o efeito do programa sobre o custo curativo e, em caso positivo, por quais
+      colunas ajustar. Prazo: próxima reunião.
+    edges:
+      - condicao_gengival -> programa_periodontal
+      - condicao_gengival -> custo_curativo_12m
+      - consultas_ano_anterior -> programa_periodontal
+      - consultas_ano_anterior -> custo_curativo_12m
+      - programa_periodontal -> limpezas_12m
+      - limpezas_12m -> custo_curativo_12m
+      - programa_periodontal -> custo_curativo_12m
+      - idade -> custo_curativo_12m
+      - tipo_contrato -> custo_curativo_12m
+    answer:
+      identifiable: false
+      missing: [condicao_gengival]
+    twin: pt_odonto_programa_periodontal_psr
+    note: >-
+      O dentista indica quem tem a gengiva pior, e gengiva pior vira canal e extração. A
+      guia não registra essa avaliação. As consultas do ano anterior estão na tabela, mas
+      não bastam.
+
+  - id: pt_odonto_programa_periodontal_psr
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenador de atendimento de um plano odontológico
+    theme: Plano odontológico, programa de acompanhamento periodontal
+    title: Programa periodontal e custo curativo, com o índice PSR na guia
+    treatment: programa_periodontal
+    outcome: custo_curativo_12m
+    columns:
+      id_beneficiario: Código do beneficiário na operadora.
+      idade: Idade do beneficiário, em anos, na data da consulta de rotina.
+      tipo_contrato: Tipo de contrato (PF = pessoa física, PJ = empresarial).
+      consultas_ano_anterior: Número de consultas odontológicas no ano anterior à consulta de rotina.
+      psr_inicial: >-
+        Índice PSR (0 a 4) registrado pelo dentista na guia da consulta de rotina de 2025;
+        campo obrigatório desde janeiro de 2025.
+      programa_periodontal: >-
+        Beneficiário indicado pelo dentista e inscrito no Programa de Acompanhamento
+        Periodontal na consulta de rotina de 2025 (1 = sim, 0 = não).
+      limpezas_12m: Número de profilaxias realizadas nos 12 meses seguintes à consulta de rotina.
+      custo_curativo_12m: >-
+        Soma, em reais, dos procedimentos curativos (restauração, endodontia, extração,
+        urgência) pagos pela operadora nos 12 meses seguintes à consulta de rotina. Não
+        inclui profilaxia nem consultas.
+    story: >-
+      ATA – Reunião mensal de Atendimento e Rede, 11/09/2026, sala 2. Presentes: Rogério
+      (coordenação de atendimento), Dra. Lúcia (auditoria odontológica), Fabiana (dados),
+      Marcos (comercial). Pauta 2 – Programa de Acompanhamento Periodontal. Rogério lembrou
+      que o programa começou em janeiro de 2025 e consiste em limpezas trimestrais e
+      orientação de higiene para beneficiários indicados pelo dentista da rede na consulta
+      de rotina. Dra. Lúcia explicou que a indicação é critério do dentista: ele olha a
+      gengiva na cadeira e indica quem está com inflamação ou sangramento, e que esse
+      quadro, sem acompanhamento, costuma virar canal e extração mais adiante. Fabiana
+      informou que, desde janeiro de 2025, a guia da consulta de rotina traz o campo
+      obrigatório do índice PSR, que é exatamente essa avaliação da gengiva feita pelo
+      dentista, e que o campo veio na extração; além dele, a base traz idade, tipo de
+      contrato, quantas consultas o beneficiário fez no ano anterior, se entrou no
+      programa, quantas limpezas fez nos 12 meses seguintes e o custo dos procedimentos
+      curativos nesses mesmos 12 meses. Marcos observou que quem já ia mais ao dentista no
+      ano anterior foi mais indicado, simplesmente porque passou mais vezes pela cadeira,
+      e que esse público também gasta mais em procedimento, por hábito de uso. Rogério
+      destacou como ponto positivo que os participantes fizeram em média 3,1 limpezas no
+      ano contra 0,8 dos demais, e que limpeza regular reduz procedimento curativo. Dra.
+      Lúcia acrescentou que o custo curativo varia também com a idade e com o tipo de
+      contrato (PJ tem cobertura mais ampla). Encaminhamento: Fabiana verifica se, com as
+      colunas disponíveis, dá para medir o efeito do programa sobre o custo curativo e,
+      em caso positivo, por quais colunas ajustar. Prazo: próxima reunião.
+    edges:
+      - psr_inicial -> programa_periodontal
+      - psr_inicial -> custo_curativo_12m
+      - consultas_ano_anterior -> programa_periodontal
+      - consultas_ano_anterior -> custo_curativo_12m
+      - programa_periodontal -> limpezas_12m
+      - limpezas_12m -> custo_curativo_12m
+      - programa_periodontal -> custo_curativo_12m
+      - idade -> custo_curativo_12m
+      - tipo_contrato -> custo_curativo_12m
+    answer:
+      identifiable: true
+      adjust_for: [consultas_ano_anterior, psr_inicial]
+      do_not_adjust_for:
+        limpezas_12m: >-
+          As limpezas são o próprio conteúdo do programa; ajustar por elas apaga o caminho
+          pelo qual o programa reduz o custo curativo.
+      indifferent: [idade, tipo_contrato, id_beneficiario]
+    twin: pt_odonto_programa_periodontal_pt10
+    note: >-
+      Mesma ata; a diferença é que a avaliação da gengiva agora está na guia, como PSR.
+      Com ela e as consultas do ano anterior, o efeito pode ser medido.
+
+  - id: pt_saneamento_caca_vazamento_wiki
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: analista de uma companhia de água e esgoto
+    theme: Saneamento, visita para busca de vazamentos internos
+    title: Visita do Caça-Vazamento e consumo no trimestre seguinte
+    treatment: visita_caca_vazamento
+    outcome: consumo_m3_trim_seguinte
+    columns:
+      matricula: Número da matrícula da ligação de água.
+      dmc: Código do DMC (setor de medição e controle) ao qual a ligação pertence.
+      categoria: Categoria de faturamento da ligação (residencial, comercial, pública).
+      consumo_m3_trim_anterior: Consumo faturado, em m³, no trimestre anterior ao período de visitas.
+      visita_caca_vazamento: >-
+        Imóvel recebeu a visita do Caça-Vazamento entre março e agosto de 2025 (1 = sim,
+        0 = não).
+      consumo_m3_trim_seguinte: Consumo faturado, em m³, no trimestre seguinte ao período de visitas.
+      reclamacao_sac_90d: >-
+        Abriu reclamação no SAC nos 90 dias após o fechamento do trimestre seguinte ao
+        período de visitas (1 = sim, 0 = não).
+    story: >-
+      Caça-Vazamento 2025 — notas para quem for analisar (página mantida pelo Planejamento
+      Comercial; última edição 02/10/2026). O que foi: entre março e agosto de 2025 as
+      equipes de campo visitaram 9.800 imóveis para procurar vazamentos internos (caixa
+      d'água, descarga, torneiras), sem custo para o cliente, consertando na hora o que
+      fosse simples. Como os imóveis foram escolhidos: duas listas. A primeira veio do
+      faturamento, com todas as ligações cujo consumo no trimestre anterior passou de 30
+      m³. A segunda veio da Operação, que mandou as equipes priorizarem os DMCs com maior
+      índice de perdas; dentro desses setores a equipe visitou rua por rua. Não houve
+      sorteio. Lembrar que o DMC também define a pressão da rede, e setor com pressão alta
+      consome mais, visita ou não. Resultado que a Operação quer mostrar: consumo médio no
+      trimestre seguinte às visitas, comparado com o dos imóveis não visitados. Imóveis
+      comerciais e públicos consomem mais que residenciais, por isso a categoria está na
+      base. O SAC pediu para incluir as reclamações: segundo eles, quem recebeu visita e
+      mesmo assim viu a conta vir alta liga para reclamar que "o problema não foi
+      resolvido". Dúvida em aberto para o time de dados: por quais colunas ajustar a
+      comparação entre visitados e não visitados?
+    edges:
+      - consumo_m3_trim_anterior -> visita_caca_vazamento
+      - consumo_m3_trim_anterior -> consumo_m3_trim_seguinte
+      - dmc -> visita_caca_vazamento
+      - dmc -> consumo_m3_trim_seguinte
+      - categoria -> consumo_m3_trim_seguinte
+      - visita_caca_vazamento -> consumo_m3_trim_seguinte
+      - visita_caca_vazamento -> reclamacao_sac_90d
+      - consumo_m3_trim_seguinte -> reclamacao_sac_90d
+    answer:
+      identifiable: true
+      adjust_for: [consumo_m3_trim_anterior, dmc]
+      do_not_adjust_for:
+        reclamacao_sac_90d: >-
+          A reclamação vem depois da conta do trimestre seguinte e depende tanto da visita
+          quanto do consumo que apareceu nela.
+      indifferent: [categoria, matricula]
+    note: >-
+      Duas regras de escolha (consumo anterior e DMC), ambas na tabela. A reclamação no
+      SAC é registrada depois do resultado; o momento está na descrição da coluna.
+
+  - id: pt_saneamento_tarifa_social_slack
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: analista de uma companhia de água e esgoto
+    theme: Saneamento, cadastro na tarifa social
+    title: Cadastro na tarifa social e inadimplência em 6 meses
+    treatment: cadastro_tarifa_social
+    outcome: inadimplente_6m
+    columns:
+      bairro: Bairro do imóvel (um dos quatro bairros da campanha).
+      inadimplente_6m_antes: >-
+        Teve ao menos uma fatura vencida há mais de 30 dias nos 6 meses anteriores à
+        campanha (1 = sim, 0 = não).
+      cadastro_tarifa_social: Família cadastrada na tarifa social durante a campanha (1 = sim, 0 = não).
+      valor_conta_media_depois: Valor médio das faturas emitidas nos 6 meses após a campanha, em reais.
+      inadimplente_6m: >-
+        Teve ao menos uma fatura vencida há mais de 30 dias nos 6 meses após a campanha
+        (1 = sim, 0 = não).
+    not_in_table:
+      renda_familiar: >-
+        Renda da família, avaliada pelo agente na visita e registrada no CadÚnico da
+        prefeitura. Não chega à companhia.
+    story: >-
+      gente, rapidinho: a campanha da tarifa social de 2025 (agentes comunitários indo de
+      porta em porta em quatro bairros da zona norte cadastrando famílias no desconto)
+      precisa de uma avaliação pro relatório da agência reguladora. a pergunta é se o
+      cadastro reduziu inadimplência nos 6 meses seguintes. detalhes que acho que
+      importam: os agentes começaram pelas casas com conta atrasada, porque era onde a
+      gente mais queria o cadastro; em dois bairros cobriram quase tudo, nos outros dois
+      ficou pela metade; e no fim quem entrou foi quem o agente viu que precisava, pela
+      situação da casa, renda, essas coisas. a renda fica no CadÚnico da prefeitura, não
+      vem pra gente. os quatro bairros têm histórico de inadimplência bem diferente entre
+      si. com o desconto a conta média caiu de R$ 96 pra R$ 41, e conta menor obviamente
+      atrasa menos. colunas que eu tenho: bairro, inadimplente_6m_antes,
+      cadastro_tarifa_social, valor_conta_media_depois, inadimplente_6m. dá pra medir?
+      ajusto por quê?
+    edges:
+      - renda_familiar -> cadastro_tarifa_social
+      - renda_familiar -> inadimplente_6m
+      - inadimplente_6m_antes -> cadastro_tarifa_social
+      - inadimplente_6m_antes -> inadimplente_6m
+      - bairro -> cadastro_tarifa_social
+      - bairro -> inadimplente_6m
+      - cadastro_tarifa_social -> valor_conta_media_depois
+      - valor_conta_media_depois -> inadimplente_6m
+      - cadastro_tarifa_social -> inadimplente_6m
+    answer:
+      identifiable: false
+      missing: [renda_familiar]
+    note: >-
+      Inadimplência anterior e bairro estão na tabela, mas o agente escolheu pela
+      necessidade da família, e a renda ficou no CadÚnico. O valor da conta depois é
+      consequência do desconto.
+
+  - id: pt_ecommerce_recomendador_tamanho_email
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: gerente de e-commerce de moda
+    theme: E-commerce de moda, recomendador de tamanho
+    title: Recomendador de tamanho e devolução do pedido
+    treatment: usou_recomendador
+    outcome: devolveu_pedido
+    columns:
+      dia_semana_pedido: Dia da semana em que o pedido foi feito (1 = segunda, 7 = domingo).
+      dispositivo: Dispositivo em que o pedido foi feito (app, mobile web, desktop).
+      categoria_produto: Categoria do item (vestido, calça, camiseta, acessório).
+      devolucoes_anteriores: Número de devoluções por tamanho da cliente nos 12 meses anteriores ao pedido.
+      valor_pedido: Valor do pedido, em reais, antes do frete.
+      usou_recomendador: >-
+        A cliente usou o recomendador de tamanho na página do produto antes de fechar o
+        pedido (1 = sim, 0 = não).
+      devolveu_pedido: Pedido devolvido dentro do prazo de troca de 15 dias após a entrega (1 = sim, 0 = não).
+      avaliou_caimento: >-
+        Respondeu à pergunta sobre caimento no e-mail de avaliação enviado 20 dias após a
+        entrega (1 = sim, 0 = não).
+    story: >-
+      Assunto: recomendador de tamanho x devoluções – dados em anexo. Oi Paula, tudo bem?
+      Conforme combinamos na reunião de quinta, segue em anexo a planilha
+      recomendador_abr_jun.xlsx. A aba "pedidos" tem uma linha por pedido de abril a junho
+      (143 mil linhas), só moda feminina, e a aba "dicionario" descreve cada coluna.
+      Contexto para quem não acompanhou: o recomendador de tamanho ("qual é o meu
+      tamanho?") entrou na página de produto em março. A cliente clica, informa altura,
+      peso e como gosta do caimento, e ele sugere o tamanho. Não é obrigatório, e no app e
+      no mobile web o botão fica escondido embaixo da descrição, então quase ninguém usa
+      pelo celular; no desktop o uso é bem maior. A taxa de devolução dos pedidos com
+      recomendador foi de 14% contra 22% sem, e o Ricardo já quer colocar isso no deck do
+      investidor. Minhas ressalvas: (1) quem usa o recomendador é quem tem dúvida de
+      tamanho, e isso aparece bem no histórico: clientes com devolução anterior por
+      tamanho usam o dobro, e essas clientes devolvem mais de qualquer jeito. (2) Em
+      vestidos e calças o botão aparece em destaque, logo abaixo do preço; em camisetas e
+      acessórios fica discreto. E vestido e calça são justamente as categorias com mais
+      devolução por caimento. (3) Pedido de valor alto devolve mais, isso é histórico,
+      independe do recomendador. (4) Coloquei também a avaliação de caimento: o e-mail de
+      avaliação sai 20 dias depois da entrega, já depois do prazo de troca, e quem usou o
+      recomendador responde bem mais (a gente lembra a cliente da sugestão que ela
+      recebeu); quem devolveu também responde mais, geralmente para reclamar. Tem ainda o
+      dia da semana do pedido, que veio no extrato e deixei. Consegue me dizer por quais
+      colunas ajustar para comparar com e sem recomendador de um jeito que eu consiga
+      defender para o Ricardo? Obrigada! Carla
+    edges:
+      - devolucoes_anteriores -> usou_recomendador
+      - devolucoes_anteriores -> devolveu_pedido
+      - categoria_produto -> usou_recomendador
+      - categoria_produto -> devolveu_pedido
+      - dispositivo -> usou_recomendador
+      - valor_pedido -> devolveu_pedido
+      - usou_recomendador -> devolveu_pedido
+      - usou_recomendador -> avaliou_caimento
+      - devolveu_pedido -> avaliou_caimento
+    answer:
+      identifiable: true
+      adjust_for: [categoria_produto, devolucoes_anteriores]
+      do_not_adjust_for:
+        avaliou_caimento: >-
+          A avaliação é enviada depois do prazo de troca, e responder depende tanto de ter
+          usado o recomendador quanto de ter devolvido.
+      indifferent: [dispositivo, valor_pedido, dia_semana_pedido]
+    note: >-
+      Duas colunas a ajustar, ambas explicadas no e-mail. O dispositivo só muda quem usa;
+      o valor só muda quem devolve. A avaliação de caimento é registrada depois do resultado.
+
+  - id: pt_mineradora_treinamento_bloqueio_email
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: gerente de segurança do trabalho em uma mineradora
+    theme: Mineração, treinamento de bloqueio e etiquetagem de energia
+    title: Treinamento de bloqueio e desvios de segurança em 12 meses
+    treatment: treinamento_bloqueio
+    outcome: desvios_12m
+    columns:
+      matricula: Matrícula funcional do empregado.
+      area: Área de lotação (mina, usina, porto).
+      turno: Turno fixo de trabalho (dia, noite).
+      tempo_casa_anos: Tempo de empresa, em anos completos, na data de abertura das vagas do treinamento.
+      treinamento_bloqueio: >-
+        Concluiu o treinamento de 16 horas de bloqueio e etiquetagem de energia no
+        primeiro semestre de 2025 (1 = sim, 0 = não).
+      aderencia_checklist_pct: >-
+        Percentual de tarefas auditadas com checklist de pré-tarefa preenchido
+        corretamente, nas auditorias de campo dos 12 meses seguintes ao treinamento.
+      desvios_12m: Número de desvios de segurança registrados pelas inspeções nos 12 meses seguintes ao treinamento.
+    not_in_table:
+      perfil_risco_supervisor: >-
+        Avaliação informal do supervisor sobre o quanto o empregado é afoito e pula etapas,
+        que orientou as indicações. Não existe em sistema nenhum.
+    story: >-
+      Assunto: avaliação do treinamento de bloqueio e etiquetagem – planilha anexa.
+      Prezados do time de dados, boa tarde. Segue anexa a planilha
+      treinamento_bloqueio_2025.xlsx, com uma linha por empregado da manutenção (1.126
+      pessoas) e a aba "legenda" explicando as colunas. Preciso de ajuda para responder à
+      diretoria se o treinamento de 16 horas de bloqueio e etiquetagem de energia, que
+      rodou no primeiro semestre de 2025, reduziu os desvios registrados pelas inspeções
+      nos 12 meses seguintes. Como foi a seleção: o RH abriu 400 vagas e cada supervisor
+      indicou quem mandar. Conversando com eles, a lógica foi mandar primeiro "quem
+      precisa mais": o pessoal mais afoito, que pula etapa, que o supervisor já tinha
+      pegado fazendo intervenção sem bloquear. Isso é olho de supervisor; não existe
+      registro disso em sistema nenhum. Também foram mais indicados os mais novos de casa,
+      e a gente sabe que tempo de casa pesa nos desvios. O treinamento aconteceu só na
+      mina e na usina; o porto ficou de fora por logística, e o porto historicamente tem
+      menos desvios dessa natureza. O turno da noite aparece com mais desvios todo ano,
+      por causa da supervisão reduzida. Como indicador intermediário, as auditorias de
+      campo mostram aderência ao checklist de pré-tarefa de 91% entre os treinados contra
+      72% nos demais, e aderência ao checklist é justamente o que evita o desvio. A
+      diretoria gostou desse número, mas eu quero responder a pergunta certa. Com as
+      colunas da planilha, dá para medir o efeito do treinamento sobre os desvios? Se der,
+      por quais colunas ajustar? Se não der, me digam o que falta, que eu tento levantar.
+      Atenciosamente, Henrique – Segurança do Trabalho.
+    edges:
+      - perfil_risco_supervisor -> treinamento_bloqueio
+      - perfil_risco_supervisor -> desvios_12m
+      - tempo_casa_anos -> treinamento_bloqueio
+      - tempo_casa_anos -> desvios_12m
+      - area -> treinamento_bloqueio
+      - area -> desvios_12m
+      - turno -> desvios_12m
+      - treinamento_bloqueio -> aderencia_checklist_pct
+      - aderencia_checklist_pct -> desvios_12m
+      - treinamento_bloqueio -> desvios_12m
+    answer:
+      identifiable: false
+      missing: [perfil_risco_supervisor]
+    note: >-
+      Tempo de casa e área estão na tabela; o olho do supervisor, que mandou os mais
+      afoitos, não está. A aderência ao checklist é consequência do treinamento e é
+      apresentada como o número que a diretoria gostou.
+
+  - id: pt_jornal_audio_wiki
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: gerente de assinaturas de um jornal
+    theme: Mídia, matérias narradas em áudio no app
+    title: Uso de áudio no app e cancelamento em 6 meses
+    treatment: usa_audio
+    outcome: cancelou_6m
+    columns:
+      sistema_operacional: Sistema operacional do aparelho principal do assinante (iOS, Android).
+      uf: Unidade da federação do endereço de cobrança.
+      tempo_assinatura_meses: >-
+        Meses desde o início da assinatura, na data do lançamento do áudio na plataforma
+        do assinante.
+      leituras_30d_antes: >-
+        Matérias lidas no app nos 30 dias anteriores ao lançamento do áudio na plataforma
+        do assinante.
+      usa_audio: >-
+        Ouviu quatro ou mais matérias narradas nos 30 dias seguintes ao lançamento do
+        áudio na sua plataforma (1 = sim, 0 = não).
+      sessoes_mes_seguinte: Aberturas do app no mês seguinte ao lançamento do áudio na plataforma do assinante.
+      cancelou_6m: >-
+        Cancelou a assinatura nos 6 meses seguintes ao lançamento do áudio na sua
+        plataforma (1 = sim, 0 = não).
+    not_in_table:
+      viu_banner_audio: >-
+        Se o app exibiu ao assinante o banner "ouça esta matéria", decidido pelo motor de
+        recomendação a partir do engajamento dos 30 dias anteriores. O log de exibição não
+        é armazenado.
+    story: >-
+      Wiki Produto > Áudio > Avaliação do impacto na retenção (rascunho; dono: Tiago;
+      atualizado em 29/09/2026). Contexto. Em abril lançamos as matérias narradas (áudio)
+      no app. Nas primeiras semanas o recurso só existia no iOS; o Android entrou em
+      junho. Quem vê o banner "ouça esta matéria" é decidido pelo motor de recomendação do
+      app a partir do engajamento dos 30 dias anteriores; esse log de exibição do banner
+      não é armazenado, só sabemos quem de fato ouviu. Definição de uso. Consideramos
+      usuário de áudio quem ouviu quatro ou mais matérias nos 30 dias após o lançamento
+      na sua plataforma. O que sabemos da base. Assinantes mais antigos aderiram mais ao
+      áudio e, como sempre, cancelam menos. Quem lia mais antes do lançamento também
+      aderiu mais, e leitura prévia é o nosso melhor preditor de cancelamento há anos. O
+      cancelamento varia por estado (o Sul e o Centro-Oeste cancelam menos), que está na
+      base. Indicador que o time comemorou: no mês seguinte ao lançamento, os usuários de
+      áudio abriram o app 2,3 vezes mais; frequência de abertura é o que segura
+      assinante. Pergunta para a área de dados. Dá para medir o efeito do uso de áudio
+      sobre o cancelamento em 6 meses com o que está na base? Por quais colunas ajustar?
+      A tabela tem: sistema_operacional, uf, tempo_assinatura_meses, leituras_30d_antes,
+      usa_audio, sessoes_mes_seguinte, cancelou_6m.
+    edges:
+      - leituras_30d_antes -> viu_banner_audio
+      - viu_banner_audio -> usa_audio
+      - leituras_30d_antes -> usa_audio
+      - leituras_30d_antes -> cancelou_6m
+      - sistema_operacional -> usa_audio
+      - tempo_assinatura_meses -> usa_audio
+      - tempo_assinatura_meses -> cancelou_6m
+      - uf -> cancelou_6m
+      - usa_audio -> sessoes_mes_seguinte
+      - sessoes_mes_seguinte -> cancelou_6m
+      - usa_audio -> cancelou_6m
+    answer:
+      identifiable: true
+      adjust_for: [leituras_30d_antes, tempo_assinatura_meses]
+      do_not_adjust_for:
+        sessoes_mes_seguinte: >-
+          As aberturas do mês seguinte são consequência do uso de áudio e são o caminho
+          pelo qual ele segura o assinante.
+      indifferent: [sistema_operacional, uf]
+    note: >-
+      Há uma informação não guardada (o banner), mas ela só influencia quem usa o áudio e
+      depende da leitura prévia, que está na tabela: o efeito continua medível. A
+      plataforma só muda quem usa; o estado só muda quem cancela.

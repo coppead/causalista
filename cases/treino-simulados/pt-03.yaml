@@ -1,0 +1,572 @@
+# Casos de TREINO que simulam texto de pessoa, lote pt-03: oito casos em português do
+# Brasil escritos como se fossem de uma pessoa (uma analista de marketing de editora de
+# livros didáticos, um técnico de secretaria estadual de saúde, uma gerente regional de
+# rede de hotéis de estrada, um coordenador de cooperativa de catadores, duas analistas
+# de crédito de uma financeira de veículos), cada um no estilo em que essa pessoa
+# escreveria: e-mail longo com anexo descrito, trecho de dissertação de mestrado, ata de
+# reunião, transcrição de áudio informal, nota interna curta.
+#
+# Escritos pelo assistente em 2026-10-07, no papel de cada pessoa. Idioma: pt.
+#
+# Estes casos são material de TREINO (reforço com a nota do verificador), não teste.
+# Não repetem nenhum cenário do conjunto de teste congelado em cases/simulados/ nem
+# variante próxima dele. Status rascunho até revisão. As setas ("causa -> efeito")
+# declaram o diagrama que o texto, as descrições das colunas e o bom senso implicam; o
+# verificador confere a resposta a partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_editora_exemplares
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: analista de marketing de uma editora de livros didáticos, formada em publicidade, responsável pelos relatórios da campanha de adoção; sem formação em estatística
+    theme: Editora de livros didáticos (marketing de adoção)
+    title: Caixa de exemplares de divulgação e adoção para 2026
+    treatment: recebeu_exemplares
+    outcome: adotou_2026
+    columns:
+      cod_escola: Código da escola no CRM da editora.
+      recebeu_exemplares: Recebeu a caixa de exemplares de divulgação da coleção de Fundamental II (livro do aluno dos quatro anos e livro do professor) entre maio e agosto de 2025 (1 = sim, 0 = não).
+      adotou_2025: Adotou ao menos um título da editora para o ano letivo de 2025 (1 = sim, 0 = não).
+      adotou_2026: Adotou ao menos um título da coleção para o ano letivo de 2026, conforme pedido registrado até 31/01/2026 (1 = sim, 0 = não).
+      pediu_formacao: Solicitou a formação de professores oferecida pela editora entre dezembro de 2025 e fevereiro de 2026 (1 = sim, 0 = não).
+      num_alunos: Alunos matriculados no Fundamental II, conforme cadastro do CRM atualizado em abril de 2025.
+      regional: Regional comercial responsável pela escola (Sul, Sudeste, Centro-Oeste, Nordeste, Norte).
+    not_in_table:
+      afinidade_coordenacao: A relação do divulgador com a coordenação pedagógica da escola, se a coordenadora atende, abre a caixa e senta com ele. Cada divulgador sabe de cabeça; não há campo para isso no CRM.
+    story: >-
+      Oi, Renato, tudo bem?
+
+      Conforme conversamos na quinta, segue em anexo a base da campanha de adoção 2026
+      (arquivo base_adocao_2026.xlsx, aba "escolas", 1.874 linhas, uma por escola
+      particular com Fundamental II na nossa carteira). Vou explicar o que tem lá e o
+      que a gente precisa.
+
+      Contexto: entre maio e agosto do ano passado mandamos a caixa de exemplares de
+      divulgação da coleção nova (livro do aluno dos quatro anos mais o livro do
+      professor) pra 612 escolas. A caixa custa caro, uns R$ 380 com frete, então cada
+      divulgador tinha uma cota e escolhia pra quem mandar. A diretoria quer saber se a
+      caixa fez diferença na adoção pra 2026, porque o orçamento de 2027 depende disso.
+
+      O resultado cru é bonito: 41% de adoção entre quem recebeu a caixa contra 17%
+      entre quem não recebeu. Só que eu já ouvi do Jorge (regional Sul) e da Cris
+      (Nordeste) como eles escolheram, e fiquei com o pé atrás. Eles mandam primeiro
+      pras escolas que já adotaram a gente em 2025, pra garantir a renovação, e pras
+      escolas grandes, porque a cota é por caixa e não por aluno, então escola de 800
+      alunos vale mais que uma de 120. E o Jorge foi sincero: ele manda caixa pra
+      coordenadora que ele sabe que vai abrir e sentar com ele, aquela que atende o
+      telefone dele há anos. Isso não tem como estar no sistema, é a cabeça do
+      divulgador, mas é óbvio que essas coordenadoras adotam mais a gente, com ou sem
+      caixa; aliás, já adotavam em 2025 por isso mesmo. Fora isso, escola que adotou em
+      2025 tende a renovar, e escola grande tem mais turma, logo mais chance de pelo
+      menos um título entrar.
+
+      A cota também variou por regional: Norte e Nordeste tiveram menos caixas por
+      escola porque têm menos divulgador em campo.
+
+      Colunas da planilha: código da escola, se recebeu a caixa, se adotou em 2025, se
+      adotou pra 2026 (pedido registrado até 31/01), número de alunos do Fundamental
+      II, regional, e uma coluna que eu puxei do time de formação: se a escola pediu a
+      formação de professores que a gente oferece de dezembro a fevereiro. Eu gosto
+      desse dado, mas aviso que a formação é mais pedida por quem adotou (lógico, vão
+      usar o livro) e também por quem recebeu a caixa, porque dentro da caixa vai o
+      folheto da formação.
+
+      Dá pra tirar daí um número honesto do efeito da caixa, ou a gente vai ter que
+      fazer um teste em 2026, mandando caixa por sorteio em parte da carteira? Preciso
+      de uma resposta até sexta, se der.
+
+      Obrigada,
+      Letícia
+    edges:
+      - afinidade_coordenacao -> recebeu_exemplares
+      - afinidade_coordenacao -> adotou_2026
+      - afinidade_coordenacao -> adotou_2025
+      - adotou_2025 -> recebeu_exemplares
+      - adotou_2025 -> adotou_2026
+      - num_alunos -> recebeu_exemplares
+      - num_alunos -> adotou_2026
+      - num_alunos -> adotou_2025
+      - regional -> recebeu_exemplares
+      - recebeu_exemplares -> adotou_2026
+      - recebeu_exemplares -> pediu_formacao
+      - adotou_2026 -> pediu_formacao
+    answer:
+      identifiable: false
+      missing: [afinidade_coordenacao]
+    note: >-
+      Os divulgadores mandaram a caixa para as coordenadoras que os atendem, e essa
+      relação não está em coluna nenhuma. A adoção de 2025 carrega parte dela, mas não
+      tudo. O pedido de formação vem depois da adoção e sobe com a caixa e com a adoção.
+
+  - id: pt_saude_teleconsultoria
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: técnico da área de regulação de uma secretaria estadual de saúde, enfermeiro, escrevendo a dissertação do mestrado profissional em saúde coletiva sobre o serviço de teleconsultoria
+    theme: Saúde pública (secretaria estadual, atenção primária)
+    title: Teleconsultoria na atenção primária e encaminhamentos ao ambulatório estadual
+    treatment: aderiu_teleconsultoria
+    outcome: encaminhamentos_2025
+    columns:
+      codigo_ibge: Código IBGE do município, com sete dígitos.
+      aderiu_teleconsultoria: Município com ao menos uma equipe de atenção primária habilitada na plataforma estadual de teleconsultoria até 31 de março de 2025 (1 = sim, 0 = não).
+      encaminhamentos_2025: Encaminhamentos de usuários do município ao ambulatório estadual de especialidades registrados no sistema de regulação entre abril e dezembro de 2025, por mil consultas médicas na atenção primária no mesmo período.
+      encaminhamentos_2024: Mesmo indicador, calculado para o ano de 2024.
+      cobertura_esf_2024: Cobertura populacional estimada da Estratégia Saúde da Família em dezembro de 2024, em percentual.
+      distancia_capital_km: Distância rodoviária da sede do município à capital, em quilômetros.
+      teleconsultorias_1000: Teleconsultorias solicitadas pelas equipes do município entre abril e dezembro de 2025, por mil consultas médicas na atenção primária no período (zero para os municípios não habilitados).
+      rotatividade_medicos_2025: Proporção dos médicos da atenção primária do município que mudaram de equipe ou deixaram o município ao longo de 2025, segundo o CNES.
+    story: >-
+      4.2 Delineamento e fonte dos dados
+
+      A implantação do serviço estadual de teleconsultoria não seguiu desenho
+      experimental. A adesão foi voluntária e ocorreu em duas ondas, entre setembro de
+      2024 e março de 2025, mediante termo assinado pelo gestor municipal e habilitação
+      de ao menos uma equipe de atenção primária na plataforma. Até 31 de março de
+      2025, 97 dos 223 municípios do estado haviam aderido.
+
+      Importa descrever como se deu essa adesão, porque ela condiciona a leitura dos
+      resultados. As coordenações regionais, por orientação da Superintendência de
+      Regulação, concentraram o trabalho de sensibilização nos municípios com as
+      maiores taxas de encaminhamento ao ambulatório estadual em 2024, entendidos como
+      os que mais pressionavam a fila. Aderiram em maior proporção, ainda, os
+      municípios mais distantes da capital, para os quais o deslocamento do usuário até
+      o ambulatório representa custo elevado e o acesso remoto ao especialista é mais
+      atraente, e os municípios com cobertura mais alta da Estratégia Saúde da Família,
+      uma vez que o serviço exigia equipe completa e cadastrada. Essas três
+      características guardam, por sua vez, relação própria com a taxa de
+      encaminhamento: a cobertura da ESF está associada, na literatura e na série
+      histórica do estado, a maior resolutividade e menor encaminhamento; a distância
+      opera como barreira ao encaminhamento, independentemente de qualquer intervenção;
+      e a taxa de 2024 reflete padrões locais de prática que se mantêm no ano seguinte.
+      Cobertura e distância também explicam parte das próprias taxas de 2024.
+
+      O mecanismo esperado do serviço é direto: ao discutir o caso com o especialista à
+      distância, o médico da atenção primária resolve localmente parte do que antes
+      encaminharia. Por isso o volume de teleconsultorias efetivamente solicitadas, por
+      mil consultas, foi incluído na base como indicador de processo, ainda que ele
+      seja, por definição, posterior e decorrente da habilitação. Registra-se, por fim,
+      que 2025 foi um ano de alta rotatividade de médicos na atenção primária em
+      diversos municípios, pelo encerramento de um ciclo do Mais Médicos; médicos
+      recém-chegados tendem a encaminhar mais, e a rotatividade foi incluída na base
+      por esse motivo.
+
+      A base final tem uma linha por município (n = 223) e as variáveis descritas no
+      Quadro 3. A questão que orienta a análise do capítulo 5 é a estimativa do efeito
+      da adesão sobre a taxa de encaminhamentos de abril a dezembro de 2025.
+    edges:
+      - cobertura_esf_2024 -> aderiu_teleconsultoria
+      - cobertura_esf_2024 -> encaminhamentos_2025
+      - cobertura_esf_2024 -> encaminhamentos_2024
+      - distancia_capital_km -> aderiu_teleconsultoria
+      - distancia_capital_km -> encaminhamentos_2025
+      - distancia_capital_km -> encaminhamentos_2024
+      - encaminhamentos_2024 -> aderiu_teleconsultoria
+      - encaminhamentos_2024 -> encaminhamentos_2025
+      - aderiu_teleconsultoria -> teleconsultorias_1000
+      - teleconsultorias_1000 -> encaminhamentos_2025
+      - aderiu_teleconsultoria -> encaminhamentos_2025
+      - rotatividade_medicos_2025 -> encaminhamentos_2025
+    answer:
+      identifiable: true
+      adjust_for: [cobertura_esf_2024, distancia_capital_km, encaminhamentos_2024]
+      do_not_adjust_for:
+        teleconsultorias_1000: É posterior à habilitação e decorre dela; é o caminho pelo qual o serviço age. Ajustar por ela apaga parte do efeito.
+      indifferent: [codigo_ibge, rotatividade_medicos_2025]
+    note: >-
+      Os três motivos da adesão estão na tabela. A armadilha é o indicador de processo,
+      consequência da adesão; a rotatividade só mexe no resultado.
+
+  - id: pt_hotel_patio_sem_contagem
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: gerente regional de uma rede de hotéis econômicos de beira de estrada com 46 unidades em quatro estados, que redige as atas das reuniões de gerência; formação em hotelaria
+    theme: Hotelaria (rede de hotéis de estrada)
+    title: Pátio vigiado para carretas e ocupação, sem a contagem de tráfego
+    twin: pt_hotel_patio_com_contagem
+    treatment: patio_carretas
+    outcome: ocupacao_2025
+    columns:
+      cod_unidade: Código da unidade na rede, formado pela rodovia e um número sequencial.
+      patio_carretas: Unidade recebeu o pátio vigiado 24 horas para carretas, inaugurado entre fevereiro e abril de 2025 (1 = sim, 0 = não).
+      ocupacao_2025: Taxa de ocupação média da unidade de maio a dezembro de 2025, em percentual das unidades habitacionais disponíveis.
+      ocupacao_2024: Taxa de ocupação média da unidade em 2024, mesmo critério.
+      terreno_m2: Área total do terreno da unidade, em metros quadrados, conforme matrícula.
+      convenios_transportadoras: Número de convênios com transportadoras assinados pela unidade entre maio e dezembro de 2025.
+    not_in_table:
+      movimento_carretas: O movimento de carretas no trecho de rodovia de cada unidade, como o diretor comercial o percebe nas viagens dele. A rede não tem contagem nenhuma.
+    story: >-
+      ATA – Reunião de gerentes regionais – 20/01/2026 – sala da diretoria, matriz.
+      Presentes: Nelson (diretor comercial), Patrícia (controladoria), Fábio, Renata e
+      eu (regionais). Ausente: Marcelo (regional Sul), justificado.
+
+      Pauta 2 – Pátio de carretas: resultado de 2025 e decisão sobre expansão em 2026.
+
+      Nelson apresentou o resumo: 17 das 46 unidades receberam o pátio vigiado 24h
+      entre fevereiro e abril, investimento médio de R$ 410 mil por unidade. Ocupação
+      média de maio a dezembro: 71% nas unidades com pátio contra 58% nas demais. Ele
+      propõe estender para mais 12 unidades em 2026.
+
+      Patrícia pediu cautela com a comparação. Lembrou que as 17 unidades não foram
+      sorteadas: o Nelson escolheu pelo movimento de carreta que ele vê na estrada, de
+      tanto rodar os trechos, e priorizou também unidades com terreno sobrando, pra
+      fazer o pátio sem comprar área. Nelson confirmou e acrescentou que preferiu
+      unidades que vinham com ocupação fraca em 2024, "pra dar um gás onde precisava".
+      Patrícia observou que trecho com muita carreta é trecho com muito hóspede
+      caminhoneiro, com ou sem pátio, e que isso já aparecia na ocupação de 2024
+      dessas unidades; e que a ocupação de um ano puxa a do outro, cliente fixo volta.
+      Sobre o movimento de carreta, confirmou-se que a rede não tem esse número em
+      lugar nenhum: é a leitura do Nelson, e só.
+
+      Renata comentou que as unidades com pátio fecharam convênios com transportadoras
+      ao longo do ano (a Rota Sul fechou cinco), coisa que não acontecia antes porque
+      a transportadora exige vaga segura pra carreta; convênio enche quarto de segunda
+      a quinta. Nelson concordou que foi por aí que o pátio funcionou.
+
+      Encaminhamentos:
+      1. Patrícia envia ao BI a planilha por unidade (código, pátio, ocupação 2025 e
+      2024, área do terreno, número de convênios) e pede uma estimativa do efeito do
+      pátio na ocupação, com a ressalva acima.
+      2. Decisão sobre expansão adiada para a reunião de fevereiro.
+      3. Fábio verifica com a concessionária se existe contagem de veículos pesados por
+      trecho.
+
+      Redigido por Cláudia (regional Centro-Oeste).
+    edges:
+      - movimento_carretas -> patio_carretas
+      - movimento_carretas -> ocupacao_2025
+      - movimento_carretas -> ocupacao_2024
+      - ocupacao_2024 -> patio_carretas
+      - ocupacao_2024 -> ocupacao_2025
+      - terreno_m2 -> patio_carretas
+      - patio_carretas -> convenios_transportadoras
+      - convenios_transportadoras -> ocupacao_2025
+      - patio_carretas -> ocupacao_2025
+    answer:
+      identifiable: false
+      missing: [movimento_carretas]
+    note: >-
+      O diretor escolheu as unidades pelo movimento de carretas que ele vê, e a rede
+      não tem esse número. A ocupação de 2024 carrega parte dele, mas não tudo. Os
+      convênios são consequência do pátio.
+
+  - id: pt_hotel_patio_com_contagem
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: gerente regional de uma rede de hotéis econômicos de beira de estrada com 46 unidades em quatro estados, que redige as atas das reuniões de gerência; formação em hotelaria
+    theme: Hotelaria (rede de hotéis de estrada)
+    title: Pátio vigiado para carretas e ocupação, com a contagem de tráfego
+    twin: pt_hotel_patio_sem_contagem
+    treatment: patio_carretas
+    outcome: ocupacao_2025
+    columns:
+      cod_unidade: Código da unidade na rede, formado pela rodovia e um número sequencial.
+      patio_carretas: Unidade recebeu o pátio vigiado 24 horas para carretas, inaugurado entre fevereiro e abril de 2025 (1 = sim, 0 = não).
+      ocupacao_2025: Taxa de ocupação média da unidade de maio a dezembro de 2025, em percentual das unidades habitacionais disponíveis.
+      ocupacao_2024: Taxa de ocupação média da unidade em 2024, mesmo critério.
+      terreno_m2: Área total do terreno da unidade, em metros quadrados, conforme matrícula.
+      vmd_pesados_2024: Volume médio diário de veículos pesados em 2024 no trecho da rodovia em frente à unidade, segundo a concessionária ou o DNIT.
+      convenios_transportadoras: Número de convênios com transportadoras assinados pela unidade entre maio e dezembro de 2025.
+    story: >-
+      ATA – Reunião de gerentes regionais – 20/01/2026 – sala da diretoria, matriz.
+      Presentes: Nelson (diretor comercial), Patrícia (controladoria), Fábio, Renata e
+      eu (regionais). Ausente: Marcelo (regional Sul), justificado.
+
+      Pauta 2 – Pátio de carretas: resultado de 2025 e decisão sobre expansão em 2026.
+
+      Nelson apresentou o resumo: 17 das 46 unidades receberam o pátio vigiado 24h
+      entre fevereiro e abril, investimento médio de R$ 410 mil por unidade. Ocupação
+      média de maio a dezembro: 71% nas unidades com pátio contra 58% nas demais. Ele
+      propõe estender para mais 12 unidades em 2026.
+
+      Patrícia pediu cautela com a comparação. Lembrou que as 17 unidades não foram
+      sorteadas: o Nelson escolheu pelo movimento de carreta que ele vê na estrada, de
+      tanto rodar os trechos, e priorizou também unidades com terreno sobrando, pra
+      fazer o pátio sem comprar área. Nelson confirmou e acrescentou que preferiu
+      unidades que vinham com ocupação fraca em 2024, "pra dar um gás onde precisava".
+      Patrícia observou que trecho com muita carreta é trecho com muito hóspede
+      caminhoneiro, com ou sem pátio, e que isso já aparecia na ocupação de 2024
+      dessas unidades; e que a ocupação de um ano puxa a do outro, cliente fixo volta.
+      Fábio informou que conseguiu com a concessionária e com o DNIT o volume médio
+      diário de veículos pesados de 2024 no trecho de cada unidade e que, cruzando com
+      a lista, a escolha do Nelson bate com a contagem: as unidades com pátio estão
+      quase todas nos trechos de maior movimento de pesados. Patrícia incluiu a
+      contagem na planilha.
+
+      Renata comentou que as unidades com pátio fecharam convênios com transportadoras
+      ao longo do ano (a Rota Sul fechou cinco), coisa que não acontecia antes porque
+      a transportadora exige vaga segura pra carreta; convênio enche quarto de segunda
+      a quinta. Nelson concordou que foi por aí que o pátio funcionou.
+
+      Encaminhamentos:
+      1. Patrícia envia ao BI a planilha por unidade (código, pátio, ocupação 2025 e
+      2024, área do terreno, VMD de pesados, número de convênios) e pede uma estimativa
+      do efeito do pátio na ocupação, com a ressalva acima.
+      2. Decisão sobre expansão adiada para a reunião de fevereiro.
+
+      Redigido por Cláudia (regional Centro-Oeste).
+    edges:
+      - vmd_pesados_2024 -> patio_carretas
+      - vmd_pesados_2024 -> ocupacao_2025
+      - vmd_pesados_2024 -> ocupacao_2024
+      - ocupacao_2024 -> patio_carretas
+      - ocupacao_2024 -> ocupacao_2025
+      - terreno_m2 -> patio_carretas
+      - patio_carretas -> convenios_transportadoras
+      - convenios_transportadoras -> ocupacao_2025
+      - patio_carretas -> ocupacao_2025
+    answer:
+      identifiable: true
+      adjust_for: [ocupacao_2024, vmd_pesados_2024]
+      do_not_adjust_for:
+        convenios_transportadoras: Foram assinados depois do pátio e por causa dele; é o caminho pelo qual o pátio enche quarto. Ajustar por eles apaga parte do efeito.
+      indifferent: [cod_unidade, terreno_m2]
+    note: >-
+      Mesma reunião do caso irmão, com a contagem de veículos pesados na planilha. Com
+      ela e a ocupação de 2024, a escolha do diretor fica toda em coluna. A área do
+      terreno só pesou na escolha.
+
+  - id: pt_catadores_carrinho
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: coordenador de uma cooperativa de catadores de materiais recicláveis com 120 cooperados, ele mesmo catador há vinte anos, mandando áudio para a professora da universidade que ajuda a cooperativa com as planilhas
+    theme: Reciclagem (cooperativa de catadores)
+    title: Carrinho elétrico e material entregue no galpão
+    treatment: carrinho_eletrico
+    outcome: kg_mes_abr_set
+    columns:
+      id_cooperado: Número do cooperado no livro de matrícula da cooperativa.
+      carrinho_eletrico: Recebeu um dos carrinhos elétricos doados pela prefeitura, entregues em março de 2026 (1 = sim, 0 = não).
+      kg_mes_abr_set: Média mensal de material entregue e pesado no galpão da cooperativa entre abril e setembro de 2026, em kg.
+      kg_mes_2025: Média mensal de material entregue no galpão em 2025, em kg.
+      viagens_dia: Média de viagens ao galpão por dia trabalhado entre abril e setembro de 2026, conforme anotação da portaria.
+      idade: Idade em março de 2026, em anos.
+      anos_coop: Anos como cooperado até março de 2026.
+      conferencia_pesagem: Teve ao menos uma entrega repesada na balança pequena entre abril e setembro de 2026 (1 = sim, 0 = não).
+    story: >-
+      [áudio, 3 min 12 s]
+
+      Oi, professora, boa tarde, é o Edmilson aqui da cooperativa. Então, é sobre
+      aquela planilha dos carrinhos que a Jéssica montou pra senhora. Deixa eu explicar
+      como foi, que eu acho que a senhora precisa saber disso pra fazer a conta.
+
+      A prefeitura doou quarenta carrinho elétrico pra gente em março, e nós temos
+      noventa e cinco cooperado que trabalha na rua, o resto fica no galpão na triagem.
+      Como não dava pra todo mundo, a gente fez sorteio na assembleia, papelzinho no
+      saco mesmo, com o pessoal da prefeitura olhando. Todo mundo da rua entrou,
+      ninguém ia recusar carrinho de graça, né. Então quem pegou carrinho foi pura
+      sorte, não teve escolha de ninguém.
+
+      O que a gente quer saber é se o carrinho aumentou o material que o pessoal traz
+      pro galpão. A planilha tem os noventa e cinco da rua, e pra cada um a Jéssica
+      botou a média de quilo por mês de abril a setembro deste ano, a média de 2025
+      inteiro pra comparar, a idade, e quantos anos a pessoa tem de cooperativa. Isso
+      importa porque os mais velhos puxam menos, o corpo não aguenta, e quem tá há mais
+      tempo tem os ponto certo, os prédio que guardam material pra ele, então traz
+      mais.
+
+      Tem duas coisa que eu queria avisar. Uma é que a portaria anota quantas viagem
+      cada um faz por dia, e quem tá de carrinho elétrico tá fazendo muito mais viagem,
+      porque não cansa, volta no galpão, descarrega e sai de novo. E mais viagem é mais
+      quilo, lógico. A Jéssica botou isso na planilha também. A outra é a coluna da
+      repesagem: a dona Neide confere de novo na balança pequena quem tá com carrinho
+      novo, porque a prefeitura pede relatório certinho desse pessoal, e confere também
+      qualquer um que chega com muito acima do normal dele, pra não ter conversa de que
+      tá misturando material de fora. Então essa coluna marca quem foi repesado pelo
+      menos uma vez.
+
+      Na conta grossa deu 1.340 quilo por mês pra quem tem carrinho e 870 pra quem não
+      tem. A senhora acha que esse número tá certo ou tem que mexer em alguma dessas
+      colunas? É que a prefeitura quer saber se vale comprar mais quarenta pro ano que
+      vem. Valeu, professora, um abraço.
+    edges:
+      - carrinho_eletrico -> viagens_dia
+      - viagens_dia -> kg_mes_abr_set
+      - carrinho_eletrico -> kg_mes_abr_set
+      - kg_mes_2025 -> kg_mes_abr_set
+      - idade -> kg_mes_abr_set
+      - idade -> kg_mes_2025
+      - anos_coop -> kg_mes_abr_set
+      - anos_coop -> kg_mes_2025
+      - carrinho_eletrico -> conferencia_pesagem
+      - kg_mes_abr_set -> conferencia_pesagem
+      - kg_mes_2025 -> conferencia_pesagem
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        viagens_dia: Foi anotada depois da entrega dos carrinhos e é consequência deles; é por aí que o carrinho rende mais quilo. Ajustar por ela apaga parte do efeito.
+        conferencia_pesagem: A repesagem é feita em quem tem carrinho novo e em quem trouxe muito acima do normal, ou seja, depende do carrinho e do próprio resultado. Ajustar por ela cria uma associação falsa entre o carrinho e o material entregue.
+      indifferent: [anos_coop, id_cooperado, idade, kg_mes_2025]
+    note: >-
+      Houve sorteio entre todos os catadores de rua, então a comparação simples já dá
+      o efeito. As armadilhas são as viagens por dia, consequência do carrinho, e a
+      repesagem, que depende do carrinho e do quilo entregue.
+
+  - id: pt_financeira_vistoria
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: analista de crédito sênior de uma financeira de veículos usados, escrevendo uma nota rápida ao gerente de risco; formação em administração
+    theme: Crédito (financeira de veículos)
+    title: Vistoria presencial e atraso de 90 dias
+    treatment: vistoria_presencial
+    outcome: atraso_90d
+    columns:
+      num_proposta: Número da proposta no sistema de crédito.
+      score_bureau: Score do cliente no bureau de crédito na data da proposta, de 0 a 1000.
+      vistoria_presencial: Proposta passou por vistoria presencial do veículo pela empresa parceira antes da liberação do contrato (1 = sim, 0 = não). Contratos liberados entre fevereiro e julho de 2025.
+      atraso_90d: Contrato atingiu 90 dias de atraso em alguma parcela nos 12 meses seguintes à liberação (1 = sim, 0 = não).
+      entrada_pct: Valor da entrada sobre o valor do veículo, em percentual.
+      idade_veiculo: Idade do veículo na data da proposta, em anos.
+      dia_semana_proposta: Dia da semana em que a proposta foi digitada pela loja.
+    not_in_table:
+      desconfianca_analista: A desconfiança do analista com a proposta, formada no telefonema de confirmação e na leitura dos documentos. Fica na cabeça do analista; o sistema só registra se a vistoria foi pedida.
+    story: >-
+      Rogério,
+
+      Sobre a sua pergunta de ontem, se a vistoria presencial "paga o custo". Puxei os
+      6.212 contratos liberados de fevereiro a julho de 2025: 2,9% de atraso de 90 dias
+      entre os que tiveram vistoria contra 6,1% entre os que não tiveram. Mas antes de
+      levar isso pro comitê: a vistoria era pedida por regra pra carro com mais de 10
+      anos e pra entrada abaixo de 20%, e fora da regra ficava a critério da mesa,
+      quando a proposta cheirava mal no telefonema de confirmação ou na documentação.
+      Esse faro do analista não vira campo nenhum no sistema, e a gente sabe que ele
+      acerta: proposta que cheira mal atrasa mais. Carro velho e entrada baixa também
+      atrasam mais, isso o modelo de score já mostra, e o score em si segue sendo o que
+      melhor separa quem paga. Na base tem o número da proposta, se teve vistoria, o
+      atraso, o score na data, a entrada em %, a idade do carro e o dia da semana em
+      que a loja digitou a proposta. Consigo um número limpo com isso ou não?
+
+      Marina
+    edges:
+      - desconfianca_analista -> vistoria_presencial
+      - desconfianca_analista -> atraso_90d
+      - idade_veiculo -> vistoria_presencial
+      - idade_veiculo -> atraso_90d
+      - entrada_pct -> vistoria_presencial
+      - entrada_pct -> atraso_90d
+      - score_bureau -> atraso_90d
+      - vistoria_presencial -> atraso_90d
+    answer:
+      identifiable: false
+      missing: [desconfianca_analista]
+    note: >-
+      As regras da vistoria (idade do carro, entrada) estão na tabela; o critério da
+      mesa, o faro do analista, não está, e ele também prevê o atraso. O score só mexe
+      no atraso.
+
+  - id: pt_financeira_debito_automatico
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: analista de crédito de uma financeira de veículos, mandando áudio no WhatsApp para a colega do BI; fala rápido, com o jargão da área
+    theme: Crédito (financeira de veículos)
+    title: Débito automático na assinatura e atraso de 60 dias
+    treatment: debito_automatico
+    outcome: atraso_60d
+    columns:
+      num_contrato: Número do contrato de financiamento.
+      debito_automatico: Cliente aderiu ao débito automático das parcelas no momento da assinatura do contrato (1 = sim, 0 = não). Contratos assinados entre março e agosto de 2025.
+      atraso_60d: Alguma parcela com 60 dias ou mais de atraso nos 12 meses seguintes à assinatura (1 = sim, 0 = não).
+      ligacoes_cobranca: Número de ligações da central de cobrança ao cliente nos 12 meses seguintes à assinatura. Inclui a ligação de boas-vindas que a central faz, no primeiro mês, a todo cliente com débito automático, para confirmar os dados bancários.
+      score_bureau: Score do cliente no bureau de crédito na data da proposta, de 0 a 1000.
+      regiao_loja: Região da loja onde o contrato foi assinado (capital, interior ou litoral).
+      valor_parcela: Valor da parcela mensal, em reais.
+    story: >-
+      [áudio 2:10]
+
+      Lu, bom dia, deixa eu te passar o contexto daquela base do débito automático que
+      eu te mandei ontem, que você perguntou. Ó, o sistema novo de formalização, aquele
+      que oferece o débito automático na hora da assinatura, entrou nas lojas do
+      interior em março, na capital só em junho e no litoral em setembro, então no
+      período da base, março a agosto, a maioria dos clientes que teve a opção é do
+      interior. E aí você já sabe o que eu vou dizer: interior sempre atrasou menos que
+      capital, é histórico nosso, independe de qualquer coisa. E mesmo onde tinha a
+      opção, quem topou o débito automático foi mais o cliente de score alto, que tem
+      conta em banco grande e não tem medo de deixar debitar; cliente de score baixo
+      quase sempre recusou. Score alto paga melhor, isso você sabe. A parcela eu deixei
+      na base porque parcela pesada atrasa mais, mas ela não influenciou em nada quem
+      aderiu. E tem a coluna das ligações da cobrança, que é o número de ligações que a
+      central fez pro cliente no ano; a central liga pra quem passa de quinze dias de
+      atraso, é o fluxo padrão. Tá tudo no dicionário que eu mandei junto. A pergunta
+      do gerente é só uma: o débito automático reduz o atraso de sessenta dias ou é o
+      perfil do cliente que tá fazendo a diferença? Vê aí pra mim quais colunas você
+      usaria no ajuste. Valeu.
+    edges:
+      - regiao_loja -> debito_automatico
+      - regiao_loja -> atraso_60d
+      - score_bureau -> debito_automatico
+      - score_bureau -> atraso_60d
+      - valor_parcela -> atraso_60d
+      - debito_automatico -> atraso_60d
+      - debito_automatico -> ligacoes_cobranca
+      - atraso_60d -> ligacoes_cobranca
+    answer:
+      identifiable: true
+      adjust_for: [regiao_loja, score_bureau]
+      do_not_adjust_for:
+        ligacoes_cobranca: Contadas depois, sobem com o atraso (fluxo de cobrança) e com o débito automático (ligação de boas-vindas, dita só no dicionário). Ajustar por elas cria uma associação falsa entre o débito automático e o atraso.
+      indifferent: [num_contrato, valor_parcela]
+    note: >-
+      A região e o score explicam quem aderiu e quem atrasa. A armadilha está no
+      dicionário: a central também liga para todo cliente com débito automático, então
+      as ligações dependem da intervenção e do resultado.
+
+  - id: pt_saude_carreta_mamografia
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: técnico da coordenação de atenção à saúde da mulher de uma secretaria estadual de saúde, escrevendo um despacho curto para a coordenadora; formação em enfermagem
+    theme: Saúde pública (secretaria estadual, rastreamento)
+    title: Carreta da mamografia e exames de rastreamento
+    treatment: carreta_2025
+    outcome: mamografias_100_2025
+    columns:
+      carreta_2025: Município recebeu a unidade móvel de mamografia (carreta) por ao menos uma semana em 2025 (1 = sim, 0 = não).
+      campanha_radio: Município veiculou campanha em rádio local para a chegada da carreta, conforme relato da coordenação regional (1 = sim, 0 = não).
+      mamografias_100_2025: Mamografias de rastreamento realizadas em 2025 em mulheres residentes de 50 a 69 anos, por 100 mulheres dessa faixa etária, segundo o SISCAN.
+      mamografias_100_2024: Mesmo indicador, para 2024.
+      tem_mamografo: Município possui mamógrafo fixo em serviço habilitado pelo SUS, segundo o CNES de dezembro de 2024 (1 = sim, 0 = não).
+    story: >-
+      Despacho à coordenadora – 03/02/2026
+
+      Lúcia, o levantamento da carreta para a prestação de contas: em 2025 ela passou
+      por 61 dos 223 municípios, primeiro nos sem mamógrafo fixo e, depois, nos de
+      cobertura mais baixa em 2024 (quem tem mamógrafo rastreia mais em qualquer ano, e
+      cobertura baixa num ano segue baixa no outro). O indicador subiu 9 pontos onde a
+      carreta passou, 2 onde não passou. Em vários lugares a prefeitura anunciou a
+      carreta no rádio e a agenda lotou em dois dias. Planilha e dicionário em anexo,
+      uma linha por município. Dá para afirmar quanto desse aumento é da carreta?
+
+      Hugo
+    edges:
+      - tem_mamografo -> carreta_2025
+      - tem_mamografo -> mamografias_100_2025
+      - tem_mamografo -> mamografias_100_2024
+      - mamografias_100_2024 -> carreta_2025
+      - mamografias_100_2024 -> mamografias_100_2025
+      - carreta_2025 -> campanha_radio
+      - campanha_radio -> mamografias_100_2025
+      - carreta_2025 -> mamografias_100_2025
+    answer:
+      identifiable: true
+      adjust_for: [mamografias_100_2024, tem_mamografo]
+      do_not_adjust_for:
+        campanha_radio: A campanha foi feita para a chegada da carreta, como diz o dicionário; é consequência dela e parte do efeito. Ajustar por ela apaga parte do efeito.
+    note: >-
+      Os dois critérios do roteiro estão na tabela. A campanha de rádio só existe onde a
+      carreta foi, e o dicionário é que diz isso com clareza.

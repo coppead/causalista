@@ -1,0 +1,37 @@
+# Divisão entre treino e teste.
+#
+# Proposta do assistente (2026-10-04), aprovada pelo André em 2026-10-06 ("vamos fazer tudo o
+# que você propõe"), com os idiomas ajustados na mesma conversa: treino em português e
+# inglês, espanhol só como prova; francês e alemão ficam para uma versão futura.
+#
+# A ideia é a mesma nos dois eixos: o que fica reservado para teste nunca aparece no
+# treino, para que o teste meça se o modelo acerta no que nunca viu.
+
+status: aprovada
+
+themes:
+  train: [telecom, varejo, banco, software, rh, educacao]
+  # Um tema próximo dos de treino (e-mail, parecido com varejo) e um distante (saúde).
+  test: [email, saude]
+
+languages:
+  # Treinar nos dois idiomas que o André e o assistente conseguem revisar; o espanhol mede
+  # se o modelo generaliza para uma língua que nunca viu.
+  train: [pt, en]
+  test: [es]
+
+# Faixas de sementes (ver scripts/make_worlds.py).
+seeds:
+  baseline: 50000      # placar de base, fase 3: os oito temas
+  final_test: 60000    # teste final: só os temas reservados
+  training: 100000
+
+# Mundos-vitrine: fixados antes do treino e respondidos a cada ponto do treino. A regra
+# olha só o tamanho do mundo, nunca os resultados: os primeiros pares de gêmeos de cada
+# tema reservado, com até 6 colunas além da intervenção e do resultado, e tabelas de
+# 10 mil ou 20 mil linhas.
+showcase:
+  set: teste-v3
+  pairs_per_theme: 5
+  max_columns: 6
+  rows: [10000, 20000]

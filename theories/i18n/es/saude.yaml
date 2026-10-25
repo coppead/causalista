@@ -1,0 +1,208 @@
+# Tradução da ficha de teoria 'saude' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente a partir da
+# ficha em português, theories/saude.yaml, que é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado: esta tradução serve só aos testes (a avaliação em
+# idioma não visto no treino) e não entra em nenhum conjunto de treino.
+
+language: es
+status: revisada
+title: Programa de seguimiento en una aseguradora de salud
+context: Una aseguradora de salud inscribió a una parte de sus afiliados en un programa de
+  seguimiento, en el que una enfermera acuerda un plan de cuidados con el afiliado y hace
+  seguimiento del tratamiento. La aseguradora quiere saber si el programa de seguimiento reduce
+  la hospitalización en los doce meses siguientes.
+randomized: Los afiliados inscritos en el programa de seguimiento fueron elegidos por sorteo.
+closing: Nada más que lo descrito influyó en quiénes entraron al programa de seguimiento.
+treatment:
+  label: el programa de seguimiento
+  dictionary: Fue inscrito en el programa de seguimiento (1 = sí, 0 = no).
+outcome:
+  label: la hospitalización
+  dictionary: Fue hospitalizado en los doce meses siguientes al inicio del programa (1 = sí, 0 = no).
+variables:
+  idade:
+    label: la edad del afiliado
+    roles:
+      confounder:
+        dictionary: Edad del afiliado al inicio del programa, en años.
+        to_treatment: La aseguradora inscribió en el programa de seguimiento con más frecuencia a los
+          afiliados de mayor edad.
+        to_outcome: Los afiliados de mayor edad son hospitalizados con más frecuencia.
+      outcome_cause:
+        dictionary: Edad del afiliado al inicio del programa, en años.
+        to_outcome: Los afiliados de mayor edad son hospitalizados con más frecuencia.
+  doencas_cronicas:
+    label: las enfermedades crónicas
+    roles:
+      confounder:
+        dictionary: Tenía dos o más enfermedades crónicas registradas al inicio del programa
+          (1 = sí, 0 = no).
+        to_treatment: Los afiliados con dos o más enfermedades crónicas fueron inscritos en el programa
+          de seguimiento con más frecuencia.
+        to_outcome: Los afiliados con dos o más enfermedades crónicas son hospitalizados con más
+          frecuencia.
+      outcome_cause:
+        dictionary: Tenía dos o más enfermedades crónicas registradas al inicio del programa
+          (1 = sí, 0 = no).
+        to_outcome: Los afiliados con dos o más enfermedades crónicas son hospitalizados con más
+          frecuencia.
+  internacao_anterior:
+    label: la hospitalización anterior
+    roles:
+      confounder:
+        dictionary: Fue hospitalizado en los doce meses anteriores al inicio del programa (1 = sí, 0 = no).
+        to_treatment: Quienes habían sido hospitalizados el año anterior fueron inscritos en el programa
+          de seguimiento con más frecuencia.
+        to_outcome: Quienes fueron hospitalizados el año anterior al programa de seguimiento vuelven a
+          ser hospitalizados con más frecuencia.
+      outcome_cause:
+        dictionary: Fue hospitalizado en los doce meses anteriores al inicio del programa (1 = sí, 0 = no).
+        to_outcome: Quienes fueron hospitalizados el año anterior al programa de seguimiento vuelven a
+          ser hospitalizados con más frecuencia.
+  consultas:
+    label: las consultas ambulatorias
+    roles:
+      confounder:
+        dictionary: Número de consultas ambulatorias en los seis meses anteriores al inicio del programa.
+        to_treatment: Quienes iban a más consultas ambulatorias fueron inscritos en el programa de
+          seguimiento con más frecuencia.
+        to_outcome: Quienes van a más consultas ambulatorias tratan los problemas más temprano y son
+          hospitalizados con menos frecuencia.
+      mediator:
+        dictionary: Número de consultas ambulatorias en los seis meses siguientes al inicio del programa.
+        from_treatment: El plan de cuidados del programa de seguimiento incluye consultas de rutina, y
+          quienes participan van a más consultas ambulatorias en los meses siguientes.
+        to_outcome: Quienes van a más consultas ambulatorias tratan los problemas más temprano y son
+          hospitalizados con menos frecuencia.
+      outcome_cause:
+        dictionary: Número de consultas ambulatorias en los seis meses anteriores al inicio del programa.
+        to_outcome: Quienes van a más consultas ambulatorias tratan los problemas más temprano y son
+          hospitalizados con menos frecuencia.
+  pronto_socorro:
+    label: la visita a urgencias
+    roles:
+      confounder:
+        dictionary: Fue a urgencias en los seis meses anteriores al inicio del programa (1 = sí, 0 = no).
+        to_treatment: Quienes habían ido a urgencias fueron inscritos en el programa de seguimiento con
+          más frecuencia.
+        to_outcome: Quienes van a urgencias son hospitalizados con más frecuencia.
+      mediator:
+        dictionary: Fue a urgencias en los seis meses siguientes al inicio del programa (1 = sí, 0 = no).
+        from_treatment: Quienes participan en el programa de seguimiento van menos a urgencias en los
+          meses siguientes.
+        to_outcome: Quienes van a urgencias son hospitalizados con más frecuencia.
+      outcome_cause:
+        dictionary: Fue a urgencias en los seis meses anteriores al inicio del programa (1 = sí, 0 = no).
+        to_outcome: Quienes van a urgencias son hospitalizados con más frecuencia.
+  adesao_medicacao:
+    label: la adherencia a la medicación
+    roles:
+      confounder:
+        dictionary: Puntaje de adherencia a la medicación en el cuestionario de salud respondido antes
+          del inicio del programa, de 0 a 10.
+        to_treatment: La aseguradora inscribió en el programa de seguimiento con más frecuencia a los
+          afiliados con menor adherencia a la medicación.
+        to_outcome: Los afiliados con mayor adherencia a la medicación tienen menos crisis y son
+          hospitalizados con menos frecuencia.
+      mediator:
+        dictionary: Puntaje de adherencia a la medicación en el cuestionario de salud respondido seis
+          meses después del inicio del programa, de 0 a 10.
+        from_treatment: La enfermera del programa de seguimiento revisa el uso de los medicamentos, y
+          quienes participan pasan a tener mayor adherencia a la medicación.
+        to_outcome: Los afiliados con mayor adherencia a la medicación tienen menos crisis y son
+          hospitalizados con menos frecuencia.
+  fragilidade:
+    label: la fragilidad del afiliado
+    hidden_fact: La aseguradora no tiene una evaluación de fragilidad de los afiliados, y por eso la
+      fragilidad no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Puntaje de fragilidad en la evaluación clínica hecha antes del inicio del programa,
+          de 0 a 10 (cuanto más alto, más frágil).
+        to_treatment: Los afiliados más frágiles aceptaron la invitación al programa de seguimiento con
+          más frecuencia.
+        to_outcome: Los afiliados más frágiles son hospitalizados con más frecuencia.
+      outcome_cause:
+        dictionary: Puntaje de fragilidad en la evaluación clínica hecha antes del inicio del programa,
+          de 0 a 10 (cuanto más alto, más frágil).
+        to_outcome: Los afiliados más frágiles son hospitalizados con más frecuencia.
+  apoio_familiar:
+    label: el apoyo de la familia en casa
+    hidden_fact: La aseguradora no sabe qué afiliados tienen apoyo de la familia en casa, y por eso esa
+      información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Tenía en casa un familiar que ayudaba con los cuidados de salud, al inicio del
+          programa (1 = sí, 0 = no).
+        to_treatment: Los afiliados con apoyo de la familia en casa aceptaron la invitación al programa
+          de seguimiento con más frecuencia.
+        to_outcome: Los afiliados con apoyo de la familia en casa son hospitalizados con menos frecuencia.
+      outcome_cause:
+        dictionary: Tenía en casa un familiar que ayudaba con los cuidados de salud, al inicio del
+          programa (1 = sí, 0 = no).
+        to_outcome: Los afiliados con apoyo de la familia en casa son hospitalizados con menos frecuencia.
+  tabagismo:
+    label: el tabaquismo
+    hidden_fact: La aseguradora no sabe qué afiliados fuman, y por eso esa información no está en la
+      tabla.
+    roles:
+      confounder:
+        dictionary: Fumaba al inicio del programa (1 = sí, 0 = no).
+        to_treatment: Los fumadores aceptaron la invitación al programa de seguimiento con menos
+          frecuencia.
+        to_outcome: Los fumadores son hospitalizados con más frecuencia.
+      mediator:
+        dictionary: Fumaba seis meses después del inicio del programa (1 = sí, 0 = no).
+        from_treatment: El programa de seguimiento incluye apoyo para dejar de fumar, y quienes
+          participan fuman menos en los meses siguientes.
+        to_outcome: Los fumadores son hospitalizados con más frecuencia.
+  indicacao_medica:
+    label: la recomendación del médico
+    roles:
+      treatment_cause:
+        dictionary: Recibió de su médico la recomendación de entrar al programa, antes del inicio del
+          programa (1 = sí, 0 = no).
+        to_treatment: Una parte de los médicos de la red recomendaba el programa de seguimiento a sus
+          pacientes, y quienes recibieron la recomendación fueron inscritos con más frecuencia.
+  cidade_piloto:
+    label: la ciudad piloto
+    roles:
+      treatment_cause:
+        dictionary: Vive en una de las ciudades elegidas para el piloto del programa (1 = sí, 0 = no).
+        to_treatment: El programa de seguimiento empezó en algunas ciudades piloto, y quienes viven en
+          ellas fueron inscritos con más frecuencia.
+  ligacao_enfermagem:
+    label: la llamada de la central de enfermería
+    roles:
+      treatment_cause:
+        dictionary: Recibió una llamada de la central de enfermería en los tres meses anteriores al
+          inicio del programa (1 = sí, 0 = no).
+        to_treatment: La central de enfermería invitaba al programa de seguimiento durante sus llamadas,
+          y quienes habían recibido una llamada fueron inscritos con más frecuencia.
+      collider:
+        dictionary: Recibió una llamada de la central de enfermería en los doce meses siguientes al
+          inicio del programa (1 = sí, 0 = no).
+        from_treatment: La central de enfermería llama con más frecuencia a quienes están en el programa
+          de seguimiento, para hacer la encuesta de satisfacción del programa.
+        from_outcome: La central de enfermería llama con más frecuencia a quienes recibieron el alta de
+          una hospitalización, para hacer seguimiento de la recuperación.
+  auditoria_medica:
+    label: la revisión por la auditoría médica
+    roles:
+      collider:
+        dictionary: Tuvo una atención revisada por la auditoría médica de la aseguradora en los doce
+          meses siguientes al inicio del programa (1 = sí, 0 = no).
+        from_treatment: La auditoría médica revisa con más frecuencia las atenciones de quienes están en
+          el programa de seguimiento, para evaluar el programa.
+        from_outcome: La auditoría médica revisa con más frecuencia las atenciones de quienes fueron
+          hospitalizados, para verificar la cuenta del hospital.
+  dia_vencimento:
+    label: el día de vencimiento de la mensualidad
+    roles:
+      unrelated:
+        dictionary: Día del mes en que vence la mensualidad del plan.
+        fact: El día de vencimiento de la mensualidad no tiene relación con el programa de seguimiento
+          ni con la hospitalización.

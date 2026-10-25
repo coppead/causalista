@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.hypothesis/
+
+# Generated worlds, recorded answers, trained weights, rendered pages.
+# Seeds and configs live in git; final versions go to Hugging Face.
+outputs/
+
+# Project-local R library (dagitty, used only to regenerate reference answers)
+.r-lib/
+
+# Editor and linter caches
+.vscode/
+.ruff_cache/
+
+# Other editors and tools
+.idea/
+.DS_Store
+.mypy_cache/
+.ipynb_checkpoints/

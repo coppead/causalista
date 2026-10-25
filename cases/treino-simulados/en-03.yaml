@@ -1,0 +1,494 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-03, oito casos em inglês
+# (vozes dos EUA e da Irlanda).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (gerente de frota de uma
+# concessionária de energia no noroeste dos EUA, diretora de uma rede de bancos de alimentos
+# em Ohio, analista de uma corretora de seguros em Dublin, líder de operações de lojas de uma
+# rede de ferragens no meio-oeste, planejador de transporte público de uma cidade média)
+# descrevendo um conjunto de dados do jeito que essa pessoa escreveria: memorando de uma
+# página, transcrição de áudio, mensagem de Slack, pergunta a um consultor, notas de reunião.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_utility_idle_timers
+    author: ai
+    status: rascunho
+    language: en
+    style: voice-note transcript
+    persona: fleet manager at an electric and gas utility in the Pacific Northwest (about 1,100 vehicles), leaving a voice note for the analyst in Finance, no statistics background
+    theme: Utility fleet / fuel economy
+    title: Idle shutdown timers fitted to the half of the trucks a spreadsheet shuffle picked
+    treatment: idle_timer
+    outcome: mpg_q2
+    columns:
+      idle_timer: 1 if an automatic idle shutdown timer was installed on the unit in March 2026, 0 if not. Diesel pool only, 180 units.
+      mpg_q2: Miles per gallon, April to June 2026. Odometer miles divided by fuel-card gallons.
+      idle_hrs_q2: Engine idle hours, April to June 2026, from the engine control module download at the quarterly service.
+      vehicle_class: Bucket truck, digger derrick, service-body pickup, or cargo van.
+      district: Operating district the unit is assigned to. Coast, Valley or Cascades.
+      miles_q2: Odometer miles driven April to June 2026.
+      unit_no: Fleet unit number painted on the door.
+    story: >-
+      Hey Priya, Carl here, voice note because I'm driving back from the Valley yard, sorry
+      about the wind noise. The idle timer thing, for your write-up for Pat. Recap. The vendor
+      shipped us 90 kits in February and we have 180 diesel trucks in the pool, so Dana put the
+      whole list in a spreadsheet, did the random sort thing in Excel, and the top 90 got timers
+      in March. The other 90 get them in the fall when the budget resets. People are going to
+      ask if we did the bucket trucks first or the Coast district first. We did not, it was the
+      shuffle, I watched her do it. The number I'm proud of is idle hours, the timer units are
+      down about 30 percent on idle in Q2 off the module downloads, and idle is where the fuel
+      goes, you're burning close to a gallon an hour sitting there with the heater on. MPG is up
+      too, and that's the number Pat wants for the sustainability report. Couple of things about
+      the file. Buckets and digger derricks idle a ton no matter what because the boom runs off
+      the engine, and they get terrible mileage regardless, that's just the truck. Coast is all
+      hills and wet roads, their mpg has always been the worst of the three districts. The
+      high-mileage units are the ones running highway between yards and they always post better
+      mpg. Unit number is just the number on the door. Can you give me a clean mpg effect for the
+      timers, and tell me what to slice it by and what to leave alone? Pat wants it by the 15th.
+      Thanks, bye.
+    edges:
+      - idle_timer -> idle_hrs_q2
+      - idle_hrs_q2 -> mpg_q2
+      - vehicle_class -> idle_hrs_q2
+      - vehicle_class -> mpg_q2
+      - district -> mpg_q2
+      - miles_q2 -> mpg_q2
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        idle_hrs_q2: Downloaded during the same quarter and cut by the timer itself. It is how the timer saves fuel, so it is part of the effect being measured.
+      indifferent: [district, miles_q2, unit_no, vehicle_class]
+    note: >-
+      A random sort in Excel decided who got a timer, so the plain comparison is already right.
+      The trap is the idle-hours KPI the manager is proud of, which is the mechanism. Class,
+      district and mileage only drive fuel economy.
+
+  - id: en_broker_remarket_memory
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: analyst at a commercial insurance broker in Dublin (about 7,000 SME clients), writing to the head of SME, comfortable with spreadsheets, no formal statistics
+    theme: Insurance broking / SME renewals
+    title: Remarketing at renewal decided by what the client said on the phone
+    twin: en_broker_remarket_flag
+    treatment: remarketed
+    outcome: renewed
+    columns:
+      remarketed: 1 if the handler took the policy to market at the 2025 renewal, meaning terms were sought from at least one insurer other than the holding insurer.
+      renewed: 1 if the client renewed through us, with any insurer, within 30 days of the renewal date.
+      premium_change_pct: Best renewal premium presented to the client, as a percentage change on the expiring premium.
+      expiring_premium: Expiring annual premium, euro.
+      sector: Client trade sector. Construction, hospitality, retail, professional services, other.
+      years_with_us: Full years the client had been with the brokerage at the 2025 renewal date.
+      complaint_90d: 1 if a complaint was logged on the client file in the 90 days after the renewal date.
+      policy_ref: Acturis policy reference.
+    not_in_table:
+      price_grumbling: Whether the client had pushed back on the price or mentioned another broker before renewal. Lives in e-mails and in the handlers' heads. No field for it in Acturis.
+    story: >-
+      MEMO. To Siobhán Carey, Head of SME. From Eoin Walsh, Analytics. 3 October 2026. Re
+      remarketing at the 2025 renewals and retention. Of about 6,800 SME policies that fell due
+      in 2025, the handlers took roughly 2,100 to market and let the rest roll over with the
+      holding insurer. Retention on the remarketed book was 91 percent against 84 on the rest,
+      and that seven-point gap is being quoted in the budget round as the return on the
+      remarketing hours. I don't think we can quote it yet. How policies were chosen. There was
+      no rule. Each handler decided case by case, and from a week sitting with the team it comes
+      down to two things. One, the size of the account, since nobody spends a day getting
+      alternative terms on a 900 euro shop policy, and in fairness the bigger accounts are also
+      the ones the insurers themselves fight to keep, so they tend to stick with us regardless.
+      Two, whether the client had been on the phone giving out about the price or saying they'd
+      had a call from another broker. The second one is the problem. A client who is giving out
+      about price is already halfway out the door, and that is exactly who got remarketed. It
+      lives in e-mails and in the handlers' heads; there is no field for it in Acturis and I am
+      not going to read 6,800 files. Notes on the extract. The premium change is largely what
+      remarketing buys you, a better number to present, and clients renew on the number, though
+      I'd also say a client who sees us go to market for them feels looked after whatever the
+      number comes back as. Construction and hospitality got double-digit increases from every
+      insurer this year, whatever we did. Our long-standing clients renew at higher rates than
+      the newer ones, always have. The complaint flag picks up two kinds of case, clients we
+      moved to a new insurer who had grief with the paperwork, and clients who lapsed and left a
+      complaint on the way out. Ask. Before I put a number in front of Finance I'd like your view
+      on whether this file can give an honest estimate of the remarketing effect at all, and if
+      it can, what should and should not be in the comparison.
+    edges:
+      - price_grumbling -> remarketed
+      - price_grumbling -> renewed
+      - expiring_premium -> remarketed
+      - expiring_premium -> renewed
+      - remarketed -> premium_change_pct
+      - premium_change_pct -> renewed
+      - remarketed -> renewed
+      - sector -> premium_change_pct
+      - years_with_us -> renewed
+      - remarketed -> complaint_90d
+      - renewed -> complaint_90d
+    answer:
+      identifiable: false
+      missing: [price_grumbling]
+    note: >-
+      Account size is in the table, but the handlers also remarketed whoever was giving out
+      about price, and those clients leave anyway. That only exists in e-mails. The premium
+      change is the mechanism and the complaint flag is logged after the fact; neither rescues
+      the comparison. Its twin records the price query.
+
+  - id: en_broker_remarket_flag
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: analyst at a commercial insurance broker in Dublin (about 7,000 SME clients), writing to the head of SME, comfortable with spreadsheets, no formal statistics
+    theme: Insurance broking / SME renewals
+    title: Remarketing at renewal decided by a price-query box the handlers had to tick
+    twin: en_broker_remarket_memory
+    treatment: remarketed
+    outcome: renewed
+    columns:
+      remarketed: 1 if the handler took the policy to market at the 2025 renewal, meaning terms were sought from at least one insurer other than the holding insurer.
+      renewed: 1 if the client renewed through us, with any insurer, within 30 days of the renewal date.
+      premium_change_pct: Best renewal premium presented to the client, as a percentage change on the expiring premium.
+      expiring_premium: Expiring annual premium, euro.
+      sector: Client trade sector. Construction, hospitality, retail, professional services, other.
+      years_with_us: Full years the client had been with the brokerage at the 2025 renewal date.
+      price_query_flag: 1 if the handler ticked "client queried price" on the renewal task in Acturis. Mandatory from January 2025 whenever a client pushed back on the premium or mentioned another broker, remarketed or not.
+      complaint_90d: 1 if a complaint was logged on the client file in the 90 days after the renewal date.
+      policy_ref: Acturis policy reference.
+    story: >-
+      MEMO. To Siobhán Carey, Head of SME. From Eoin Walsh, Analytics. 3 October 2026. Re
+      remarketing at the 2025 renewals and retention. Of about 6,800 SME policies that fell due
+      in 2025, the handlers took roughly 2,100 to market and let the rest roll over with the
+      holding insurer. Retention on the remarketed book was 91 percent against 84 on the rest,
+      and that seven-point gap is being quoted in the budget round as the return on the
+      remarketing hours. I don't think we can quote it yet. How policies were chosen. There was
+      no formal rule, but there is a record. From January 2025 every handler has had to tick the
+      "client queried price" box on the renewal task in Acturis whenever a client pushed back on
+      the premium or mentioned another broker, remarketed or not, because Finance wanted the
+      workload tracked, and the team were strict about it since the box is what gets remarketing
+      hours signed off. From a week sitting with the team, who got remarketed comes down to that
+      box and to the size of the account, since nobody spends a day getting alternative terms on
+      a 900 euro shop policy, and in fairness the bigger accounts are also the ones the insurers
+      themselves fight to keep, so they tend to stick with us regardless. A client who queries
+      the price is already halfway out the door, and that is exactly who got remarketed, so the
+      raw gap flatters us; at least this time the thing driving it is in the file. Notes on the
+      extract. The premium change is largely what remarketing buys you, a better number to
+      present, and clients renew on the number, though I'd also say a client who sees us go to
+      market for them feels looked after whatever the number comes back as. Construction and
+      hospitality got double-digit increases from every insurer this year, whatever we did. Our
+      long-standing clients renew at higher rates than the newer ones, always have. The
+      complaint flag picks up two kinds of case, clients we moved to a new insurer who had grief
+      with the paperwork, and clients who lapsed and left a complaint on the way out. Ask. I'd
+      like your view on what should and should not be in the comparison before it goes to Finance.
+    edges:
+      - price_query_flag -> remarketed
+      - price_query_flag -> renewed
+      - expiring_premium -> remarketed
+      - expiring_premium -> renewed
+      - remarketed -> premium_change_pct
+      - premium_change_pct -> renewed
+      - remarketed -> renewed
+      - sector -> premium_change_pct
+      - years_with_us -> renewed
+      - remarketed -> complaint_90d
+      - renewed -> complaint_90d
+    answer:
+      identifiable: true
+      adjust_for: [expiring_premium, price_query_flag]
+      do_not_adjust_for:
+        premium_change_pct: Produced by the remarketing itself, the better number the handler brings back, and the main way remarketing keeps a client. Adjusting for it removes the effect being measured.
+        complaint_90d: Logged after the renewal date and driven by both the remarketing (the move to a new insurer) and the lapse itself. Adjusting for it creates a false link between the two.
+      indifferent: [policy_ref, sector, years_with_us]
+    note: >-
+      Same memo as its twin, with the price query now a mandatory box in the system. Both
+      reasons a policy was remarketed are recorded and both drive renewal. Sector only moves the
+      premium change and tenure only moves renewal, so neither is needed.
+
+  - id: en_foodbank_client_choice
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: executive director of a regional food bank serving 14 counties in central Ohio (about 190 partner pantries), e-mailing an evaluation consultant, no research training
+    theme: Food bank / pantry model
+    title: Client-choice pantries run by the coordinators who show up to everything
+    treatment: client_choice
+    outcome: return_rate_q1
+    columns:
+      client_choice: 1 if the pantry operated as client choice (households shop the shelves and pick their own items) for all of Q1 2026. 0 if it handed out pre-packed boxes.
+      return_rate_q1: Of the households served in January 2026, the share that visited the same pantry at least once in February or March 2026. From the intake system.
+      pantry_sqft: Floor area of the distribution space, square feet, from the 2024 agency site inspection.
+      county_poverty_pct: Share of the pantry's county population below the poverty line, 2024 ACS five-year estimate.
+      produce_share_q1: Pounds of fresh produce as a share of all pounds the pantry drew from our warehouse, Q1 2026.
+      distribution_day: Main weekly distribution day, Monday to Saturday.
+      agency_id: Partner agency number.
+    not_in_table:
+      coordinator_drive: How engaged the pantry coordinator is. Shows up to trainings, answers e-mails the same day, keeps a bench of volunteers. Known to agency relations, never scored or recorded.
+    story: >-
+      Hi Marianne, hope the Pittsburgh engagement wrapped up ok. Here's the question I mentioned
+      on the call, data dictionary attached. About two years ago we started pushing our partner
+      pantries toward client choice, where people shop the shelves with a cart instead of
+      getting a pre-packed box. As of January, 71 of our 190 pantries are fully on choice. The
+      board wants to know whether choice brings people back, because return visits are how we
+      know a household is actually getting fed and not trying us once and giving up. Raw
+      numbers, 58 percent of the January households at choice pantries came back in February or
+      March, versus 44 at the box pantries. I would love to believe that. Here's what worries
+      me. Who converted wasn't up to us. We offered the training to everybody, and the pantries
+      that went for it were the ones with the coordinators who show up to every training, answer
+      their e-mails the same day, have a bench of volunteers, you know the type. Those were also
+      the pantries running well before any of this started, and their people come back
+      regardless. Rob's team could name those coordinators off the top of their heads but there
+      is no column for it, we have never scored it. Then there's space. You need room for
+      shelving and a cart aisle, so the little church basements mostly couldn't convert, and the
+      bigger rooms also carry more variety, which on its own keeps families coming back. On the
+      file: produce share went way up at the choice pantries, people take produce when they pick
+      it themselves and the pantries order more of it in response, and produce is what families
+      tell us they come back for. There's also the dignity piece, people say they'd rather shop
+      than be handed a box, and I think that brings them back on its own. County poverty rate is
+      in there because the high-poverty counties have higher return rates across the board.
+      Distribution day and agency id are just how we run the calendar. So, is there a defensible
+      way to get the effect of choice on return rate out of this, or do I tell the board we
+      can't say with what we have? And if we can, what do we adjust for? Thanks, Denise.
+    edges:
+      - coordinator_drive -> client_choice
+      - coordinator_drive -> return_rate_q1
+      - pantry_sqft -> client_choice
+      - pantry_sqft -> return_rate_q1
+      - client_choice -> produce_share_q1
+      - produce_share_q1 -> return_rate_q1
+      - client_choice -> return_rate_q1
+      - county_poverty_pct -> return_rate_q1
+    answer:
+      identifiable: false
+      missing: [coordinator_drive]
+    note: >-
+      Floor area is recorded, but the pantries that converted were the well-run ones, and that
+      is known to the staff and written nowhere. The produce share is the mechanism, not a
+      substitute for it.
+
+  - id: en_foodbank_cooler_grants
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: executive director of a regional food bank in central Ohio; notes taken by her operations coordinator at the monthly program team meeting
+    theme: Food bank / cold storage grants
+    title: Cooler grants ranked by meal gap, with a capacity column counted after the coolers went in
+    treatment: cooler_grant
+    outcome: hh_per_month_h2
+    columns:
+      cooler_grant: 1 if the agency received a walk-in or reach-in cooler under the 2025 capacity grant. Units installed April to June 2025.
+      hh_per_month_h2: Average unique households served per month, July to December 2025, from intake.
+      meal_gap_2024: Estimated annual meal gap for the agency's zip code, thousands of meals, 2024 Map the Meal Gap figure.
+      open_days_wk: Days open per week, per the 2024 agency agreement.
+      volunteers_2024: Active volunteers reported in the 2024 agency agreement.
+      cold_cuft: Total refrigerated and frozen storage, cubic feet, from the December 2025 agency equipment inventory. Includes grant-funded units.
+      agency_id: Partner agency number.
+    story: >-
+      Program team meeting, Feb 11, 2026. Notes T. Nguyen. Present Denise (ED), Rob (agency
+      relations), Luis (ops), Kayla (development), Sam (data). Item 2, cooler grant results for
+      the March board. Denise wants a number on whether the 2025 coolers moved households served
+      in the second half of the year. Rob recapped the selection for the record. 38 agencies
+      funded out of 91 applications; the extract Sam built is those 91, one row each.
+      Applications ranked by the Map the Meal Gap figure for the
+      agency's zip, biggest gap first, and we required at least two open days a week; both
+      numbers come from the 2024 agreements. Nothing else went into it, no site visits, no essay,
+      Rob was clear on that. Sam flagged that both of those move the household count on their
+      own, the high-gap zips are where the lines are, and an agency open four days sees more
+      families than one open Saturdays. Volunteer counts from the 2024 agreements are in the
+      extract too, bigger volunteer pools serve more families, nothing to do with who got funded.
+      Luis said we have cold storage capacity for every agency in the file from the equipment
+      inventory, so we can see who has what, and more cold space means more families served,
+      that's the whole theory of the grant. Kayla asked if she can quote the number in the spring
+      appeal; Denise said only once Sam signs off. Action (Sam): produce the effect of the grant
+      on monthly households, July to December 2025, with the adjustments the selection calls for
+      and nothing else, and flag anything in the extract that should stay out. Action (Luis):
+      confirm which inventory the capacity numbers came from. Item 3, mobile pantry route,
+      deferred.
+    edges:
+      - meal_gap_2024 -> cooler_grant
+      - meal_gap_2024 -> hh_per_month_h2
+      - open_days_wk -> cooler_grant
+      - open_days_wk -> hh_per_month_h2
+      - volunteers_2024 -> hh_per_month_h2
+      - cooler_grant -> cold_cuft
+      - cold_cuft -> hh_per_month_h2
+    answer:
+      identifiable: true
+      adjust_for: [meal_gap_2024, open_days_wk]
+      do_not_adjust_for:
+        cold_cuft: Counted in the December 2025 inventory, after the grant coolers were installed, so it includes them. It is how the grant reaches families, and adjusting for it removes the effect being measured.
+      indifferent: [agency_id, volunteers_2024]
+    note: >-
+      The two selection rules are recorded and both drive the household count. The trap sits in
+      the column dictionary: the capacity column was inventoried after the coolers went in, so
+      it is a consequence of the grant, not a baseline. The story never says when it was
+      measured.
+
+  - id: en_hardware_pro_desk
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: store operations lead at a 64-store hardware chain in the upper Midwest, messaging the BI analyst before a steering committee, reads dashboards, no statistics
+    theme: Hardware retail / contractor counter
+    title: Contractor counters put where the regional managers saw the trucks lined up
+    treatment: pro_desk
+    outcome: comp_sales_pct
+    columns:
+      pro_desk: 1 if the store had a staffed contractor counter open by March 1, 2026.
+      comp_sales_pct: Total store sales March to August 2026 versus March to August 2025, percent change.
+      store_sqft: Selling floor area, square feet.
+      trade_accts_opened: Trade credit accounts opened at the store, March to August 2026.
+      rm_walk_q3: 1 if the regional manager did a store walk with the ops team in September or October 2026.
+      region: North, Twin Cities, Dakotas, or Wisconsin.
+      store_id: Store number.
+    not_in_table:
+      builder_activity: How much homebuilding and remodeling is going on around the store. The RMs know their markets; the company has never put a number on it.
+    story: >-
+      @jenna before Monday's steerco, the pro desk numbers. 18 stores have had the contractor
+      counter since March and they're comping +6.8 vs +1.9 for the rest, and Dave wants to roll
+      it to 30 more on that basis. my problem is that the RMs picked the 18. I asked each of
+      them for the stores where "the contractor business was already there", meaning they'd
+      seen the trucks lined up at 6:30 in the morning and knew the builders in that town were
+      busy. so we put desks where construction was already hot, and hot construction lifts the
+      whole store whether there's a desk or not. we don't have a column for any of that, it's
+      just what the RMs know. we also leaned toward the bigger boxes because the desk eats 400
+      sq ft, and the big boxes have been comping better since last year's resets anyway. the
+      trade accounts number is real and I'm proud of it, the desk stores are opening 3x the
+      accounts, and accounts drive the sales, a contractor on account buys every week, plus the
+      walk-in pros who never open an account are buying more at those stores too. the RM walk
+      flag: RMs walked every pro desk store in September plus anywhere comps were negative, so
+      don't read anything into that. Dakotas are soft this year, late spring. can you tell me
+      whether we can actually say the desk did +X, and if so what to cut it by? honestly I
+      suspect the answer is no.
+    edges:
+      - builder_activity -> pro_desk
+      - builder_activity -> comp_sales_pct
+      - store_sqft -> pro_desk
+      - store_sqft -> comp_sales_pct
+      - pro_desk -> trade_accts_opened
+      - trade_accts_opened -> comp_sales_pct
+      - pro_desk -> comp_sales_pct
+      - pro_desk -> rm_walk_q3
+      - comp_sales_pct -> rm_walk_q3
+      - region -> comp_sales_pct
+    answer:
+      identifiable: false
+      missing: [builder_activity]
+    note: >-
+      Floor area is recorded, but the desks went where the RMs saw construction booming, which
+      lifts sales on its own and was never recorded. The trade-accounts KPI is the mechanism and
+      the RM walk happened after the fact for both reasons; neither helps.
+
+  - id: en_hardware_tinters
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: store operations lead at a 64-store hardware chain in the upper Midwest, e-mailing the retail consultant the chain keeps on retainer
+    theme: Hardware retail / paint department
+    title: New paint tinters for the oldest machines and the biggest paint stores
+    treatment: new_tinter
+    outcome: paint_comp_pct
+    columns:
+      new_tinter: 1 if the store's paint dispenser was replaced with the new automatic tinter by April 30, 2026.
+      paint_comp_pct: Paint category sales May to September 2026 versus May to September 2025, percent change.
+      tinter_age_yrs: Age in years of the dispenser in place on January 1, 2026.
+      paint_sales_2025: Paint category sales, calendar 2025, dollars.
+      store_format: Big box or neighborhood.
+      mystery_shop_q4: 1 if the store received a paint-department mystery shop in October or November 2026. Shops were commissioned in October for every new-tinter store and for every store whose May to September paint comp came in negative.
+    story: >-
+      Karen, quick one before Thursday. We swapped the paint dispensers in 22 stores for the new
+      automatic tinters this spring and merch wants to know what it did to paint comps over the
+      summer. The 22 were the oldest machines on the vendor's age list, the 12-year-old units
+      were mis-tinting and breaking down weekly and that costs you the sale, plus a few of our
+      biggest paint stores the vendor pushed to the front of the line because that's where their
+      product moves, and those stores have been growing paint on their own for three years. Big
+      boxes have a bigger paint wall, do more paint dollars, and comp better in paint generally.
+      Columns in the attached
+      sheet, fall mystery shop flag included. Enough to say the tinter did plus X, and what do
+      I adjust for or leave out?
+    edges:
+      - tinter_age_yrs -> new_tinter
+      - tinter_age_yrs -> paint_comp_pct
+      - paint_sales_2025 -> new_tinter
+      - paint_sales_2025 -> paint_comp_pct
+      - new_tinter -> paint_comp_pct
+      - store_format -> paint_sales_2025
+      - store_format -> paint_comp_pct
+      - new_tinter -> mystery_shop_q4
+      - paint_comp_pct -> mystery_shop_q4
+    answer:
+      identifiable: true
+      adjust_for: [paint_sales_2025, tinter_age_yrs]
+      do_not_adjust_for:
+        mystery_shop_q4: Commissioned in October, after the summer, for the new-tinter stores and for the stores whose paint comp came in negative. Adjusting for it creates a false link between the two.
+      indifferent: [store_format]
+    note: >-
+      Short note, both selection reasons stated in passing and both recorded. The trap is in the
+      column dictionary: the mystery shop flag was decided from the treatment and from the
+      outcome, which the story never mentions.
+
+  - id: en_transit_rt_screens
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: service planner at a mid-size US city transit agency (about 40 bus routes), writing up a working session with the data team
+    theme: Urban transit / stop amenities
+    title: Real-time arrival screens at the busiest stops, with shelters added in the same trench
+    treatment: rt_screen
+    outcome: boardings_2025
+    columns:
+      rt_screen: 1 if the stop received a real-time arrival screen in the summer 2025 installation batch.
+      boardings_2025: Average weekday boardings at the stop, September to November 2025, from automatic passenger counters.
+      boardings_2024: Average weekday boardings at the stop, September to November 2024.
+      shelter_new: 1 if a shelter was installed at the stop during 2025.
+      requests_311: Number of 311 service requests referencing the stop, December 2025 to February 2026.
+      peak_bph: Scheduled buses per hour at the stop, weekday AM peak, August 2025 service change.
+      stop_id: GTFS stop id.
+    not_in_table:
+      council_ask: Whether a council member asked the GM for a screen at the stop. Known from e-mails, not recorded.
+    story: >-
+      Working session, real-time screens eval, Mar 4, 2026. Attending: me (planning), Ana and
+      Devon (data), Marcus (capital projects). Purpose: the board asked whether the 60 screens
+      we installed last summer brought riders. Selection, per Marcus: capital set the cut at 150
+      weekday boardings in fall 2024 and every stop above it was on the list; then a handful of
+      stops below the cut were added because council members asked the GM for one in their
+      district. Those adds don't do anything to ridership one way or the other, the stop just
+      got a screen. Ana pointed out the 2024 boardings cut is the issue: a stop that was busy in
+      2024 is busy in 2025, so comparing screen stops to the rest is comparing big stops to
+      small stops. Peak frequency from the August service change is in the file because the
+      routes we boosted picked up riders at every stop along them. Marcus on shelters: wherever
+      we trenched for the screen's power, which was most of the 60 but not the stops that already
+      had power at the pole, we put in a shelter at the same time since the sidewalk was already
+      open; no other shelters went in during 2025. Everyone agrees a shelter brings
+      riders on its own. Devon has 311 pulled: screens generate requests when they freeze or go
+      dark, and busier stops generate requests, period. Action (Ana): estimate the screen effect
+      on fall 2025 boardings with the adjustments the selection needs, nothing extra, and list
+      what in the file must stay out. Action (me): draft the board slide.
+    edges:
+      - boardings_2024 -> rt_screen
+      - boardings_2024 -> boardings_2025
+      - council_ask -> rt_screen
+      - rt_screen -> shelter_new
+      - shelter_new -> boardings_2025
+      - rt_screen -> boardings_2025
+      - rt_screen -> requests_311
+      - boardings_2025 -> requests_311
+      - peak_bph -> boardings_2025
+    answer:
+      identifiable: true
+      adjust_for: [boardings_2024]
+      do_not_adjust_for:
+        shelter_new: Installed because of the screen, in the same trench, and a draw for riders on its own. It is part of how the screen project changed boardings, so adjusting for it removes part of the effect.
+        requests_311: Filed December to February, after the fall count, and driven by both the screen (when it fails) and how busy the stop is. Adjusting for it creates a false link between the two.
+      indifferent: [peak_bph, stop_id]
+    note: >-
+      The ridership cut is recorded and is the only thing to adjust for; the council requests
+      only moved the screens and nothing else. The shelter is a consequence of the install and
+      the 311 count is after the fact for both reasons.

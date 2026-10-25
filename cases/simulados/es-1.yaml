@@ -1,0 +1,511 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Casos simulados em espanhol: primeiro arquivo (es-1).
+#
+# Escritos pelo assistente em 2026-10-06, no papel de pessoas que nunca viram o projeto:
+# uma gerente de varejo no México, um analista de banco na Colômbia, uma coordenadora
+# de ONG na Argentina, dois funcionários de um município no Chile, um agrônomo de uma
+# cooperativa no Peru e o dono de uma academia de idiomas na Espanha. O texto imita o
+# que essas pessoas escreveriam (chat, e-mail, ata, trecho de relatório, pergunta em
+# fórum), em espanhol latino-americano; o caso da Espanha, em espanhol peninsular.
+#
+# São casos de teste: ficam congelados antes de qualquer modelo respondê-los e nunca
+# entram em treino. O formato é o de cases/fase0.yaml; as setas declaram o diagrama
+# causal que o texto implica, e o verificador confere a resposta
+# (scripts/check_cases.py).
+
+cases:
+
+  - id: es_retail_cabeceras
+    author: ai
+    status: aprovado
+    language: es
+    style: mensaje de chat
+    persona: gerente regional de una cadena de tiendas de conveniencia en México, sin formación en estadística
+    theme: Retail (tiendas de conveniencia)
+    title: Cabeceras de góndola nuevas y venta de botanas
+    treatment: cabecera_nueva
+    outcome: venta_botanas_jun_ago
+    columns:
+      tienda_id: Clave de la tienda en el sistema de punto de venta.
+      cabecera_nueva: 1 si la tienda recibió la cabecera de góndola de la marca en la última semana de mayo de 2026, 0 si no.
+      venta_botanas_jun_ago: Venta de la categoría botanas saladas de junio a agosto de 2026, en pesos sin IVA.
+      venta_botanas_feb_abr: Venta de la categoría botanas saladas de febrero a abril de 2026, en pesos sin IVA.
+      m2_piso: Metros cuadrados de piso de venta.
+      zona: Zona de supervisión de la tienda (Norte, Centro o Sur).
+      visitas_promotor: Visitas del promotor de la marca a la tienda entre junio y agosto de 2026, según la bitácora de visitas.
+    not_in_table:
+      criterio_rodrigo: Qué tiendas le parecían a Rodrigo "con más jale". Lo decidió él recorriendo las tiendas y no quedó anotado en ningún lado.
+    story: >-
+      Caro, ahí te va lo de las cabeceras pa que me ayudes con lo que pide Dirección. La
+      marca nos puso cabecera de góndola de botanas en 38 tiendas a fines de mayo. Las
+      cabeceras solo entran en formato grande, las chiquitas quedaron fuera de volada, y
+      de las grandes Rodrigo escogió las 38 que según él tienen más jale, las que él ve
+      siempre llenas de gente, a puro ojo, sin ver números ni nada, por eso todas son de
+      Centro, que es su zona. Donde hay cabecera
+      la marca manda promotor a resurtir y acomodar, y donde el promotor pasa seguido se
+      nota en la venta, eso ya lo vimos con otras marcas. Ya sé que las tiendas que vendían
+      más botanas antes siguen vendiendo más, y que una tienda grande vende más que una
+      chiquita, eso no me lo tienes que explicar jaja. Lo que quiere saber Dirección es si
+      la cabecera en sí mueve la venta de botanas, porque la marca nos quiere cobrar el
+      espacio en 2027. Te mando la base en la tarde, ¿va?
+    edges:
+      - m2_piso -> cabecera_nueva
+      - m2_piso -> venta_botanas_jun_ago
+      - m2_piso -> venta_botanas_feb_abr
+      - zona -> cabecera_nueva
+      - criterio_rodrigo -> cabecera_nueva
+      - criterio_rodrigo -> venta_botanas_jun_ago
+      - criterio_rodrigo -> venta_botanas_feb_abr
+      - venta_botanas_feb_abr -> venta_botanas_jun_ago
+      - cabecera_nueva -> visitas_promotor
+      - visitas_promotor -> venta_botanas_jun_ago
+      - cabecera_nueva -> venta_botanas_jun_ago
+    answer:
+      identifiable: false
+      missing: [criterio_rodrigo]
+    note: >-
+      El ojo de Rodrigo decidió qué tiendas grandes recibieron cabecera y es también señal
+      de tiendas que venden más. La venta anterior y el tamaño no lo sustituyen. Las
+      visitas del promotor son consecuencia de la cabecera.
+
+  - id: es_banco_asesoria_puntaje
+    author: ai
+    status: aprovado
+    language: es
+    style: fragmento de informe
+    persona: analista de riesgo de un banco en Colombia, con algo de estadística pero sin formación en inferencia causal
+    theme: Banca (tarjetas de crédito)
+    title: Asesoría de plan de pagos y mora, con priorización por puntaje
+    twin: es_banco_asesoria_impresion
+    treatment: asesoria_plan_pagos
+    outcome: mora_90_dic
+    columns:
+      cliente_id: Identificador interno del cliente.
+      asesoria_plan_pagos: 1 si el cliente fue contactado por un asesor y se le armó plan de pagos en febrero de 2025.
+      mora_90_dic: 1 si la tarjeta registraba más de 90 días de mora al cierre de diciembre de 2025.
+      utilizacion_ene: Porcentaje del cupo utilizado al cierre de enero de 2025.
+      score_riesgo: Puntaje interno de riesgo al cierre de enero de 2025, de 0 a 1000 (a mayor puntaje, menor riesgo).
+      cupo_tarjeta: Cupo aprobado de la tarjeta al cierre de enero de 2025, en millones de pesos.
+      pagos_puntuales_mar_jun: Número de meses, entre marzo y junio de 2025, en que el pago mínimo se hizo a tiempo (0 a 4).
+      contacto_cobranza_2s: 1 si el área de Cobranzas registró al menos un contacto con el cliente en el segundo semestre de 2025.
+      canal_apertura: Canal por el que se abrió la tarjeta (oficina, digital o aliado comercial).
+    story: >-
+      3.1 Antecedentes de la campaña. En febrero de 2025 el equipo de Cobranza Preventiva
+      ejecutó la campaña de asesoría de plan de pagos sobre la cartera de tarjeta de
+      crédito. La base objetivo se construyó con los clientes que al cierre de enero
+      presentaban una utilización del cupo superior al 80 % (11.842 clientes de una cartera
+      activa de 206.315). Por capacidad del equipo (seis asesores durante tres semanas) se
+      alcanzó a contactar y a armar plan de pagos a 4.106 clientes. La priorización dentro
+      de la base se hizo por puntaje interno de riesgo, de menor a mayor: los asesores
+      comenzaron por los clientes de peor puntaje y avanzaron hasta donde alcanzó el
+      tiempo. Como es sabido, tanto la utilización alta como el puntaje bajo anticipan la
+      mora. En la revisión de mitad de año la gerencia destacó que los clientes asesorados
+      pagaron puntualmente el mínimo en más meses entre marzo y junio que el resto de la
+      cartera, resultado que atribuye al plan de pagos; la puntualidad en esos meses es, a
+      su vez, lo que más pesa para no llegar a mora de 90 días al cierre del año. Debe
+      tenerse en cuenta que el área de Cobranzas registra un contacto tanto cuando el
+      cliente entra en mora como en el seguimiento rutinario que se hace a quienes pasaron
+      por asesoría, de modo que la variable de contacto del segundo semestre recoge ambas
+      situaciones. Los clientes con cupos más altos acumulan saldos mayores y presentan
+      históricamente más mora, aunque el cupo no se tuvo en cuenta en la priorización. El
+      objetivo de esta sección es estimar si la asesoría redujo la mora a 90 días al cierre
+      de 2025, insumo para decidir si la campaña se repite en 2026 con el presupuesto
+      solicitado. La tabla de trabajo (anexo B) incluye toda la cartera activa a enero de
+      2025.
+    edges:
+      - utilizacion_ene -> asesoria_plan_pagos
+      - utilizacion_ene -> mora_90_dic
+      - score_riesgo -> asesoria_plan_pagos
+      - score_riesgo -> mora_90_dic
+      - cupo_tarjeta -> mora_90_dic
+      - asesoria_plan_pagos -> pagos_puntuales_mar_jun
+      - pagos_puntuales_mar_jun -> mora_90_dic
+      - asesoria_plan_pagos -> mora_90_dic
+      - asesoria_plan_pagos -> contacto_cobranza_2s
+      - mora_90_dic -> contacto_cobranza_2s
+    answer:
+      identifiable: true
+      adjust_for: [score_riesgo, utilizacion_ene]
+      do_not_adjust_for:
+        pagos_puntuales_mar_jun: Se midió después de la asesoría y es consecuencia de ella. Es parte del efecto que se quiere medir.
+        contacto_cobranza_2s: Es consecuencia de la asesoría y también de la mora. Ajustar por esta columna crea una asociación falsa entre la asesoría y la mora.
+      indifferent: [canal_apertura, cliente_id, cupo_tarjeta]
+    note: >-
+      La utilización define la base y el puntaje define el orden de llamada; los dos
+      están en la tabla. La trampa es la puntualidad de marzo a junio, que la gerencia
+      presenta como logro, y el contacto de Cobranzas, posterior a la mora.
+
+  - id: es_banco_asesoria_impresion
+    author: ai
+    status: aprovado
+    language: es
+    style: fragmento de informe
+    persona: analista de riesgo de un banco en Colombia, con algo de estadística pero sin formación en inferencia causal
+    theme: Banca (tarjetas de crédito)
+    title: Asesoría de plan de pagos y mora, con priorización a criterio del asesor
+    twin: es_banco_asesoria_puntaje
+    treatment: asesoria_plan_pagos
+    outcome: mora_90_dic
+    columns:
+      cliente_id: Identificador interno del cliente.
+      asesoria_plan_pagos: 1 si el cliente fue contactado por un asesor y se le armó plan de pagos en febrero de 2025.
+      mora_90_dic: 1 si la tarjeta registraba más de 90 días de mora al cierre de diciembre de 2025.
+      utilizacion_ene: Porcentaje del cupo utilizado al cierre de enero de 2025.
+      score_riesgo: Puntaje interno de riesgo al cierre de enero de 2025, de 0 a 1000 (a mayor puntaje, menor riesgo).
+      cupo_tarjeta: Cupo aprobado de la tarjeta al cierre de enero de 2025, en millones de pesos.
+      pagos_puntuales_mar_jun: Número de meses, entre marzo y junio de 2025, en que el pago mínimo se hizo a tiempo (0 a 4).
+      contacto_cobranza_2s: 1 si el área de Cobranzas registró al menos un contacto con el cliente en el segundo semestre de 2025.
+      canal_apertura: Canal por el que se abrió la tarjeta (oficina, digital o aliado comercial).
+    not_in_table:
+      impresion_asesor: Qué tan enredado con la deuda le parecía cada cliente al asesor, por conversaciones previas en oficina o por el tono de los últimos contactos. No quedó registrado en ningún sistema.
+    story: >-
+      3.1 Antecedentes de la campaña. En febrero de 2025 el equipo de Cobranza Preventiva
+      ejecutó la campaña de asesoría de plan de pagos sobre la cartera de tarjeta de
+      crédito. La base objetivo se construyó con los clientes que al cierre de enero
+      presentaban una utilización del cupo superior al 80 % (11.842 clientes de una cartera
+      activa de 206.315). Por capacidad del equipo (seis asesores durante tres semanas) se
+      alcanzó a contactar y a armar plan de pagos a 4.106 clientes. La priorización dentro
+      de la base quedó a criterio de cada asesor: según relataron en la retroalimentación
+      de cierre, fueron llamando primero a los clientes que, por conversaciones previas en
+      oficina o por el tono de los últimos contactos, les parecían más enredados con la
+      deuda, y avanzaron hasta donde alcanzó el tiempo. Ese criterio no quedó registrado en
+      ningún sistema. Como es sabido, tanto la utilización alta como el puntaje bajo
+      anticipan la mora, y un cliente que ya se ve enredado con la deuda tiene,
+      previsiblemente, más probabilidad de terminar en mora. En la revisión de mitad de
+      año la gerencia destacó que los clientes asesorados pagaron puntualmente el mínimo en
+      más meses entre marzo y junio que el resto de la cartera, resultado que atribuye al
+      plan de pagos; la puntualidad en esos meses es, a su vez, lo que más pesa para no
+      llegar a mora de 90 días al cierre del año. Debe tenerse en cuenta que el área de
+      Cobranzas registra un contacto tanto cuando el cliente entra en mora como en el
+      seguimiento rutinario que se hace a quienes pasaron por asesoría, de modo que la
+      variable de contacto del segundo semestre recoge ambas situaciones. Los clientes con
+      cupos más altos acumulan saldos mayores y presentan históricamente más mora, aunque
+      el cupo no se tuvo en cuenta en la priorización. El objetivo de esta sección es
+      estimar si la asesoría redujo la mora a 90 días al cierre de 2025, insumo para
+      decidir si la campaña se repite en 2026 con el presupuesto solicitado. La tabla de
+      trabajo (anexo B) incluye toda la cartera activa a enero de 2025.
+    edges:
+      - utilizacion_ene -> asesoria_plan_pagos
+      - utilizacion_ene -> mora_90_dic
+      - impresion_asesor -> asesoria_plan_pagos
+      - impresion_asesor -> mora_90_dic
+      - score_riesgo -> mora_90_dic
+      - cupo_tarjeta -> mora_90_dic
+      - asesoria_plan_pagos -> pagos_puntuales_mar_jun
+      - pagos_puntuales_mar_jun -> mora_90_dic
+      - asesoria_plan_pagos -> mora_90_dic
+      - asesoria_plan_pagos -> contacto_cobranza_2s
+      - mora_90_dic -> contacto_cobranza_2s
+    answer:
+      identifiable: false
+      missing: [impresion_asesor]
+    note: >-
+      Gemelo de es_banco_asesoria_puntaje con un solo cambio: el orden de llamada lo puso
+      la impresión del asesor, que no se registró. El puntaje sigue en la tabla y sigue
+      anticipando la mora, pero ya no explica a quién se llamó.
+
+  - id: es_academia_tutorias
+    author: ai
+    status: aprovado
+    language: es
+    style: pregunta en un foro
+    persona: dueño de una academia de idiomas en Valladolid, España, profesor de formación, sin estadística
+    theme: Educación (academia de idiomas)
+    title: Tutorías individuales y aprobado en el examen oficial de B2
+    treatment: tutoria_individual
+    outcome: aprobo_oficial
+    columns:
+      alumno_id: Número de matrícula del alumno.
+      tutoria_individual: 1 si el alumno hizo las sesiones de tutoría individual ofrecidas en octubre de 2025 (seis sesiones de media hora entre noviembre y febrero), 0 si no.
+      aprobo_oficial: 1 si aprobó el examen oficial de B2 en la convocatoria de junio de 2026.
+      nota_prueba_sept: Nota en la prueba de nivel interna de septiembre de 2025, de 0 a 100.
+      tipo_curso: Modalidad del curso matriculado, intensivo (8 horas por semana) o extensivo (4 horas por semana).
+      asistencia_pct: Porcentaje de asistencia a clase entre noviembre de 2025 y mayo de 2026.
+      matricula_c1: 1 si se matriculó en el curso de C1 del año siguiente, en el plazo de matrícula de julio de 2026, tras publicarse las notas del examen oficial.
+      edad: Edad del alumno al matricularse, en años.
+    story: >-
+      Hola a todos, a ver si alguien me echa una mano, que de estadística voy justo. Tengo
+      una academia pequeña en Valladolid, unos 140 alumnos de B2 este curso. En octubre
+      ofrecimos tutorías individuales gratis, seis sesiones de media hora entre noviembre y
+      febrero. Se las ofrecimos sobre todo a los que habían sacado menos de 60 en la prueba
+      de nivel de septiembre (y, claro, los que vienen flojos de septiembre lo tienen más
+      difícil en junio). No todos las hicieron: en el intensivo se hicieron muchas más
+      tutorías que en el extensivo, simplemente porque los del intensivo están en la
+      academia cuatro tardes y era fácil encajarlas, y a los del extensivo a muchos no les
+      cuadraba el horario; y los del intensivo, con el doble de horas, aprueban más de
+      todas formas. Lo que sí he notado, y de esto estoy bastante orgulloso, es que los de
+      tutoría luego faltaron mucho menos a clase, se enganchan, y venir a clase es lo que
+      acaba haciendo que aprueben. En junio aprobó el oficial el 71 %. Ya tenemos abierta
+      la matrícula del C1 para el curso que viene: a los de tutoría les hicimos un
+      descuento por seguir con nosotros y se han apuntado casi todos, y de los demás se han
+      apuntado sobre todo los que aprobaron, lógico, el que suspende normalmente repite B2
+      o se va. Lo tengo todo en un Excel: matrícula, nota de septiembre, tipo de curso, si
+      hizo tutoría, asistencia, si aprobó, si se ha matriculado en C1, y la edad porque la
+      pide el formulario de matrícula. ¿Cómo comparo para saber si la tutoría hace que
+      aprueben más? ¿Comparo solo alumnos con nota de septiembre parecida? ¿Meto la
+      asistencia o no? Gracias de antemano.
+    edges:
+      - nota_prueba_sept -> tutoria_individual
+      - nota_prueba_sept -> aprobo_oficial
+      - tipo_curso -> tutoria_individual
+      - tipo_curso -> aprobo_oficial
+      - tutoria_individual -> asistencia_pct
+      - asistencia_pct -> aprobo_oficial
+      - tutoria_individual -> aprobo_oficial
+      - tutoria_individual -> matricula_c1
+      - aprobo_oficial -> matricula_c1
+    answer:
+      identifiable: true
+      adjust_for: [nota_prueba_sept, tipo_curso]
+      do_not_adjust_for:
+        asistencia_pct: Se midió después de empezar las tutorías y es consecuencia de ellas. Es parte del efecto que se quiere medir.
+        matricula_c1: La matrícula del C1 se abrió después del examen; se apuntaron más los de tutoría, por el descuento, y más los que aprobaron. Ajustar por esta columna crea una asociación falsa entre la tutoría y el aprobado.
+      indifferent: [alumno_id, edad]
+    note: >-
+      Dos cosas decidieron quién tuvo tutoría, la nota de septiembre y la modalidad, y las
+      dos pesan en el aprobado. La asistencia es el logro del que el dueño está orgulloso;
+      la fecha de la matrícula del C1 está solo en el diccionario de columnas.
+
+  - id: es_ong_taller_digital
+    author: ai
+    status: aprovado
+    language: es
+    style: acta de reunión
+    persona: coordinadora de programas de una ONG del conurbano bonaerense, Argentina, trabajadora social
+    theme: Tercer sector (inclusión laboral)
+    title: Taller de alfabetización digital y empleo registrado
+    treatment: taller_digital
+    outcome: empleo_registrado_dic
+    columns:
+      familia_id: Código de la familia en el registro de la organización.
+      taller_digital: 1 si la mujer participó del taller de alfabetización digital (marzo a junio de 2025, dos encuentros semanales en el comedor).
+      empleo_registrado_dic: 1 si tenía empleo registrado (recibo de sueldo o monotributo activo) en diciembre de 2025, según la entrevista de cierre de año.
+      hijos_menores_12: Cantidad de hijos menores de 12 años conviviendo al momento de la inscripción al registro (febrero de 2025).
+      secundario_completo: 1 si tenía el secundario terminado al momento de la inscripción.
+      cv_en_plataforma: 1 si cargó su CV en la bolsa de trabajo de la organización entre julio y noviembre de 2025.
+      dia_inscripcion: Día de la semana en que se hizo la inscripción al registro (lunes a viernes).
+    not_in_table:
+      empuje_percibido: Las ganas o el empuje que las trabajadoras sociales les veían a las mujeres al convocarlas. Quedó en la conversación, no en la planilla.
+    story: >-
+      ACTA - Reunión de equipo de programas - 12/03/2026. Presentes: Marcela
+      (coordinación), Vero y Luli (trabajo social), Nico (sistemas), Flor (vinculación con
+      empresas). Ausente con aviso: Pato. 1) Evaluación del taller digital 2025. Marcela
+      recuerda que el pedido viene de la fundación que financia: quieren saber si el taller
+      aumenta el empleo registrado, con los datos que ya tenemos, antes de renovar para
+      2027. 2) Cómo se armaron los grupos. Vero y Luli explican que la convocatoria la
+      hicieron ellas, comedor por comedor, entre las mujeres del registro. Convocaron sobre
+      todo a las que tenían el secundario terminado (el taller arranca con un piso de
+      lectoescritura) y, siendo sinceras, a las que veían con más empuje, las que ya
+      andaban preguntando por laburo. Marcela pregunta si eso quedó en algún lado; Vero:
+      no, fue charlando con cada una. Las que tienen muchos chicos chicos casi no pudieron
+      sostener los dos encuentros por semana y varias ni se anotaron. 3) Resultados. Flor
+      cuenta que de las
+      94 que terminaron el taller, 61 cargaron el CV en la bolsa de trabajo de la
+      organización (es la práctica final del taller, lo hacen ahí mismo con la compu); del
+      resto del registro lo cargaron muy pocas. Las empresas aliadas toman casi
+      exclusivamente de la bolsa. Nico aclara que el dato de empleo sale de la entrevista
+      de cierre de diciembre, que se hizo a todas las familias del registro, no solo a las
+      del taller. 4) Discusión. Luli señala que las que tienen secundario y menos chicos a
+      cargo consiguen laburo registrado más fácil, con o sin taller, y que las que ya
+      venían con empuje también. Nico pregunta si entonces hay que comparar solo entre
+      mujeres parecidas, y parecidas en qué. Se acuerda: Nico arma la tabla por familia
+      con las columnas del registro (código, taller, empleo en diciembre, hijos menores,
+      secundario, CV en plataforma y el día de inscripción, que viene por default del
+      sistema) y se la manda al consultor para que responda. Próxima reunión 26/03.
+    edges:
+      - hijos_menores_12 -> taller_digital
+      - hijos_menores_12 -> empleo_registrado_dic
+      - secundario_completo -> taller_digital
+      - secundario_completo -> empleo_registrado_dic
+      - empuje_percibido -> taller_digital
+      - empuje_percibido -> empleo_registrado_dic
+      - taller_digital -> cv_en_plataforma
+      - cv_en_plataforma -> empleo_registrado_dic
+      - taller_digital -> empleo_registrado_dic
+    answer:
+      identifiable: false
+      missing: [empuje_percibido]
+    note: >-
+      Secundario e hijos menores explican parte de la convocatoria y están en la tabla. El
+      empuje que veían las trabajadoras sociales, dicho de pasada en el punto 2, quedó en
+      la charla. El CV en la plataforma es la práctica final del taller, no una causa previa.
+
+  - id: es_municipio_curso_sorteo
+    author: ai
+    status: aprovado
+    language: es
+    style: correo al jefe
+    persona: profesional de la Dirección de Desarrollo Comunitario de un municipio de la Región Metropolitana, Chile, administrador público
+    theme: Política pública local (capacitación en oficios)
+    title: Curso de electricidad con cupos sorteados y empleo a los seis meses
+    treatment: seleccionado_sorteo
+    outcome: trabajando_oct
+    columns:
+      folio_postulacion: Número de folio de la postulación al curso.
+      seleccionado_sorteo: 1 si el postulante salió seleccionado en el sorteo del 20 de marzo de 2025 e ingresó al curso (abril a julio de 2025).
+      trabajando_oct: 1 si declaró estar trabajando, con o sin contrato, en el seguimiento telefónico de la OMIL de octubre de 2025.
+      edad: Edad al momento de postular, en años.
+      cuarto_medio: 1 si tenía la enseñanza media completa al postular.
+      certificacion_sec: 1 si obtuvo la certificación SEC de instalador eléctrico clase D al término del curso, en julio de 2025.
+      asistio_feria_nov: 1 si asistió a la feria laboral municipal del 12 de noviembre de 2025.
+      unidad_vecinal: Unidad vecinal del domicilio declarado en la postulación.
+    story: >-
+      Don Patricio, buenas tardes. Le dejo por escrito lo que conversamos para el informe a
+      la SUBDERE sobre el curso de electricidad domiciliaria 2025, así queda claro antes
+      de mandárselo al consultor. Postularon 412 personas para 120 cupos, y las 412
+      cumplían los requisitos (mayor de 18 y domicilio en la comuna). Como el 2024 hubo
+      reclamos por la selección, esta vez los cupos se asignaron por sorteo público en el
+      salón municipal, el 20 de marzo, con ministro de fe, entre los 412. Los 120 partieron
+      en abril y el curso terminó en julio; 97 obtuvieron la certificación SEC clase D, que
+      es lo que al final les abre la puerta en las empresas contratistas, por eso
+      insistimos tanto con ese examen. En octubre la OMIL llamó a los 412 postulantes para
+      preguntarles si estaban trabajando. Hartos de los más jóvenes y de los que no tienen
+      cuarto medio siguen sin pega, pero eso pasa igual con o sin curso. En noviembre
+      hicimos la feria laboral: invitamos especialmente a los egresados del curso y, como
+      siempre, a la feria van sobre todo los que andan buscando pega, los que ya están
+      trabajando no se dan la vuelta. La pregunta del consultor es cuánto subió el empleo
+      por el curso, y Finanzas quiere saber si vale la pena repetirlo con 200 cupos. Le
+      adjunto la planilla: folio, sorteado, trabajando en octubre, edad, cuarto medio,
+      certificación, asistencia a la feria y la unidad vecinal, que la pide el formato de
+      la SUBDERE. Quedo atento. Saludos, Felipe.
+    edges:
+      - seleccionado_sorteo -> certificacion_sec
+      - certificacion_sec -> trabajando_oct
+      - seleccionado_sorteo -> trabajando_oct
+      - edad -> trabajando_oct
+      - cuarto_medio -> trabajando_oct
+      - seleccionado_sorteo -> asistio_feria_nov
+      - trabajando_oct -> asistio_feria_nov
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        certificacion_sec: Se obtiene al terminar el curso y es consecuencia de él. Es parte del efecto que se quiere medir.
+        asistio_feria_nov: La feria fue después del seguimiento de octubre; fueron más los egresados del curso y menos los que ya estaban trabajando. Ajustar por esta columna crea una asociación falsa entre el curso y el empleo.
+      indifferent: [cuarto_medio, edad, folio_postulacion, unidad_vecinal]
+    note: >-
+      Con sorteo, la comparación simple ya da el efecto. La trampa es ajustar por la
+      certificación, que es el logro del curso, o por la feria, que vino después del
+      resultado.
+
+  - id: es_cooperativa_cafe_asistencia
+    author: ai
+    status: aprovado
+    language: es
+    style: mensaje de chat
+    persona: ingeniero agrónomo de una cooperativa cafetalera de la selva central del Perú
+    theme: Agricultura (café)
+    title: Asistencia técnica en parcelas de café y rendimiento de la campaña
+    treatment: asistencia_tecnica
+    outcome: rendimiento_qq_ha
+    columns:
+      codigo_socio: Código del socio en el padrón de la cooperativa.
+      asistencia_tecnica: 1 si la parcela recibió el paquete de asistencia técnica (tres visitas del técnico entre agosto y noviembre de 2025, con plan de manejo).
+      rendimiento_qq_ha: Rendimiento de café pergamino de la campaña 2026, en quintales por hectárea, según el registro de cosecha del socio.
+      altitud_msnm: Altitud de la parcela en metros sobre el nivel del mar, del levantamiento con GPS de 2023.
+      edad_cafetal: Años desde la última siembra o renovación del cafetal, a 2025.
+      distancia_trocha_km: Distancia de la parcela a la trocha carrozable más cercana, en kilómetros.
+      abono_kg_ha: Kilos de abono orgánico aplicados por hectárea en la campaña 2025-2026, según el cuaderno de campo.
+      entrego_acopio: 1 si el socio entregó su cosecha 2026 al centro de acopio de la cooperativa.
+    story: >-
+      Inge Rocío, buenas, le cuento rapidito lo de la asistencia técnica para que arme la
+      tabla. Este año llegamos a 86 parcelas de las 240 del padrón. Priorizamos las que
+      están arriba de 1600 msnm, porque ahí la roya pegó más fuerte el 2024, y los
+      cafetales viejos, de más de 12 años, que son los que más manejo necesitan. Allá
+      arriba el café rinde distinto que abajo, y un cafetal viejo rinde menos, eso usted ya
+      sabe. A las parcelas que quedan a más de una hora de la trocha casi no llegamos, no
+      daba el tiempo con una sola moto. Con el plan de manejo los socios asistidos abonaron
+      bastante más (ahí están los cuadernos de campo) y el abono se nota directo en la
+      cosecha. Otra cosa: los asistidos entregan más al acopio porque se comprometen con
+      la coope, y también entregan más los que sacaron buena cosecha, porque con poquito
+      café prefieren venderle al intermediario que pasa por la zona. El gerente quiere
+      saber cuánto sube el rendimiento por la asistencia en sí, para pedir plata al
+      proyecto de Devida. No tengo anotado qué técnico fue a cada parcela, disculpe. Le
+      paso el Excel en la tarde.
+    edges:
+      - altitud_msnm -> asistencia_tecnica
+      - altitud_msnm -> rendimiento_qq_ha
+      - edad_cafetal -> asistencia_tecnica
+      - edad_cafetal -> rendimiento_qq_ha
+      - distancia_trocha_km -> asistencia_tecnica
+      - asistencia_tecnica -> abono_kg_ha
+      - abono_kg_ha -> rendimiento_qq_ha
+      - asistencia_tecnica -> rendimiento_qq_ha
+      - asistencia_tecnica -> entrego_acopio
+      - rendimiento_qq_ha -> entrego_acopio
+    answer:
+      identifiable: true
+      adjust_for: [altitud_msnm, edad_cafetal]
+      do_not_adjust_for:
+        abono_kg_ha: Se aplicó después de las visitas y es consecuencia del plan de manejo. Es parte del efecto que se quiere medir.
+        entrego_acopio: Es consecuencia de la asistencia y también de la cosecha. Ajustar por esta columna crea una asociación falsa entre la asistencia y el rendimiento.
+      indifferent: [codigo_socio, distancia_trocha_km]
+    note: >-
+      La distancia a la trocha solo decidió a dónde llegó el técnico; no hace falta
+      ajustar por ella. El dato que falta (qué técnico fue) no importa para la pregunta.
+
+  - id: es_municipio_resaltos
+    author: ai
+    status: aprovado
+    language: es
+    style: pregunta en un foro
+    persona: profesional de la Dirección de Tránsito de un municipio de Chile, ingeniero civil sin formación en estadística
+    theme: Movilidad urbana (seguridad vial)
+    title: Resaltos reductores de velocidad y siniestros en calles residenciales
+    treatment: resalto_instalado
+    outcome: siniestros_12m
+    columns:
+      tramo_id: Código del tramo de calle en el catastro vial municipal.
+      resalto_instalado: 1 si en el tramo se instaló un resalto reductor de velocidad en el programa de abril de 2025.
+      siniestros_12m: Número de siniestros de tránsito registrados por Carabineros en el tramo entre mayo de 2025 y abril de 2026.
+      siniestros_2024: Número de siniestros de tránsito registrados por Carabineros en el tramo durante 2024.
+      flujo_vehicular: Flujo vehicular promedio diario del tramo, según el conteo de 2023.
+      cerca_colegio: 1 si el tramo está a menos de 200 metros de un establecimiento educacional.
+      velocidad_sep_2025: Velocidad media medida en el tramo con radar portátil en septiembre de 2025, en km/h.
+    not_in_table:
+      velocidad_previa: Lo rápido que se corría en cada calle antes del programa, según lo que veían los inspectores en terreno. No había radar y nada quedó medido.
+    story: >-
+      Consulta para los colegas de tránsito. En abril de 2025 instalamos resaltos (lomos de
+      toro) en 64 tramos de calles residenciales y ahora el Concejo quiere saber cuánto
+      bajaron los siniestros antes de aprobar la segunda etapa. Cómo se eligieron los
+      tramos: se partió de los que tuvieron siniestros en 2024 y de los que están cerca de
+      colegios, que eran prioridad del alcalde (y donde más atropellos hay, por los niños
+      cruzando). Se descartaron los tramos de alto flujo porque la norma no permite
+      resaltos en vías con mucho tráfico, aunque en las calles con más flujo chocan más,
+      es cuestión de exposición. Después los inspectores recorrieron la lista y marcaron
+      las calles donde, a su juicio, la gente corre más, que son las que más siniestros
+      tienen, eso lo sabe cualquiera. En esa época no teníamos radar, así que eso salió de
+      lo que los inspectores veían en terreno, nada más. Más adelante conseguimos un
+      radar portátil prestado de la Seremi y medimos la velocidad media en todos los tramos
+      del catastro, con y sin resalto: donde hay resalto se nota que bajó, y las calles que
+      siempre fueron rápidas siguen siendo más rápidas que las otras. Los siniestros del
+      período posterior los tenemos de Carabineros, mayo 2025 a abril 2026, y obviamente a
+      menor velocidad menos siniestros; además las calles que tuvieron siniestros en 2024
+      tienden a repetir. Mi duda: ¿puedo comparar tramos con y sin resalto ajustando por
+      siniestros 2024, flujo y colegio, y meto la velocidad medida o no? ¿Les parece
+      razonable? Gracias.
+    edges:
+      - siniestros_2024 -> resalto_instalado
+      - siniestros_2024 -> siniestros_12m
+      - cerca_colegio -> resalto_instalado
+      - cerca_colegio -> siniestros_12m
+      - cerca_colegio -> siniestros_2024
+      - flujo_vehicular -> resalto_instalado
+      - flujo_vehicular -> siniestros_12m
+      - flujo_vehicular -> siniestros_2024
+      - velocidad_previa -> resalto_instalado
+      - velocidad_previa -> siniestros_12m
+      - velocidad_previa -> siniestros_2024
+      - velocidad_previa -> velocidad_sep_2025
+      - resalto_instalado -> velocidad_sep_2025
+      - velocidad_sep_2025 -> siniestros_12m
+      - resalto_instalado -> siniestros_12m
+    answer:
+      identifiable: false
+      missing: [velocidad_previa]
+    note: >-
+      Tres criterios de selección están en la tabla; el cuarto, la velocidad que veían los
+      inspectores, no se midió. La velocidad de septiembre es posterior al resalto y no la
+      sustituye. La fecha de esa medición está solo en el diccionario de columnas.

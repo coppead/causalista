@@ -1,0 +1,467 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria, para o modelo responder durante o treino por reforço (o verificador
+# dá a nota; o modelo não vê a resposta).
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: o
+# coordenador de uma cooperativa de catadores, o gerente de uma rede de hotéis de estrada,
+# a diretora de um museu municipal, a gerente de RH de um call center e uma analista de
+# marketing de uma editora de livros didáticos. Cada texto tem o estilo do canal em que a
+# pessoa escreveria (WhatsApp, Slack, wiki interna, nota interna, relatório trimestral).
+#
+# Estes casos NÃO fazem parte do teste congelado de cases/simulados/: os cenários são
+# outros, e nada daqui pode ser usado para medir o modelo. O diagrama (edges) e a resposta
+# são do autor; o verificador confere a resposta contra o diagrama
+# (scripts/check_cases.py). Status: rascunho até revisão.
+
+cases:
+
+  - id: pt_catadores_carrinho_escolhido
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenador de uma cooperativa de catadores de material reciclável
+    theme: Cooperativa de reciclagem
+    title: Carrinhos elétricos escolhidos pela coordenação
+    treatment: carrinho_eletrico
+    outcome: kg_mes
+    columns:
+      carrinho_eletrico: Recebeu um dos oito carrinhos elétricos doados pela prefeitura em abril (1 = sim, 0 = não).
+      kg_mes: Quilos de material entregues no galpão por mês, média de maio a agosto, pela ficha de pesagem.
+      dias_trabalhados: Dias por mês com pesagem registrada no nome do cooperado, média de maio a agosto.
+      anos_coop: Anos como cooperado, contados até março.
+      rota: Região da rota de coleta do cooperado (centro, zona norte, orla).
+      idade: Idade em anos.
+      num_ficha: Número da ficha do cooperado no caderno de pesagem.
+    not_in_table:
+      disposicao: O empenho de cada cooperado (chegar cedo, sair todo dia), que a coordenação viu "no olho" para escolher quem recebia carrinho. Não é anotado em lugar nenhum.
+    story: >-
+      Oi Lu, tudo bem? Então, lembra dos 8 carrinhos elétricos que a prefeitura doou em
+      abril? A diretoria quer saber se valeu a pena, pq tem mais 10 pra vir e o vereador
+      quer número. Montei a planilha com a ficha de pesagem de todo mundo, maio a agosto,
+      37 cooperados. Quem ficou com carrinho fui eu e a Dona Cida que escolhemos, a gente
+      deu pros que estavam mais na pegada, que a gente via chegando cedo e saindo todo dia,
+      e esse pessoal junta mais quilo de qualquer jeito, né. Isso não tem anotado em lugar
+      nenhum, foi no olho mesmo. Com o carrinho o pessoal passou a sair mais dias na
+      semana, dá pra ver nas pesagens, e saindo mais dia junta mais quilo, óbvio. Tem a
+      rota também, a turma da orla pega muito mais pet, por causa dos quiosques, e quem tem
+      mais tempo de coop conhece os pontos bons. Os mais velhos rendem menos, a gente sabe.
+      Dá pra vc me dizer se o carrinho aumentou os quilos? Fiquei com essa pulga atrás da
+      orelha.
+    edges:
+      - disposicao -> carrinho_eletrico
+      - disposicao -> dias_trabalhados
+      - disposicao -> kg_mes
+      - carrinho_eletrico -> dias_trabalhados
+      - dias_trabalhados -> kg_mes
+      - carrinho_eletrico -> kg_mes
+      - anos_coop -> kg_mes
+      - rota -> kg_mes
+      - idade -> kg_mes
+    answer:
+      identifiable: false
+      missing: [disposicao]
+    twin: pt_catadores_carrinho_sorteio
+    note: >-
+      A coordenação escolheu quem recebia pelo empenho que via, e o empenho também faz
+      juntar mais quilo; não está na tabela. Os dias trabalhados são consequência do
+      carrinho e não servem de ajuste.
+
+  - id: pt_catadores_carrinho_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenador de uma cooperativa de catadores de material reciclável
+    theme: Cooperativa de reciclagem
+    title: Carrinhos elétricos sorteados na assembleia
+    treatment: carrinho_eletrico
+    outcome: kg_mes
+    columns:
+      carrinho_eletrico: Recebeu um dos oito carrinhos elétricos doados pela prefeitura em abril (1 = sim, 0 = não).
+      kg_mes: Quilos de material entregues no galpão por mês, média de maio a agosto, pela ficha de pesagem.
+      dias_trabalhados: Dias por mês com pesagem registrada no nome do cooperado, média de maio a agosto.
+      anos_coop: Anos como cooperado, contados até março.
+      rota: Região da rota de coleta do cooperado (centro, zona norte, orla).
+      idade: Idade em anos.
+      num_ficha: Número da ficha do cooperado no caderno de pesagem.
+    not_in_table:
+      disposicao: O empenho de cada cooperado (chegar cedo, sair todo dia). Não é anotado em lugar nenhum.
+    story: >-
+      Oi Lu, tudo bem? Então, lembra dos 8 carrinhos elétricos que a prefeitura doou em
+      abril? A diretoria quer saber se valeu a pena, pq tem mais 10 pra vir e o vereador
+      quer número. Montei a planilha com a ficha de pesagem de todo mundo, maio a agosto,
+      37 cooperados. Quem ficou com carrinho saiu no sorteio da assembleia de abril, não
+      tinha pra todo mundo e ninguém queria briga. Com o carrinho o pessoal passou a sair
+      mais dias na semana, dá pra ver nas pesagens, e saindo mais dia junta mais quilo,
+      óbvio. Tem gente que é mais na pegada de qualquer jeito, chega cedo e sai todo dia,
+      isso não tem anotado em lugar nenhum mas pesa nos quilos. Tem a rota também, a turma
+      da orla pega muito mais pet, por causa dos quiosques, e quem tem mais tempo de coop
+      conhece os pontos bons. Os mais velhos rendem menos, a gente sabe. Dá pra vc me dizer
+      se o carrinho aumentou os quilos? Fiquei com essa pulga atrás da orelha.
+    edges:
+      - disposicao -> dias_trabalhados
+      - disposicao -> kg_mes
+      - carrinho_eletrico -> dias_trabalhados
+      - dias_trabalhados -> kg_mes
+      - carrinho_eletrico -> kg_mes
+      - anos_coop -> kg_mes
+      - rota -> kg_mes
+      - idade -> kg_mes
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        dias_trabalhados: Foi medida depois da entrega dos carrinhos e muda com eles; é parte do caminho pelo qual o carrinho aumenta os quilos. Também depende do empenho, que não está na tabela.
+      indifferent: [anos_coop, rota, idade, num_ficha]
+    twin: pt_catadores_carrinho_escolhido
+    note: >-
+      Mesmo texto do gêmeo, com o sorteio no lugar da escolha da coordenação. O empenho
+      continua fora da tabela, mas agora só mexe nos quilos, não em quem recebeu carrinho.
+
+  - id: pt_hoteis_totem_checkin
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente de operações de uma rede de hotéis de estrada
+    theme: Hotelaria de estrada
+    title: Totem de check-in e nota dos hóspedes
+    treatment: unidade_com_totem
+    outcome: nota_avaliacao
+    columns:
+      unidade_com_totem: Estadia em unidade com totem de autoatendimento para check-in instalado em abril (1 = sim, 0 = não).
+      nota_avaliacao: Nota de 1 a 5 deixada pelo hóspede no Google ou no Booking até 30 dias após o check-out.
+      ocupacao_unidade: Taxa de ocupação média da unidade no 1º trimestre, em %.
+      espera_checkin_min: Minutos entre o registro de chegada na portaria e a entrega da chave.
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação da rede, enviada por e-mail sete dias após o check-out (1 = sim, 0 = não).
+      dia_semana_checkin: Dia da semana do check-in.
+      cod_reserva: Código da reserva no sistema de gestão hoteleira.
+    story: >-
+      3.2 Piloto de autoatendimento no check-in. Em abril instalamos totens de check-in em
+      seis das dezenove unidades. Foram escolhidas as seis de maior taxa de ocupação no 1º
+      trimestre, pelo critério de retorno do investimento: o equipamento se paga mais
+      rápido onde passam mais hóspedes. Entre abril e junho, nas unidades com totem o tempo
+      entre a chegada do hóspede e a entrega da chave caiu de 9,4 para 3,8 minutos em
+      média; nas demais ficou em 8,9. Sabemos, pelas avaliações, que a espera na recepção
+      pesa na nota, e sabemos também que as unidades mais cheias, com ou sem totem, têm
+      filas maiores e nota historicamente mais baixa. A nota média das unidades com totem
+      foi 4,31 contra 4,12 das demais no período, com a ressalva de que nos fins de semana
+      a nota sobe em toda a rede, por conta do público de lazer. Um efeito colateral
+      positivo: como o totem pede o e-mail no check-in, a pesquisa pós-estadia passou a
+      chegar a 86% dos hóspedes dessas unidades, contra 31% nas demais, onde a recepção
+      raramente registra o e-mail. E quem responde à pesquisa, como de costume, é
+      sobretudo o hóspede que deu nota baixa. A base de estadias do trimestre foi enviada
+      à consultoria para que se estime o efeito do totem na nota, separado dos demais
+      fatores.
+    edges:
+      - ocupacao_unidade -> unidade_com_totem
+      - ocupacao_unidade -> nota_avaliacao
+      - ocupacao_unidade -> espera_checkin_min
+      - unidade_com_totem -> espera_checkin_min
+      - espera_checkin_min -> nota_avaliacao
+      - unidade_com_totem -> nota_avaliacao
+      - unidade_com_totem -> respondeu_pesquisa
+      - nota_avaliacao -> respondeu_pesquisa
+      - dia_semana_checkin -> nota_avaliacao
+    answer:
+      identifiable: true
+      adjust_for: [ocupacao_unidade]
+      do_not_adjust_for:
+        espera_checkin_min: É consequência do totem e é por ela que o totem melhora a nota; ajustar por ela apaga parte do efeito.
+        respondeu_pesquisa: Registrada depois da estadia; depende do totem (que capta o e-mail) e da nota dada. Ajustar por ela cria associação falsa entre totem e nota.
+      indifferent: [dia_semana_checkin, cod_reserva]
+    note: >-
+      A ocupação decidiu quem recebeu totem e também pesa na nota. A espera é consequência
+      do totem; a resposta à pesquisa vem depois da nota e depende das duas coisas.
+
+  - id: pt_museu_visita_educador_pt15
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: diretora de um museu municipal
+    theme: Museu municipal, programa educativo
+    title: Visitas escolares com educador e retorno das escolas
+    treatment: visita_com_educador
+    outcome: retorno_12m
+    columns:
+      visita_com_educador: Turma acompanhada por educador do museu durante a visita (1 = sim, 0 = visitou com o próprio professor).
+      retorno_12m: A escola agendou e realizou nova visita de qualquer turma nos 12 meses seguintes (1 = sim, 0 = não).
+      rede: Rede da escola (municipal, estadual, particular).
+      distancia_km: Distância da escola ao museu, em km, pelo endereço do cadastro.
+      n_alunos: Número de alunos da turma na lista de presença.
+      tempo_visita_min: Minutos entre a entrada e a saída do grupo, registrados na portaria.
+      exposicao: Exposição em cartaz no dia da visita (longa duração ou temporária).
+      turno: Turno da visita (manhã ou tarde).
+    not_in_table:
+      contato_previo_professor: O quanto o professor procurou o museu antes da visita (ligações, e-mails, pedido de material de apoio). Fica nos e-mails das educadoras e no telefone da recepção; nunca foi para a planilha.
+    story: >-
+      Visitas escolares 2025 — base para a conversa com a Secretaria. Página criada pela
+      direção em setembro de 2026, para quem for olhar os números do programa educativo
+      antes da reunião do dia 22.
+
+      Contexto. Em 2025 recebemos 412 turmas de escolas. Parte delas (161) fez a visita
+      acompanhada por um educador do museu; as outras percorreram as salas com o próprio
+      professor. A Secretaria quer saber se vale ampliar a equipe educativa, e a medida
+      que combinamos foi simples: a escola voltou com alguma turma nos 12 meses seguintes?
+
+      Como se decide quem tem educador. Não há sorteio nem regra escrita. A equipe
+      educativa é pequena (três pessoas) e atende, na prática, os professores que entram
+      em contato antes: ligam, mandam e-mail perguntando sobre a exposição, pedem o
+      material de apoio. Quem agenda pelo formulário e some, ou chega sem agendar, costuma
+      visitar por conta própria. Turmas muito grandes também raramente conseguem educador,
+      porque não dá para acompanhar 45 alunos nas salas pequenas do segundo andar. Esse
+      histórico de contato fica no e-mail de cada educadora e no caderno da recepção;
+      nunca foi para a planilha. E são, aliás, os mesmos professores que a gente vê de
+      novo no ano seguinte, com educador ou sem.
+
+      O que sabemos do retorno. As escolas particulares voltam mais e também pedem mais o
+      acompanhamento. Escolas de longe (acima de 20 km) quase não voltam; o ônibus é o
+      limitador. A visita com educador dura mais, em média 95 minutos contra 60, e a nossa
+      impressão (minha e da Marta) é que turma que fica mais tempo sai mais envolvida, e
+      isso ajuda a voltar.
+
+      Pedido. Antes de a Secretaria ler os 38% de retorno das turmas com educador contra
+      19% das demais, queria uma opinião de quem entende de dados sobre o que essa base
+      permite concluir.
+    edges:
+      - contato_previo_professor -> visita_com_educador
+      - contato_previo_professor -> retorno_12m
+      - rede -> visita_com_educador
+      - rede -> retorno_12m
+      - distancia_km -> retorno_12m
+      - n_alunos -> visita_com_educador
+      - visita_com_educador -> tempo_visita_min
+      - tempo_visita_min -> retorno_12m
+      - visita_com_educador -> retorno_12m
+    answer:
+      identifiable: false
+      missing: [contato_previo_professor]
+    note: >-
+      O professor que procura o museu antes é quem consegue educador e é quem traz a turma
+      de volta; esse contato não está na planilha. A rede é um fator comum que está na
+      tabela, mas não basta.
+
+  - id: pt_callcenter_home_office_pt15
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de RH de um call center
+    theme: Call center, gestão de pessoas
+    title: Home office dois dias por semana e pedidos de demissão
+    treatment: home_office
+    outcome: desligou_6m
+    columns:
+      home_office: Operador incluído no piloto de dois dias por semana em casa a partir de fevereiro (1 = sim, 0 = não).
+      desligou_6m: Pediu desligamento entre fevereiro e agosto (1 = sim, 0 = não).
+      meta_jan: Atingimento da meta individual em janeiro, em % (100 = meta batida).
+      tempo_casa_meses: Meses de empresa até 31 de janeiro.
+      faltas_fev_ago: Faltas não justificadas registradas no ponto entre fevereiro e agosto (até a saída, para quem saiu).
+      respondeu_clima: Respondeu à pesquisa de clima aplicada em setembro (1 = sim, 0 = não; desligados contam como 0).
+      turno: Turno de trabalho (manhã, tarde, noite).
+      site: Prédio em que o operador está lotado (Centro ou Barra Funda).
+      matricula: Matrícula do operador no RH.
+    not_in_table:
+      internet_casa: Resultado do teste de velocidade da internet de casa feito pela TI. Só ficou o sim/não, e nem esse foi gravado.
+    story: >-
+      pessoal, bom dia! preciso de uma ajuda com o piloto de home office antes do comitê
+      de quinta. contexto rápido: em fevereiro a gente colocou 240 operadores pra trabalhar
+      2 dias por semana de casa. a regra de entrada foi meta de janeiro acima de 90% e
+      mais de 6 meses de casa; dessa lista a gente ainda cortou quem não tinha internet
+      decente (a TI fez um teste de velocidade, mas o resultado não ficou salvo em lugar
+      nenhum, só o sim/não na cabeça do Rogério). o que o comitê quer saber é se o home
+      office segurou gente, ou seja, se reduziu pedido de demissão até agosto. o que eu já
+      sei de antemão e vcs vão ver na base: quem bate meta e quem tem mais tempo de casa
+      já sai menos, com ou sem piloto. o pessoal da noite sai muito mais, sempre foi
+      assim. e as faltas caíram bastante em quem está em casa, o que é ótimo em si, e a
+      gente sabe que falta é o primeiro sinal de quem vai pedir as contas. mandei a
+      extração do ponto e do RH no canal, com a pesquisa de clima de setembro junto, pq a
+      Carla pediu (a adesão à pesquisa foi bem maior no pessoal de home office, e óbvio
+      que quem já saiu não respondeu). conseguem montar uma comparação justa?
+    edges:
+      - meta_jan -> home_office
+      - meta_jan -> desligou_6m
+      - tempo_casa_meses -> home_office
+      - tempo_casa_meses -> desligou_6m
+      - internet_casa -> home_office
+      - home_office -> faltas_fev_ago
+      - faltas_fev_ago -> desligou_6m
+      - home_office -> desligou_6m
+      - home_office -> respondeu_clima
+      - desligou_6m -> respondeu_clima
+      - turno -> desligou_6m
+    answer:
+      identifiable: true
+      adjust_for: [meta_jan, tempo_casa_meses]
+      do_not_adjust_for:
+        faltas_fev_ago: Medida depois do início do piloto e muda com ele; é parte do caminho entre o home office e a saída.
+        respondeu_clima: Pesquisa de setembro, depois do período de saída; depende do home office e de quem já saiu. Ajustar por ela cria associação falsa.
+      indifferent: [turno, site, matricula]
+    note: >-
+      A internet de casa decidiu quem entrou mas não mexe na saída: não está na tabela e
+      não faz falta. As faltas são consequência do piloto; a pesquisa de clima vem depois
+      do desligamento e depende das duas coisas.
+
+  - id: pt_editora_webinar
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: analista de marketing de uma editora de livros didáticos
+    theme: Editora de livros didáticos
+    title: Webinar de lançamento e adoção da coleção
+    treatment: webinar_2026
+    outcome: adotou_2027
+    columns:
+      webinar_2026: Ao menos um professor da escola participou do webinar de lançamento da coleção em maio (1 = sim, 0 = não).
+      adotou_2027: A escola adotou ao menos um título da coleção para o ano letivo de 2027 (1 = sim, 0 = não).
+      porte: Alunos matriculados no fundamental II, pelo Censo Escolar.
+      cliente_atual: Já adota algum título da editora em 2026 (1 = sim, 0 = não).
+      amostra_enviada: Kit de amostras físicas da coleção enviado à escola em junho (1 = sim, 0 = não).
+    not_in_table:
+      ano_troca: Se a escola está no ano de trocar de coleção. O CRM não tem o ciclo de troca de cada escola.
+    story: >-
+      Nota para a gerência de marketing — webinar de lançamento da coleção Trilhas
+      (fundamental II), 14/05/2026. Convidamos a base inteira de escolas particulares do
+      CRM, 3.870 escolas; 14% tiveram ao menos um professor presente. Dessas, 41% adotaram
+      algum título da coleção para 2027, contra 9% das que não participaram. Antes que o
+      número vire slide: a presença veio puxada, como sempre, pelas escolas que estão
+      trocando de coleção este ano, e quem está em ano de troca adota porque está
+      trocando. O CRM não tem o ciclo de troca de cada escola. Quem participou recebeu o
+      kit de amostras em junho (algumas escolas pediram o kit por fora), e amostra na mão
+      do professor é o que mais converte. As escolas maiores e as que já adotam algum
+      título nosso compareceram mais e, como de hábito, adotam mais. Peço cautela com o
+      41% até alguém olhar isso com calma.
+    edges:
+      - ano_troca -> webinar_2026
+      - ano_troca -> adotou_2027
+      - porte -> webinar_2026
+      - porte -> adotou_2027
+      - cliente_atual -> webinar_2026
+      - cliente_atual -> adotou_2027
+      - webinar_2026 -> amostra_enviada
+      - amostra_enviada -> adotou_2027
+      - webinar_2026 -> adotou_2027
+    answer:
+      identifiable: false
+      missing: [ano_troca]
+    note: >-
+      O ano de troca de coleção leva a escola ao webinar e à adoção, e não está no CRM.
+      Porte e cliente atual são fatores comuns que estão na tabela, mas não bastam; a
+      amostra é consequência do webinar.
+
+  - id: pt_museu_audioguia_pt15
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: diretora de um museu municipal
+    theme: Museu municipal, público e sócios
+    title: Audioguia gratuito e adesão ao programa de sócios
+    treatment: audioguia
+    outcome: cadastro_amigos
+    columns:
+      audioguia: Visitante retirou o audioguia gratuito na bilheteria (1 = sim, 0 = não).
+      cadastro_amigos: Visitante se associou ao programa Amigos do Museu no balcão de saída, no mesmo dia (1 = sim, 0 = não).
+      turista: Visitante com CEP de fora do município, informado na bilheteria (1 = sim, 0 = não).
+      faixa_etaria: Faixa etária declarada na bilheteria (18-29, 30-49, 50-64, 65+).
+      atendente_bilheteria: Atendente que vendeu o ingresso (código de 1 a 5).
+      campanha_socios: Ingresso vendido durante a campanha anual do Amigos do Museu, em junho, com desconto na anuidade (1 = sim, 0 = não).
+      num_ingresso: Número do ingresso.
+    story: >-
+      oi pessoal do observatório, aqui é a Renata, do Museu da Cidade. a gente lançou em
+      março o audioguia gratuito (aquele que o visitante pega na bilheteria e devolve na
+      saída) e eu queria entender se ele ajuda a converter visitante em sócio do Amigos do
+      Museu, que é a nossa meta do ano. mandei a base de ingressos de março a agosto, 21
+      mil adultos. algumas coisas que vcs precisam saber: quem oferece o audioguia é a
+      pessoa da bilheteria, e aí depende muito de quem está no caixa, a Fátima oferece pra
+      todo mundo e tem gente que esquece. turista pega bem mais o audioguia e quase não
+      vira sócio (lógico, não vai voltar). o público mais velho é quem mais se associa, e
+      é quem menos pega o aparelho, não gostam do fone. em junho tem a campanha de sócios
+      com desconto na anuidade, e aí a adesão sempre dá uma subida. a adesão é feita na
+      saída, no balcão, e a gente cruza pelo número do ingresso. o número bruto deu 6,1%
+      de adesão com audioguia e 3,4% sem, mas eu desconfio de tudo que é número bruto
+      desde o curso de vcs, rs
+    edges:
+      - turista -> audioguia
+      - turista -> cadastro_amigos
+      - faixa_etaria -> audioguia
+      - faixa_etaria -> cadastro_amigos
+      - atendente_bilheteria -> audioguia
+      - campanha_socios -> cadastro_amigos
+      - audioguia -> cadastro_amigos
+    answer:
+      identifiable: true
+      adjust_for: [faixa_etaria, turista]
+      indifferent: [atendente_bilheteria, campanha_socios, num_ingresso]
+    note: >-
+      Turista e faixa etária mexem em quem pega o audioguia e em quem se associa. A
+      atendente só mexe no audioguia; a campanha só na adesão. Nenhuma coluna estraga o
+      efeito.
+
+  - id: pt_editora_amostra_impressa
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: analista de marketing de uma editora de livros didáticos
+    theme: Editora de livros didáticos
+    title: Exemplar impresso para o professor e adoção
+    treatment: amostra_impressa
+    outcome: adocao_2027
+    columns:
+      amostra_impressa: Professor recebeu exemplar impresso da nova edição entre março e maio de 2026 (1 = sim, 0 = não).
+      adocao_2027: A escola do professor adotou o título da disciplina dele para 2027 (1 = sim, 0 = não), pela lista de adoções fechada em novembro.
+      pediu_site: Professor pediu amostra pelo formulário do site antes de março (1 = sim, 0 = não).
+      porte_escola: Número de alunos da escola no Censo Escolar de 2025.
+      visita_rep_dez: Professor ou sua escola recebeu visita do representante em dezembro de 2026, registrada no CRM (1 = sim, 0 = não).
+      disciplina: Disciplina do professor (matemática, português, ciências).
+      regiao: Regional comercial da escola (Sul, Sudeste, Centro-Oeste, Nordeste, Norte).
+    story: >-
+      Base amostras_2026 — documentação. Mantida pelo marketing; última edição em
+      02/10/2026 (Paula).
+
+      Para que serve. Avaliar se o envio de exemplar impresso da nova edição (Matemática,
+      Português e Ciências, 6º ao 9º ano) aumenta a adoção para 2027. Cada linha é um
+      professor do CRM com escola vinculada; 9.312 linhas.
+
+      Como as amostras foram distribuídas (março a maio). Primeiro, todo professor que
+      pediu amostra pelo formulário do site recebeu. Depois, cada representante completou
+      a cota da sua regional com os professores das escolas de maior número de alunos da
+      carteira, em ordem decrescente, até acabar o estoque; as cotas por regional foram
+      diferentes. Não houve outro critério: a lista de envio é gerada pelo próprio sistema
+      a partir do pedido no site e do porte da escola. Quem pede amostra, claro, já está
+      interessado e adota mais; e escola grande adota mais porque tem mais turmas para
+      fechar.
+
+      Sobre a visita de dezembro. Em dezembro, com a lista de adoções fechada, os
+      representantes visitam as escolas que adotaram, para alinhar a entrega, e visitam
+      também os professores que receberam amostra, para colher a opinião sobre a edição.
+      Essas visitas foram carregadas do CRM e entram na base porque a área comercial
+      pediu.
+
+      Outras notas. Matemática é o carro-chefe e tem adoção historicamente maior, faça a
+      gente o que fizer. O custo do frete das amostras não está na base. Pergunta aberta
+      para o time de dados: qual a comparação correta entre quem recebeu e quem não
+      recebeu amostra?
+    edges:
+      - pediu_site -> amostra_impressa
+      - pediu_site -> adocao_2027
+      - porte_escola -> amostra_impressa
+      - porte_escola -> adocao_2027
+      - regiao -> amostra_impressa
+      - amostra_impressa -> adocao_2027
+      - amostra_impressa -> visita_rep_dez
+      - adocao_2027 -> visita_rep_dez
+      - disciplina -> adocao_2027
+    answer:
+      identifiable: true
+      adjust_for: [pediu_site, porte_escola]
+      do_not_adjust_for:
+        visita_rep_dez: Registrada em dezembro, depois de fechada a adoção; depende de quem recebeu amostra e de quem adotou. Ajustar por ela cria associação falsa.
+      indifferent: [disciplina, regiao]
+    note: >-
+      A regra de envio foi mecânica e usou duas colunas da tabela. A visita de dezembro
+      vem depois da adoção e depende das duas coisas. A regional só mexe em quem recebeu.

@@ -1,0 +1,493 @@
+# Casos que simulam texto de pessoa, para TREINO: oito textos em português do Brasil,
+# escritos pelo assistente em 2026-10-07 no papel de cinco pessoas: um gerente regional de uma
+# rede de supermercados, uma coordenadora de extensão universitária, o diretor de uma rede
+# de escolas de idiomas, um gerente de produto de um marketplace de serviços e um técnico
+# de uma secretaria estadual de saúde. Estilos: trecho de relatório trimestral, mensagem
+# de WhatsApp, e-mail longo com anexo descrito, nota interna curta e pergunta em um fórum
+# de analytics.
+#
+# Diferente de cases/simulados/ (o teste congelado), estes casos ENTRAM no treino por
+# reforço: o modelo responde e o verificador dá a nota. Não repetem nenhum cenário do
+# teste nem variação próxima dele. As setas declaram o diagrama que o texto implica; o
+# verificador confere a resposta a partir delas (scripts/check_cases.py). O status é
+# rascunho: a aprovação é registrada em outro lugar.
+
+cases:
+
+  - id: pt_super_autoatendimento_abr26
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente regional de uma rede de supermercados do interior de Minas, responsável por 61 lojas
+    theme: Varejo supermercadista, caixas de autoatendimento
+    title: Caixas de autoatendimento e vendas do trimestre
+    treatment: autoatendimento
+    outcome: vendas_var_3t
+    columns:
+      autoatendimento: Loja recebeu o módulo de seis caixas de autoatendimento em abril de 2026 (1 = sim, 0 = não).
+      vendas_var_3t: Variação das vendas brutas do 3º trimestre de 2026 sobre o 3º trimestre de 2025, em %.
+      area_vendas_m2: Área de vendas da loja, em m², conforme cadastro de engenharia.
+      faturamento_2025: Faturamento bruto da loja em 2025, em R$ mil.
+      regiao_metropolitana: Loja situada na região metropolitana de Belo Horizonte (1 = sim, 0 = não).
+      tempo_fila_3t: Tempo médio de espera na fila dos caixas no 3º trimestre de 2026, em minutos, medido pelo sistema de câmeras.
+      nps_3t: NPS da pesquisa de saída do 3º trimestre de 2026.
+      cod_loja: Código da loja no ERP.
+    story: >-
+      3.2 Caixas de autoatendimento. Conforme aprovado no comitê de investimentos de
+      fevereiro, 14 das 61 lojas da regional receberam em abril o módulo de seis caixas de
+      autoatendimento (Capex de R$ 4,1 milhões). A priorização seguiu o ranking de
+      faturamento de 2025, restrita às lojas com área de vendas acima de 1.200 m², já que o
+      módulo não cabe no layout das menores. Cabe registrar que as lojas de maior área e de
+      maior faturamento vêm crescendo acima da média da regional desde 2024, com ou sem o
+      investimento, o que recomenda cautela na leitura dos números a seguir. No 3º
+      trimestre, as 14 lojas apresentaram crescimento de vendas de 9,8% sobre o mesmo
+      período de 2025, contra 4,1% nas demais. O tempo médio de fila nessas lojas caiu de
+      7,2 para 4,3 minutos; a experiência da operação é que fila curta segura o cliente que
+      hoje abandona o carrinho, e parte do ganho de vendas vem daí. O NPS do trimestre
+      acompanhou a fila: onde a espera caiu, a nota subiu. As lojas da região metropolitana,
+      com ou sem autoatendimento, sofreram com a abertura de três atacarejos concorrentes e
+      fecharam o trimestre abaixo das lojas do interior. A diretoria solicitou à área de
+      dados uma estimativa do efeito dos caixas de autoatendimento sobre as vendas, a partir
+      da base de lojas (código da loja, área de vendas, faturamento de 2025, região, tempo
+      de fila e NPS do trimestre), para a reunião de 28 de outubro.
+    edges:
+      - area_vendas_m2 -> autoatendimento
+      - area_vendas_m2 -> vendas_var_3t
+      - area_vendas_m2 -> faturamento_2025
+      - faturamento_2025 -> autoatendimento
+      - faturamento_2025 -> vendas_var_3t
+      - regiao_metropolitana -> vendas_var_3t
+      - autoatendimento -> tempo_fila_3t
+      - tempo_fila_3t -> vendas_var_3t
+      - tempo_fila_3t -> nps_3t
+      - autoatendimento -> vendas_var_3t
+    answer:
+      identifiable: true
+      adjust_for: [area_vendas_m2, faturamento_2025]
+      do_not_adjust_for:
+        tempo_fila_3t: Foi medido depois da instalação e é consequência dela. A fila menor é parte do efeito que se quer medir.
+        nps_3t: Acompanha a fila, que é consequência dos caixas. Ajustar por ele também tira parte do efeito.
+      indifferent: [regiao_metropolitana, cod_loja]
+    note: >-
+      Os dois critérios de escolha (área e faturamento) estão na tabela e os dois puxam as
+      vendas. A fila e o NPS vieram depois: o NPS nem é consequência direta dos caixas, é
+      consequência da fila, e mesmo assim não pode entrar.
+
+  - id: pt_super_forno_padaria_fev26
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: gerente regional de uma rede de supermercados do interior de Minas, escrevendo para a analista da matriz
+    theme: Varejo supermercadista, padaria
+    title: Forno novo e vendas da padaria
+    treatment: forno_novo
+    outcome: vendas_padaria_var
+    columns:
+      forno_novo: Padaria da loja recebeu forno novo em fevereiro de 2026 (1 = sim, 0 = não).
+      vendas_padaria_var: Variação das vendas da padaria de março a agosto de 2026 sobre março a agosto de 2025, em %.
+      vendas_padaria_2025: Vendas da padaria em 2025, em R$ mil.
+      padeiro_anos_casa: Anos de casa do padeiro-chefe da loja em janeiro de 2026.
+      porte_cidade: Porte do município da loja (1 = até 50 mil habitantes, 2 = de 50 a 200 mil, 3 = acima de 200 mil).
+    not_in_table:
+      estado_forno_antigo: >-
+        Quanto o forno antigo da loja estava ruim (queimando fornada, parando no meio,
+        demorando a esquentar). Não há registro disso em sistema nenhum; era reclamação
+        de padeiro em visita.
+    story: >-
+      Jú, bom dia! lembra dos fornos novos da padaria? trocamos em 19 lojas em fev e o
+      Marcelo quer um número pra levar pro conselho dia 20. te explico como foi a escolha:
+      nas visitas o padeiro reclamava do forno (queimando fornada, parando no meio,
+      demorando a esquentar) e eu ia guardando na cabeça, trocamos onde tava pior. não tem
+      registro de nada disso, nem ordem de serviço, era na conversa. e óbvio que forno que
+      queima pão perde venda todo dia, já perdia ano passado e onde não trocou continua
+      perdendo. outro detalhe: padeiro antigo de casa reclama muito mais, tem moral, e
+      padeiro antigo vende mais, pão dele dá fila. nas cidades grandes a padaria de rua tá
+      comendo a gente, isso pesa no resultado de todo mundo. e as padarias pequenas crescem
+      mais em %, partem de pouco. te mando a planilha com venda da padaria 2025, variação
+      mar-ago contra ano passado, anos de casa do padeiro e porte da cidade. dá pra tirar o
+      efeito do forno disso? por quais colunas vc compara?
+    edges:
+      - estado_forno_antigo -> forno_novo
+      - estado_forno_antigo -> vendas_padaria_var
+      - estado_forno_antigo -> vendas_padaria_2025
+      - padeiro_anos_casa -> forno_novo
+      - padeiro_anos_casa -> vendas_padaria_var
+      - padeiro_anos_casa -> vendas_padaria_2025
+      - vendas_padaria_2025 -> vendas_padaria_var
+      - porte_cidade -> vendas_padaria_var
+      - forno_novo -> vendas_padaria_var
+    answer:
+      identifiable: false
+      missing: [estado_forno_antigo]
+    note: >-
+      O critério da troca foi o estado do forno velho, que ninguém anotou, e forno ruim
+      segue perdendo venda onde não foi trocado. Os anos de casa do padeiro estão na tabela
+      e explicam parte da escolha, mas não substituem o estado do forno.
+
+  - id: pt_extensao_oficina_mei_set25
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: coordenadora de um projeto de extensão de uma universidade federal, formada em serviço social
+    theme: Extensão universitária, microempreendedoras de bairro
+    title: Oficina de gestão para microempreendedoras e faturamento seis meses depois
+    treatment: oficina
+    outcome: faturamento_mar26
+    columns:
+      oficina: Participou de pelo menos seis dos oito encontros da oficina de gestão, em setembro e outubro de 2025 (1 = sim, 0 = não).
+      faturamento_mar26: Faturamento mensal declarado por telefone aos bolsistas em março de 2026, em R$.
+      faturamento_ago25: Faturamento mensal declarado na ficha de inscrição, em agosto de 2025, em R$.
+      anos_negocio: Anos de atividade do negócio na data da inscrição.
+      ramo: Ramo do negócio (alimentação, beleza, costura, revenda, outro).
+      bairro: Bairro de moradia, conforme cadastro do projeto (1 = Jardim Primavera, 2 = Vila União).
+      mei_mar26: Tinha CNPJ de MEI ativo em março de 2026 (1 = sim, 0 = não), conferido no portal do Simples.
+      feira_mai26: Expôs na feira de encerramento do projeto, em maio de 2026 (1 = sim, 0 = não).
+      id_inscricao: Número da ficha de inscrição.
+    not_in_table:
+      comprometimento: >-
+        O quanto as lideranças comunitárias achavam que a mulher "leva o negócio a sério".
+        Ficou só na cabeça da Dona Cida e do seu Jorge.
+    story: >-
+      Oi, Renata, tudo bem? Desculpa te procurar em cima da hora, mas a Pró-Reitoria pediu
+      pra gente mostrar resultado do Empreender no Bairro no relatório de prestação de
+      contas e eu travei. Vou te contar como foi e te mando a planilha em anexo
+      (empreender_base.xlsx, aba "base", 212 linhas, uma por mulher inscrita; a aba
+      "dicionario" explica cada coluna).
+
+      Em agosto de 2025 abrimos inscrição para microempreendedoras informais de dois
+      bairros, Jardim Primavera e Vila União. Pela regra do edital, só podia negócio sem
+      CNPJ. Foram 212 inscritas e tínhamos 60 vagas na oficina (oito encontros de gestão,
+      setembro e outubro). A seleção foi feita pelas lideranças dos bairros, Dona Cida e seu
+      Jorge, e a orientação que demos foi priorizar quem faturava menos, até R$ 2 mil por
+      mês na ficha. Só que eles também escolheram, e foram bem francos comigo sobre isso, as
+      mulheres que eles sabem que levam o negócio a sério, que não faltam, que correm atrás.
+      Isso não está em nenhuma ficha, é o olho deles, e eu acho que essas mulheres já
+      estariam crescendo de qualquer jeito. A Vila União acabou mandando muito mais gente
+      que o Primavera, porque o seu Jorge é mais articulado.
+
+      Em março de 2026 os bolsistas ligaram para as 212 e perguntaram o faturamento do mês.
+      Um dos encontros era só sobre formalização e muitas abriram MEI depois; com CNPJ dá
+      pra pegar maquininha e vender pra prefeitura, e isso puxa o faturamento. Em maio
+      fizemos a feira de encerramento na praça; ela foi pensada para as alunas da oficina,
+      mas abrimos a inscrição pra todo o cadastro, e quem estava vendendo bem topou expor,
+      quem estava parada não quis. Na planilha tem ainda os anos de negócio e o ramo (as de
+      alimentação faturam mais, e negócio mais antigo também, isso já aparecia na ficha de
+      agosto), mais o número da ficha e o bairro.
+
+      A pergunta da Pró-Reitoria é simples: a oficina aumentou o faturamento? Eu sei que
+      comparar as 60 com as 152 não vale, mas não sei o que fazer com essas colunas. Por
+      quais eu ajusto? Dá pra responder com o que tem na planilha? Obrigada, de verdade.
+      Beijo, Luciana.
+    edges:
+      - comprometimento -> oficina
+      - comprometimento -> faturamento_mar26
+      - faturamento_ago25 -> oficina
+      - faturamento_ago25 -> faturamento_mar26
+      - bairro -> oficina
+      - anos_negocio -> faturamento_ago25
+      - anos_negocio -> faturamento_mar26
+      - ramo -> faturamento_ago25
+      - ramo -> faturamento_mar26
+      - oficina -> mei_mar26
+      - mei_mar26 -> faturamento_mar26
+      - oficina -> faturamento_mar26
+      - oficina -> feira_mai26
+      - faturamento_mar26 -> feira_mai26
+    answer:
+      identifiable: false
+      missing: [comprometimento]
+    note: >-
+      O faturamento de agosto, critério oficial da seleção, está na tabela; o critério
+      informal das lideranças, não, e ele puxa o faturamento depois. O MEI é consequência da
+      oficina e a feira veio depois do resultado, mas nada disso muda o veredito.
+
+  - id: pt_extensao_uati_solidao_2025
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: coordenadora de extensão de uma universidade estadual, responsável pelo programa para pessoas idosas, fazendo um curso de dados
+    theme: Extensão universitária, programa para pessoas idosas
+    title: Programa universitário para idosos e escala de solidão
+    treatment: participou_uati
+    outcome: solidao_2025
+    columns:
+      participou_uati: Inscrito na Universidade Aberta à Pessoa Idosa com frequência de pelo menos 50% nas atividades de 2025 (1 = sim, 0 = não).
+      solidao_2025: Pontuação na escala curta de solidão (0 a 9) aplicada na consulta anual da pessoa idosa na UBS, em outubro e novembro de 2025.
+      solidao_2024: Pontuação na mesma escala, na consulta anual de outubro e novembro de 2024.
+      mora_sozinho: Mora sozinho, segundo o cadastro da UBS (1 = sim, 0 = não).
+      idade: Idade em 2025, em anos.
+      distancia_campus_km: Distância da residência ao campus, em km, calculada a partir do endereço do cadastro.
+      grupo_whatsapp: Entrou no grupo de WhatsApp "Amigos da UATI", criado em dezembro de 2025 (1 = sim, 0 = não).
+    story: >-
+      Pessoal, sou coordenadora de extensão numa universidade estadual e estou fazendo o
+      curso de inferência causal daqui do fórum, então perdoem se a pergunta for básica.
+      Coordeno a UATI (atividades semanais para pessoas acima de 60 anos: coral,
+      informática, ginástica) e a UBS do bairro topou cruzar os dados com a gente. A UBS
+      aplica uma escala curta de solidão em toda consulta anual da pessoa idosa, então temos
+      a pontuação de 2024 e a de 2025 para 1.340 idosos cadastrados, 212 dos quais
+      participaram da UATI em 2025. O que eu sei sobre como as pessoas chegaram até nós: a
+      equipe da UBS encaminhou pra UATI justamente quem tinha pontuado alto em 2024, e quem
+      pontua alto num ano tende a pontuar alto no outro. Quem mora sozinho foi mais
+      encaminhado também, e mora sozinho pontua mais. Os mais velhos participam bem menos
+      (dificuldade de locomoção) e pontuam mais alto na escala. E quem mora longe do campus
+      simplesmente não vem. Em dezembro criamos um grupo de WhatsApp pra manter o vínculo:
+      todo participante entrou automaticamente, os ACS divulgaram o grupo nas visitas de fim
+      de ano e quem tinha acabado de pontuar alto na escala pediu pra entrar. Minha dúvida:
+      para estimar se a UATI
+      reduziu a solidão (pontuação de 2025), eu pensei em ajustar pela escala de 2024 e pela
+      distância (pra "limpar" quem não vem) e deixar idade de fora, porque é demográfico
+      demais. Faz sentido? Mora sozinho entra? E o grupo de WhatsApp, posso usar como
+      indicador de engajamento? Obrigada!
+    edges:
+      - solidao_2024 -> participou_uati
+      - solidao_2024 -> solidao_2025
+      - mora_sozinho -> participou_uati
+      - mora_sozinho -> solidao_2025
+      - mora_sozinho -> solidao_2024
+      - idade -> participou_uati
+      - idade -> solidao_2025
+      - idade -> solidao_2024
+      - distancia_campus_km -> participou_uati
+      - participou_uati -> solidao_2025
+      - participou_uati -> grupo_whatsapp
+      - solidao_2025 -> grupo_whatsapp
+    answer:
+      identifiable: true
+      adjust_for: [idade, mora_sozinho, solidao_2024]
+      do_not_adjust_for:
+        grupo_whatsapp: Foi criado depois da avaliação de 2025 e depende tanto de ter participado quanto da própria pontuação. Ajustar por ele cria uma associação falsa entre a UATI e a solidão.
+      indifferent: [distancia_campus_km]
+    note: >-
+      A autora propõe ajustar pela distância (que só explica quem vem) e deixar a idade de
+      fora (que explica quem vem e quem pontua alto). O grupo de WhatsApp é a armadilha do
+      fim: a ordem (escala em outubro e novembro, grupo em dezembro) só fecha com o dicionário.
+
+  - id: pt_idiomas_imersao_jan26
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: diretor de uma rede de escolas de idiomas com 11 unidades, formado em letras
+    theme: Educação, escola de idiomas
+    title: Semana de imersão no exterior e renovação de matrícula
+    treatment: imersao_jan26
+    outcome: renovou_2s26
+    columns:
+      imersao_jan26: Participou da semana de imersão em Buenos Aires, em janeiro de 2026 (1 = sim, 0 = não).
+      renovou_2s26: Renovou a matrícula para o 2º semestre de 2026 (1 = sim, 0 = não).
+      nivel_dez25: Nível do aluno ao fim de 2025 (1 a 6).
+      faltas_2s25: Número de faltas no 2º semestre de 2025.
+      unidade: Código da unidade (11 unidades).
+      nota_jun26: Nota na prova oral de fim do 1º semestre de 2026 (0 a 10).
+      id_aluno: Número de matrícula do aluno.
+    not_in_table:
+      renda_familia: Quanto a família tem para gastar. A rede não pergunta renda em nenhum momento, nem no contrato.
+    story: >-
+      Prezada Carla, conforme conversamos na reunião de diretores, segue em anexo a base da
+      imersão (imersao_2026.xlsx). A aba "alunos" tem 2.317 linhas, todos os alunos de
+      espanhol matriculados em dezembro de 2025, com número de matrícula, unidade, nível em
+      dezembro, faltas do segundo semestre de 2025, se foi à imersão, nota da prova oral de
+      junho e se renovou para o segundo semestre. A aba "notas" só repete a descrição de
+      cada coluna.
+
+      Contexto: em janeiro levamos 148 alunos para uma semana em Buenos Aires, a R$ 4.800
+      por pessoa, fora passagem. Oferecemos a viagem do nível 3 para cima, e os professores
+      divulgaram sobretudo para os alunos que estavam frequentando direito, porque ninguém
+      quer levar aluno que some. O que observo há vinte anos nesta escola é que o aluno que
+      falta muito no segundo semestre não volta em julho, e que o aluno de nível alto renova
+      menos, porque está terminando o curso. A unidade de Campinas sozinha vendeu 61 vagas,
+      e as unidades do interior historicamente renovam mais que as da capital.
+
+      Agora, o que me incomoda: foi quem tinha como pagar. Quase cinco mil reais em janeiro,
+      mais passagem, não é para qualquer família, e nós não perguntamos renda, nem no
+      contrato. E família com dinheiro mais curto é a primeira a trancar quando aperta.
+
+      Os resultados: quem viajou voltou falando visivelmente melhor, a média deles na prova
+      oral de junho foi 8,4 contra 6,9, e aluno que vai bem na prova oral renova. Renovação
+      de 91% entre os que viajaram contra 68% nos demais. O conselho quer saber se a imersão
+      "se paga" em retenção. Com essa base, você consegue separar o efeito da viagem do
+      resto? Que colunas usaria na comparação? Atenciosamente, Fernando.
+    edges:
+      - renda_familia -> imersao_jan26
+      - renda_familia -> renovou_2s26
+      - nivel_dez25 -> imersao_jan26
+      - nivel_dez25 -> renovou_2s26
+      - faltas_2s25 -> imersao_jan26
+      - faltas_2s25 -> renovou_2s26
+      - unidade -> imersao_jan26
+      - unidade -> renovou_2s26
+      - imersao_jan26 -> nota_jun26
+      - nota_jun26 -> renovou_2s26
+      - imersao_jan26 -> renovou_2s26
+    answer:
+      identifiable: false
+      missing: [renda_familia]
+    note: >-
+      Nível, faltas e unidade explicam parte de quem viajou e estão na tabela. O que
+      faltou foi quem podia pagar, e a renda nunca foi perguntada. A nota de junho é
+      consequência da viagem e aparece como o resultado de que o diretor se orgulha.
+
+  - id: pt_marketplace_selo_jun26
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de produto de um marketplace de serviços (reformas, aulas, limpeza), sem formação em estatística
+    theme: Marketplace de serviços, selo de verificação
+    title: Selo de verificado sorteado e pedidos fechados
+    treatment: selo_verificado
+    outcome: pedidos_jun_ago
+    columns:
+      selo_verificado: Prestador recebeu o selo "Verificado" no perfil em 1º de junho de 2026 (1 = sim, 0 = não).
+      pedidos_jun_ago: Pedidos fechados de junho a agosto de 2026.
+      pedidos_mar_mai: Pedidos fechados de março a maio de 2026.
+      categoria: Categoria principal do prestador (reformas, aulas, limpeza, tecnologia, eventos).
+      uf: UF do prestador.
+      posicao_busca_jul: Posição média do prestador nos resultados de busca da sua categoria em julho de 2026 (1 = topo).
+      respondeu_pesquisa_set: Respondeu à pesquisa de satisfação do prestador enviada em setembro de 2026 (1 = sim, 0 = não).
+    story: >-
+      Fala, pessoal. PM aqui, sem background de estatística, então vou tentar ser claro.
+      Temos um marketplace de serviços (reformas, aulas particulares, limpeza, TI, eventos)
+      e em junho lançamos o selo "Verificado" no perfil do prestador que tem documentos
+      validados. Eram 12.400 elegíveis; por limite do time de ops a gente fez rollout
+      escalonado: sorteamos metade pra receber o selo em 1º de junho e a outra metade ficou
+      pra setembro. Então até agosto tenho um grupo com selo e um sem, e a divisão foi na
+      moeda mesmo. Resultado: quem tem selo fechou em média 6,1 pedidos entre junho e
+      agosto, contra 4,3. Detalhes que podem importar: (1) o ranking de busca já pesava
+      histórico de pedidos e avaliação, e em junho o time de ranking colocou o selo como
+      mais um peso, então quem tem selo subiu na busca, e posição na busca é o que mais gera
+      pedido na plataforma. (2) Em setembro mandamos uma pesquisa de satisfação pra base de
+      prestadores; quem tinha fechado pedido no período recebeu dentro do app, os outros só
+      por e-mail, e o e-mail dos verificados ia com o selo no assunto, que o time de CRM
+      jura que abre mais. (3) Pedidos variam muito por categoria e por estado, antes e
+      depois do selo. Minha dúvida: preciso ajustar por pedidos anteriores, categoria e UF
+      pra ter um número confiável? E faz sentido ajustar pela posição na busca, pra isolar o
+      efeito "puro" do selo sem o boost do algoritmo? Um analista aqui sugeriu também
+      filtrar só quem respondeu a pesquisa, porque seriam os prestadores "ativos". Valeu.
+    edges:
+      - selo_verificado -> posicao_busca_jul
+      - pedidos_mar_mai -> posicao_busca_jul
+      - posicao_busca_jul -> pedidos_jun_ago
+      - selo_verificado -> pedidos_jun_ago
+      - pedidos_mar_mai -> pedidos_jun_ago
+      - categoria -> pedidos_mar_mai
+      - categoria -> pedidos_jun_ago
+      - uf -> pedidos_mar_mai
+      - uf -> pedidos_jun_ago
+      - selo_verificado -> respondeu_pesquisa_set
+      - pedidos_jun_ago -> respondeu_pesquisa_set
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        posicao_busca_jul: É consequência do selo e é o caminho pelo qual ele gera pedidos. Ajustar por ela tira do efeito justamente o que o selo faz.
+        respondeu_pesquisa_set: Veio depois dos pedidos e depende do selo e dos pedidos. Ajustar por ela, ou filtrar por ela, cria uma associação falsa entre o selo e os pedidos.
+      indifferent: [pedidos_mar_mai, categoria, uf]
+    note: >-
+      Como houve sorteio, a comparação simples já dá o efeito. As duas tentações são o
+      "efeito puro" sem o boost do ranking e o filtro pelos respondentes da pesquisa.
+
+  - id: pt_saude_telessaude_esf_dez24
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: técnico da área de planejamento de uma secretaria estadual de saúde
+    theme: Saúde pública, atenção primária
+    title: Telessaúde municipal e internações evitáveis, com a cobertura de ESF de 2024
+    twin: pt_saude_telessaude_esf_jun26
+    treatment: telessaude
+    outcome: icsap_2026
+    columns:
+      telessaude: Município aderiu ao programa estadual de telessaúde (teleconsultoria para as equipes da atenção primária) em 2025 (1 = sim, 0 = não).
+      icsap_2026: Taxa de internações por condições sensíveis à atenção primária, de janeiro a junho de 2026, por 10 mil habitantes.
+      icsap_2024: Mesma taxa, de janeiro a junho de 2024.
+      porte_pop: População estimada em 2024.
+      cobertura_esf: Cobertura populacional das equipes de Saúde da Família em dezembro de 2024, em %.
+      cod_ibge: Código IBGE do município.
+    story: >-
+      Para o Núcleo de Informação. Assunto: efeito do telessaúde nas ICSAP. Dos 417
+      municípios, 236 aderiram ao telessaúde em 2025. A adesão não foi aleatória: as
+      regionais pressionaram os municípios com ICSAP alta, e o programa exigia pelo menos
+      uma equipe de ESF ativa, de modo que quem já tinha cobertura maior aderiu mais. Os
+      municípios pequenos aderiram menos (sem TI, sem internet) e, como sempre, têm as taxas
+      mais altas, porque internam qualquer coisa no hospital regional. Quem aderiu recebeu
+      cofinanciamento para abrir equipes novas, e cobertura de ESF é o que mais segura
+      internação evitável. Planilha em anexo com código IBGE, população, ICSAP de 2024 e de
+      2026 e cobertura de ESF (a de dezembro de 2024, anterior à adesão). Favor indicar por
+      quais colunas ajustar na comparação entre aderentes e não aderentes, para a nota
+      técnica da próxima semana.
+    edges:
+      - icsap_2024 -> telessaude
+      - icsap_2024 -> icsap_2026
+      - cobertura_esf -> telessaude
+      - cobertura_esf -> icsap_2026
+      - cobertura_esf -> icsap_2024
+      - porte_pop -> telessaude
+      - porte_pop -> icsap_2026
+      - porte_pop -> icsap_2024
+      - telessaude -> icsap_2026
+    answer:
+      identifiable: true
+      adjust_for: [cobertura_esf, icsap_2024, porte_pop]
+      indifferent: [cod_ibge]
+    note: >-
+      Os três motivos da adesão (taxa alta, cobertura de ESF, porte) estão na tabela e os
+      três mexem na taxa de 2026. A cobertura aqui é a de antes da adesão; no gêmeo, é a de
+      depois.
+
+  - id: pt_saude_telessaude_esf_jun26
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: técnico da área de planejamento de uma secretaria estadual de saúde
+    theme: Saúde pública, atenção primária
+    title: Telessaúde municipal e internações evitáveis, com a cobertura de ESF de 2026
+    twin: pt_saude_telessaude_esf_dez24
+    treatment: telessaude
+    outcome: icsap_2026
+    columns:
+      telessaude: Município aderiu ao programa estadual de telessaúde (teleconsultoria para as equipes da atenção primária) em 2025 (1 = sim, 0 = não).
+      icsap_2026: Taxa de internações por condições sensíveis à atenção primária, de janeiro a junho de 2026, por 10 mil habitantes.
+      icsap_2024: Mesma taxa, de janeiro a junho de 2024.
+      porte_pop: População estimada em 2024.
+      cobertura_esf: Cobertura populacional das equipes de Saúde da Família em junho de 2026, em %, última competência exportada do SISAB.
+      cod_ibge: Código IBGE do município.
+    not_in_table:
+      cobertura_esf_2024: Cobertura populacional das equipes de Saúde da Família antes da adesão, em dezembro de 2024. Não veio na exportação do SISAB.
+    story: >-
+      Para o Núcleo de Informação. Assunto: efeito do telessaúde nas ICSAP. Dos 417
+      municípios, 236 aderiram ao telessaúde em 2025. A adesão não foi aleatória: as
+      regionais pressionaram os municípios com ICSAP alta, e o programa exigia pelo menos
+      uma equipe de ESF ativa, de modo que quem já tinha cobertura maior aderiu mais. Os
+      municípios pequenos aderiram menos (sem TI, sem internet) e, como sempre, têm as taxas
+      mais altas, porque internam qualquer coisa no hospital regional. Quem aderiu recebeu
+      cofinanciamento para abrir equipes novas, e cobertura de ESF é o que mais segura
+      internação evitável. Planilha em anexo com código IBGE, população, ICSAP de 2024 e de
+      2026 e cobertura de ESF (a que o SISAB exportou é a da última competência, junho de
+      2026). Favor indicar por quais colunas ajustar na comparação entre aderentes e não
+      aderentes, para a nota técnica da próxima semana.
+    edges:
+      - icsap_2024 -> telessaude
+      - icsap_2024 -> icsap_2026
+      - cobertura_esf_2024 -> telessaude
+      - cobertura_esf_2024 -> icsap_2024
+      - cobertura_esf_2024 -> cobertura_esf
+      - telessaude -> cobertura_esf
+      - cobertura_esf -> icsap_2026
+      - porte_pop -> telessaude
+      - porte_pop -> icsap_2026
+      - porte_pop -> icsap_2024
+      - telessaude -> icsap_2026
+    answer:
+      identifiable: false
+      missing: [cobertura_esf_2024]
+    note: >-
+      Mesma nota do gêmeo; só a data da cobertura mudou, e ela está no dicionário. A
+      cobertura de 2026 é consequência da adesão (o cofinanciamento abriu equipes), e a
+      cobertura de antes, que explica quem aderiu, não veio na planilha.

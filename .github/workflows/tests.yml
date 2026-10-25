@@ -1,0 +1,51 @@
+# Runs the everyday test suite on every push and pull request, in an environment without the
+# training libraries (no torch): the runner and the verifier must work on their own.
+# The exhaustive suite (every graph of up to five variables) runs on demand, from the Actions tab.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  everyday:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Install Graphviz (the page tests draw graphs with dot)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends graphviz
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+        with:
+          enable-cache: true
+      - name: Install Python and the runtime and test dependencies
+        run: |
+          uv python install
+          uv sync --locked --no-group train
+      - name: Run the everyday suite
+        run: uv run --no-sync pytest -q
+
+  exhaustive:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e  # v10.3.2
+        with:
+          enable-cache: true
+      - name: Install Python and the runtime and test dependencies
+        run: |
+          uv python install
+          uv sync --locked --no-group train
+      - name: Run the exhaustive verifier suite
+        run: uv run --no-sync pytest -q -m slow

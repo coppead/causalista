@@ -1,0 +1,631 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Casos simulados, lote pt-3: oito casos em português do Brasil escritos como se
+# fossem de uma pessoa (um agrônomo, um analista de clube, um dono de franquia, um
+# engenheiro de concessionária, uma gerente de atendimento, uma professora), cada um
+# no estilo em que essa pessoa escreveria: e-mail longo, tópicos de reunião, mensagem
+# de WhatsApp, briefing para consultoria, trecho de dissertação.
+#
+# Escritos pelo assistente em 2026-10-06, no papel de cada pessoa, porque não houve tempo
+# de conseguir casos escritos por gente de verdade antes do teste. Idioma: pt.
+#
+# Estes casos são TESTE. Ficam congelados antes de qualquer modelo respondê-los e nunca
+# entram em treino. As setas ("causa -> efeito") declaram o diagrama que o texto, as
+# descrições das colunas e o bom senso implicam; o verificador confere a resposta a
+# partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_coop_bioinsumo
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail longo
+    persona: agrônomo responsável pela assistência técnica de uma cooperativa agrícola do oeste do Paraná, sem formação em estatística
+    theme: Agricultura (cooperativa de grãos)
+    title: Bioinsumo na soja e produtividade
+    treatment: usou_bioinsumo
+    outcome: produtividade_sc_ha
+    columns:
+      cod_associado: Código do associado na cooperativa.
+      usou_bioinsumo: Aplicou o produto biológico à base de Trichoderma no tratamento de sementes de soja da safra 2025/26 (1 = sim, 0 = não).
+      produtividade_sc_ha: Produtividade de soja na safra 2025/26, em sacas de 60 kg por hectare, conforme romaneio de entrega na cooperativa.
+      produtividade_anterior_sc_ha: Produtividade de soja na safra 2024/25, em sacas de 60 kg por hectare, pelo mesmo critério.
+      area_soja_ha: Área plantada com soja na safra 2025/26, em hectares.
+      chuva_out_fev_mm: Chuva acumulada de outubro de 2025 a fevereiro de 2026 na estação meteorológica mais próxima da propriedade, em mm.
+      mancha_alvo_fev: Nota de severidade de mancha-alvo na lavoura, de 0 a 5, dada pelo técnico na visita de fevereiro de 2026.
+    not_in_table:
+      capricho_manejo: A impressão da equipe técnica sobre o capricho do produtor no manejo da lavoura (seguir a recomendação, fazer tudo na época certa). Nunca foi anotada.
+    story: >-
+      Prezado professor Rogério, bom dia.
+
+      Sou o agrônomo responsável pela assistência técnica aqui da cooperativa, e o Valdir
+      me passou seu contato dizendo que o senhor topa olhar uns dados nossos. Vou tentar
+      resumir.
+
+      Na safra 2025/26 a cooperativa passou a oferecer aos associados, com desconto, um
+      produto biológico à base de Trichoderma para tratamento de sementes de soja.
+      Aderiram 212 dos 640 produtores de soja. Agora a diretoria quer decidir se mantém
+      o subsídio na 26/27, e a pergunta é simples: o produto aumentou a produtividade
+      ou não?
+
+      Eu puxei do sistema a produtividade entregue na cooperativa (sacas por hectare)
+      de todo mundo, nas duas últimas safras, a área de soja e quem usou o produto.
+      Juntei também a chuva acumulada de outubro a fevereiro da estação mais próxima de
+      cada propriedade, porque este ano a chuva pegou muito diferente de uma região pra
+      outra e isso pesou demais na colheita; o pessoal do norte do município colheu bem
+      menos. E tem a nota de mancha-alvo que a gente dá em cada lavoura na visita de
+      fevereiro, de 0 a 5: nas lavouras com o produto a nota veio bem mais baixa, como
+      era de esperar, e lavoura com mancha-alvo forte desfolha cedo e perde saca.
+
+      Alguns detalhes que acho que importam. Como foi a primeira safra com o produto, eu
+      e o Marcos (o outro técnico) oferecemos primeiro pros produtores que a gente sabia
+      que iam seguir a recomendação direitinho, aquele pessoal mais caprichoso, que faz
+      tudo na época certa. Isso a gente sabe de cabeça, de tanto visitar; não é coisa
+      que entre no sistema. E é bom dizer que esse pessoal já colhe acima da média todo
+      ano, com ou sem produto, e segura doença melhor que os outros, de tanto cuidado.
+      Também insisti bastante com quem tinha colhido mal na 24/25 por causa de
+      mancha-alvo, porque o produto ajuda no controle. Os produtores de área maior
+      aderiram mais, acho que porque o custo por hectare dilui.
+
+      De resto, a produtividade da safra anterior sempre ajuda a prever a seguinte, o
+      senhor sabe, mesmo solo, mesmo produtor.
+
+      A comparação crua deu 68,4 sc/ha com produto contra 61,9 sem, mas eu desconfio
+      desse número pelo que expliquei acima. Dá pra tirar alguma conclusão com o que
+      temos? Se precisar, posso mandar a planilha ainda esta semana.
+
+      Abraço,
+      Cleiton
+    edges:
+      - capricho_manejo -> usou_bioinsumo
+      - capricho_manejo -> produtividade_sc_ha
+      - capricho_manejo -> produtividade_anterior_sc_ha
+      - produtividade_anterior_sc_ha -> usou_bioinsumo
+      - produtividade_anterior_sc_ha -> produtividade_sc_ha
+      - area_soja_ha -> usou_bioinsumo
+      - chuva_out_fev_mm -> produtividade_sc_ha
+      - usou_bioinsumo -> mancha_alvo_fev
+      - capricho_manejo -> mancha_alvo_fev
+      - mancha_alvo_fev -> produtividade_sc_ha
+      - usou_bioinsumo -> produtividade_sc_ha
+    answer:
+      identifiable: false
+      missing: [capricho_manejo]
+    note: >-
+      Os técnicos ofereceram o produto aos produtores mais caprichosos, e o capricho não
+      está em coluna nenhuma. A produtividade da safra anterior carrega parte disso, mas
+      não tudo. A nota de mancha-alvo de fevereiro é consequência do produto (e do
+      capricho), não substitui nada.
+
+  - id: pt_clube_preventivo
+    author: ai
+    status: aprovado
+    language: pt
+    style: tópicos de reunião
+    persona: analista de desempenho de um clube de futebol da Série B, formado em educação física, acostumado a planilhas
+    theme: Esporte (futebol profissional)
+    title: Programa preventivo de isquiotibiais e lesões musculares
+    treatment: programa_preventivo
+    outcome: lesao_muscular
+    columns:
+      id_atleta: Identificador do atleta no sistema do departamento de saúde e performance.
+      programa_preventivo: Fez o programa individualizado de fortalecimento excêntrico de isquiotibiais de janeiro a março de 2025, da pré-temporada ao fim do estadual (1 = sim, 0 = não).
+      lesao_muscular: Sofreu ao menos uma lesão muscular de membro inferior com afastamento durante a Série B de 2025, de abril a novembro (1 = sim, 0 = não).
+      idade: Idade em 1º de janeiro de 2025, em anos completos.
+      lesoes_2024: Número de lesões musculares de membro inferior registradas pelo departamento médico em 2024.
+      posicao: Posição em campo (goleiro, defensor, meio-campista ou atacante).
+      forca_isquios_mar: Pico de força no teste Nordic, em N, na reavaliação do fim de março de 2025.
+      ressonancias_2025: Número de exames de ressonância magnética realizados pelo atleta em 2025.
+    story: >-
+      Pauta – reunião DSP + comissão técnica – 02/12/2025.
+      Assunto: programa preventivo de isquios (jan–mar 2025). Decidir se vira padrão pro
+      elenco inteiro em 2026.
+
+      - Contexto: em janeiro de 2025 a fisio montou um programa individualizado de
+      excêntrico de isquios pra parte do elenco, que rodou da pré-temporada até o fim do
+      estadual. Entraram 14 dos 31 atletas. A escolha foi do DM junto com a fisio:
+      priorizaram quem tinha histórico de lesão muscular em 2024 e os mais velhos (acima
+      de 29, basicamente). Goleiros ficaram de fora, não fazia sentido pelo perfil de
+      esforço.
+
+      - Resultado bruto na Série B: 3 lesões em 14 no grupo do programa x 6 em 17 no
+      resto. Dá pra vender isso? Eu não venderia ainda, pelo viés da escolha. Quem tem
+      histórico lesiona de novo e os mais velhos lesionam mais, isso todo mundo aqui
+      sabe. E a posição pesa também, atacante e lateral puxam sprint muito mais que
+      zagueiro.
+
+      - Dado que eu gosto: na reavaliação do Nordic o grupo do programa subiu em média
+      18% (vs. 2% nos outros). Isquio forte lesiona menos, isso é consenso na
+      literatura. Ou seja, o programa funcionou pelo caminho que a gente esperava.
+
+      - Atenção com a ressonância: o DM pede RM de base pra todo mundo que entra no
+      programa, e obviamente pede RM quando o cara se lesiona. Então a contagem de
+      exames do ano tá inflada nos dois grupos, por motivos diferentes. Não usar isso
+      como indicador de nada.
+
+      - Dados: planilha do DSP com id, idade, posição, lesões em 2024, se fez o programa,
+      Nordic da reavaliação, lesão na Série B e número de RMs. 31 linhas só, eu sei.
+      Pergunta pro pessoal da análise: dá pra estimar o efeito do programa com esses
+      dados, e por quais colunas a gente deveria ajustar?
+
+      - Próximo passo: definir até 15/12 pra entrar no planejamento da pré-temporada.
+    edges:
+      - idade -> programa_preventivo
+      - idade -> lesao_muscular
+      - idade -> lesoes_2024
+      - lesoes_2024 -> programa_preventivo
+      - lesoes_2024 -> lesao_muscular
+      - posicao -> programa_preventivo
+      - posicao -> lesao_muscular
+      - posicao -> lesoes_2024
+      - programa_preventivo -> forca_isquios_mar
+      - forca_isquios_mar -> lesao_muscular
+      - programa_preventivo -> lesao_muscular
+      - programa_preventivo -> ressonancias_2025
+      - lesao_muscular -> ressonancias_2025
+    answer:
+      identifiable: true
+      adjust_for: [idade, lesoes_2024, posicao]
+      do_not_adjust_for:
+        forca_isquios_mar: Medida no fim de março, depois do programa e antes da Série B, e é consequência dele. É o caminho pelo qual o programa age; ajustar por ela apaga parte do efeito.
+        ressonancias_2025: Sobe por causa do programa (RM de base) e por causa da lesão (RM de diagnóstico). Ajustar por ela cria uma associação falsa entre o programa e a lesão.
+      indifferent: [id_atleta]
+    note: >-
+      Os três motivos da escolha (histórico, idade, posição) estão na tabela. As
+      armadilhas são o Nordic de março, consequência do programa, e a contagem de
+      ressonâncias, que sobe com o programa e com a lesão.
+
+  - id: pt_franquia_combo
+    author: ai
+    status: aprovado
+    language: pt
+    style: mensagem de WhatsApp
+    persona: dono de uma franquia de restaurantes por quilo com 14 unidades em São Paulo, sem formação em análise de dados
+    theme: Restaurantes (franquia)
+    title: Combo executivo e faturamento do almoço
+    treatment: combo_executivo
+    outcome: fat_almoco_set
+    columns:
+      id_unidade: Código da unidade na rede.
+      combo_executivo: Unidade passou a vender o combo executivo (prato, bebida e sobremesa a preço fixo) a partir de junho de 2026 (1 = sim, 0 = não).
+      fat_almoco_set: Faturamento médio por dia útil no horário de almoço (11h às 15h) em setembro de 2026, em reais.
+      fat_almoco_mar: Faturamento médio por dia útil no horário de almoço em março de 2026, em reais.
+      tipo_ponto: Tipo do ponto comercial (shopping, rua ou galeria).
+      assentos: Número de lugares sentados da unidade.
+    not_in_table:
+      confianca_gerente: A confiança do dono no gerente de cada unidade, quem ele acha que "toca bem o negócio". Impressão pessoal, sem registro.
+    story: >-
+      Fala Dani, tudo bem? vc q é das planilhas me ajuda aqui kkk
+
+      em junho eu lancei um combo executivo (prato + bebida + sobremesa por 39,90) em 6
+      das minhas 14 lojas, pra atacar o almoço, q tava fraco desde o começo do ano.
+      escolhi assim: só loja de rua, pq em shopping o pessoal almoça na praça e galeria
+      não tem fluxo de escritório. e dentro das de rua eu botei nas q têm gerente q eu
+      confio de olho fechado, q eu sei q iam executar direito. isso é feeling meu, não
+      tem como botar em planilha, mas não é por acaso q essas sempre foram as lojas q
+      mais vendem, gerente bom faz diferença no balcão. ah, e tentei pegar tb as q
+      estavam mais fracas no almoço em março, q era onde doía
+
+      setembro fechou: 4.100/dia de almoço nas lojas com combo, 3.200 nas sem. meu sócio
+      já quer colocar em todas
+
+      tenho por loja o faturamento médio do almoço em março e em setembro, tipo de
+      ponto, assentos (loja grande vende mais, óbvio) e se tem combo. dá pra dizer q o
+      combo deu certo ou eu to me enganando? te pago um almoço (com combo kkk)
+    edges:
+      - confianca_gerente -> combo_executivo
+      - confianca_gerente -> fat_almoco_set
+      - confianca_gerente -> fat_almoco_mar
+      - tipo_ponto -> combo_executivo
+      - tipo_ponto -> fat_almoco_set
+      - tipo_ponto -> fat_almoco_mar
+      - fat_almoco_mar -> combo_executivo
+      - fat_almoco_mar -> fat_almoco_set
+      - assentos -> fat_almoco_set
+      - assentos -> fat_almoco_mar
+      - combo_executivo -> fat_almoco_set
+    answer:
+      identifiable: false
+      missing: [confianca_gerente]
+    note: >-
+      O dono escolheu as lojas pelo gerente em quem confia, e essa confiança não está em
+      coluna nenhuma. O faturamento de março carrega parte disso, mas não tudo.
+
+  - id: pt_energia_alerta_sms
+    author: ai
+    status: aprovado
+    language: pt
+    style: briefing para uma consultoria
+    persona: engenheiro eletricista da área de eficiência energética de uma concessionária de distribuição, acostumado a relatórios de P&D
+    theme: Energia (distribuição)
+    title: Alertas de consumo por SMS e consumo residencial
+    treatment: alerta_sms
+    outcome: consumo_kwh_pos
+    columns:
+      numero_uc: Número da unidade consumidora.
+      alerta_sms: UC incluída no grupo que recebeu alertas semanais de consumo por SMS entre março e agosto de 2026 (1 = sim, 0 = não).
+      consumo_kwh_pos: Consumo médio mensal faturado de março a agosto de 2026, em kWh.
+      consumo_kwh_pre: Consumo médio mensal faturado de março a agosto de 2025, em kWh.
+      classe_tarifaria: Subclasse tarifária da UC (residencial convencional ou residencial baixa renda).
+      regional: Regional de atendimento da concessionária (litoral, serra ou metropolitana).
+      acessos_app: Número de acessos ao aplicativo da concessionária entre março e agosto de 2026.
+      contestou_fatura: Abriu ao menos uma contestação de fatura entre março e setembro de 2026 (1 = sim, 0 = não).
+    not_in_table:
+      moradores_uc: Número de pessoas que moram na unidade consumidora. O cadastro comercial não tem esse campo.
+    story: >-
+      Briefing para proposta de consultoria. Avaliação do piloto de alertas de consumo
+      (P&D ANEEL, projeto 0047/2025).
+
+      1. Contexto. Entre março e agosto de 2026 a concessionária rodou um piloto de
+      alertas semanais de consumo por SMS para clientes residenciais. A mensagem informa
+      o consumo acumulado no ciclo, compara com o mesmo período do ano anterior e traz
+      um link para o aplicativo. Elegíveis: 12.400 UCs residenciais com medidor com
+      telemetria e celular cadastrado. Dessas, 6.200 foram selecionadas por sorteio
+      simples para receber os alertas; as demais seguiram sem nenhuma comunicação
+      adicional e servem de comparação.
+
+      2. Resultados preliminares. O consumo médio do grupo com alerta ficou 3,1% abaixo
+      do grupo sem alerta no período. O acesso ao aplicativo mais que triplicou no grupo
+      com alerta (média de 9,4 acessos no período contra 2,7), e a experiência da área
+      mostra que o cliente que acompanha o consumo no app ajusta o uso de ar-condicionado
+      e chuveiro e reduz a conta. Consideramos esse o principal mecanismo do programa.
+
+      3. Pontos de atenção. (a) O número de contestações de fatura subiu no grupo com
+      alerta, provavelmente porque o cliente passa a olhar a conta com mais atenção;
+      contestações também são mais frequentes, como sempre, em UCs com consumo alto no
+      período. (b) O consumo varia muito entre regionais pelo clima: a regional litoral
+      usa muito mais ar-condicionado. (c) A subclasse baixa renda tem consumo
+      estruturalmente menor. (d) O consumo do mesmo período de 2025 está disponível para
+      todas as UCs e é, naturalmente, o melhor preditor do consumo de 2026. (e) Não
+      dispomos do número de moradores por UC, que pesa bastante no consumo; o cadastro
+      comercial não tem esse campo.
+
+      4. Base de dados. Uma linha por UC com: número da UC, grupo (alerta ou não),
+      consumo médio mensal de mar–ago/2026, consumo médio mensal de mar–ago/2025,
+      subclasse tarifária, regional, número de acessos ao app no período e indicador de
+      contestação de fatura.
+
+      5. O que pedimos. Estimativa do efeito dos alertas sobre o consumo, com intervalo
+      de confiança, e orientação sobre quais variáveis da base devem ou não entrar no
+      modelo. O relatório final do P&D precisa ser entregue à ANEEL em dezembro.
+    edges:
+      - consumo_kwh_pre -> consumo_kwh_pos
+      - classe_tarifaria -> consumo_kwh_pos
+      - classe_tarifaria -> consumo_kwh_pre
+      - regional -> consumo_kwh_pos
+      - regional -> consumo_kwh_pre
+      - moradores_uc -> consumo_kwh_pos
+      - moradores_uc -> consumo_kwh_pre
+      - alerta_sms -> acessos_app
+      - acessos_app -> consumo_kwh_pos
+      - alerta_sms -> consumo_kwh_pos
+      - alerta_sms -> contestou_fatura
+      - consumo_kwh_pos -> contestou_fatura
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        acessos_app: Medido depois do início dos alertas e é consequência deles. É o caminho pelo qual o programa age; ajustar por ele apaga parte do efeito.
+        contestou_fatura: Sobe com os alertas e com o consumo alto. Ajustar por ela cria uma associação falsa entre os alertas e o consumo.
+      indifferent: [consumo_kwh_pre, classe_tarifaria, regional, numero_uc]
+    note: >-
+      Houve sorteio, então a comparação simples já dá o efeito. As armadilhas são o
+      acesso ao app, consequência dos alertas, e a contestação de fatura, consequência
+      dos alertas e do consumo. O número de moradores, que falta, só age sobre o
+      consumo: não atrapalha.
+
+  - id: pt_telecom_retencao_lista
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail longo
+    persona: gerente de atendimento de uma operadora de telefonia móvel, responsável pelas ilhas de retenção, sem formação em estatística
+    theme: Telecom
+    title: Ligação de retenção e cancelamento, com a lista seguida à risca
+    twin: pt_telecom_retencao_supervisoras
+    treatment: ligacao_retencao
+    outcome: cancelou_90d
+    columns:
+      id_cliente: Identificador do cliente na base.
+      ligacao_retencao: Recebeu a ligação proativa da equipe de retenção na ação de junho de 2026 (1 = sim, 0 = não).
+      cancelou_90d: Cancelou a linha nos 90 dias seguintes à ação (1 = sim, 0 = não).
+      reclamacoes_6m: Número de reclamações registradas no SAC de dezembro de 2025 a maio de 2026.
+      meses_contrato: Meses desde a ativação da linha até maio de 2026.
+      plano: Tipo de plano em maio de 2026 (controle ou pós-pago).
+      desconto_aplicado: Recebeu desconto na mensalidade a partir da fatura de julho de 2026 (1 = sim, 0 = não).
+      contato_sac_90d: Entrou em contato com o SAC, por qualquer canal, nos 90 dias seguintes à ação (1 = sim, 0 = não).
+    story: >-
+      Assunto: Ação de retenção de junho, pedido de análise
+
+      Oi, Fernanda, tudo bem?
+
+      Como combinamos na reunião de ontem, segue o contexto da ação de retenção proativa
+      de junho, pra vocês do BI avaliarem se valeu a pena antes de a gente pedir
+      orçamento pra repetir em novembro.
+
+      A ação: entre 2 e 27 de junho, as duas ilhas de retenção ligaram pra 18 mil
+      clientes com oferta de permanência. A lista veio do sistema, que ordena a base por
+      dois critérios: quem tem mais reclamações no SAC nos últimos seis meses e quem tem
+      menos tempo de contrato vêm primeiro. A gente foi ligando na ordem da lista até acabar
+      a capacidade da equipe, sem nenhum outro filtro. Então quem recebeu a ligação é
+      exatamente quem o sistema colocou no topo.
+
+      O que eu sei da base, pra ajudar: cliente que vive no SAC reclamando é o primeiro
+      a pedir portabilidade, e cliente novo (menos de um ano) também sai mais que os
+      antigos. Plano controle cancela bem mais que pós-pago, isso é histórico. Boa parte das ligações termina em
+      desconto na mensalidade, a partir da fatura seguinte, e desconto segura o cliente,
+      a gente sabe de outras ações. E tem um detalhe chato: quem cancela normalmente
+      entra em contato com o SAC pra fazer isso, e quem recebeu a nossa ligação também
+      costuma ligar depois com dúvida sobre a oferta, então o volume de contato nos 90
+      dias cresceu nos dois grupos.
+
+      Resultado cru: cancelamento em 90 dias de 7,8% entre quem recebeu a ligação contra
+      5,1% na base que não recebeu. O diretor olhou isso e falou que a ação "aumentou o
+      churn". Eu acho que não é bem assim, pela forma como a lista foi montada, mas não
+      sei provar.
+
+      A base que o Rafael vai mandar tem uma linha por cliente com: id, se recebeu a
+      ligação, reclamações no SAC de dez/25 a mai/26, meses de contrato, tipo de plano,
+      se recebeu desconto, se contatou o SAC nos 90 dias e se cancelou nos 90 dias.
+
+      Dá pra tirar o efeito real da ligação disso? E, se der, por quais colunas vocês
+      vão ajustar? Preciso levar uma resposta pro diretor até o dia 20.
+
+      Obrigada,
+      Patrícia
+    edges:
+      - reclamacoes_6m -> ligacao_retencao
+      - reclamacoes_6m -> cancelou_90d
+      - meses_contrato -> ligacao_retencao
+      - meses_contrato -> cancelou_90d
+      - plano -> cancelou_90d
+      - ligacao_retencao -> desconto_aplicado
+      - desconto_aplicado -> cancelou_90d
+      - ligacao_retencao -> cancelou_90d
+      - ligacao_retencao -> contato_sac_90d
+      - cancelou_90d -> contato_sac_90d
+    answer:
+      identifiable: true
+      adjust_for: [meses_contrato, reclamacoes_6m]
+      do_not_adjust_for:
+        desconto_aplicado: Concedido depois da ligação e é consequência dela. É um dos caminhos pelos quais a ligação segura o cliente; ajustar por ele apaga parte do efeito.
+        contato_sac_90d: Cresce por causa da ligação e por causa do cancelamento. Ajustar por ele cria uma associação falsa entre a ligação e o cancelamento.
+      indifferent: [plano, id_cliente]
+    note: >-
+      A lista foi seguida à risca, então os dois motivos da ligação (reclamações e tempo
+      de contrato) estão na tabela. As armadilhas são o desconto, consequência da
+      ligação, e o contato com o SAC, consequência da ligação e do cancelamento.
+
+  - id: pt_telecom_retencao_supervisoras
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail longo
+    persona: gerente de atendimento de uma operadora de telefonia móvel, responsável pelas ilhas de retenção, sem formação em estatística
+    theme: Telecom
+    title: Ligação de retenção e cancelamento, com a escolha final das supervisoras
+    twin: pt_telecom_retencao_lista
+    treatment: ligacao_retencao
+    outcome: cancelou_90d
+    columns:
+      id_cliente: Identificador do cliente na base.
+      ligacao_retencao: Recebeu a ligação proativa da equipe de retenção na ação de junho de 2026 (1 = sim, 0 = não).
+      cancelou_90d: Cancelou a linha nos 90 dias seguintes à ação (1 = sim, 0 = não).
+      reclamacoes_6m: Número de reclamações registradas no SAC de dezembro de 2025 a maio de 2026.
+      meses_contrato: Meses desde a ativação da linha até maio de 2026.
+      plano: Tipo de plano em maio de 2026 (controle ou pós-pago).
+      desconto_aplicado: Recebeu desconto na mensalidade a partir da fatura de julho de 2026 (1 = sim, 0 = não).
+      contato_sac_90d: Entrou em contato com o SAC, por qualquer canal, nos 90 dias seguintes à ação (1 = sim, 0 = não).
+    not_in_table:
+      irritacao_percebida: A impressão das supervisoras, ao ouvir as gravações, de quão irritado e perto de sair o cliente estava. Não é registrada em sistema nenhum.
+    story: >-
+      Assunto: Ação de retenção de junho, pedido de análise
+
+      Oi, Fernanda, tudo bem?
+
+      Como combinamos na reunião de ontem, segue o contexto da ação de retenção proativa
+      de junho, pra vocês do BI avaliarem se valeu a pena antes de a gente pedir
+      orçamento pra repetir em novembro.
+
+      A ação: entre 2 e 27 de junho, as duas ilhas de retenção ligaram pra 18 mil
+      clientes com oferta de permanência. A lista veio do sistema, que ordena a base por
+      dois critérios: quem tem mais reclamações no SAC nos últimos seis meses e quem tem
+      menos tempo de contrato vêm primeiro. Só que a lista tinha 40 mil nomes e a
+      capacidade era de 18 mil ligações, então as supervisoras de cada ilha escolheram,
+      dentro da lista, pra quem ligar: elas ouviram as últimas gravações e priorizaram
+      quem parecia mais irritado, mais perto de sair. Isso é o ouvido delas, não tem
+      como puxar do sistema.
+
+      O que eu sei da base, pra ajudar: cliente que vive no SAC reclamando é o primeiro
+      a pedir portabilidade, e cliente novo (menos de um ano) também sai mais que os
+      antigos. Plano controle cancela bem mais que pós-pago, isso é histórico. Boa parte das ligações termina em
+      desconto na mensalidade, a partir da fatura seguinte, e desconto segura o cliente,
+      a gente sabe de outras ações. E tem um detalhe chato: quem cancela normalmente
+      entra em contato com o SAC pra fazer isso, e quem recebeu a nossa ligação também
+      costuma ligar depois com dúvida sobre a oferta, então o volume de contato nos 90
+      dias cresceu nos dois grupos.
+
+      Resultado cru: cancelamento em 90 dias de 7,8% entre quem recebeu a ligação contra
+      5,1% na base que não recebeu. O diretor olhou isso e falou que a ação "aumentou o
+      churn". Eu acho que não é bem assim, pela forma como a gente escolheu pra quem
+      ligar, mas não sei provar.
+
+      A base que o Rafael vai mandar tem uma linha por cliente com: id, se recebeu a
+      ligação, reclamações no SAC de dez/25 a mai/26, meses de contrato, tipo de plano,
+      se recebeu desconto, se contatou o SAC nos 90 dias e se cancelou nos 90 dias.
+
+      Dá pra tirar o efeito real da ligação disso? E, se der, por quais colunas vocês
+      vão ajustar? Preciso levar uma resposta pro diretor até o dia 20.
+
+      Obrigada,
+      Patrícia
+    edges:
+      - irritacao_percebida -> ligacao_retencao
+      - irritacao_percebida -> cancelou_90d
+      - reclamacoes_6m -> ligacao_retencao
+      - reclamacoes_6m -> cancelou_90d
+      - meses_contrato -> ligacao_retencao
+      - meses_contrato -> cancelou_90d
+      - plano -> cancelou_90d
+      - ligacao_retencao -> desconto_aplicado
+      - desconto_aplicado -> cancelou_90d
+      - ligacao_retencao -> cancelou_90d
+      - ligacao_retencao -> contato_sac_90d
+      - cancelou_90d -> contato_sac_90d
+    answer:
+      identifiable: false
+      missing: [irritacao_percebida]
+    note: >-
+      Mesma história do caso irmão, com um fato trocado: a escolha final de quem recebia
+      a ligação foi pelo ouvido das supervisoras, e essa impressão não está em coluna
+      nenhuma. Reclamações e tempo de contrato continuam na tabela, mas não bastam.
+
+  - id: pt_reforco_letra_viva
+    author: ai
+    status: aprovado
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: professora da rede municipal que coordena um projeto de reforço escolar e escreve sobre ele a dissertação de mestrado profissional em educação
+    theme: Educação (reforço escolar)
+    title: Reforço de língua portuguesa e nota de novembro
+    treatment: participou_reforco
+    outcome: nota_port_nov
+    columns:
+      matricula: Número de matrícula do estudante na rede municipal.
+      participou_reforco: Frequentou as oficinas de reforço de língua portuguesa no contraturno, de março a outubro de 2025 (1 = sim, 0 = não).
+      nota_port_nov: Nota na avaliação de língua portuguesa da rede aplicada em novembro de 2025, de 0 a 100.
+      nota_diag_fev: Nota na avaliação diagnóstica de língua portuguesa aplicada pela rede em fevereiro de 2025, de 0 a 100.
+      escola: Escola em que o estudante estava matriculado em 2025 (A, B ou C).
+      bolsa_familia: Família beneficiária do Programa Bolsa Família, conforme o cadastro de matrícula (1 = sim, 0 = não).
+      frequencia_2025: Percentual de presença nas aulas regulares de março a outubro de 2025.
+    story: >-
+      3.2 O desenho do projeto e a base de dados
+
+      O projeto Letra Viva foi implementado em 2025 em três escolas da rede municipal,
+      atendendo estudantes do 6º ano em oficinas de leitura e escrita no contraturno,
+      duas vezes por semana, de março a outubro. A indicação dos estudantes seguiu a
+      avaliação diagnóstica aplicada pela rede em fevereiro: em cada escola, foram
+      chamados os estudantes de menor nota, em ordem, até o preenchimento das vagas. As
+      médias do diagnóstico, registre-se, variaram sensivelmente entre as três escolas,
+      o que já se observava em edições anteriores da avaliação (SMED, 2024).
+
+      O número de vagas, contudo, não foi uniforme: por limitação de espaço físico, a
+      escola A abriu duas turmas de oficina, a B uma e a C apenas meia turma,
+      compartilhada com outro projeto, de modo que a proporção de estudantes do 6º ano
+      atendidos variou de 41% na escola A a 18% na escola C. Trata-se de escolas com
+      perfis bastante distintos, e os resultados de novembro, assim como os de
+      fevereiro, refletem essas diferenças.
+
+      Um resultado intermediário merece destaque. Os estudantes atendidos passaram a
+      frequentar com mais assiduidade as aulas regulares, movimento que as educadoras do
+      projeto atribuem ao vínculo construído nas oficinas; a frequência escolar, por sua
+      vez, é um dos preditores mais consistentes do desempenho (ver seção 2.3). Cabe
+      registrar também o que já se sabia da rede: estudantes de famílias beneficiárias
+      do Bolsa Família apresentam frequência menor e desempenho menor nas avaliações,
+      padrão que se repetiu em 2025.
+
+      A base de dados, cedida pela Secretaria Municipal de Educação em formato
+      anonimizado, contém, para cada um dos 412 estudantes do 6º ano das três escolas: o
+      número de matrícula, a escola, a nota do diagnóstico de fevereiro, a condição de
+      beneficiário do Bolsa Família conforme o cadastro de matrícula, a participação no
+      projeto, o percentual de frequência nas aulas regulares de março a outubro e a
+      nota da avaliação da rede em novembro. A média de novembro dos participantes foi
+      de 58,3 pontos, contra 63,1 dos não participantes; a diferença, como se discute a
+      seguir, não pode ser lida como efeito do projeto sem que se leve em conta o modo
+      como os estudantes foram indicados. No capítulo 4, estima-se o efeito da
+      participação no Letra Viva sobre a nota de novembro.
+    edges:
+      - nota_diag_fev -> participou_reforco
+      - nota_diag_fev -> nota_port_nov
+      - escola -> participou_reforco
+      - escola -> nota_port_nov
+      - escola -> nota_diag_fev
+      - bolsa_familia -> nota_port_nov
+      - bolsa_familia -> nota_diag_fev
+      - bolsa_familia -> frequencia_2025
+      - participou_reforco -> frequencia_2025
+      - frequencia_2025 -> nota_port_nov
+      - participou_reforco -> nota_port_nov
+    answer:
+      identifiable: true
+      adjust_for: [escola, nota_diag_fev]
+      do_not_adjust_for:
+        frequencia_2025: Medida durante o projeto e é consequência dele. É um dos caminhos pelos quais o reforço age sobre a nota; ajustar por ela apaga parte do efeito.
+      indifferent: [bolsa_familia, matricula]
+    note: >-
+      A indicação dependeu do diagnóstico de fevereiro e das vagas de cada escola, e as
+      duas coisas estão na tabela. A armadilha é a frequência nas aulas regulares, que o
+      texto apresenta com orgulho e que é consequência do reforço.
+
+  - id: pt_sacola_literaria
+    author: ai
+    status: aprovado
+    language: pt
+    style: mensagem de WhatsApp
+    persona: professora que coordena o projeto de reforço escolar de uma escola municipal, sem formação em pesquisa, escrevendo a uma pesquisadora parceira
+    theme: Educação (reforço escolar, leitura nos anos iniciais)
+    title: Sacola literária e fluência de leitura
+    treatment: recebeu_sacola
+    outcome: fluencia_nov
+    columns:
+      matricula: Número de matrícula do aluno.
+      recebeu_sacola: Família recebeu a sacola literária (kit de seis livros para leitura em casa, com troca mensal) a partir de abril de 2025 (1 = sim, 0 = não).
+      fluencia_nov: Palavras lidas corretamente por minuto no teste de fluência de leitura aplicado em novembro de 2025.
+      fluencia_mar: Palavras lidas corretamente por minuto no teste de fluência de leitura aplicado em março de 2025.
+      turma: Turma do 2º ano em 2025 (201, 202 ou 203).
+      faltas_2025: Número de faltas nas aulas regulares de março a novembro de 2025.
+      chamada_dez: Família convocada pela coordenação para conversa individual em dezembro de 2025 (1 = sim, 0 = não).
+    not_in_table:
+      presenca_familia: Quanto a família acompanha a escola (vai às reuniões, procura a professora). Impressão das professoras; a escola não registra presença em reunião.
+    story: >-
+      Oi Renata, boa noite, desculpa a hora
+
+      então, sobre a planilha da sacola literária q te mandei. vou te explicar como foi
+      pq acho q muda a análise
+
+      ano passado a gente montou 40 sacolas (6 livros cada, troca todo mês) pras três
+      turmas do 2º ano, q têm 87 alunos no total. a ideia era priorizar quem tava mais
+      atrasado na leitura pelo teste de março, e em parte foi isso. mas na prática a
+      sacola foi pra casa de quem a mãe ou o pai apareceu na reunião de abril ou veio
+      falar com a professora. família q não aparece a gente não conseguiu entregar, não
+      tinha como. e vc sabe como é: criança de família presente já lê melhor, falta
+      menos, chega com dever feito. a gente não anota quem vem em reunião, isso fica só
+      na cabeça da professora
+
+      a 203 recebeu bem mais sacolas q as outras duas pq a professora de lá abraçou o
+      projeto, e a turma dela em geral rende mais mesmo, ela é muito boa
+
+      o teste de novembro deu em média 62 palavras por minuto em quem recebeu e 51 em
+      quem não recebeu. a diretora quer levar pra secretaria como resultado do projeto
+
+      na planilha tem: matrícula, turma, fluência de março, fluência de novembro, faltas
+      no ano e se recebeu a sacola. faltar muito atrapalha a leitura, claro. ah, e tem
+      uma coluna de quem a coordenação chamou pra conversar em dezembro: ela chamou
+      todas as famílias da sacola, pra devolver os livros e dar um retorno, e as
+      famílias das crianças q ficaram abaixo de 50 palavras no teste de novembro. não
+      sei se isso serve pra alguma coisa
+
+      dá pra afirmar q foi a sacola? ou a gente vai estar enganando a secretaria sem
+      querer?
+    edges:
+      - presenca_familia -> recebeu_sacola
+      - presenca_familia -> fluencia_nov
+      - presenca_familia -> fluencia_mar
+      - presenca_familia -> faltas_2025
+      - fluencia_mar -> recebeu_sacola
+      - fluencia_mar -> fluencia_nov
+      - turma -> recebeu_sacola
+      - turma -> fluencia_nov
+      - faltas_2025 -> fluencia_nov
+      - recebeu_sacola -> fluencia_nov
+      - recebeu_sacola -> chamada_dez
+      - fluencia_nov -> chamada_dez
+    answer:
+      identifiable: false
+      missing: [presenca_familia]
+    note: >-
+      A sacola foi para as famílias que aparecem na escola, e essa presença não está em
+      coluna nenhuma. A fluência de março e as faltas carregam parte disso, mas não tudo.
+      A convocação de dezembro vem depois de tudo, da sacola e da nota de novembro.

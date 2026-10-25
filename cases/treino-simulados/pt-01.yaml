@@ -1,0 +1,480 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: o
+# gerente de uma concessionária de veículos, uma gerente de produto de um marketplace de
+# serviços, o dono de uma rede de pet shops, a dona de uma clínica odontológica com três
+# unidades e a gerente de frota de uma locadora de carros. Cada texto tem o estilo do
+# canal em que a pessoa escreveria (nota interna, Slack, áudio, e-mail, relatório).
+#
+# Diferente de cases/simulados/ (o teste congelado), estes casos servem ao treino por
+# reforço: o modelo responde, o verificador dá a nota, e nada mais é mostrado a ele. Não
+# contam como casos de pessoa e não entram no teste final; os cenários do teste congelado
+# foram evitados. As setas declaram o diagrama que o texto implica; o verificador confere
+# a resposta a partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_concessionaria_test_drive_fds
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de uma concessionária de veículos, sem formação em estatística
+    theme: Concessionária de veículos, test-drive de fim de semana
+    title: Test-drive de fim de semana e fechamento em 30 dias
+    treatment: test_drive_fds
+    outcome: comprou_30d
+    columns:
+      test_drive_fds: Levou o carro para casa de sexta a segunda (1 = sim, 0 = não). Oferecido a partir de julho.
+      comprou_30d: Fechou a compra de um veículo novo em até 30 dias após a primeira visita à loja (1 = sim, 0 = não).
+      veiculo_troca: Trouxe um usado para avaliar na troca na primeira visita (1 = sim, 0 = não).
+      renda_declarada: Faixa de renda mensal informada na ficha de atendimento (1 = até 5 mil; 2 = de 5 a 10 mil; 3 = acima de 10 mil).
+      vendedor_id: Código do vendedor que atendeu o cliente.
+      visitas_loja: Número de vezes que o cliente esteve na loja nos 30 dias após a primeira visita, contando a primeira.
+      avaliacao_google: Deixou avaliação da loja no Google em até 60 dias após a primeira visita (1 = sim, 0 = não).
+      dia_semana_1a_visita: Dia da semana da primeira visita (1 = segunda ... 7 = domingo).
+    story: >-
+      Ricardo, bom dia.
+
+      Segue o que você pediu sobre o test-drive de fim de semana. Desde julho a gente
+      deixa o cliente levar o carro na sexta e devolver na segunda; foram 212 clientes
+      até agora, de 1.140 atendidos no período. O número bruto é ótimo: 41% dos que
+      levaram fecharam em 30 dias, contra 19% dos outros. Mas eu mesmo desconfio desse
+      número, pelo seguinte.
+
+      Primeiro, quem decide oferecer é o vendedor, e cada um tem a sua mão. O Marcelo
+      oferece pra praticamente todo mundo, o Jean quase nunca, e o Marcelo já era o que
+      mais fechava antes da campanha. Segundo, pela orientação que eu mesmo dei, eles só
+      oferecem pra quem declarou renda na faixa de cima e, de preferência, pra quem
+      trouxe um usado pra avaliar, porque esses a gente sabe que estão no mercado de
+      verdade e não vão só passear com o carro. Cliente com usado na mão fecha mais de
+      qualquer jeito, e o de renda alta também.
+
+      Um dado que eu gosto: quem leva o carro volta pelo menos mais uma vez pra
+      devolver, e muitas vezes uma terceira. A média de visitas de quem levou foi 2,8,
+      contra 1,6 dos outros, e venda acontece na segunda ou na terceira visita, não na
+      primeira. A Fernanda do pós-venda também passou a pedir avaliação no Google pra
+      quem levou o carro no fim de semana, além de pedir pra quem fechou a compra, como
+      ela já fazia; a nota da loja subiu de 4,3 pra 4,6.
+
+      Se der, queria que o BI do grupo olhasse a planilha (vendedor, faixa de renda da
+      ficha, se trouxe usado, dia da semana da primeira visita, número de visitas, se
+      avaliou no Google) e me dissesse quanto desse 41 contra 19 é o test-drive mesmo.
+
+      Abraço,
+      Paulo
+    edges:
+      - vendedor_id -> test_drive_fds
+      - vendedor_id -> comprou_30d
+      - renda_declarada -> test_drive_fds
+      - renda_declarada -> comprou_30d
+      - veiculo_troca -> test_drive_fds
+      - veiculo_troca -> comprou_30d
+      - test_drive_fds -> visitas_loja
+      - visitas_loja -> comprou_30d
+      - test_drive_fds -> comprou_30d
+      - test_drive_fds -> avaliacao_google
+      - comprou_30d -> avaliacao_google
+    answer:
+      identifiable: true
+      adjust_for: [renda_declarada, veiculo_troca, vendedor_id]
+      do_not_adjust_for:
+        visitas_loja: As visitas extras são consequência do test-drive e é por elas que ele vende. Ajustar por essa coluna apaga parte do efeito que se quer medir.
+        avaliacao_google: Registrada depois da compra e pedida tanto a quem levou o carro quanto a quem comprou. Ajustar por ela cria uma associação falsa entre o test-drive e a compra.
+      indifferent: [dia_semana_1a_visita]
+    note: Três colunas a ajustar, ditas de passagem (a mão de cada vendedor, a orientação de renda e usado). A coluna de visitas é um KPI de que o gerente se orgulha, e é consequência da intervenção.
+
+  - id: pt_marketplace_selo_verificado
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de produto de um marketplace de serviços (eletricistas, diaristas, pintores)
+    theme: Marketplace de serviços, selo de profissional verificado
+    title: Selo verificado e pedidos de orçamento
+    treatment: selo_verificado
+    outcome: pedidos_60d
+    columns:
+      selo_verificado: Profissional recebeu o selo "verificado" no perfil (documentos e antecedentes conferidos pelo time de operações) na onda de março (1 = sim, 0 = não).
+      pedidos_60d: Pedidos de orçamento recebidos nos 60 dias seguintes a 15 de março.
+      nota_media_fev: Nota média do profissional nas avaliações de clientes até o fim de fevereiro (1 a 5).
+      categoria: Categoria principal do profissional (eletricista, encanador, diarista, pintor, montador).
+      preco_hora: Preço por hora anunciado no perfil em fevereiro, em reais.
+      cidade: Cidade do profissional.
+    not_in_table:
+      atividade_app: Quanto o profissional abria o aplicativo e respondia pedidos antes de março. Não havia registro de sessões na época.
+    story: >-
+      @time-dados bom dia, uma dúvida antes da review de quinta 🙏
+
+      Em março a ops verificou documento e antecedentes de ~1.800 profissionais e eles
+      ganharam o selo no perfil. Quem tem selo recebeu em média 9,4 pedidos de orçamento
+      em 60 dias vs 5,1 de quem não tem. O Rafa quer colocar isso no deck pra diretoria
+      como "selo quase dobra pedidos". Antes disso queria entender se a conta fecha.
+
+      Contexto de como a ops montou a fila: o time foi olhando quem estava mais ativo no
+      app (quem respondia rápido, entrava todo dia), porque não fazia sentido gastar
+      verificação com gente que tinha sumido. Isso foi no olho, olhando a tela deles, e
+      a gente só começou a logar sessão em junho, então não tem como reconstruir. E esse
+      pessoal ativo recebe mais pedido de qualquer jeito, porque o ranking da busca olha
+      tempo de resposta. Eles também priorizaram eletricista e encanador, que são as
+      categorias com mais reclamação de golpe, e perfis com nota acima de 4,5, que eram
+      os "embaixadores" do programa.
+
+      Pedido varia muito por categoria e por cidade, e nota alta puxa pedido (o ranking
+      usa nota também). Preço anunciado pesa na conversão da busca. A tabela no Metabase
+      tem: selo, pedidos nos 60 dias, nota média até fev, categoria, preço/hora de fev e
+      cidade.
+
+      Dá pra dizer o efeito do selo com o que a gente tem ou vou ter que segurar o Rafa?
+    edges:
+      - atividade_app -> selo_verificado
+      - atividade_app -> pedidos_60d
+      - categoria -> selo_verificado
+      - categoria -> pedidos_60d
+      - nota_media_fev -> selo_verificado
+      - nota_media_fev -> pedidos_60d
+      - preco_hora -> pedidos_60d
+      - cidade -> pedidos_60d
+      - selo_verificado -> pedidos_60d
+    answer:
+      identifiable: false
+      missing: [atividade_app]
+    note: A atividade no app decidiu a fila e puxa pedidos pelo ranking, e a gerente diz de passagem que não havia registro de sessões na época. Categoria e nota são ajustáveis, mas não bastam.
+
+  - id: pt_petshop_plano_banho
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: dono de uma rede de cinco pet shops, mandando áudio para uma amiga que trabalha com dados
+    theme: Pet shop, plano mensal de banho
+    title: Plano de banho e gasto em produtos
+    treatment: plano_banho
+    outcome: gasto_produtos_6m
+    columns:
+      plano_banho: Cliente aderiu ao plano mensal de banho (quatro banhos por mês, valor fixo) em julho (1 = sim, 0 = não).
+      gasto_produtos_6m: Total gasto em produtos (ração, petiscos, acessórios) nas lojas da rede de julho a dezembro, em reais. Não inclui o plano nem banhos avulsos.
+      banhos_1sem: Número de banhos avulsos feitos na rede de janeiro a junho.
+      unidade: Loja em que o cliente está cadastrado (1 a 5).
+      porte: Porte do animal no cadastro (P, M ou G).
+      visitas_mes: Média de visitas do cliente a qualquer loja da rede por mês, de julho a dezembro. Conta banho, compra ou passagem registrada no caixa.
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada em janeiro (1 = sim, 0 = não). A pesquisa foi enviada a todos os assinantes do plano e aos clientes com gasto em produtos acima de R$ 600 no semestre.
+    story: >-
+      Oi Lu, tudo bem? Então, é sobre aquele plano de banho que eu te falei. A gente
+      lançou em julho nas cinco lojas, quatro banhos por mês, preço fechado, e aderiram
+      umas 640 pessoas. Eu puxei do sistema o gasto em produto dessas pessoas de julho a
+      dezembro, só produto, ração, petisco, coleira, sem contar o plano, e deu uma média
+      de 1.380 reais pra quem tá no plano e 710 pra quem não tá. Quase o dobro. Eu fiquei
+      empolgado mas a Carla, minha sócia, falou que isso não quer dizer nada, que quem
+      aderiu já era cliente bom. E ela tem razão em parte, porque quem já vinha dar banho
+      avulso toda semana no primeiro semestre foi o primeiro a assinar, óbvio, e esse
+      pessoal já gastava mais na loja. Também teve diferença grande de loja, na Barra e
+      no Recreio quase 30% da base aderiu, no Centro deu uns 8%, e o tíquete do Centro
+      sempre foi mais baixo, é outro público. O que eu achei que ia pesar e não pesou foi
+      o tamanho do cachorro, a adesão foi parelha entre pequeno, médio e grande; o porte
+      pesa é na ração, cachorro grande come muito mais. Agora, o que eu acho que é o
+      segredo: quem tá no plano vem toda semana, a média de visita por mês de quem
+      assinou foi 4,6 e de quem não assinou foi 1,9, e quem vem toda semana leva uma
+      ração, leva um petisco, não sai de mão vazia. Pra mim o plano funciona por isso.
+      Ah, e eu mandei uma pesquisa de satisfação em janeiro, a nota ficou em 4,8, depois
+      te mostro. Tudo isso tá na planilha que o Diego exportou, loja, porte, quantos
+      banhos avulsos no primeiro semestre, visitas por mês, gasto, se respondeu a
+      pesquisa. Você consegue me dizer quanto desse dobro é do plano mesmo? Porque se
+      for, eu quero botar propaganda do plano em tudo quanto é lugar.
+    edges:
+      - banhos_1sem -> plano_banho
+      - banhos_1sem -> gasto_produtos_6m
+      - unidade -> plano_banho
+      - unidade -> gasto_produtos_6m
+      - porte -> gasto_produtos_6m
+      - plano_banho -> visitas_mes
+      - visitas_mes -> gasto_produtos_6m
+      - plano_banho -> gasto_produtos_6m
+      - plano_banho -> respondeu_pesquisa
+      - gasto_produtos_6m -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: [banhos_1sem, unidade]
+      do_not_adjust_for:
+        visitas_mes: É consequência do plano e é o caminho pelo qual ele aumenta o gasto. Ajustar por essa coluna apaga justamente o efeito que o dono quer medir.
+        respondeu_pesquisa: A pesquisa foi enviada por causa do plano e por causa do gasto alto, depois do semestre. Ajustar por ela cria uma associação falsa entre o plano e o gasto.
+      indifferent: [porte]
+    note: O dono apresenta as visitas semanais como o segredo do plano, e elas são consequência dele. Quem recebeu a pesquisa só está dito na descrição da coluna; a história menciona a pesquisa de passagem.
+
+  - id: pt_locadora_revisao_oficina
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: gerente de frota de uma locadora de carros
+    theme: Locadora de carros, intervalo de revisão
+    title: Intervalo de revisão de 10 mil km e dias parado (escolha da oficina)
+    treatment: revisao_10k
+    outcome: dias_parado_6m
+    columns:
+      revisao_10k: Carro passou para o intervalo de revisão de 10 mil km em janeiro, em vez dos 15 mil padrão (1 = sim, 0 = não).
+      dias_parado_6m: Dias fora de operação por quebra não programada, de janeiro a junho. Não conta os dias de revisão.
+      idade_meses: Idade do carro em 1º de janeiro, em meses.
+      km_jan: Odômetro em 1º de janeiro. Único dado sobre o estado do carro que o sistema de frota guarda.
+      categoria: Grupo tarifário (econômico, intermediário, SUV).
+      filial: Filial em que o carro fica baseado (centro, aeroporto, rodoviária).
+      custo_oficina_6m: Gasto total de oficina com o carro de janeiro a junho, revisões programadas e consertos de quebra somados, em reais.
+      final_placa: Último dígito da placa.
+    not_in_table:
+      estado_mecanico: Como o carro estava de fato em janeiro (barulhos, histórico de problemas que o chefe da oficina conhece de cabeça). Não é registrado em lugar nenhum.
+    story: >-
+      Nota — piloto do intervalo de revisão (jan–jun). Em janeiro passamos 180 carros da
+      frota de 15 mil para 10 mil km entre revisões, para ver se cai a quebra na rua.
+      Resultado do semestre: os carros em 10 mil ficaram parados por quebra 6,1 dias em
+      média, os demais 3,4. Deu o contrário do esperado. Antes de cancelarmos, peço ao
+      Gustavo uma leitura mais cuidadosa da base, considerando que: (1) quem escolheu os
+      180 foi o Edson, chefe da oficina, pelo critério dele, os carros que ele achava que
+      iam dar problema, pelo que ouvia na oficina e pelo histórico que ele conhece de
+      cabeça, placa por placa; naturalmente pegou carros mais velhos e com mais km, que
+      quebram mais de qualquer jeito, e muito provavelmente carros que já estavam ruins e
+      iam quebrar com ou sem revisão a mais; (2) o custo
+      de oficina desse grupo subiu, o que era esperado, porque soma as revisões a mais e
+      os consertos das quebras; (3) a frota do aeroporto sempre quebra mais, e SUV quebra
+      menos que econômico.
+    edges:
+      - idade_meses -> revisao_10k
+      - km_jan -> revisao_10k
+      - estado_mecanico -> revisao_10k
+      - idade_meses -> dias_parado_6m
+      - km_jan -> dias_parado_6m
+      - estado_mecanico -> dias_parado_6m
+      - categoria -> dias_parado_6m
+      - filial -> dias_parado_6m
+      - revisao_10k -> dias_parado_6m
+      - revisao_10k -> custo_oficina_6m
+      - dias_parado_6m -> custo_oficina_6m
+    answer:
+      identifiable: false
+      missing: [estado_mecanico]
+    twin: pt_locadora_revisao_placa
+    note: Idade e km estão na tabela, mas o chefe da oficina escolheu pelo estado real do carro, e a descrição de km_jan diz que esse é o único dado de estado que o sistema guarda.
+
+  - id: pt_locadora_revisao_placa
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: gerente de frota de uma locadora de carros
+    theme: Locadora de carros, intervalo de revisão
+    title: Intervalo de revisão de 10 mil km e dias parado (escolha pela placa)
+    treatment: revisao_10k
+    outcome: dias_parado_6m
+    columns:
+      revisao_10k: Carro passou para o intervalo de revisão de 10 mil km em janeiro, em vez dos 15 mil padrão (1 = sim, 0 = não).
+      dias_parado_6m: Dias fora de operação por quebra não programada, de janeiro a junho. Não conta os dias de revisão.
+      idade_meses: Idade do carro em 1º de janeiro, em meses.
+      km_jan: Odômetro em 1º de janeiro. Único dado sobre o estado do carro que o sistema de frota guarda.
+      categoria: Grupo tarifário (econômico, intermediário, SUV).
+      filial: Filial em que o carro fica baseado (centro, aeroporto, rodoviária).
+      custo_oficina_6m: Gasto total de oficina com o carro de janeiro a junho, revisões programadas e consertos de quebra somados, em reais.
+      final_placa: Último dígito da placa.
+    story: >-
+      Nota — piloto do intervalo de revisão (jan–jun). Em janeiro passamos 180 carros da
+      frota de 15 mil para 10 mil km entre revisões, para ver se cai a quebra na rua.
+      Resultado do semestre: os carros em 10 mil ficaram parados por quebra 6,1 dias em
+      média, os demais 3,4. Deu o contrário do esperado. Antes de cancelarmos, peço ao
+      Gustavo uma leitura mais cuidadosa da base, considerando que: (1) para não ter
+      discussão com as filiais, entraram no piloto os carros com final de placa 0, 2 ou
+      4, sem olhar idade, km nem histórico; mesmo assim vale lembrar que carro mais velho
+      e com mais km quebra mais de qualquer jeito; (2) o custo de oficina desse grupo
+      subiu, o que era esperado, porque soma as revisões a mais e os consertos das
+      quebras; (3) a frota do aeroporto sempre quebra mais, e SUV quebra menos que
+      econômico.
+    edges:
+      - final_placa -> revisao_10k
+      - idade_meses -> dias_parado_6m
+      - km_jan -> dias_parado_6m
+      - categoria -> dias_parado_6m
+      - filial -> dias_parado_6m
+      - revisao_10k -> dias_parado_6m
+      - revisao_10k -> custo_oficina_6m
+      - dias_parado_6m -> custo_oficina_6m
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        custo_oficina_6m: Soma o custo das revisões, que é consequência do novo intervalo, com o custo dos consertos, que é consequência das quebras. Ajustar por essa coluna cria uma associação falsa entre o intervalo e os dias parado.
+      indifferent: [categoria, filial, final_placa, idade_meses, km_jan]
+    twin: pt_locadora_revisao_oficina
+    note: Mesma nota do caso irmão; só muda quem entrou no piloto (final de placa, não a escolha do chefe da oficina). Idade e km continuam explicando quebra, mas não decidem nada. O custo de oficina mistura intervenção e resultado.
+
+  - id: pt_odonto_parcelamento
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: dona de uma clínica odontológica com três unidades
+    theme: Clínica odontológica, parcelamento próprio do tratamento
+    title: Parcelamento próprio e conclusão do tratamento
+    treatment: parcelado_10x
+    outcome: concluiu_12m
+    columns:
+      parcelado_10x: Orçamento aprovado com parcelamento próprio da clínica em até 10 vezes sem juros (1 = sim; 0 = à vista ou cartão em até 3 vezes).
+      concluiu_12m: Concluiu todos os procedimentos do plano de tratamento em até 12 meses da aprovação do orçamento (1 = sim, 0 = não).
+      unidade: Unidade em que o orçamento foi aprovado (Tijuca, Méier ou Barra).
+      valor_orcamento: Valor total do orçamento aprovado, em reais.
+      idade: Idade do paciente na aprovação do orçamento, em anos.
+      dentista: Dentista responsável pelo plano de tratamento (código).
+      ligacao_recepcao: Recebeu ligação da recepção nos 12 meses seguintes à aprovação (1 = sim, 0 = não).
+    story: >-
+      3.2 Parcelamento próprio e conclusão de tratamento. O parcelamento próprio em até
+      10 vezes foi implantado em fevereiro de 2026 nas unidades Méier e Tijuca; na Barra,
+      por decisão da gerência local, ele só passou a ser oferecido em agosto, de modo que
+      praticamente todos os orçamentos parcelados do período são das duas primeiras
+      unidades. A orientação dada à recepção foi oferecer o parcelamento sobretudo nos
+      orçamentos acima de R$ 3.000, nos quais a objeção de preço é mais frequente.
+
+      Entre os 1.212 orçamentos aprovados de fevereiro a julho, a conclusão do tratamento
+      em 12 meses foi de 71% nos parcelados e de 64% nos demais. A leitura direta desses
+      números pede cuidado. As unidades têm públicos distintos: Méier e Tijuca atendem
+      pacientes de renda mais baixa, com histórico de maior abandono, enquanto a Barra
+      concentra os planos de maior valor. Orçamentos altos, por sua vez, envolvem mais
+      sessões e são abandonados com mais frequência. Pacientes mais velhos concluem mais,
+      e há diferença entre os profissionais na retenção dos pacientes, como apontado no
+      relatório anterior.
+
+      A partir de março a recepção passou a ligar para os pacientes com parcela em atraso
+      com a clínica e para os que ficam mais de 90 dias sem comparecer; o registro dessas ligações está
+      na base. A base entregue à consultoria contém unidade, valor do orçamento, idade,
+      dentista responsável, forma de pagamento, conclusão em 12 meses e a ligação da
+      recepção. Pedimos que a estimativa do efeito do parcelamento sobre a conclusão leve
+      em conta os pontos acima.
+    edges:
+      - unidade -> parcelado_10x
+      - unidade -> concluiu_12m
+      - unidade -> valor_orcamento
+      - valor_orcamento -> parcelado_10x
+      - valor_orcamento -> concluiu_12m
+      - idade -> concluiu_12m
+      - dentista -> concluiu_12m
+      - parcelado_10x -> concluiu_12m
+      - parcelado_10x -> ligacao_recepcao
+      - concluiu_12m -> ligacao_recepcao
+    answer:
+      identifiable: true
+      adjust_for: [unidade, valor_orcamento]
+      do_not_adjust_for:
+        ligacao_recepcao: A recepção liga por parcela em atraso com a clínica (só existe no parcelamento próprio) e por abandono do tratamento. A coluna é consequência da intervenção e do resultado; ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [dentista, idade]
+    note: Unidade e valor do orçamento decidiram a oferta e mudam a conclusão. A ligação da recepção parece uma ação da clínica, mas é disparada pelo atraso de parcela e pelo abandono.
+
+  - id: pt_concessionaria_revisao_cortesia
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: gerente de uma concessionária de veículos, mandando áudio para uma analista do grupo
+    theme: Concessionária de veículos, primeira revisão de cortesia e retorno ao pós-venda
+    title: Revisão de cortesia e retorno para a segunda revisão
+    treatment: revisao_cortesia
+    outcome: fez_2a_revisao
+    columns:
+      revisao_cortesia: Cliente ganhou a primeira revisão (10 mil km) de cortesia na entrega do carro, entre março e junho (1 = sim, 0 = não).
+      fez_2a_revisao: Fez a segunda revisão (20 mil km), paga, na concessionária em até 18 meses da compra (1 = sim, 0 = não).
+      modelo: Modelo do veículo comprado.
+      distancia_km: Distância entre o endereço do cliente e a concessionária, em km.
+      financiou: Comprou com financiamento pelo banco da montadora (1 = sim, 0 = não).
+      gasto_acessorios: Valor em acessórios comprados junto com o carro, em reais.
+      consultor_entrega: Consultor que fez a entrega técnica do veículo (código).
+    not_in_table:
+      insatisfacao_entrega: Se o cliente saiu insatisfeito da entrega (atraso, item faltando, cara fechada). O consultor percebe na hora, mas não existe campo para isso no CRM.
+    story: >-
+      Fala Dani, é o Paulo. Olha, aquela história da revisão de cortesia, deixa eu te
+      explicar como foi, porque o número tá bonito demais. De março a junho a gente deu a
+      primeira revisão de graça pra uma parte dos clientes na entrega, uns 310 de 900 e
+      poucos. E aí olha: quem ganhou a cortesia voltou pra fazer a segunda revisão, a
+      paga, em 58% dos casos, e quem não ganhou voltou 37%. O pessoal do pós-venda tá
+      comemorando. Só que não teve regra pra dar a cortesia, foi o consultor da entrega
+      que decidia, e o que eu sei que eles faziam era o seguinte: quando o cliente saía
+      da entrega meio chateado, teve atraso, faltou um tapete, o cara fez cara feia, aí o
+      consultor dava a cortesia pra compensar. E cliente que sai chateado da entrega é
+      justamente o que some, vai pra oficina de bairro e nunca mais aparece. Isso o
+      consultor sente na hora, mas não vai pro CRM, não tem campo pra isso, nunca teve.
+      Também sei que o financiado pelo banco da montadora ganhou mais cortesia, porque a
+      montadora bancava uma parte. O que eu sei que tem a ver com voltar: a distância da
+      casa do cliente até aqui, a gente perde muito cliente que mora longe; o modelo,
+      dono de SUV volta mais que dono de hatch; e quem gastou mais em acessório na
+      compra, que é um cliente mais apegado ao carro. Ah, e cada consultor tem a sua mão
+      pra dar cortesia, o Léo deu pra quase metade dos dele. Na base tem o modelo, a
+      distância, se financiou, o gasto em acessório, o consultor da entrega, se ganhou
+      cortesia e se fez a segunda revisão. Me diz se dá pra tirar alguma coisa disso ou
+      se eu falo pro pós-venda segurar a comemoração.
+    edges:
+      - insatisfacao_entrega -> revisao_cortesia
+      - insatisfacao_entrega -> fez_2a_revisao
+      - financiou -> revisao_cortesia
+      - consultor_entrega -> revisao_cortesia
+      - distancia_km -> fez_2a_revisao
+      - modelo -> fez_2a_revisao
+      - gasto_acessorios -> fez_2a_revisao
+      - revisao_cortesia -> fez_2a_revisao
+    answer:
+      identifiable: false
+      missing: [insatisfacao_entrega]
+    note: A cortesia foi dada para compensar a insatisfação na entrega, que também afasta o cliente, e o gerente diz no meio do áudio que isso nunca teve campo no CRM. As colunas da base só mexem num lado ou no outro.
+
+  - id: pt_marketplace_resposta_automatica
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente de produto de um marketplace de serviços, escrevendo para o conselho
+    theme: Marketplace de serviços, resposta automática a pedidos de orçamento
+    title: Resposta automática e conversão de orçamentos
+    treatment: resposta_auto
+    outcome: conversao_90d
+    columns:
+      resposta_auto: Profissional ativou a resposta automática a novos pedidos de orçamento (mensagem-modelo enviada na hora) em abril (1 = sim, 0 = não).
+      conversao_90d: Fração dos pedidos de orçamento recebidos de abril a junho que viraram serviço contratado.
+      pedidos_t1: Pedidos de orçamento recebidos de janeiro a março.
+      categoria: Categoria principal do profissional (eletricista, encanador, diarista, pintor, montador).
+      tempo_resposta_t2: Tempo mediano, em minutos, entre o pedido do cliente e a primeira resposta do profissional, de abril a junho.
+      plano_pro: Assinante do plano pago "Pro" em março (1 = sim, 0 = não).
+      destaque_busca: Recebeu o selo "Destaque" na busca em julho (1 = sim, 0 = não). O critério do trimestre foi ter resposta automática ativa e conversão acima de 40% no trimestre anterior.
+      id_profissional: Identificador interno.
+    story: >-
+      4.1 Resposta automática. A funcionalidade foi liberada para toda a base em abril e
+      divulgada por push aos profissionais que receberam mais de dez pedidos por mês no
+      primeiro trimestre, que eram os que mais reclamavam de não dar conta de responder.
+      No aplicativo do plano Pro o atalho ficou na tela inicial; nos demais, dentro das
+      configurações. Ao fim de abril, 4.312 profissionais haviam ativado a resposta
+      automática.
+
+      Entre abril e junho, a conversão de pedido em serviço contratado foi de 38% entre
+      os profissionais com resposta automática e de 27% entre os demais. O tempo mediano
+      de primeira resposta caiu de 41 para 6 minutos no grupo que ativou, e o tempo de
+      resposta é, historicamente, o principal preditor de conversão na nossa base. Vale
+      registrar que profissionais com muita demanda convertem menos, pois escolhem quais
+      serviços aceitam, e que assinantes Pro, com perfis mais completos, convertem melhor
+      desde antes do lançamento. A conversão também varia entre categorias. Em julho
+      lançamos o selo "Destaque" na busca, cujo critério está descrito no dicionário de
+      dados que acompanha este relatório.
+
+      Solicitamos ao time de dados uma estimativa do efeito da resposta automática sobre
+      a conversão que separe o que é da funcionalidade do que é do perfil de quem a
+      ativou.
+    edges:
+      - pedidos_t1 -> resposta_auto
+      - pedidos_t1 -> conversao_90d
+      - plano_pro -> resposta_auto
+      - plano_pro -> conversao_90d
+      - categoria -> conversao_90d
+      - resposta_auto -> tempo_resposta_t2
+      - tempo_resposta_t2 -> conversao_90d
+      - resposta_auto -> conversao_90d
+      - resposta_auto -> destaque_busca
+      - conversao_90d -> destaque_busca
+    answer:
+      identifiable: true
+      adjust_for: [pedidos_t1, plano_pro]
+      do_not_adjust_for:
+        tempo_resposta_t2: Cair o tempo de resposta é o que a resposta automática faz; a coluna é consequência da intervenção e caminho do efeito. Ajustar por ela apaga o efeito.
+        destaque_busca: Concedido em julho a quem tinha resposta automática ativa e conversão alta. É consequência da intervenção e do resultado; ajustar por ele cria uma associação falsa entre os dois.
+      indifferent: [categoria, id_profissional]
+    note: O tempo de resposta é apresentado como o melhor preditor de conversão e é consequência da intervenção. O critério do selo Destaque, que o torna consequência dos dois lados, só está na descrição da coluna.

@@ -1,0 +1,222 @@
+# Tradução da ficha de teoria 'software' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. A ficha em português,
+# theories/software.yaml, é a que vale: este arquivo só traz as palavras, e a sua
+# estrutura tem de espelhar a da ficha.
+#
+# Lida por inteiro e corrigida pelo assistente em 2026-10-06, por delegação do André,
+# frase a frase contra a ficha em português (inclusive as trocas de 2026-10-05
+# listadas em theories/i18n/pendentes-2026-10-05.json). Erros de sentido
+# corrigidos: "assinatura" do contrato traduzida como "subscription" (é a firma do
+# contrato), "nota" de familiaridade traduzida como "note" (é uma pontuação),
+# frases em que o agente mudou (quem pede ou aceita o treinamento é a empresa
+# cliente, não a empresa de software) e os "com mais frequência" que faltavam nas
+# frases das ligações e reuniões.
+
+language: en
+status: revisada
+title: Implementation training at a subscription software company
+context: A subscription software company sells a management system to other companies on twelve-month
+  contracts. In the third month of the contract, it gave some of its customer companies an implementation
+  training, which teaches their employees to use the system. It wants to know whether the training
+  increases contract renewal at the end of the twelve months.
+randomized: The customer companies that received the training were selected by lottery.
+closing: Nothing other than what was described influenced the choice of who received the training.
+treatment:
+  label: the implementation training
+  dictionary: Received the implementation training in the third month of the contract (1 = yes, 0 = no).
+outcome:
+  label: the renewal
+  dictionary: Renewed the contract at the end of the twelve months (1 = yes, 0 = no).
+variables:
+  funcionarios:
+    label: the number of employees in the customer company
+    roles:
+      confounder:
+        dictionary: Number of employees in the customer company on the date the contract was signed.
+        to_treatment: The software company gave the implementation training more frequently to customer
+          companies with more employees.
+        to_outcome: Customer companies with more employees face more work to switch systems and renew
+          more.
+      outcome_cause:
+        dictionary: Number of employees in the customer company on the date the contract was signed.
+        to_outcome: Customer companies with more employees face more work to switch systems and renew
+          more.
+  valor_contrato:
+    label: the contract value
+    roles:
+      confounder:
+        dictionary: Monthly contract value on the date the contract was signed, in reais.
+        to_treatment: Customer companies with higher contract values received the implementation training
+          more frequently.
+        to_outcome: Customer companies with higher contract values renew less, because the monthly fee
+          weighs more heavily on their budget.
+      outcome_cause:
+        dictionary: Monthly contract value on the date the contract was signed, in reais.
+        to_outcome: Customer companies with higher contract values renew less, because the monthly fee
+          weighs more heavily on their budget.
+  usuarios_ativos:
+    label: the active users
+    roles:
+      confounder:
+        dictionary: Average number of active users in the system per month, in the two months before the
+          implementation training.
+        to_treatment: The software company gave the implementation training more frequently to customer
+          companies with fewer active users in the system.
+        to_outcome: Customer companies with more active users in the system renew more.
+      mediator:
+        dictionary: Average number of active users in the system per month, in the three months after
+          the implementation training.
+        from_treatment: The implementation training teaches more employees in the customer company to
+          use the system and increases the number of active users in the following months.
+        to_outcome: Customer companies with more active users in the system renew more.
+      outcome_cause:
+        dictionary: Average number of active users in the system per month, in the two months before the
+          implementation training.
+        to_outcome: Customer companies with more active users in the system renew more.
+  funcionalidades:
+    label: the features in use
+    roles:
+      mediator:
+        dictionary: Number of system features that the customer company used in the three months after
+          the implementation training.
+        from_treatment: The implementation training introduces system features that the customer company
+          was not yet using and increases the number of features in use.
+        to_outcome: Customer companies that use more system features renew more.
+      outcome_cause:
+        dictionary: Number of system features that the customer company used in the two months before
+          the implementation training.
+        to_outcome: Customer companies that use more system features renew more.
+  chamados_suporte:
+    label: the support tickets
+    roles:
+      confounder:
+        dictionary: Number of support tickets opened in the two months before the implementation training.
+        to_treatment: The software company gave the implementation training more frequently to customer
+          companies that had opened more support tickets, because it saw in the tickets a sign of difficulty
+          with the system.
+        to_outcome: Customer companies that open more support tickets lose more time to problems with
+          the system and renew less.
+      mediator:
+        dictionary: Number of support tickets opened in the three months after the implementation training.
+        from_treatment: The implementation training clears up the most common questions and reduces the
+          number of support tickets in the following months.
+        to_outcome: Customer companies that open more support tickets lose more time to problems with
+          the system and renew less.
+      outcome_cause:
+        dictionary: Number of support tickets opened in the two months before the implementation training.
+        to_outcome: Customer companies that open more support tickets lose more time to problems with
+          the system and renew less.
+  satisfacao:
+    label: the customer company's satisfaction
+    hidden_fact: The satisfaction of the customer companies was not measured before the implementation
+      training, and therefore it is not in the table.
+    roles:
+      confounder:
+        dictionary: Satisfaction score with the system in the survey conducted before the implementation
+          training, from 0 to 10.
+        to_treatment: Customer companies less satisfied with the system accepted the invitation to the
+          training more often, and therefore received the implementation training more frequently.
+        to_outcome: Customer companies more satisfied with the system renew more.
+      mediator:
+        dictionary: Satisfaction score with the system in the survey conducted three months after the
+          implementation training, from 0 to 10.
+        from_treatment: Customer companies that receive the implementation training become more satisfied
+          with the system in the following months.
+        to_outcome: Customer companies more satisfied with the system renew more.
+  patrocinador_interno:
+    label: the internal sponsor
+    hidden_fact: The software company does not record in which customer companies there is a manager who
+      advocates for the use of the system, and therefore this information is not in the table.
+    roles:
+      confounder:
+        dictionary: Had, before the implementation training, a manager who advocated for the use of the
+          system within the customer company (1 = yes, 0 = no).
+        to_treatment: Customer companies in which a manager advocates for the use of the system received
+          the implementation training more frequently, because that manager asked for the training for
+          the team.
+        to_outcome: Customer companies in which a manager advocates for the use of the system renew more.
+      outcome_cause:
+        dictionary: Had, before the implementation training, a manager who advocated for the use of the
+          system within the customer company (1 = yes, 0 = no).
+        to_outcome: Customer companies in which a manager advocates for the use of the system renew more.
+  maturidade_digital:
+    label: the team's digital maturity
+    hidden_fact: The software company does not assess how familiar the teams of its customer companies
+      are with digital systems, and therefore this information is not in the table.
+    roles:
+      confounder:
+        dictionary: Score for the familiarity of the customer company's team with digital systems, in
+          the assessment made before the implementation training, from 0 to 10.
+        to_treatment: Customer companies whose team was less familiar with digital systems asked for the
+          training more often, and therefore received the implementation training more frequently.
+        to_outcome: Customer companies whose team is more familiar with digital systems learn the system
+          faster and renew more.
+      outcome_cause:
+        dictionary: Score for the familiarity of the customer company's team with digital systems, in
+          the assessment made before the implementation training, from 0 to 10.
+        to_outcome: Customer companies whose team is more familiar with digital systems learn the system
+          faster and renew more.
+  gerente_conta:
+    label: the dedicated account manager
+    roles:
+      confounder:
+        dictionary: Had a dedicated account manager since the contract was signed (1 = yes, 0 = no).
+        to_treatment: Account managers nominated the companies they serve for the implementation training,
+          and therefore customer companies with a dedicated account manager received the implementation
+          training more frequently.
+        to_outcome: Customer companies with a dedicated account manager get their problems resolved faster
+          and renew more.
+      treatment_cause:
+        dictionary: Had a dedicated account manager since the contract was signed (1 = yes, 0 = no).
+        to_treatment: Account managers nominated the companies they serve for the implementation training,
+          and therefore customer companies with a dedicated account manager received the implementation
+          training more frequently.
+  escritorio_piloto:
+    label: the pilot office
+    roles:
+      treatment_cause:
+        dictionary: Was served by one of the regional offices chosen for the pilot of the implementation
+          training (1 = yes, 0 = no).
+        to_treatment: The implementation training started in a few regional offices chosen as a pilot,
+          and the customer companies served by those offices received the implementation training more
+          frequently.
+  contato_sucesso_cliente:
+    label: the call from the customer success team
+    roles:
+      treatment_cause:
+        dictionary: Received a call from the customer success team in the two months before the implementation
+          training (1 = yes, 0 = no).
+        to_treatment: The implementation training was offered during the call from the customer success
+          team, and therefore the customer companies that had received the call received the implementation
+          training more frequently.
+      collider:
+        dictionary: Received a call from the customer success team after the implementation training,
+          up to one month after the end of the contract (1 = yes, 0 = no).
+        from_treatment: The customer success team more often calls the customer companies that received
+          the implementation training, to hear how the training went.
+        from_outcome: The customer success team more often calls the customer companies that do not renew,
+          to understand the reason for leaving.
+  reuniao_acompanhamento:
+    label: the follow-up meeting
+    roles:
+      collider:
+        dictionary: Took part in a follow-up meeting with the software company after the implementation
+          training, up to one month after the end of the contract (1 = yes, 0 = no).
+        from_treatment: The software company more often schedules a follow-up meeting with the customer
+          companies that received the implementation training, to assess what was learned.
+        from_outcome: The software company more often schedules a follow-up meeting with the customer
+          companies that renew, to plan the new contract period.
+      outcome_cause:
+        dictionary: Took part in a follow-up meeting with the software company in the two months before
+          the implementation training (1 = yes, 0 = no).
+        to_outcome: Customer companies that take part in a follow-up meeting in the first months of the
+          contract resolve their difficulties early and renew more.
+  mes_assinatura:
+    label: the month the contract was signed
+    roles:
+      unrelated:
+        dictionary: Month of the year in which the contract was signed (1 to 12).
+        fact: The month the contract was signed has no relation to the implementation training or to
+          the renewal.

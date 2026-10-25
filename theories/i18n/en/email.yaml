@@ -1,0 +1,246 @@
+# Tradução da ficha de teoria 'email' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. Lida por inteiro e corrigida pelo
+# assistente em 2026-10-06, frase a frase contra a ficha em português, por delegação do
+# André: as frases que a revisão independente de 2026-10-05 mudou na ficha foram
+# traduzidas de novo (janelas de 7 dias dos mediadores, "12 meses anteriores ao envio",
+# clique em e-mail, chat de atendimento, item no carrinho "com mais frequência"), e as
+# traduções literais demais ("the send of the email campaign") foram reescritas.
+#
+# A ficha em português, theories/email.yaml, é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+
+language: en
+status: revisada
+title: Email campaign in an online store
+context: >-
+  An online store sent an email campaign to some of its customers: a message with the
+  week's offers and a link to the website. The store wants to know whether the campaign
+  increases purchases in the 14 days after it was sent.
+randomized: The customers who received the campaign were selected by lottery.
+closing: Nothing other than what was described influenced the choice of who received the campaign.
+treatment:
+  label: the email campaign
+  dictionary: Received the email campaign (1 = yes, 0 = no).
+outcome:
+  label: the purchase
+  dictionary: Purchased at the store in the 14 days after the campaign was sent (1 = yes, 0 = no).
+variables:
+  dias_ultima_compra:
+    label: the days since the last purchase
+    roles:
+      confounder:
+        dictionary: Days between the customer's last purchase at the store and the sending of the campaign.
+        to_treatment: The store sent the campaign more frequently to those who had bought more recently.
+        to_outcome: Customers who have gone longer without buying at the store buy less.
+      outcome_cause:
+        dictionary: Days between the customer's last purchase at the store and the sending of the campaign.
+        to_outcome: Customers who have gone longer without buying at the store buy less.
+  compras_12m:
+    label: the number of purchases in 12 months
+    roles:
+      confounder:
+        dictionary: Number of purchases in the store in the 12 months before the campaign was sent.
+        to_treatment: >-
+          The campaign was sent more frequently to customers who had purchased more times in
+          the store in the 12 months before it was sent.
+        to_outcome: >-
+          Customers who purchased more times in the store in the 12 months before the campaign
+          was sent purchase more.
+      outcome_cause:
+        dictionary: Number of purchases in the store in the 12 months before the campaign was sent.
+        to_outcome: >-
+          Customers who purchased more times in the store in the 12 months before the campaign
+          was sent purchase more.
+  emails_abertos:
+    label: the emails opened
+    roles:
+      confounder:
+        dictionary: Number of store emails that the customer opened in the 14 days before the campaign was sent.
+        to_treatment: The store sent the email campaign more frequently to those who opened more store emails.
+        to_outcome: Customers who open more store emails make more purchases.
+      mediator:
+        dictionary: Number of store emails that the customer opened in the 7 days after the campaign was sent.
+        from_treatment: Those who receive the email campaign open more store emails in the following days.
+        to_outcome: Customers who open more store emails make more purchases.
+      outcome_cause:
+        dictionary: Number of store emails that the customer opened in the 14 days before the campaign was sent.
+        to_outcome: Customers who open more store emails make more purchases.
+  visitas_site:
+    label: the visits to the website
+    roles:
+      confounder:
+        dictionary: Number of visits to the store website in the 14 days before the campaign was sent.
+        to_treatment: >-
+          The email campaign was directed more frequently to those who had visited the store
+          website more.
+        to_outcome: Customers who visit the store website more buy more.
+      mediator:
+        dictionary: Number of visits to the store website in the 7 days after the campaign was sent.
+        from_treatment: >-
+          Customers who receive the email campaign visit the store website more in the following
+          days.
+        to_outcome: Customers who visit the store website more buy more.
+      outcome_cause:
+        dictionary: Number of visits to the store website in the 14 days before the campaign was sent.
+        to_outcome: Customers who visit the store website more buy more.
+  item_carrinho:
+    label: the item in the cart
+    roles:
+      confounder:
+        dictionary: >-
+          Had an item in the cart on the website the day before the email campaign was sent
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The store sent the email campaign more frequently to those who had left an item in
+          the cart on the website.
+        to_outcome: Customers who place an item in the website cart make more purchases.
+      mediator:
+        dictionary: >-
+          Placed an item in the cart on the website in the 7 days after the email campaign was
+          sent (1 = yes, 0 = no).
+        from_treatment: >-
+          Those who receive the email campaign place an item in the cart on the website more
+          often in the following days.
+        to_outcome: Customers who place an item in the website cart make more purchases.
+      outcome_cause:
+        dictionary: >-
+          Had an item in the cart on the website the day before the email campaign was sent
+          (1 = yes, 0 = no).
+        to_outcome: Customers who place an item in the website cart make more purchases.
+  clique_email:
+    label: the click on a store email
+    roles:
+      confounder:
+        dictionary: >-
+          Clicked on a link from any store email in the 30 days before the campaign was sent
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The store sent the campaign more frequently to those who had clicked on links from
+          previous store emails.
+        to_outcome: Customers who click on a store email link make more purchases.
+      mediator:
+        dictionary: >-
+          Clicked on a link from any store email in the 3 days after the campaign was sent
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          Customers who receive the campaign click more on links from store emails in the
+          following days.
+        to_outcome: Customers who click on a store email link make more purchases.
+  intencao_compra:
+    label: the purchase intention
+    hidden_fact: >-
+      The store did not measure customers' purchase intention before the campaign was sent,
+      and therefore this information is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Purchase intention score from the survey conducted before the campaign was sent, from
+          0 to 10.
+        to_treatment: >-
+          Customers with higher purchase intention subscribe more to the store's offer alerts
+          and, therefore, received the email campaign more frequently.
+        to_outcome: Customers with higher purchase intention make more purchases.
+      mediator:
+        dictionary: >-
+          Purchase intention score from the survey conducted 3 days after the campaign was sent,
+          from 0 to 10.
+        from_treatment: >-
+          People who receive the email campaign have higher purchase intention in the following
+          days.
+        to_outcome: Customers with higher purchase intention make more purchases.
+  renda:
+    label: the customer's income
+    hidden_fact: The store does not have the customers' income, and therefore the income is not in the table.
+    roles:
+      confounder:
+        dictionary: Estimated monthly customer income, in reais.
+        to_treatment: >-
+          The store directed the campaign to neighborhoods with higher income, and therefore
+          customers with higher income received the campaign more frequently.
+        to_outcome: Customers with higher income make more purchases.
+      outcome_cause:
+        dictionary: Estimated monthly customer income, in reais.
+        to_outcome: Customers with higher income make more purchases.
+  propaganda_concorrente:
+    label: the competitor advertising
+    hidden_fact: >-
+      The store does not know who saw competitor advertising, and therefore this information
+      is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Saw competitor advertising in the 30 days before the campaign was sent
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The store sent the campaign mainly to buyers of product categories where competitors
+          advertised most, and therefore those who saw competitor advertising received the
+          campaign more frequently.
+        to_outcome: Those who see competitor advertising buy less at the store.
+      outcome_cause:
+        dictionary: >-
+          Saw competitor advertising in the 30 days before the campaign was sent
+          (1 = yes, 0 = no).
+        to_outcome: Those who see competitor advertising buy less at the store.
+  chat_atendimento:
+    label: the conversation in the support chat
+    roles:
+      confounder:
+        dictionary: >-
+          Opened a conversation in the support chat in the 30 days before the campaign was sent
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The store sent the email campaign less frequently to customers who had contacted the
+          support chat, so as not to bother customers with a problem in an order.
+        to_outcome: Customers who had to contact the support chat buy less.
+      collider:
+        dictionary: >-
+          Opened a conversation in the support chat in the 30 days after the campaign was sent
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          Customers who receive the email campaign contact the support chat more, to ask the
+          store to stop sending emails.
+        from_outcome: Customers who buy contact the support chat more, to follow the delivery of the order.
+      outcome_cause:
+        dictionary: >-
+          Opened a conversation in the support chat in the 30 days before the campaign was sent
+          (1 = yes, 0 = no).
+        to_outcome: Customers who had to contact the support chat buy less.
+  avaliacao_loja:
+    label: the store rating
+    roles:
+      collider:
+        dictionary: >-
+          Responded to the request to rate the store in the 30 days after the campaign was sent
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          The campaign email includes a request to rate the store, and customers who receive the
+          campaign rate the store more frequently.
+        from_outcome: >-
+          The store requests a rating after each purchase, and customers who make a purchase
+          rate the store more frequently.
+  segmento_marketing:
+    label: the segment prioritized by marketing
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Belongs to the customer segment that the marketing team prioritized in the campaign
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The marketing team prioritized a segment of customers in the campaign, and those who
+          belong to that segment received the campaign more frequently.
+  lista_piloto:
+    label: the pilot list
+    roles:
+      treatment_cause:
+        dictionary: Was on the customer list used in the campaign pilot (1 = yes, 0 = no).
+        to_treatment: >-
+          The campaign started with a pilot list of customers, and those who were on the pilot
+          list received the campaign more frequently.
+  provedor_email:
+    label: the email provider
+    roles:
+      unrelated:
+        dictionary: The customer's email address is from Gmail (1 = yes, 0 = no).
+        fact: The customer's email provider has no relation to the campaign or to the purchase.

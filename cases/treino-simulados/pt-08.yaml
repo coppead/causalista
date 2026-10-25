@@ -1,0 +1,522 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: o
+# coordenador de um programa de habitação municipal, o gerente de uma loja de uma rede
+# de eletrodomésticos, o gerente de um supermercado regional, uma analista de BI de uma
+# seguradora de saúde e a coordenadora de um programa de microcrédito. Cada texto tem o
+# estilo do canal em que a pessoa escreveria (nota interna, e-mail com anexo, áudio
+# transcrito, relatório trimestral, Slack).
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são texto de pessoas de verdade e não contam para a prova da seção 7. Os cenários
+# evitam os do conjunto de teste congelado em cases/simulados/. As setas declaram o
+# diagrama que o texto implica; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: pt_habitacao_casa_saudavel_digitado
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: coordenador do programa de melhoria habitacional da Secretaria Municipal de Habitação de uma cidade de porte médio
+    theme: Habitação municipal, reforma de telhado e banheiro e saúde respiratória infantil
+    title: Reforma pelo Casa Saudável e atendimentos respiratórios, com o grau de umidade digitado
+    twin: pt_habitacao_casa_saudavel_papel
+    treatment: reforma
+    outcome: atend_resp_12m
+    columns:
+      reforma: Domicílio recebeu a obra do Casa Saudável (troca do telhado, impermeabilização e reforma do banheiro) em 2025 (1 = sim, 0 = não).
+      atend_resp_12m: >-
+        Número de atendimentos de crianças de até 10 anos do domicílio nas UBS por queixa
+        respiratória nos 12 meses seguintes ao término da obra (para os domicílios não
+        atendidos, 12 meses a partir de julho de 2025). Fonte e-SUS, cruzado pelo CPF do
+        responsável.
+      grau_umidade: >-
+        Grau de umidade e mofo atribuído pela assistente social na vistoria de 2024, antes
+        da obra, de 0 (sem sinais) a 3 (mofo em cômodo de dormir). Digitado no SIGHAB.
+      renda_pc: Renda familiar per capita declarada no CadÚnico na última atualização anterior a 2025, em reais.
+      n_moradores: Número de moradores do domicílio no CadÚnico.
+      ano_cadastro: Ano de inclusão da família no CadÚnico.
+      visita_retorno: A equipe social voltou ao domicílio depois de julho de 2025 (1 = sim, 0 = não).
+      nis_responsavel: Número de Identificação Social do responsável familiar.
+    story: >-
+      3.4 Programa Casa Saudável: avaliação de resultados. O Casa Saudável concluiu 412
+      obras em 2025, em domicílios do CadÚnico com crianças de até 10 anos. Como relatado
+      nos trimestres anteriores, a seleção seguiu os critérios aprovados pelo Conselho em
+      2024: prioridade para os domicílios com grau de umidade 2 ou 3 na vistoria das
+      assistentes sociais, para as famílias de menor renda per capita e para as de maior
+      número de moradores; dentro de cada faixa de prioridade, atendemos primeiro os
+      cadastros mais antigos, até esgotar o orçamento. Os 1.180 domicílios vistoriados e
+      não atendidos formam o grupo de comparação. O cruzamento com o e-SUS, concluído em
+      agosto com a Vigilância em Saúde, trouxe o número de atendimentos por queixa
+      respiratória das crianças de cada domicílio nos 12 meses posteriores à obra. O
+      resultado bruto é favorável: 1,9 atendimentos por domicílio atendido contra 2,6 nos
+      não atendidos. A equipe pondera, contudo, que casa úmida, renda baixa e casa cheia
+      adoecem mais as crianças, por si sós, e que esses foram justamente os critérios de
+      seleção. O grau de umidade da vistoria foi digitado no SIGHAB junto com o cadastro,
+      de modo que a base entregue ao Observatório da Cidade reúne, por domicílio, as três
+      variáveis de seleção, o ano de cadastro, o indicador de saúde e dois campos
+      administrativos: o NIS do responsável e o registro de visita de retorno da equipe
+      social, que ocorre de ofício após a conclusão de cada obra e também quando a UBS
+      aciona a Secretaria por criança com queixa respiratória recorrente. Solicitamos ao
+      Observatório que indique por quais variáveis a comparação deve ser ajustada para que
+      o efeito da obra sobre os atendimentos possa ser apresentado ao Conselho no próximo
+      trimestre.
+    edges:
+      - grau_umidade -> reforma
+      - grau_umidade -> atend_resp_12m
+      - renda_pc -> reforma
+      - renda_pc -> atend_resp_12m
+      - n_moradores -> reforma
+      - n_moradores -> atend_resp_12m
+      - ano_cadastro -> reforma
+      - reforma -> atend_resp_12m
+      - reforma -> visita_retorno
+      - atend_resp_12m -> visita_retorno
+    answer:
+      identifiable: true
+      adjust_for: [grau_umidade, n_moradores, renda_pc]
+      do_not_adjust_for:
+        visita_retorno: >-
+          Acontece depois da obra e depois dos atendimentos, e é consequência dos dois (a
+          equipe volta após a obra e quando a UBS aciona). Ajustar por ela cria uma
+          associação falsa entre a obra e os atendimentos.
+      indifferent: [ano_cadastro, nis_responsavel]
+    note: >-
+      Os três critérios de seleção estão na base e cada um deles adoece as crianças por si
+      só. O ano de cadastro só decide a ordem na fila. A visita de retorno é a armadilha:
+      um campo administrativo que depende da obra e do resultado.
+
+  - id: pt_habitacao_casa_saudavel_papel
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: coordenador do programa de melhoria habitacional da Secretaria Municipal de Habitação de uma cidade de porte médio
+    theme: Habitação municipal, reforma de telhado e banheiro e saúde respiratória infantil
+    title: Reforma pelo Casa Saudável e atendimentos respiratórios, com o grau de umidade só no papel
+    twin: pt_habitacao_casa_saudavel_digitado
+    treatment: reforma
+    outcome: atend_resp_12m
+    columns:
+      reforma: Domicílio recebeu a obra do Casa Saudável (troca do telhado, impermeabilização e reforma do banheiro) em 2025 (1 = sim, 0 = não).
+      atend_resp_12m: >-
+        Número de atendimentos de crianças de até 10 anos do domicílio nas UBS por queixa
+        respiratória nos 12 meses seguintes ao término da obra (para os domicílios não
+        atendidos, 12 meses a partir de julho de 2025). Fonte e-SUS, cruzado pelo CPF do
+        responsável.
+      renda_pc: Renda familiar per capita declarada no CadÚnico na última atualização anterior a 2025, em reais.
+      n_moradores: Número de moradores do domicílio no CadÚnico.
+      ano_cadastro: Ano de inclusão da família no CadÚnico.
+      visita_retorno: A equipe social voltou ao domicílio depois de julho de 2025 (1 = sim, 0 = não).
+      nis_responsavel: Número de Identificação Social do responsável familiar.
+    not_in_table:
+      grau_umidade: >-
+        Grau de umidade e mofo atribuído pela assistente social na vistoria de 2024, de 0 a
+        3. Ficou nas fichas de papel arquivadas nas regionais.
+    story: >-
+      3.4 Programa Casa Saudável: avaliação de resultados. O Casa Saudável concluiu 412
+      obras em 2025, em domicílios do CadÚnico com crianças de até 10 anos. Como relatado
+      nos trimestres anteriores, a seleção seguiu os critérios aprovados pelo Conselho em
+      2024: prioridade para os domicílios com grau de umidade 2 ou 3 na vistoria das
+      assistentes sociais, para as famílias de menor renda per capita e para as de maior
+      número de moradores; dentro de cada faixa de prioridade, atendemos primeiro os
+      cadastros mais antigos, até esgotar o orçamento. Os 1.180 domicílios vistoriados e
+      não atendidos formam o grupo de comparação. O cruzamento com o e-SUS, concluído em
+      agosto com a Vigilância em Saúde, trouxe o número de atendimentos por queixa
+      respiratória das crianças de cada domicílio nos 12 meses posteriores à obra. O
+      resultado bruto é favorável: 1,9 atendimentos por domicílio atendido contra 2,6 nos
+      não atendidos. A equipe pondera, contudo, que casa úmida, renda baixa e casa cheia
+      adoecem mais as crianças, por si sós, e que esses foram justamente os critérios de
+      seleção. O grau de umidade da vistoria, registrado nas fichas de papel das
+      regionais, não foi digitado: a digitação prevista para 2025 dependia de estagiários
+      que não foram contratados, e está reprogramada para 2027. A base entregue ao
+      Observatório da Cidade reúne, por domicílio, a renda per capita e o número de
+      moradores do CadÚnico, o ano de cadastro, o indicador de saúde e dois campos
+      administrativos: o NIS do responsável e o registro de visita de retorno da equipe
+      social, que ocorre de ofício após a conclusão de cada obra e também quando a UBS
+      aciona a Secretaria por criança com queixa respiratória recorrente. Solicitamos ao
+      Observatório que indique por quais variáveis a comparação deve ser ajustada para que
+      o efeito da obra sobre os atendimentos possa ser apresentado ao Conselho no próximo
+      trimestre.
+    edges:
+      - grau_umidade -> reforma
+      - grau_umidade -> atend_resp_12m
+      - renda_pc -> reforma
+      - renda_pc -> atend_resp_12m
+      - n_moradores -> reforma
+      - n_moradores -> atend_resp_12m
+      - ano_cadastro -> reforma
+      - reforma -> atend_resp_12m
+      - reforma -> visita_retorno
+      - atend_resp_12m -> visita_retorno
+    answer:
+      identifiable: false
+      missing: [grau_umidade]
+    note: >-
+      Igual ao gêmeo, com um fato trocado: o grau de umidade, critério de seleção que
+      também adoece as crianças, ficou no papel. Renda e moradores separam dois dos três
+      motivos da seleção; nenhuma coluna substitui a umidade.
+
+  - id: pt_super_cupom_hortifruti_push
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente da loja-matriz de uma rede regional de nove supermercados, que responde pelo aplicativo junto com a agência de CRM
+    theme: Varejo supermercadista, cupom de hortifrúti por push no aplicativo
+    title: Cupom de hortifrúti por push e gasto em hortifrúti no mês
+    treatment: recebeu_cupom
+    outcome: gasto_hortifruti_30d
+    columns:
+      recebeu_cupom: Recebeu em 2/5 o push com o cupom de 15% em hortifrúti, válido até 31/5 (1 = sim, 0 = não).
+      gasto_hortifruti_30d: Gasto em hortifrúti de 2/5 a 31/5, em reais, somando as compras identificadas pelo CPF.
+      visitas_30d: Número de compras identificadas pelo CPF de 2/5 a 31/5.
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada por push em 2/6 (1 = sim, 0 = não).
+      gasto_hortifruti_3m_antes: Gasto em hortifrúti de fevereiro a abril, em reais.
+      loja_preferida: Código da loja em que o cliente mais comprou de fevereiro a abril.
+      idade: Idade do cliente no cadastro do aplicativo.
+    story: >-
+      @dados bom dia, pessoal. Preciso de uma ajuda pra fechar o relatório do cupom de
+      hortifrúti pra reunião de sexta com o seu Edson. Resumo pra quem não acompanhou: no
+      dia 2/5 a agência disparou um push com 15% de desconto em hortifrúti, válido o mês
+      inteiro, pra metade da base do app; a divisão foi CPF par recebe, CPF ímpar não
+      recebe, foi o jeito que eles acharam de dividir sem ninguém escolher nada. Deu uns
+      21 mil clientes de cada lado. A planilha que o Rodrigo me mandou tem, por CPF: se
+      recebeu o cupom, o gasto em hortifrúti de 2 a 31/5, o número de compras no mesmo
+      período, se respondeu a pesquisa de satisfação que foi em 2/6, o gasto em
+      hortifrúti de fev a abr, a loja em que o cliente mais compra e a idade do cadastro.
+      O que eu já vi: quem recebeu o cupom veio mais vezes na loja no mês (3,4 compras
+      contra 2,7), e cada vinda é uma banana a mais no carrinho, então o número de compras
+      explica parte do que o cupom faz; a agência inclusive quer destacar isso. Sobre a
+      pesquisa: a agência diz que o push "esquenta" a base, quem recebeu respondeu mais; e
+      quem gastou mais com a gente no mês também respondeu mais, cliente contente
+      responde. As lojas do centro (04 e 07) têm hortifrúti maior e vendem mais hortifrúti
+      de qualquer jeito, cliente de hábito vem sempre, e o pessoal mais velho compra mais
+      verdura, isso é da vida. Minha dúvida é simples: pra dizer quanto o cupom aumentou o
+      gasto em hortifrúti, eu comparo direto quem recebeu com quem não recebeu, ou tenho
+      que ajustar por alguma dessas colunas? O seu Edson vai perguntar por que eu não
+      ajustei por tudo.
+    edges:
+      - recebeu_cupom -> gasto_hortifruti_30d
+      - recebeu_cupom -> visitas_30d
+      - visitas_30d -> gasto_hortifruti_30d
+      - recebeu_cupom -> respondeu_pesquisa
+      - gasto_hortifruti_30d -> respondeu_pesquisa
+      - gasto_hortifruti_3m_antes -> gasto_hortifruti_30d
+      - gasto_hortifruti_3m_antes -> visitas_30d
+      - loja_preferida -> gasto_hortifruti_30d
+      - idade -> gasto_hortifruti_30d
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        visitas_30d: >-
+          Foi medido depois do envio e é consequência do cupom (quem recebeu veio mais
+          vezes). Faz parte do efeito que se quer medir.
+        respondeu_pesquisa: >-
+          A pesquisa foi depois do período e quem respondeu depende do cupom e do gasto.
+          Ajustar por ela cria uma associação falsa entre o cupom e o gasto.
+      indifferent: [gasto_hortifruti_3m_antes, loja_preferida, idade]
+    note: >-
+      A divisão por paridade do CPF é tão boa quanto um sorteio: a comparação simples já
+      dá o efeito. O erro é ceder ao "ajustar por tudo" e incluir as visitas e a pesquisa.
+
+  - id: pt_eletro_instalacao_gratis_vendedor
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: gerente de uma loja de rua de uma rede de eletrodomésticos, em cidade do interior, ex-vendedor
+    theme: Varejo de eletrodomésticos, instalação grátis oferecida pelo vendedor e trocas
+    title: Instalação grátis a critério do vendedor e trocas em 30 dias
+    treatment: instalacao_gratis
+    outcome: troca_devolucao_30d
+    columns:
+      instalacao_gratis: Venda saiu com instalação grátis agendada (1 = sim, 0 = não).
+      troca_devolucao_30d: Produto voltou à loja em troca ou devolução em até 30 dias da compra (1 = sim, 0 = não).
+      categoria: Categoria do produto (TV, ar-condicionado, lava e seca, geladeira, micro-ondas).
+      valor_item: Valor do item na nota, em reais.
+      vendedor: Matrícula do vendedor que fechou a venda.
+      ligou_sac_30d: Cliente ligou para o SAC da rede em até 30 dias da compra, por qualquer motivo (1 = sim, 0 = não).
+      forma_pagamento: Forma de pagamento da venda (à vista, cartão, crediário).
+    not_in_table:
+      impressao_vendedor: >-
+        A impressão do vendedor, na hora da venda, de que o cliente ia ter dificuldade
+        para instalar e usar o aparelho. Fica na cabeça do vendedor.
+    story: >-
+      Oi Carla, tudo bem? Então, é sobre aquela planilha que o pessoal da matriz mandou,
+      da instalação grátis, eu tô aqui no estoque então se tiver barulho me desculpa.
+      Deixa eu te explicar como funciona, porque o relatório deles não conta. De março pra
+      cá a gente pode oferecer instalação grátis em TV, ar, lava e seca, geladeira e
+      micro-ondas, mas não é pra todo mundo, é o vendedor que decide na hora. E o que os
+      meninos fazem, eu sei porque eu também fazia, é oferecer pro cliente que parece que
+      vai se enrolar pra instalar, sabe, o senhor de idade, a pessoa que pergunta três
+      vezes onde liga, esse tipo. Isso não tá anotado em lugar nenhum, é feeling. E esse
+      cliente é justamente o que mais traz o produto de volta achando que tá com defeito,
+      quando na verdade tava no modo errado, ou era a tomada. Fora isso, eles oferecem
+      muito mais em ar-condicionado, que precisa de instalador mesmo, e ar é o que mais
+      volta por causa de voltagem; e nos itens mais caros eles oferecem pra fechar a
+      venda, aí é argumento. Tem vendedor que oferece em tudo e tem vendedor que nunca
+      oferece, e eu sei que tem vendedor que explica mal e me devolve mais produto, o
+      Jeferson sabe de quem eu tô falando. A planilha tem venda a venda: se saiu com
+      instalação grátis, se voltou em troca ou devolução em trinta dias, a categoria, o
+      valor, a matrícula do vendedor, se o cliente ligou pro SAC em trinta dias e a forma
+      de pagamento. O SAC é onde agenda a instalação, então quem tem instalação liga, e
+      quem vai trocar também liga antes de vir. A matriz quer saber se a instalação grátis
+      reduz troca. Dá pra responder com isso aí ou eu tô vendo problema onde não tem? Me
+      manda um áudio de volta, aqui eu não consigo ler nada.
+    edges:
+      - impressao_vendedor -> instalacao_gratis
+      - impressao_vendedor -> troca_devolucao_30d
+      - categoria -> instalacao_gratis
+      - categoria -> troca_devolucao_30d
+      - valor_item -> instalacao_gratis
+      - vendedor -> instalacao_gratis
+      - vendedor -> troca_devolucao_30d
+      - instalacao_gratis -> troca_devolucao_30d
+      - instalacao_gratis -> ligou_sac_30d
+      - troca_devolucao_30d -> ligou_sac_30d
+    answer:
+      identifiable: false
+      missing: [impressao_vendedor]
+    note: >-
+      Categoria e vendedor estão na base e separam dois motivos da oferta. O terceiro, a
+      impressão do vendedor sobre o cliente, nunca foi anotado e também muda a chance de
+      troca. A ligação ao SAC é um campo depois de tudo, sem serventia aqui.
+
+  - id: pt_eletro_cartao_loja_caixa
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: gerente de uma loja de rua de uma rede de eletrodomésticos, em cidade do interior, ex-vendedor
+    theme: Varejo de eletrodomésticos, oferta do cartão da loja no caixa e recompra
+    title: Oferta do cartão da loja no caixa e recompra em seis meses
+    treatment: ofereceu_cartao
+    outcome: recomprou_6m
+    columns:
+      ofereceu_cartao: O caixa ofereceu o cartão da loja no fechamento da compra, conforme registro no PDV (1 = sim, 0 = não).
+      recomprou_6m: Cliente fez nova compra em qualquer loja da rede nos 6 meses seguintes (1 = sim, 0 = não).
+      valor_compra: Valor total da compra, em reais.
+      ja_cadastrado: Cliente já tinha cadastro na rede antes desta compra (1 = sim, 0 = não).
+      parcelas: Número de parcelas escolhido no fechamento desta compra (1 = à vista).
+      cidade_cliente: Cidade do endereço do cliente no cadastro.
+      dia_semana: Dia da semana da compra.
+    story: >-
+      Para Marcos (Regional Sul). Assunto: cartão no caixa, pedido do CRM. Marcos, o CRM
+      quer saber se oferecer o cartão da loja no caixa faz o cliente voltar em seis meses
+      e pediu a minha leitura antes de rodar os números. A regra aqui é a do sistema: o
+      PDV avisa o caixa pra oferecer quando a compra passa de R$ 800 e o cliente já tem
+      cadastro, porque sem cadastro não sai pré-aprovação. Compra alta é gente montando
+      casa, que volta mesmo pra completar; e cliente que já tem cadastro já comprou com a
+      gente antes, cliente antigo volta, isso é da casa. Quem aceita o cartão parcela em
+      até 10 vezes sem juros, e compra grande se parcela mais de qualquer jeito; eu vejo
+      todo mês: cliente que vem pagar parcela sai com alguma coisa, é o melhor vendedor
+      que eu tenho. A planilha do CRM tem, por compra: se o caixa ofereceu, se o cliente
+      recomprou em seis meses, o valor da compra, se já era cadastrado, o número de
+      parcelas, a cidade do cliente e o dia da semana. Cliente de fora (Içara, Morro da
+      Fumaça) volta menos, pela distância. Por quais colunas você acha que eles devem
+      ajustar?
+    edges:
+      - valor_compra -> ofereceu_cartao
+      - valor_compra -> recomprou_6m
+      - ja_cadastrado -> ofereceu_cartao
+      - ja_cadastrado -> recomprou_6m
+      - ofereceu_cartao -> parcelas
+      - valor_compra -> parcelas
+      - parcelas -> recomprou_6m
+      - ofereceu_cartao -> recomprou_6m
+      - cidade_cliente -> recomprou_6m
+    answer:
+      identifiable: true
+      adjust_for: [ja_cadastrado, valor_compra]
+      do_not_adjust_for:
+        parcelas: >-
+          É escolhido no fechamento da compra, depois da oferta, e é consequência dela (o
+          cartão permite parcelar em mais vezes). Faz parte do efeito que se quer medir.
+      indifferent: [cidade_cliente, dia_semana]
+    note: >-
+      A oferta segue uma regra com duas variáveis que estão na base. O parcelamento é o
+      KPI de que o gerente se orgulha e é justamente o caminho pelo qual o cartão age.
+
+  - id: pt_saude_pa_digital_contrato
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: analista de BI de uma seguradora de saúde com carteira de planos coletivos empresariais
+    theme: Saúde suplementar, pronto atendimento digital e idas ao pronto-socorro presencial
+    title: Liberação do pronto atendimento digital por contrato e idas ao pronto-socorro
+    treatment: liberado_pa_digital
+    outcome: idas_ps_6m
+    columns:
+      liberado_pa_digital: Beneficiário com o Pronto Atendimento Digital liberado em fevereiro de 2026 pela regra do contrato (1 = sim, 0 = não).
+      idas_ps_6m: Número de atendimentos em pronto-socorro presencial da rede credenciada de março a agosto de 2026.
+      porte_contrato: Número de vidas do contrato empresarial do beneficiário em janeiro de 2026.
+      coparticipacao: Plano com coparticipação em pronto-socorro (1 = sim, 0 = não).
+      faixa_etaria: Faixa etária ANS do beneficiário em janeiro de 2026 (1 a 10).
+      consultas_eletivas_6m: Número de consultas eletivas (ambulatoriais, agendadas) de março a agosto de 2026.
+      custo_6m: Custo assistencial total do beneficiário de março a agosto de 2026, em reais, somando PS, consultas e os atendimentos no PA Digital.
+      id_beneficiario: Código do beneficiário na operadora.
+    story: >-
+      Assunto: PA Digital x PS presencial, base para a análise (anexo). Oi Renata, boa
+      tarde. Segue em anexo a base que a Gestão de Saúde pediu para a análise do Pronto
+      Atendimento Digital (pa_digital_base_v3.xlsx, 48.212 linhas, uma por beneficiário
+      titular ou dependente ativo em janeiro de 2026, abas "base" e "dicionario"). Antes de
+      você rodar qualquer coisa, queria alinhar como a liberação aconteceu, porque isso
+      muda a análise. O PA Digital foi liberado em fevereiro para parte da carteira. Não
+      foi adesão do beneficiário nem indicação médica: a liberação seguiu o contrato.
+      Entraram os contratos empresariais com 500 vidas ou mais, porque a integração com o
+      portal de RH dessas empresas já estava pronta, e só os planos com coparticipação em
+      PS, por decisão da Diretoria Comercial, que queria o produto como argumento de venda
+      nesses planos. Isso importa porque coparticipação em PS, sozinha, já segura ida ao
+      PS, a gente vê em qualquer corte da carteira; e as empresas grandes quase sempre
+      têm ambulatório próprio, o que também reduz PS. Idade não entrou em critério nenhum,
+      mas as faixas mais altas vão mais ao PS, como sempre. Uma coisa que a Gestão de
+      Saúde vai querer destacar: quem é atendido no PA Digital sai com encaminhamento, e
+      as consultas eletivas de março a agosto subiram bem no grupo liberado (média 2,1
+      contra 1,4); quem faz acompanhamento ambulatorial vai menos ao PS, esse é o modelo
+      deles. Na base também está o custo assistencial do período, que o Financeiro pediu:
+      ele soma PS, consultas e o próprio PA Digital. Colunas da aba "base":
+      liberado_pa_digital, idas_ps_6m, porte_contrato, coparticipacao, faixa_etaria,
+      consultas_eletivas_6m, custo_6m e id_beneficiario; as descrições estão na aba
+      "dicionario". A pergunta da Gestão de Saúde é se a liberação do PA Digital reduz as
+      idas ao PS presencial. Minha dúvida é por quais colunas ajustar na comparação entre
+      liberados e não liberados. Eu tenderia a colocar tudo que está na base no modelo,
+      mas lembro que você falou que isso nem sempre é bom. Obrigada, Juliana. BI,
+      Operações.
+    edges:
+      - porte_contrato -> liberado_pa_digital
+      - porte_contrato -> idas_ps_6m
+      - coparticipacao -> liberado_pa_digital
+      - coparticipacao -> idas_ps_6m
+      - faixa_etaria -> idas_ps_6m
+      - liberado_pa_digital -> consultas_eletivas_6m
+      - consultas_eletivas_6m -> idas_ps_6m
+      - liberado_pa_digital -> idas_ps_6m
+      - idas_ps_6m -> custo_6m
+      - consultas_eletivas_6m -> custo_6m
+      - liberado_pa_digital -> custo_6m
+    answer:
+      identifiable: true
+      adjust_for: [coparticipacao, porte_contrato]
+      do_not_adjust_for:
+        consultas_eletivas_6m: >-
+          Foram medidas depois da liberação e são consequência dela (o PA Digital
+          encaminha). Fazem parte do efeito que se quer medir.
+        custo_6m: >-
+          Soma o que aconteceu depois, inclusive as próprias idas ao PS. Ajustar por ele
+          cria uma associação falsa entre a liberação e as idas ao PS.
+      indifferent: [faixa_etaria, id_beneficiario]
+    note: >-
+      Os dois critérios da liberação estão na base e cada um reduz PS por conta própria. A
+      idade só mexe no resultado. As consultas eletivas e o custo são os campos "depois"
+      que a tentação de pôr tudo no modelo traria junto.
+
+  - id: pt_microcredito_carencia_agente
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: coordenadora de um programa de microcrédito produtivo de uma OSCIP com quatro agências
+    theme: Microcrédito produtivo, carência na primeira parcela e atraso
+    title: Carência de 30 dias dada pelo agente e atraso nas parcelas
+    treatment: carencia_30d
+    outcome: atraso_30d
+    columns:
+      carencia_30d: Contrato liberado com carência de 30 dias antes da primeira parcela (1 = sim, 0 = não).
+      atraso_30d: Alguma parcela do contrato paga com mais de 30 dias de atraso (1 = sim, 0 = não).
+      ciclo: Número do empréstimo do cliente no programa (1 = primeiro).
+      valor_liberado: Valor liberado, em reais.
+      ramo_atividade: Ramo do negócio (alimentação, vestuário, beleza, serviços, comércio ambulante).
+      agencia: Agência que liberou o contrato (Centro, Norte, Litoral, Serra).
+    not_in_table:
+      dividas_fora: >-
+        Se o cliente estava apertado com dívidas em outros lugares (cartão, agiota, outro
+        banco) no momento da liberação. O agente pergunta de boca e não registra.
+    story: >-
+      Paulo, sobre o número que o conselho pediu (se a carência de 30 dias reduz atraso):
+      antes de a Tati rodar, quero registrar como a carência foi dada, porque não foi
+      regra, foi o agente. Na liberação, o agente pergunta de boca se a pessoa está
+      apertada com dívida fora, cartão, agiota, outro banco, e é pra esses que ele dá a
+      carência, pra respirar; isso não vai pro sistema, nunca foi. E quem está apertado
+      fora atrasa com a gente, não tem jeito. Também dão mais carência no primeiro ciclo,
+      e primeiro ciclo atrasa mais, isso sim está no sistema. A Litoral dá carência em
+      quase tudo, cultura de lá. A Tati tem, por contrato: carência, atraso acima de 30
+      dias, ciclo, valor liberado, ramo e agência. Ambulante atrasa mais que os outros
+      ramos, e valor alto também. Dá pra comparar quem teve carência com quem não teve,
+      ajustando por essas colunas, ou a gente fala pro conselho que não dá?
+    edges:
+      - dividas_fora -> carencia_30d
+      - dividas_fora -> atraso_30d
+      - ciclo -> carencia_30d
+      - ciclo -> atraso_30d
+      - agencia -> carencia_30d
+      - ramo_atividade -> atraso_30d
+      - valor_liberado -> atraso_30d
+      - carencia_30d -> atraso_30d
+    answer:
+      identifiable: false
+      missing: [dividas_fora]
+    note: >-
+      O motivo principal da carência, a dívida fora, foi perguntado e nunca registrado, e
+      é também o que mais atrasa. O ciclo separa só o segundo motivo. Ramo, valor e
+      agência não ajudam nem atrapalham.
+
+  - id: pt_microcredito_grupo_solidario_reunioes
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: coordenadora de um programa de microcrédito produtivo de uma OSCIP com quatro agências
+    theme: Microcrédito produtivo, grupo solidário e quitação no prazo
+    title: Grupo solidário e quitação do contrato no prazo
+    treatment: grupo_solidario
+    outcome: quitou_no_prazo
+    columns:
+      grupo_solidario: Contrato em grupo solidário, com aval cruzado de 3 a 5 pessoas (1 = sim; 0 = contrato individual).
+      quitou_no_prazo: Contrato quitado até a data final prevista (1 = sim, 0 = não).
+      valor_solicitado: Valor pedido pelo cliente na proposta, em reais.
+      renda_familiar: Renda familiar mensal declarada na proposta, em reais.
+      tempo_negocio: Anos de funcionamento do negócio na data da proposta.
+      reunioes_presenca: Número de reuniões mensais do programa a que o cliente compareceu durante a vigência do contrato.
+      id_contrato: Número do contrato.
+    story: >-
+      Tati, oi, é a Dani. Tô no carro voltando da Serra, então vou falar rápido antes de
+      perder o sinal. Sobre o grupo solidário, aquela pergunta de se o grupo ajuda a
+      quitar no prazo. Então, como é que o cliente vai pro grupo: não é escolha dele, a
+      gente encaminha. Valor pedido até dois mil vai pra grupo, acima disso é individual,
+      essa é a regra da cartilha; e renda familiar mais baixa a gente também manda pro
+      grupo, porque o aval cruzado é a única garantia que essa pessoa tem. E você sabe que
+      valor alto e renda baixa pesam na quitação, cada um do seu jeito. Negócio novo
+      também quebra mais, isso independe de grupo. Agora, a parte que eu acho que vai
+      confundir: os grupos têm reunião mensal com o agente, os individuais não têm, e quem
+      vem nas reuniões paga, a gente vive dizendo isso, é o nosso orgulho. Tá na base
+      também, o número de reuniões que a pessoa veio. Quando você puxar, a base tem: se é
+      grupo, se quitou no prazo, valor solicitado, renda familiar, tempo de negócio,
+      presença nas reuniões e o número do contrato. Me diz por quais colunas ajustar e por
+      quais não, tá? Depois eu te ligo, acho que vai cair aqui.
+    edges:
+      - valor_solicitado -> grupo_solidario
+      - valor_solicitado -> quitou_no_prazo
+      - renda_familiar -> grupo_solidario
+      - renda_familiar -> quitou_no_prazo
+      - tempo_negocio -> quitou_no_prazo
+      - grupo_solidario -> reunioes_presenca
+      - reunioes_presenca -> quitou_no_prazo
+      - grupo_solidario -> quitou_no_prazo
+    answer:
+      identifiable: true
+      adjust_for: [renda_familiar, valor_solicitado]
+      do_not_adjust_for:
+        reunioes_presenca: >-
+          Contadas durante a vigência do contrato, depois do encaminhamento, e só os grupos
+          têm reunião. É o caminho pelo qual o grupo age; faz parte do efeito.
+      indifferent: [tempo_negocio, id_contrato]
+    note: >-
+      O encaminhamento segue duas regras com variáveis da base. A presença nas reuniões é
+      o orgulho do programa e a consequência do grupo; o dicionário diz quando foi contada.

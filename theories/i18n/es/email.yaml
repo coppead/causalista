@@ -1,0 +1,254 @@
+# Tradução da ficha de teoria 'email' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06 diretamente da ficha em português, frase a frase,
+# por delegação do André. Espanhol latino-americano, registro neutro.
+#
+# O espanhol é um idioma reservado para teste: esta tradução serve só para medir se o
+# modelo generaliza a um idioma que não viu no treino, e nunca entra em dado de treino.
+#
+# A ficha em português, theories/email.yaml, é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+
+language: es
+status: revisada
+title: Campaña de correo electrónico en una tienda en línea
+context: >-
+  Una tienda en línea envió una campaña de correo electrónico a una parte de sus clientes:
+  un mensaje con las ofertas de la semana y un enlace al sitio web. La tienda quiere saber
+  si la campaña aumenta las compras en los 14 días siguientes al envío.
+randomized: Los clientes que recibieron la campaña fueron elegidos por sorteo.
+closing: Nada más allá de lo descrito influyó en la elección de quién recibió la campaña.
+treatment:
+  label: la campaña de correo electrónico
+  dictionary: Recibió la campaña de correo electrónico (1 = sí, 0 = no).
+outcome:
+  label: la compra
+  dictionary: Compró en la tienda en los 14 días siguientes al envío de la campaña (1 = sí, 0 = no).
+variables:
+  dias_ultima_compra:
+    label: los días desde la última compra
+    roles:
+      confounder:
+        dictionary: Días entre la última compra del cliente en la tienda y el envío de la campaña.
+        to_treatment: >-
+          La tienda envió la campaña con más frecuencia a quienes habían comprado más
+          recientemente.
+        to_outcome: Quienes llevan más tiempo sin comprar en la tienda compran menos.
+      outcome_cause:
+        dictionary: Días entre la última compra del cliente en la tienda y el envío de la campaña.
+        to_outcome: Quienes llevan más tiempo sin comprar en la tienda compran menos.
+  compras_12m:
+    label: el número de compras en 12 meses
+    roles:
+      confounder:
+        dictionary: Número de compras en la tienda en los 12 meses anteriores al envío de la campaña.
+        to_treatment: >-
+          La campaña se envió con más frecuencia a los clientes que compraron más veces en la
+          tienda en los 12 meses anteriores al envío de la campaña.
+        to_outcome: >-
+          Los clientes que compraron más veces en la tienda en los 12 meses anteriores al envío
+          de la campaña compran más.
+      outcome_cause:
+        dictionary: Número de compras en la tienda en los 12 meses anteriores al envío de la campaña.
+        to_outcome: >-
+          Los clientes que compraron más veces en la tienda en los 12 meses anteriores al envío
+          de la campaña compran más.
+  emails_abertos:
+    label: los correos abiertos
+    roles:
+      confounder:
+        dictionary: >-
+          Número de correos de la tienda que el cliente abrió en los 14 días anteriores al envío
+          de la campaña.
+        to_treatment: >-
+          La tienda envió la campaña con más frecuencia a quienes más abrían los correos de la
+          tienda.
+        to_outcome: Quienes abren más correos de la tienda compran más.
+      mediator:
+        dictionary: >-
+          Número de correos de la tienda que el cliente abrió en los 7 días siguientes al envío
+          de la campaña.
+        from_treatment: Quienes reciben la campaña abren más correos de la tienda en los días siguientes.
+        to_outcome: Quienes abren más correos de la tienda compran más.
+      outcome_cause:
+        dictionary: >-
+          Número de correos de la tienda que el cliente abrió en los 14 días anteriores al envío
+          de la campaña.
+        to_outcome: Quienes abren más correos de la tienda compran más.
+  visitas_site:
+    label: las visitas al sitio web
+    roles:
+      confounder:
+        dictionary: Número de visitas al sitio web de la tienda en los 14 días anteriores al envío de la campaña.
+        to_treatment: >-
+          La campaña se dirigió con más frecuencia a quienes habían visitado más el sitio web
+          de la tienda.
+        to_outcome: Quienes visitan más el sitio web de la tienda compran más.
+      mediator:
+        dictionary: Número de visitas al sitio web de la tienda en los 7 días siguientes al envío de la campaña.
+        from_treatment: Quienes reciben la campaña visitan más el sitio web de la tienda en los días siguientes.
+        to_outcome: Quienes visitan más el sitio web de la tienda compran más.
+      outcome_cause:
+        dictionary: Número de visitas al sitio web de la tienda en los 14 días anteriores al envío de la campaña.
+        to_outcome: Quienes visitan más el sitio web de la tienda compran más.
+  item_carrinho:
+    label: el artículo en el carrito
+    roles:
+      confounder:
+        dictionary: >-
+          Tenía un artículo en el carrito del sitio web el día anterior al envío de la campaña
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          La tienda envió la campaña con más frecuencia a quienes habían dejado un artículo en
+          el carrito del sitio web.
+        to_outcome: Quienes ponen un artículo en el carrito del sitio web compran más.
+      mediator:
+        dictionary: >-
+          Puso un artículo en el carrito del sitio web en los 7 días siguientes al envío de la
+          campaña (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben la campaña ponen un artículo en el carrito del sitio web con más
+          frecuencia en los días siguientes.
+        to_outcome: Quienes ponen un artículo en el carrito del sitio web compran más.
+      outcome_cause:
+        dictionary: >-
+          Tenía un artículo en el carrito del sitio web el día anterior al envío de la campaña
+          (1 = sí, 0 = no).
+        to_outcome: Quienes ponen un artículo en el carrito del sitio web compran más.
+  clique_email:
+    label: el clic en un correo de la tienda
+    roles:
+      confounder:
+        dictionary: >-
+          Hizo clic en un enlace de algún correo de la tienda en los 30 días anteriores al envío
+          de la campaña (1 = sí, 0 = no).
+        to_treatment: >-
+          La tienda envió la campaña con más frecuencia a quienes habían hecho clic en enlaces
+          de correos anteriores de la tienda.
+        to_outcome: Quienes hacen clic en un enlace de un correo de la tienda compran más.
+      mediator:
+        dictionary: >-
+          Hizo clic en un enlace de algún correo de la tienda en los 3 días siguientes al envío
+          de la campaña (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben la campaña hacen clic con más frecuencia en enlaces de correos de la
+          tienda en los días siguientes.
+        to_outcome: Quienes hacen clic en un enlace de un correo de la tienda compran más.
+  intencao_compra:
+    label: la intención de compra
+    hidden_fact: >-
+      La tienda no midió la intención de compra de los clientes antes del envío de la campaña,
+      y por eso esa información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Puntaje de intención de compra en la encuesta hecha antes del envío de la campaña,
+          de 0 a 10.
+        to_treatment: >-
+          Los clientes con mayor intención de compra se inscriben más en los avisos de ofertas
+          de la tienda y, por eso, recibieron la campaña con más frecuencia.
+        to_outcome: Los clientes con mayor intención de compra compran más.
+      mediator:
+        dictionary: >-
+          Puntaje de intención de compra en la encuesta hecha 3 días después del envío de la
+          campaña, de 0 a 10.
+        from_treatment: Quienes reciben la campaña quedan con mayor intención de compra en los días siguientes.
+        to_outcome: Los clientes con mayor intención de compra compran más.
+  renda:
+    label: el ingreso del cliente
+    hidden_fact: La tienda no tiene el ingreso de los clientes, y por eso el ingreso no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Ingreso mensual estimado del cliente, en reales.
+        to_treatment: >-
+          La tienda dirigió la campaña a barrios de mayor ingreso, y por eso los clientes de
+          mayor ingreso recibieron la campaña con más frecuencia.
+        to_outcome: Los clientes de mayor ingreso compran más.
+      outcome_cause:
+        dictionary: Ingreso mensual estimado del cliente, en reales.
+        to_outcome: Los clientes de mayor ingreso compran más.
+  propaganda_concorrente:
+    label: la publicidad de la competencia
+    hidden_fact: >-
+      La tienda no sabe quién vio publicidad de tiendas competidoras, y por eso esa
+      información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Vio publicidad de tiendas competidoras en los 30 días anteriores al envío de la
+          campaña (1 = sí, 0 = no).
+        to_treatment: >-
+          La tienda envió la campaña principalmente a compradores de las categorías de producto
+          en las que la competencia más anunciaba, y por eso quienes vieron publicidad de la
+          competencia recibieron la campaña con más frecuencia.
+        to_outcome: Quienes ven publicidad de tiendas competidoras compran menos en la tienda.
+      outcome_cause:
+        dictionary: >-
+          Vio publicidad de tiendas competidoras en los 30 días anteriores al envío de la
+          campaña (1 = sí, 0 = no).
+        to_outcome: Quienes ven publicidad de tiendas competidoras compran menos en la tienda.
+  chat_atendimento:
+    label: la conversación en el chat de atención al cliente
+    roles:
+      confounder:
+        dictionary: >-
+          Abrió una conversación en el chat de atención al cliente en los 30 días anteriores al
+          envío de la campaña (1 = sí, 0 = no).
+        to_treatment: >-
+          La tienda envió la campaña con menos frecuencia a quienes habían acudido al chat de
+          atención al cliente, para no molestar a clientes con algún problema en un pedido.
+        to_outcome: Quienes tuvieron que acudir al chat de atención al cliente compran menos.
+      collider:
+        dictionary: >-
+          Abrió una conversación en el chat de atención al cliente en los 30 días siguientes al
+          envío de la campaña (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben la campaña acuden más al chat de atención al cliente, para pedir que
+          la tienda deje de enviar correos.
+        from_outcome: >-
+          Quienes compran acuden más al chat de atención al cliente, para dar seguimiento a la
+          entrega del pedido.
+      outcome_cause:
+        dictionary: >-
+          Abrió una conversación en el chat de atención al cliente en los 30 días anteriores al
+          envío de la campaña (1 = sí, 0 = no).
+        to_outcome: Quienes tuvieron que acudir al chat de atención al cliente compran menos.
+  avaliacao_loja:
+    label: la evaluación de la tienda
+    roles:
+      collider:
+        dictionary: >-
+          Respondió a la solicitud de evaluación de la tienda en los 30 días siguientes al envío
+          de la campaña (1 = sí, 0 = no).
+        from_treatment: >-
+          El correo de la campaña trae una solicitud de evaluación de la tienda, y quienes
+          reciben la campaña evalúan la tienda con más frecuencia.
+        from_outcome: >-
+          La tienda pide una evaluación después de cada compra, y quienes compran evalúan la
+          tienda con más frecuencia.
+  segmento_marketing:
+    label: el segmento priorizado por marketing
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Pertenece al segmento de clientes que el equipo de marketing priorizó en la campaña
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          El equipo de marketing priorizó un segmento de clientes en la campaña, y quienes
+          pertenecen a ese segmento recibieron la campaña con más frecuencia.
+  lista_piloto:
+    label: la lista piloto
+    roles:
+      treatment_cause:
+        dictionary: Estaba en la lista de clientes usada en el piloto de la campaña (1 = sí, 0 = no).
+        to_treatment: >-
+          La campaña comenzó con una lista piloto de clientes, y quienes estaban en la lista
+          piloto recibieron la campaña con más frecuencia.
+  provedor_email:
+    label: el proveedor de correo electrónico
+    roles:
+      unrelated:
+        dictionary: La dirección de correo electrónico del cliente es de Gmail (1 = sí, 0 = no).
+        fact: >-
+          El proveedor de correo electrónico del cliente no tiene relación con la campaña ni
+          con la compra.

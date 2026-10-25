@@ -1,0 +1,539 @@
+# Casos de TREINO que simulam texto de pessoa, em português do Brasil.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: uma
+# analista de uma empresa de água e esgoto, um produtor rural de laranja, um gerente de
+# loja de uma rede de eletrodomésticos, uma coordenadora pedagógica de uma rede municipal
+# e uma gerente de cobrança de uma operadora de cartões. Cada texto tem o estilo do canal
+# em que a pessoa escreveria (WhatsApp, relatório trimestral, e-mail com anexo, áudio
+# transcrito, briefing para consultoria).
+#
+# Estes casos servem ao treino por reforço: o modelo responde, o verificador dá a nota.
+# Não são o teste da seção 7 e não reaproveitam nenhum cenário do conjunto congelado em
+# cases/simulados/. Não são texto de pessoas de verdade. As setas declaram o diagrama
+# que o texto implica; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_agua_hidrometro_coletor
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: analista de uma empresa de água e esgoto
+    theme: Saneamento, substituição de hidrômetros
+    title: Troca de hidrômetros e volume medido (marcação do leiturista orientou a troca)
+    treatment: hidrometro_trocado
+    outcome: consumo_medido_t2
+    columns:
+      hidrometro_trocado: Hidrômetro da ligação substituído pelo programa de troca no 1º trimestre de 2026 (1 = sim, 0 = não).
+      consumo_medido_t2: Volume medido na ligação no 2º trimestre de 2026, em m³ (soma das leituras de abril, maio e junho).
+      idade_hidrometro: Idade do hidrômetro instalado em 1º de janeiro de 2026, em anos, conforme o cadastro patrimonial.
+      consumo_medido_t4_ant: Volume medido no 4º trimestre de 2025, em m³.
+      categoria: Categoria da ligação (residencial, comercial, pública, industrial).
+      reclamacao_conta_alta: Reclamação de "conta alta" registrada na Ouvidoria entre abril e julho de 2026 (1 = sim, 0 = não).
+      rota_leitura: Código da rota de leitura.
+    not_in_table:
+      visor_embacado: >-
+        Marcação feita pelo leiturista no coletor portátil de que o visor do hidrômetro
+        estava embaçado ou o medidor parado. Fica no coletor e não é carregada no sistema
+        comercial.
+    story: >-
+      3.4 Substituição de hidrômetros e volume medido. No 1º trimestre de 2026 o programa
+      de substituição trocou 4.812 hidrômetros na regional Norte, 11% do parque, ao custo
+      de R$ 1,38 milhão. O objetivo é reduzir a submedição: medidor velho registra menos
+      água do que a que passa por ele, e o que não é medido vira perda aparente e receita
+      não faturada. A lista de troca foi montada pela Gerência Comercial a partir do
+      cadastro patrimonial (idade do medidor, trocando os mais antigos primeiro) e do
+      histórico de leitura: ligações com consumo zerado ou muito baixo no 4º trimestre de
+      2025 foram tratadas como suspeitas e entraram na frente. Em campo, as equipes
+      trocaram ainda os medidores que o leiturista havia marcado no coletor como "visor
+      embaçado" ou "parado", mesmo fora da lista; um medidor parado registra zero e um
+      embaçado costuma estar perto disso, e a marcação é tanto mais comum quanto mais
+      velho o medidor. Essa marcação fica no coletor portátil e não é carregada no sistema
+      comercial, portanto não consta na base deste relatório. Grandes consumidores
+      comerciais e industriais ficaram praticamente fora do programa, pois já receberam
+      medidores novos em 2024 pelo contrato de macromedição. Entre abril e julho a
+      Ouvidoria registrou 1.106 reclamações de conta alta, concentradas em ligações
+      trocadas, o que é esperado quando o medidor passa a registrar o consumo real;
+      ligações de consumo elevado, de resto, reclamam mais em qualquer trimestre. Para o
+      relatório anual, pede-se à Gerência de Dados que estime quanto do volume medido no
+      2º trimestre se deve à troca, comparando ligações trocadas e não trocadas. A base
+      extraída (Anexo II) tem uma linha por ligação, com as colunas hidrometro_trocado,
+      consumo_medido_t2, idade_hidrometro, consumo_medido_t4_ant, categoria,
+      reclamacao_conta_alta e rota_leitura. Observa-se que o consumo de uma ligação é
+      bastante estável de um trimestre para o outro.
+    edges:
+      - idade_hidrometro -> hidrometro_trocado
+      - idade_hidrometro -> consumo_medido_t2
+      - idade_hidrometro -> consumo_medido_t4_ant
+      - idade_hidrometro -> visor_embacado
+      - consumo_medido_t4_ant -> hidrometro_trocado
+      - consumo_medido_t4_ant -> consumo_medido_t2
+      - categoria -> hidrometro_trocado
+      - categoria -> consumo_medido_t2
+      - categoria -> consumo_medido_t4_ant
+      - visor_embacado -> hidrometro_trocado
+      - visor_embacado -> consumo_medido_t2
+      - visor_embacado -> consumo_medido_t4_ant
+      - hidrometro_trocado -> consumo_medido_t2
+      - hidrometro_trocado -> reclamacao_conta_alta
+      - consumo_medido_t2 -> reclamacao_conta_alta
+    answer:
+      identifiable: false
+      missing: [visor_embacado]
+    twin: pt_agua_hidrometro_lista
+    note: >-
+      A marcação de visor embaçado orientou parte das trocas e um medidor assim registra
+      menos; ela fica no coletor, fora da base. Idade, consumo anterior e categoria estão
+      na tabela, mas não bastam.
+
+  - id: pt_agua_hidrometro_lista
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: analista de uma empresa de água e esgoto
+    theme: Saneamento, substituição de hidrômetros
+    title: Troca de hidrômetros e volume medido (lista fechada do escritório)
+    treatment: hidrometro_trocado
+    outcome: consumo_medido_t2
+    columns:
+      hidrometro_trocado: Hidrômetro da ligação substituído pelo programa de troca no 1º trimestre de 2026 (1 = sim, 0 = não).
+      consumo_medido_t2: Volume medido na ligação no 2º trimestre de 2026, em m³ (soma das leituras de abril, maio e junho).
+      idade_hidrometro: Idade do hidrômetro instalado em 1º de janeiro de 2026, em anos, conforme o cadastro patrimonial.
+      consumo_medido_t4_ant: Volume medido no 4º trimestre de 2025, em m³.
+      categoria: Categoria da ligação (residencial, comercial, pública, industrial).
+      reclamacao_conta_alta: Reclamação de "conta alta" registrada na Ouvidoria entre abril e julho de 2026 (1 = sim, 0 = não).
+      rota_leitura: Código da rota de leitura.
+    not_in_table:
+      visor_embacado: >-
+        Marcação feita pelo leiturista no coletor portátil de que o visor do hidrômetro
+        estava embaçado ou o medidor parado. Fica no coletor e não é carregada no sistema
+        comercial.
+    story: >-
+      3.4 Substituição de hidrômetros e volume medido. No 1º trimestre de 2026 o programa
+      de substituição trocou 4.812 hidrômetros na regional Norte, 11% do parque, ao custo
+      de R$ 1,38 milhão. O objetivo é reduzir a submedição: medidor velho registra menos
+      água do que a que passa por ele, e o que não é medido vira perda aparente e receita
+      não faturada. A lista de troca foi montada pela Gerência Comercial a partir do
+      cadastro patrimonial (idade do medidor, trocando os mais antigos primeiro) e do
+      histórico de leitura: ligações com consumo zerado ou muito baixo no 4º trimestre de
+      2025 foram tratadas como suspeitas e entraram na frente. Diferentemente do programa
+      de 2025, a marcação de "visor embaçado" ou "parado" que o leiturista faz no coletor
+      não orientou as trocas deste ano: a lista veio fechada do escritório e as equipes
+      de campo se limitaram a cumpri-la. A marcação segue sem ser carregada no sistema
+      comercial e não consta na base deste relatório; registre-se que um medidor parado
+      registra zero, um embaçado costuma estar perto disso, e a marcação é tanto mais
+      comum quanto mais velho o medidor. Grandes consumidores comerciais e industriais
+      ficaram praticamente fora do programa, pois já receberam medidores novos em 2024
+      pelo contrato de macromedição. Entre abril e julho a Ouvidoria registrou 1.106
+      reclamações de conta alta, concentradas em ligações trocadas, o que é esperado
+      quando o medidor passa a registrar o consumo real; ligações de consumo elevado, de
+      resto, reclamam mais em qualquer trimestre. Para o relatório anual, pede-se à
+      Gerência de Dados que estime quanto do volume medido no 2º trimestre se deve à
+      troca, comparando ligações trocadas e não trocadas. A base extraída (Anexo II) tem
+      uma linha por ligação, com as colunas hidrometro_trocado, consumo_medido_t2,
+      idade_hidrometro, consumo_medido_t4_ant, categoria, reclamacao_conta_alta e
+      rota_leitura. Observa-se que o consumo de uma ligação é bastante estável de um
+      trimestre para o outro.
+    edges:
+      - idade_hidrometro -> hidrometro_trocado
+      - idade_hidrometro -> consumo_medido_t2
+      - idade_hidrometro -> visor_embacado
+      - consumo_medido_t4_ant -> hidrometro_trocado
+      - consumo_medido_t4_ant -> consumo_medido_t2
+      - categoria -> hidrometro_trocado
+      - categoria -> consumo_medido_t2
+      - visor_embacado -> consumo_medido_t2
+      - hidrometro_trocado -> consumo_medido_t2
+      - hidrometro_trocado -> reclamacao_conta_alta
+      - consumo_medido_t2 -> reclamacao_conta_alta
+    answer:
+      identifiable: true
+      adjust_for: [categoria, consumo_medido_t4_ant, idade_hidrometro]
+      do_not_adjust_for:
+        reclamacao_conta_alta: >-
+          Registrada depois do resultado e causada tanto pela troca quanto pelo volume
+          medido. Ajustar por ela cria uma associação falsa entre a troca e o consumo.
+      indifferent: [rota_leitura]
+    twin: pt_agua_hidrometro_coletor
+    note: >-
+      Gêmeo do caso anterior: a marcação do leiturista continua fora da base e continua
+      afetando o volume medido, mas desta vez não orientou a troca. Basta ajustar pelo
+      que montou a lista.
+
+  - id: pt_laranja_poda
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: produtor rural de laranja
+    theme: Citricultura, poda mecânica
+    title: Poda mecânica e caixas por planta
+    treatment: podou_2025
+    outcome: caixas_planta_2026
+    columns:
+      podou_2025: Talhão recebeu poda mecânica (lateral e topo) em julho/agosto de 2025 (1 = sim, 0 = não).
+      caixas_planta_2026: Produção do talhão na safra 2026, em caixas de 40,8 kg por planta.
+      caixas_planta_2025: Produção do talhão na safra 2025, em caixas de 40,8 kg por planta.
+      variedade: Variedade da copa (Pera, Valência, Hamlin, Natal).
+      idade_talhao: Idade das plantas do talhão em 2025, em anos.
+      florada_set_2025: Nota de intensidade da florada em setembro de 2025, de 1 a 5, dada pelo encarregado.
+      irrigado: Talhão com irrigação (1 = sim, 0 = sequeiro).
+      num_talhao: Número do talhão no mapa da fazenda.
+    story: >-
+      [Áudio transcrito, 3 min 48 s] Ô Carol, tô te mandando áudio porque digitar isso no
+      celular não dá, tá. É sobre a poda. Ano passado, julho, agosto, eu passei a podadeira
+      em 14 talhões, lateral e topo, custou uns 180 mil com a máquina alugada do Betão, e
+      agora na colheita o teu irmão vive dizendo que não valeu nada, que talhão podado deu
+      menos caixa. Eu acho que ele tá comparando errado. Deixa eu te explicar como eu
+      escolhi. Podei primeiro o que tava fechado, árvore alta encostando uma na outra, que
+      é talhão velho, de 15, 18 anos, e Valência, que a Valência cresce que é uma loucura.
+      E entrou também uns talhões que tavam rendendo pouco na safra de 2025, que o Nelsinho
+      falou pra renovar a copa. O resto eu deixei quieto. Agora, planta de 15 anos dá muito
+      mais caixa que uma de 5, e Valência produz diferente da Pera, isso qualquer um sabe,
+      e talhão que rende, rende, ano após ano. Depois da poda a florada mexe muito: em
+      setembro o encarregado dá nota de florada pra cada talhão, de 1 a 5, e nos podados a
+      nota mudou bastante; e florada é o que vira caixa. Então eu quero que você monte uma
+      conta direito pra mim. Eu tenho a planilha por talhão com: se podou ou não, caixa
+      por planta de 2026, caixa por planta de 2025, variedade, idade, a nota de florada de
+      setembro e o número do talhão. Ah, e tem o irrigado também, metade da fazenda é
+      irrigada e irrigado dá mais caixa, mas isso é da época do teu avô, não tem nada a
+      ver com a poda. Vê aí se dá pra saber se a poda tirou ou botou caixa, porque se
+      tirou eu não repito esse ano. Beijo, responde quando puder.
+    edges:
+      - idade_talhao -> podou_2025
+      - idade_talhao -> caixas_planta_2026
+      - variedade -> podou_2025
+      - variedade -> caixas_planta_2026
+      - caixas_planta_2025 -> podou_2025
+      - caixas_planta_2025 -> caixas_planta_2026
+      - podou_2025 -> florada_set_2025
+      - florada_set_2025 -> caixas_planta_2026
+      - podou_2025 -> caixas_planta_2026
+      - irrigado -> caixas_planta_2026
+    answer:
+      identifiable: true
+      adjust_for: [caixas_planta_2025, idade_talhao, variedade]
+      do_not_adjust_for:
+        florada_set_2025: >-
+          Medida depois da poda e consequência dela. É parte do caminho pelo qual a poda
+          muda a produção; ajustar por ela esconde esse pedaço do efeito.
+      indifferent: [irrigado, num_talhao]
+    note: >-
+      Três critérios de escolha ditos de passagem (idade, variedade, produção anterior),
+      cada um com motivo para mexer na produção. A florada é consequência da poda, dita
+      como orgulho.
+
+  - id: pt_cartoes_bloqueio_cpf
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: gerente de cobrança de uma operadora de cartões
+    theme: Cobrança, bloqueio preventivo do cartão
+    title: Bloqueio preventivo aos 15 dias e regularização em 90 dias
+    treatment: bloqueio_15d
+    outcome: regularizou_90d
+    columns:
+      bloqueio_15d: Cartão bloqueado preventivamente para novas compras no 15º dia de atraso da fatura (1 = sim, 0 = seguiu a régua normal).
+      regularizou_90d: Pagou ao menos o valor mínimo da fatura em atraso até o 90º dia de atraso (1 = sim, 0 = não).
+      final_cpf_par: Último dígito do CPF é par (1 = sim, 0 = não).
+      score_interno: Score de risco interno do cliente na data de vencimento da fatura, de 0 a 1000.
+      valor_fatura: Valor da fatura em atraso, em reais.
+      ligou_central_30d: Cliente ligou para a central de atendimento entre o 15º e o 45º dia de atraso (1 = sim, 0 = não).
+      cobranca_externa_90d: Conta repassada à assessoria de cobrança externa no 91º dia de atraso (1 = sim, 0 = não).
+      uf: Unidade da federação do endereço de cadastro.
+    story: >-
+      Assunto: Teste do bloqueio preventivo aos 15 dias — base em anexo, preciso de uma
+      leitura honesta. Oi, Renata, tudo bem? Segue em anexo a base do teste do bloqueio
+      preventivo (teste_bloqueio_15d_v3.xlsx, aba "base", 38.214 linhas, uma por cliente).
+      Antes de o Marcelo levar isso pro comitê de crédito de novembro eu queria que vocês
+      olhassem com calma, porque o número que está circulando (73% de regularização entre
+      bloqueados contra 61% nos outros) saiu de uma tabela dinâmica minha e eu não confio
+      nem em mim mesma. O desenho foi o seguinte. Entraram no teste todos os clientes
+      pessoa física que chegaram a 15 dias de atraso na fatura entre 4 de maio e 30 de
+      junho. A divisão foi pelo último dígito do CPF: final par recebeu o bloqueio
+      preventivo do cartão pra novas compras no 15º dia, final ímpar seguiu a régua normal
+      (só SMS e ligação, bloqueio aos 45). Eu insisti nesse critério justamente pra ninguém
+      da mesa escolher quem bloquear. Um dado que o time comemorou e que eu acho que é a
+      chave: 41% dos bloqueados ligaram pra central nos 30 dias seguintes, contra 12% dos
+      não bloqueados. O cliente liga pra entender por que o cartão não passou, a gente
+      aproveita e negocia, e quem negocia na central paga. Isso está na coluna
+      ligou_central_30d. Sobre as demais colunas do anexo: bloqueio_15d é a flag do teste;
+      final_cpf_par é o critério de sorteio (deixei pra vocês conferirem o balanceamento);
+      score_interno é o nosso score de risco na data em que a fatura venceu, e score baixo
+      paga menos, como sempre; valor_fatura é o valor da fatura em atraso, e fatura grande
+      também paga menos; regularizou_90d é o resultado, pagou pelo menos o mínimo até o 90º
+      dia; uf é o estado do cadastro. Tem ainda cobranca_externa_90d: pela régua, no 91º
+      dia todo mundo que não regularizou, bloqueado ou não, vai pra assessoria externa,
+      então essa coluna é basicamente o espelho do resultado, mas veio no extrato e eu
+      deixei. Minhas perguntas: por quais colunas a gente precisa ajustar pra comparar
+      bloqueados e não bloqueados? E dá pra separar quanto do efeito veio da ligação pra
+      central? Essa segunda pode ficar pra depois. Obrigada, Patrícia.
+    edges:
+      - final_cpf_par -> bloqueio_15d
+      - bloqueio_15d -> ligou_central_30d
+      - ligou_central_30d -> regularizou_90d
+      - bloqueio_15d -> regularizou_90d
+      - score_interno -> regularizou_90d
+      - valor_fatura -> regularizou_90d
+      - regularizou_90d -> cobranca_externa_90d
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        ligou_central_30d: >-
+          Consequência do bloqueio e caminho pelo qual ele age sobre o pagamento. Ajustar
+          por ela tira do efeito justamente a parte que a gerente quer contar.
+        cobranca_externa_90d: >-
+          Definida no 91º dia a partir do próprio resultado. Ajustar por uma coluna que é
+          consequência do resultado distorce a comparação.
+      indifferent: [final_cpf_par, score_interno, valor_fatura, uf]
+    note: >-
+      Divisão pelo último dígito do CPF: tão boa quanto sorteio. Nada precisa de ajuste;
+      a tentação é ajustar pela ligação à central (consequência) ou pelo repasse (depois
+      do resultado).
+
+  - id: pt_cartoes_assessoria
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de cobrança de uma operadora de cartões
+    theme: Cobrança, repasse a assessoria externa
+    title: Repasse a assessoria externa aos 60 dias e recuperação em 180 dias
+    treatment: assessoria_60d
+    outcome: pct_recuperado_180d
+    columns:
+      assessoria_60d: Conta repassada a assessoria de cobrança externa ao completar 60 dias de atraso (1 = sim, 0 = permaneceu na mesa interna).
+      pct_recuperado_180d: Valor recuperado entre o 60º e o 180º dia de atraso, em % do saldo devedor aos 60 dias.
+      score_60d: Score de risco interno aos 60 dias de atraso, de 0 a 1000.
+      saldo_60d: Saldo devedor aos 60 dias de atraso, em reais.
+      acordo_firmado: Acordo de parcelamento formalizado entre o 60º e o 180º dia de atraso (1 = sim, 0 = não).
+      carteira: Carteira do cliente (varejo ou premium).
+      idade_cliente: Idade do titular em anos.
+      mes_entrada_atraso: Mês em que a fatura entrou em atraso (1 a 6).
+    not_in_table:
+      sinal_pagamento: >-
+        Cliente atendeu a alguma ligação da mesa antes dos 60 dias e sinalizou que
+        pretende pagar. Registrado apenas nas anotações livres do operador, em texto
+        corrido, não extraídas.
+    story: >-
+      BRIEFING — Avaliação do repasse de carteira em atraso para assessorias externas.
+      Área solicitante: Gerência de Cobrança / Diretoria de Crédito. Data: 29/09/2026.
+      1. Contexto. Hoje, ao completar 60 dias de atraso, parte das contas de pessoa física
+      é repassada a uma de três assessorias externas (comissão de 18% sobre o recuperado)
+      e parte permanece na mesa interna. Em 2025 foram repassados R$ 212 milhões em saldo.
+      A diretoria quer saber se o repasse recupera mais do que a mesa recuperaria sozinha,
+      para decidir se amplia, mantém ou reduz o contrato com as assessorias em 2027.
+      2. Como a decisão de repassar é tomada hoje. Há duas regras automáticas: contas com
+      score abaixo de 300 aos 60 dias vão sempre para fora, e contas da carteira premium
+      ficam sempre na mesa, por política de relacionamento (cliente premium também paga
+      mais, em qualquer cenário). Fora dessas regras, que é onde está a maior parte do
+      volume, quem decide é o supervisor da mesa, conta a conta. Ele tende a repassar os
+      saldos menores, que não compensam o tempo da mesa (e saldo pequeno, proporcionalmente,
+      se recupera mais). E, na prática, segura as contas em que o cliente já atendeu alguma
+      ligação e sinalizou que vai pagar, repassando as que ninguém atende. Esse "já atendeu
+      e sinalizou" fica nas anotações livres do operador dentro do sistema de cobrança, em
+      texto corrido; não existe campo para isso e as anotações não foram extraídas para a
+      base deste trabalho. 3. O que acontece depois do repasse. As assessorias trabalham
+      com acordo: 34% das contas repassadas fecham um parcelamento formal até 180 dias,
+      contra 19% das contas da mesa, e conta com acordo formal recupera em média 2,5 vezes
+      mais que conta sem acordo. Consideramos esse o principal mecanismo pelo qual a
+      assessoria entrega resultado. 4. Base disponível (uma linha por conta; 61.408 contas
+      que chegaram a 60 dias de atraso entre janeiro e junho de 2026): assessoria_60d,
+      pct_recuperado_180d, score_60d, saldo_60d, acordo_firmado, carteira, idade_cliente,
+      mes_entrada_atraso. 5. Pergunta à consultoria. Com essa base, é possível estimar o
+      efeito do repasse sobre o percentual recuperado em 180 dias? Se sim, por quais
+      colunas ajustar? Se não, o que precisaríamos passar a registrar?
+    edges:
+      - score_60d -> assessoria_60d
+      - score_60d -> pct_recuperado_180d
+      - saldo_60d -> assessoria_60d
+      - saldo_60d -> pct_recuperado_180d
+      - carteira -> assessoria_60d
+      - carteira -> pct_recuperado_180d
+      - sinal_pagamento -> assessoria_60d
+      - sinal_pagamento -> pct_recuperado_180d
+      - assessoria_60d -> acordo_firmado
+      - acordo_firmado -> pct_recuperado_180d
+      - assessoria_60d -> pct_recuperado_180d
+    answer:
+      identifiable: false
+      missing: [sinal_pagamento]
+    note: >-
+      Duas regras automáticas e uma inclinação do supervisor estão na tabela; a outra
+      inclinação (segurar quem já sinalizou pagamento) vive em texto livre não extraído.
+      O acordo é consequência do repasse.
+
+  - id: pt_eletro_instalacao_ar
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: gerente de loja de uma rede de eletrodomésticos
+    theme: Varejo de eletrodomésticos, instalação de ar-condicionado
+    title: Instalação pela loja e chamado de assistência em 90 dias
+    treatment: instalacao_loja
+    outcome: chamado_90d
+    columns:
+      instalacao_loja: Instalação do ar-condicionado contratada junto com a compra e executada pela equipe técnica da loja (1 = sim, 0 = cliente instalou por conta própria).
+      chamado_90d: Abriu chamado de assistência técnica para o aparelho em até 90 dias da compra (1 = sim, 0 = não).
+      btus: Capacidade do aparelho, em BTU/h (9.000, 12.000, 18.000 ou 24.000).
+      inverter: Aparelho com tecnologia inverter (1 = sim, 0 = não).
+      vendedor_id: Matrícula do vendedor que fechou a venda.
+      nota_pesquisa: Nota de 0 a 10 dada pelo cliente na pesquisa de satisfação, enviada por SMS 100 dias após a compra (em branco se não respondeu).
+      num_pedido: Número do pedido no sistema de vendas.
+    story: >-
+      Fala Du, boa tarde! Lembra que você pediu um caso pra testar o painel novo de
+      pós-venda? Então, tenho um aqui da loja. A gente vende ar-condicionado e oferece a
+      instalação pela nossa equipe técnica (R$ 350 a R$ 600 dependendo do aparelho). O
+      Sandro da regional cismou que a instalação da loja aumenta chamado de assistência,
+      porque na planilha dele 14% de quem a gente instalou abriu chamado em 90 dias e só
+      9% de quem instalou por fora. Eu acho que é a conta que tá torta. A instalação da
+      loja vai muito mais em aparelho grande: acima de 12 mil BTUs o sistema já joga a
+      instalação no carrinho e o cliente quase sempre fecha, nos pequenos quase ninguém
+      pega. E máquina grande dá mais problema de qualquer jeito, tubulação mais longa,
+      mais ponto pra vazar gás. Fora isso depende muito do vendedor: o Rodrigo oferece pra
+      todo mundo, a Carla esquece metade das vezes. O inverter dá bem menos chamado, isso
+      o pessoal da assistência confirma. Na planilha vem também a nota da pesquisa de
+      satisfação, que é pra onde o Sandro olha (quem a gente instalou dá nota melhor, e
+      quem teve defeito detona a gente), e o número do pedido. Dá pra você rodar isso
+      certo e me dizer se a instalação da loja aumenta chamado mesmo? Se der até sexta é
+      ótimo, a reunião com o Sandro é segunda.
+    edges:
+      - btus -> instalacao_loja
+      - btus -> chamado_90d
+      - vendedor_id -> instalacao_loja
+      - inverter -> chamado_90d
+      - instalacao_loja -> chamado_90d
+      - instalacao_loja -> nota_pesquisa
+      - chamado_90d -> nota_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: [btus]
+      do_not_adjust_for:
+        nota_pesquisa: >-
+          Coletada 100 dias depois da compra, depois do resultado, e influenciada pela
+          instalação e pelo chamado. Ajustar por ela cria uma associação falsa entre os
+          dois.
+      indifferent: [inverter, vendedor_id, num_pedido]
+    note: >-
+      Que a pesquisa é posterior ao resultado só aparece na descrição da coluna. O
+      vendedor só mexe na instalação; o inverter só mexe no chamado.
+
+  - id: pt_escola_busca_ativa
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: coordenadora pedagógica de uma rede municipal
+    theme: Educação municipal, busca ativa
+    title: Visita domiciliar da busca ativa e frequência no 4º bimestre
+    treatment: visita_busca_ativa
+    outcome: freq_4bim
+    columns:
+      visita_busca_ativa: Família do aluno recebeu visita domiciliar da equipe de busca ativa no 2º bimestre de 2026 (1 = sim, 0 = não).
+      freq_4bim: Frequência do aluno no 4º bimestre de 2026, em % dos dias letivos.
+      faltas_1bim: Número de faltas do aluno no 1º bimestre de 2026.
+      escola_com_agente: Escola do aluno tem agente de busca ativa lotado (1 = sim, 0 = não).
+      ano_escolar: Ano escolar do aluno (1 a 9).
+      oficina_contraturno: Aluno inscrito em oficina do contraturno (esporte, dança ou reforço) a partir do 3º bimestre (1 = sim, 0 = não).
+      distancia_escola_km: Distância da residência à escola, em km, pelo endereço do cadastro.
+      matricula: Número de matrícula do aluno na rede.
+    not_in_table:
+      familia_conhecida: >-
+        A direção da escola já conhecia a família: atende o telefone, vai às reuniões.
+        Critério usado para escolher quem visitar primeiro; não registrado em lugar nenhum.
+    story: >-
+      Assunto: Busca ativa 2026 — planilha anexa e um pedido de ajuda com a análise.
+      Prezada Prof.ª Luciana, conforme combinamos na reunião do dia 22, segue a planilha
+      da busca ativa deste ano (busca_ativa_2026_v2.xlsx, aba "alunos", 2.937 linhas, uma
+      por aluno que entrou na lista de acompanhamento). A Secretaria quer apresentar ao
+      Conselho Municipal, em fevereiro, se a visita domiciliar melhora a frequência, e eu
+      queria chegar lá com uma conta que a senhora tenha visto antes. Como funcionou:
+      entrou na lista de acompanhamento todo aluno com dez ou mais faltas no 1º bimestre.
+      A visita domiciliar aconteceu no 2º bimestre, feita pela equipe de busca ativa, que
+      é um auxiliar administrativo remanejado; só nove das nossas 23 escolas tinham
+      auxiliar sobrando para isso, e nas outras ninguém foi visitado. Dentro das nove, a
+      equipe não deu conta da lista inteira, e foram as diretoras que escolheram por onde
+      começar. Sendo honesta com a senhora: elas começaram pelas famílias que já conheciam,
+      que atendem o telefone, que vão às reuniões. E família assim, de regra, já é a que
+      mantém o filho na escola. Isso não está em lugar nenhum da planilha, é conhecimento
+      de quem está na escola todos os dias, e eu não saberia nem como registrar. Na visita
+      a equipe leva a ficha de inscrição das oficinas do contraturno (esporte, dança,
+      reforço), e boa parte das famílias visitadas inscreve o aluno ali mesmo. As oficinas
+      começaram no 3º bimestre, e a gente vê que o aluno que está na oficina vem mais,
+      porque almoça na escola e fica. Esse é, pra mim, o grande ganho da visita, e está na
+      coluna oficina_contraturno. Colunas da planilha: matricula (número de matrícula),
+      escola_com_agente (a escola é uma das nove), visita_busca_ativa (a família recebeu
+      a visita no 2º bimestre), faltas_1bim (faltas no 1º bimestre), ano_escolar (1º ao 9º
+      ano; nos anos finais a frequência cai bastante, em qualquer escola),
+      oficina_contraturno (aluno inscrito a partir do 3º bimestre), distancia_escola_km
+      (distância da casa à escola, pelo cadastro; quem mora longe falta mais) e freq_4bim
+      (frequência do 4º bimestre, em % de dias letivos). É claro que quem já faltava muito
+      no 1º bimestre tende a continuar faltando, essa é a nossa dor. A pergunta é simples
+      de fazer e difícil de responder: comparando visitados e não visitados, por quais
+      colunas devemos ajustar para dizer que a visita teve efeito? Ou não dá para dizer
+      com o que temos? Um abraço, Rosângela. Coordenação Pedagógica — SME.
+    edges:
+      - faltas_1bim -> visita_busca_ativa
+      - faltas_1bim -> freq_4bim
+      - escola_com_agente -> visita_busca_ativa
+      - familia_conhecida -> visita_busca_ativa
+      - familia_conhecida -> freq_4bim
+      - visita_busca_ativa -> oficina_contraturno
+      - oficina_contraturno -> freq_4bim
+      - visita_busca_ativa -> freq_4bim
+      - ano_escolar -> freq_4bim
+      - distancia_escola_km -> freq_4bim
+    answer:
+      identifiable: false
+      missing: [familia_conhecida]
+    note: >-
+      A lista (faltas) e a escola (agente) estão na tabela; a escolha das diretoras pela
+      família conhecida, que também segura a frequência, não está. A oficina é consequência
+      da visita, dita como o grande ganho.
+
+  - id: pt_escola_prof_apoio
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenadora pedagógica de uma rede municipal
+    theme: Educação municipal, professor de apoio
+    title: Professor de apoio em matemática e Prova da Rede
+    treatment: prof_apoio
+    outcome: nota_mat_out
+    columns:
+      prof_apoio: Turma recebeu professor de apoio em matemática (segundo docente em sala, duas vezes por semana) de abril a outubro de 2026 (1 = sim, 0 = não).
+      nota_mat_out: Média da turma na Prova da Rede de matemática, aplicada em outubro de 2026 (0 a 10).
+      nota_mat_mar: Média da turma na avaliação diagnóstica de matemática aplicada em março de 2026, antes da designação dos professores de apoio (0 a 10).
+      alunos_turma: Número de alunos matriculados na turma em março de 2026.
+      turno: Turno da turma (manhã ou tarde).
+      cod_turma: Código da turma no sistema da rede.
+    story: >-
+      Bia, me ajuda numa coisa rápida? A secretária quer saber se o professor de apoio em
+      matemática (o segundo professor que a gente botou em 22 turmas de 5º ano, de abril a
+      outubro) melhorou a Prova da Rede de outubro. As turmas que receberam foram as que
+      foram pior na diagnóstica e as muito cheias, acima de 30 alunos, que a gente sabe
+      que rendem menos. A da tarde também rende menos, mas isso é outra história. Tenho
+      por turma: código da turma, se teve apoio, nota da diagnóstica, nº de alunos, turno
+      e a nota de outubro. Comparo como? Só a nota de outubro de quem teve e quem não
+      teve, eu sei que não pode kkk
+    edges:
+      - nota_mat_mar -> prof_apoio
+      - nota_mat_mar -> nota_mat_out
+      - alunos_turma -> prof_apoio
+      - alunos_turma -> nota_mat_out
+      - turno -> nota_mat_out
+      - prof_apoio -> nota_mat_out
+    answer:
+      identifiable: true
+      adjust_for: [alunos_turma, nota_mat_mar]
+      indifferent: [cod_turma, turno]
+    note: >-
+      Caso curto: dois critérios de escolha, os dois na tabela. Que a diagnóstica é
+      anterior ao apoio está na descrição da coluna. O turno só mexe na nota.

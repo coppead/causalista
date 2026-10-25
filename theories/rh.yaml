@@ -1,0 +1,374 @@
+# Ficha de teoria: rh.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: rh
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Programa de capacitação em uma empresa
+
+theory:
+  name: Capital humano e imersão no trabalho
+  statement: >-
+    A capacitação paga pela empresa forma habilidades que valem mais dentro dela do que
+    fora (capital humano específico). O programa também cria vínculos com colegas,
+    ajuste ao trabalho e perspectivas de carreira, coisas que o funcionário perderia ao
+    sair (imersão no trabalho). Quanto mais o funcionário tem a perder ao sair, menor a
+    chance de pedir demissão.
+  references:   # a confirmar pelo André
+    - "Becker, G. S. (1962). Investment in human capital: a theoretical analysis. Journal of Political Economy, 70(5, Part 2), 9-49."
+    - "Mitchell, T. R., Holtom, B. C., Lee, T. W., Sablynski, C. J., & Erez, M. (2001). Why people stay: using job embeddedness to predict voluntary turnover. Academy of Management Journal, 44(6), 1102-1121."
+
+context: >-
+  Uma grande empresa de serviços criou um programa de capacitação pago por ela, com três
+  meses de aulas, e parte dos seus funcionários participou. Ela quer saber se o programa
+  reduz a saída voluntária, isto é, o pedido de demissão, nos doze meses seguintes ao fim do programa.
+randomized: Os funcionários que participaram do programa foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem participou do programa.
+
+treatment:
+  column: capacitacao
+  label: o programa de capacitação
+  dictionary: Participou do programa de capacitação (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos funcionários que participa do programa
+
+outcome:
+  column: saiu
+  label: a saída voluntária
+  kind: binary
+  dictionary: Pediu demissão nos doze meses seguintes ao fim do programa (1 = sim, 0 = não).
+  scale: {rate: [0.10, 0.30]}   # fração dos funcionários que pede demissão
+
+effect:
+  sign: "-"                  # a teoria diz que o programa reduz a saída voluntária
+
+variables:
+
+  tempo_empresa:
+    label: o tempo de empresa
+    kind: count
+    scale: {mean: 48}
+    roles:
+      confounder:
+        dictionary: Meses de empresa até o início do programa.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            A empresa ofereceu o programa de capacitação com mais frequência aos
+            funcionários com menos tempo de empresa.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários com mais tempo de empresa pedem demissão com menos frequência.
+      outcome_cause:
+        dictionary: Meses de empresa até o início do programa.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários com mais tempo de empresa pedem demissão com menos frequência.
+
+  avaliacao_desempenho:
+    label: a avaliação de desempenho
+    kind: score
+    scale: {mean: 7}
+    roles:
+      confounder:
+        dictionary: Nota na avaliação de desempenho feita no semestre anterior ao início do programa, de 0 a 10.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A empresa escolheu para o programa de capacitação com mais frequência os
+            funcionários com nota mais alta na avaliação de desempenho.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Funcionários com nota mais alta na avaliação de desempenho pedem demissão com
+            menos frequência.
+      mediator:
+        dictionary: Nota na avaliação de desempenho feita no semestre seguinte ao fim do programa, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem faz o programa de capacitação recebe nota mais alta na avaliação de
+            desempenho seguinte.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Funcionários com nota mais alta na avaliação de desempenho pedem demissão com
+            menos frequência.
+      outcome_cause:
+        dictionary: Nota na avaliação de desempenho feita no semestre anterior ao início do programa, de 0 a 10.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Funcionários com nota mais alta na avaliação de desempenho pedem demissão com
+            menos frequência.
+
+  salario:
+    label: o salário
+    kind: continuous
+    scale: {median: 5500}
+    roles:
+      confounder:
+        dictionary: Salário mensal no mês anterior ao início do programa, em reais.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A empresa ofereceu o programa de capacitação com mais frequência a
+            funcionários de salário mais alto.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários com salário mais alto pedem demissão com menos frequência.
+      mediator:
+        dictionary: Salário mensal três meses depois do fim do programa, em reais.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem faz o programa de capacitação recebe um adicional de qualificação e
+            passa a ter salário mais alto.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários com salário mais alto pedem demissão com menos frequência.
+      outcome_cause:
+        dictionary: Salário mensal no mês anterior ao início do programa, em reais.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários com salário mais alto pedem demissão com menos frequência.
+
+  promocao:
+    label: a promoção
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      confounder:
+        dictionary: Foi promovido nos doze meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A empresa inscreveu no programa de capacitação com mais frequência os funcionários promovidos nos meses anteriores, para prepará-los para o
+            novo cargo.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários promovidos pedem demissão com menos frequência.
+      mediator:
+        dictionary: Foi promovido nos seis meses seguintes ao fim do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem faz o programa de capacitação é promovido com mais frequência nos
+            meses seguintes.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários promovidos pedem demissão com menos frequência.
+
+  engajamento:
+    label: o engajamento do funcionário
+    kind: score
+    scale: {mean: 7}
+    hidden_fact: >-
+      Nenhuma pesquisa feita pela empresa antes do início do programa de capacitação mediu o engajamento dos funcionários, e por isso o engajamento não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota na pesquisa de engajamento feita no mês anterior ao início do programa, de 0 a 10.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Funcionários mais engajados se inscreveram no programa de capacitação com
+            mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários mais engajados pedem demissão com menos frequência.
+      mediator:
+        dictionary: Nota na pesquisa de engajamento feita três meses depois do fim do programa, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: Quem faz o programa de capacitação fica mais engajado nos meses seguintes.
+        to_outcome:
+          sign: "-"
+          fact: Funcionários mais engajados pedem demissão com menos frequência.
+
+  procura_emprego:
+    label: a procura por outro emprego
+    kind: binary
+    scale: {rate: 0.20}
+    hidden_fact: >-
+      A empresa não sabe quais funcionários estavam procurando outro emprego, e por isso
+      essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: >-
+          Declarou, na pesquisa interna feita no mês anterior ao início do programa, que estava
+          procurando outro emprego (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Funcionários que estavam procurando outro emprego se inscreveram no programa de capacitação com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que procuram outro emprego pedem demissão com mais frequência.
+      outcome_cause:
+        dictionary: >-
+          Declarou, na pesquisa interna feita no mês anterior ao início do programa, que estava
+          procurando outro emprego (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que procuram outro emprego pedem demissão com mais frequência.
+
+  proposta_externa:
+    label: a proposta de outra empresa
+    kind: binary
+    scale: {rate: 0.15}
+    hidden_fact: >-
+      A empresa não sabe quais funcionários receberam proposta de outra empresa, e por
+      isso essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: >-
+          Declarou, na pesquisa interna feita no mês anterior ao início do programa, que tinha
+          recebido proposta de emprego de outra empresa nos seis meses anteriores
+          (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Funcionários que tinham recebido proposta de outra empresa se inscreveram no
+            programa de capacitação com menos frequência.
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que recebem proposta de outra empresa pedem demissão com mais frequência.
+      outcome_cause:
+        dictionary: >-
+          Declarou, na pesquisa interna feita no mês anterior ao início do programa, que tinha
+          recebido proposta de emprego de outra empresa nos seis meses anteriores
+          (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que recebem proposta de outra empresa pedem demissão com mais frequência.
+
+  indicacao_gestor:
+    label: a indicação do gestor
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Foi indicado pelo gestor para o programa, antes do início das aulas (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Funcionários indicados pelo gestor tiveram prioridade nas vagas e
+            participaram do programa de capacitação com mais frequência.
+
+  unidade_piloto:
+    label: a unidade-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Trabalhava, no início do programa, em uma das unidades escolhidas para o piloto (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O programa de capacitação começou por algumas unidades-piloto, e quem trabalhava nelas participou do programa com mais frequência.
+
+  conversa_rh:
+    label: a conversa com o RH
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      treatment_cause:
+        dictionary: Teve conversa individual com o RH nos três meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O RH divulgava o programa de capacitação nas conversas individuais, e por
+            isso quem tinha conversado com o RH participou do programa com mais
+            frequência.
+      collider:
+        dictionary: Teve conversa individual com o RH nos doze meses seguintes ao fim do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem fez o programa de capacitação é chamado pelo RH para uma conversa individual com mais frequência, para avaliar o programa.
+        from_outcome:
+          sign: "+"
+          fact: Quem pede demissão tem conversa individual com o RH com mais frequência, porque o RH faz a conversa de desligamento.
+
+  pesquisa_clima:
+    label: a resposta à pesquisa de clima
+    kind: binary
+    scale: {rate: 0.50}
+    roles:
+      collider:
+        dictionary: Respondeu à pesquisa de clima aplicada doze meses depois do fim do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem fez o programa de capacitação responde à pesquisa de clima com mais
+            frequência, porque a pesquisa traz perguntas sobre o programa.
+        from_outcome:
+          sign: "-"
+          fact: >-
+            Quem pede demissão costuma deixar a empresa antes da aplicação da pesquisa de
+            clima e, por isso, responde à pesquisa com menos frequência.
+      outcome_cause:
+        dictionary: Respondeu à pesquisa de clima aplicada no ano anterior ao início do programa (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Funcionários que tinham respondido à pesquisa de clima do ano anterior ao início do programa pedem demissão com menos frequência.
+
+  horas_extras:
+    label: as horas extras
+    kind: count
+    scale: {mean: 10}
+    roles:
+      confounder:
+        dictionary: Horas extras por mês, em média, nos três meses anteriores ao início do programa.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Funcionários com mais horas extras tinham menos tempo para as aulas e
+            participaram do programa de capacitação com menos frequência.
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que fazem mais horas extras pedem demissão com mais frequência.
+      outcome_cause:
+        dictionary: Horas extras por mês, em média, nos três meses anteriores ao início do programa.
+        to_outcome:
+          sign: "+"
+          fact: Funcionários que fazem mais horas extras pedem demissão com mais frequência.
+
+  mes_aniversario:
+    label: o mês de aniversário
+    kind: count
+    scale: {mean: 6, min: 1, max: 12}
+    roles:
+      unrelated:
+        dictionary: Mês de aniversário do funcionário (1 = janeiro, 12 = dezembro).
+        fact: >-
+          O mês de aniversário do funcionário não tem relação com o programa de
+          capacitação nem com a saída voluntária.

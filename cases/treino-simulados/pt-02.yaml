@@ -1,0 +1,532 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma pessoa
+# escreveria. Arquivo pt-02.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: uma
+# analista de BI de uma seguradora de saúde, o diretor de uma escola técnica estadual, a
+# coordenadora de um programa de microcrédito, uma gerente de RH de um call center e um
+# síndico profissional de condomínios. Estilos: ata de reunião, pergunta em fórum de
+# analytics, briefing para uma consultoria, mensagem de WhatsApp e página de wiki interna.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota;
+# nada mais é mostrado a ele). Não são o teste da seção 7: nenhum cenário do teste
+# congelado (cases/simulados/) se repete aqui, nem variante próxima. As setas declaram o
+# diagrama que o texto implica; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py). Status rascunho até revisão.
+
+cases:
+
+  - id: pt_seguradora_vacina_gripe
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: analista de BI de uma seguradora de saúde, que documenta as bases do time
+    theme: Seguradora de saúde, campanha de vacinação contra gripe
+    title: Vacinação na campanha e sinistro respiratório no inverno
+    treatment: vacinou_campanha
+    outcome: sinistro_resp_inverno
+    columns:
+      vacinou_campanha: Tomou a vacina da gripe na campanha de abril/maio de 2026, no posto da empresa ou com o voucher (1 = sim, 0 = não).
+      sinistro_resp_inverno: Teve pelo menos uma guia com CID principal respiratório (capítulo J) entre 01/06 e 31/08/2026 (1 = sim, 0 = não).
+      idade: Idade em anos em 01/04/2026.
+      cronico: Condição crônica (asma, DPOC, diabetes ou cardiopatia) identificada nas guias dos 24 meses anteriores a abril/2026 (1 = sim, 0 = não).
+      posto_no_local: A empresa do beneficiário cedeu uma sala e recebeu posto de vacinação no local (1 = sim; 0 = a empresa recebeu vouchers).
+      respondeu_pesquisa_set: >-
+        Respondeu à pesquisa de satisfação de setembro/2026 (1 = sim, 0 = não respondeu ou
+        não recebeu). A pesquisa foi enviada a quem participou da campanha de vacinação e a
+        quem teve alguma utilização do plano entre junho e agosto.
+      id_beneficiario: Identificador interno do beneficiário.
+    story: >-
+      Base bi_saude.vacina_gripe_2026. Uma linha por beneficiário de plano empresarial ativo
+      em 01/04/2026 (412 mil linhas). Última atualização em 02/10/2026, por mim (Camila).
+      Dúvidas no canal #bi-sinistro.
+
+      Contexto. A campanha de vacinação contra gripe foi em abril e maio de 2026, em parceria
+      com as empresas clientes. Nas empresas que cederam uma sala montamos posto de vacinação
+      no local; nas outras mandamos voucher para a rede de farmácias, e a adesão com voucher
+      foi bem menor (11% contra 46%). Dentro de cada empresa, aderiram mais os beneficiários
+      mais velhos e os que têm condição crônica, até porque a comunicação da campanha foi
+      dirigida a esses dois grupos. São também os grupos que mais abrem sinistro respiratório
+      no inverno, com ou sem vacina.
+
+      Para que serve. A pergunta padrão da Diretoria Técnica é se a vacinação na campanha
+      reduz o sinistro respiratório entre junho e agosto. A flag de sinistro respiratório já
+      vem calculada a partir do CID principal da guia, não precisa refazer.
+
+      Cuidados. As colunas vêm de três fontes (cadastro, autorização de guias e a pesquisa de
+      setembro), cada uma com o seu período; antes de usar uma coluna, confira no dicionário a
+      que período ela se refere. Houve pedidos para incluir a pesquisa de setembro como
+      "indicador de engajamento" nas comparações; o dicionário diz como ela foi aplicada.
+    edges:
+      - idade -> vacinou_campanha
+      - idade -> sinistro_resp_inverno
+      - cronico -> vacinou_campanha
+      - cronico -> sinistro_resp_inverno
+      - posto_no_local -> vacinou_campanha
+      - vacinou_campanha -> sinistro_resp_inverno
+      - vacinou_campanha -> respondeu_pesquisa_set
+      - sinistro_resp_inverno -> respondeu_pesquisa_set
+    answer:
+      identifiable: true
+      adjust_for: [cronico, idade]
+      do_not_adjust_for:
+        respondeu_pesquisa_set: Foi aplicada em setembro a quem se vacinou e a quem usou o plano no inverno. Depende da vacinação e do próprio sinistro; ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [id_beneficiario, posto_no_local]
+    note: >-
+      A pesquisa de setembro é o laço. A história só diz que ela existe e manda ler o
+      dicionário; é lá que está escrito que ela foi enviada a quem se vacinou e a quem usou o
+      plano. O posto no local só mexe na adesão.
+
+  - id: pt_etec_monitores_professores
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: diretor de escola técnica estadual, que redige as atas do conselho escolar
+    theme: Educação técnica, programa de monitores de laboratório
+    title: Monitores escolhidos pelos professores e emprego seis meses depois
+    twin: pt_etec_monitores_sorteio
+    treatment: monitor
+    outcome: empregado_6m
+    columns:
+      monitor: Foi selecionado como monitor de laboratório em 2025 (1 = sim, 0 = não). A base tem só os alunos que se inscreveram no programa.
+      empregado_6m: Estava empregado na área do curso em junho/2026, segundo a ligação de acompanhamento de egressos da secretaria (1 = sim, 0 = não).
+      turno: Turno do aluno no 2º ano (M = manhã, N = noite).
+      curso: Curso técnico (MEC = Mecatrônica, INF = Informática, EDF = Edificações).
+      media_1ano: Média geral do 1º ano (2024), de 0 a 10.
+      idade: Idade em anos em 01/02/2025.
+      cadastro_banco_vagas: Cadastrou currículo no banco de vagas da escola entre agosto e dezembro de 2025 (1 = sim, 0 = não).
+    not_in_table:
+      iniciativa: >-
+        A impressão dos professores de laboratório sobre a desenvoltura do aluno ("quem se
+        vira no laboratório"). Ficou na conversa entre os professores; não há registro.
+    story: >-
+      ATA DA REUNIÃO DO CONSELHO ESCOLAR, 14 de agosto de 2026, 19h, sala dos professores.
+      Presentes: a direção, a coordenação pedagógica, dois representantes dos professores, um
+      representante dos pais e a secretária. Pauta única: avaliação do programa de monitores
+      de laboratório com a turma formada em dezembro de 2025.
+
+      A direção relatou que o programa teve 96 inscritos do 2º ano para 38 vagas, distribuídas
+      pelos laboratórios de Mecatrônica, Informática e Edificações, em número diferente em
+      cada um e maior no período noturno, onde o laboratório funciona sem técnico. Os
+      professores de cada laboratório escolheram os monitores entre os inscritos. Segundo o
+      professor Ednaldo, pesou a média do 1º ano e, nas palavras dele, "quem se vira no
+      laboratório", o aluno mais desenrolado; esse segundo critério ficou na conversa entre os
+      professores, não há registro dele em lugar nenhum, e o conselho concordou que é
+      justamente esse aluno que as empresas contratam primeiro, monitor ou não.
+
+      A secretaria ligou para os 96 em junho de 2026, no acompanhamento de egressos. Entre os
+      que foram monitores, 71% estavam empregados na área; entre os demais, 44%. A coordenação
+      ponderou que os alunos do noturno e os mais velhos em geral já trabalham; que a
+      empregabilidade varia muito por curso (Informática contrata, Edificações está parado);
+      e que as empresas pedem o histórico, de modo que a média do 1º ano pesa na contratação.
+      Lembrou ainda que os monitores ficaram sabendo das vagas pelos professores e se
+      cadastraram muito mais no banco de vagas da escola, que é o canal pelo qual
+      encaminhamos currículos às empresas conveniadas. O representante dos pais perguntou se,
+      com o que a secretaria tem (seleção, situação em junho, turno, curso, média do 1º ano,
+      idade e cadastro no banco de vagas), dá para dizer quanto da diferença é mérito do
+      programa. A direção ficou de levar a pergunta ao professor de estatística do noturno.
+      Nada mais havendo a tratar, lavrei a presente ata.
+    edges:
+      - turno -> monitor
+      - turno -> empregado_6m
+      - curso -> monitor
+      - curso -> empregado_6m
+      - media_1ano -> monitor
+      - media_1ano -> empregado_6m
+      - iniciativa -> monitor
+      - iniciativa -> empregado_6m
+      - idade -> empregado_6m
+      - monitor -> cadastro_banco_vagas
+      - cadastro_banco_vagas -> empregado_6m
+      - monitor -> empregado_6m
+    answer:
+      identifiable: false
+      missing: [iniciativa]
+    note: >-
+      Turno, curso e média estão na tabela; a desenvoltura que os professores viram não está, e
+      é ela que também faz o aluno ser contratado. Gêmeo do caso do sorteio.
+
+  - id: pt_etec_monitores_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: diretor de escola técnica estadual, que redige as atas do conselho escolar
+    theme: Educação técnica, programa de monitores de laboratório
+    title: Monitores sorteados por laboratório e emprego seis meses depois
+    twin: pt_etec_monitores_professores
+    treatment: monitor
+    outcome: empregado_6m
+    columns:
+      monitor: Foi selecionado como monitor de laboratório em 2025 (1 = sim, 0 = não). A base tem só os alunos que se inscreveram no programa.
+      empregado_6m: Estava empregado na área do curso em junho/2026, segundo a ligação de acompanhamento de egressos da secretaria (1 = sim, 0 = não).
+      turno: Turno do aluno no 2º ano (M = manhã, N = noite).
+      curso: Curso técnico (MEC = Mecatrônica, INF = Informática, EDF = Edificações).
+      media_1ano: Média geral do 1º ano (2024), de 0 a 10.
+      idade: Idade em anos em 01/02/2025.
+      cadastro_banco_vagas: Cadastrou currículo no banco de vagas da escola entre agosto e dezembro de 2025 (1 = sim, 0 = não).
+    story: >-
+      ATA DA REUNIÃO DO CONSELHO ESCOLAR, 14 de agosto de 2026, 19h, sala dos professores.
+      Presentes: a direção, a coordenação pedagógica, dois representantes dos professores, um
+      representante dos pais e a secretária. Pauta única: avaliação do programa de monitores
+      de laboratório com a turma formada em dezembro de 2025.
+
+      A direção relatou que o programa teve 96 inscritos do 2º ano para 38 vagas, distribuídas
+      pelos laboratórios de Mecatrônica, Informática e Edificações, em número diferente em
+      cada um e maior no período noturno, onde o laboratório funciona sem técnico. Como houve
+      mais inscritos do que vagas em todos os laboratórios, a coordenação fez sorteio público
+      entre os inscritos, um sorteio para cada laboratório (curso e turno), de modo que a
+      chance de entrar variou bastante: na Informática do noturno entraram dois a cada três
+      inscritos; na Mecatrônica da manhã, um a cada quatro. O professor Ednaldo registrou que
+      preferia ter escolhido, e a direção respondeu que o sorteio evitou reclamação de pais.
+
+      A secretaria ligou para os 96 em junho de 2026, no acompanhamento de egressos. Entre os
+      que foram monitores, 63% estavam empregados na área; entre os demais, 47%. A coordenação
+      ponderou que os alunos do noturno e os mais velhos em geral já trabalham; que a
+      empregabilidade varia muito por curso (Informática contrata, Edificações está parado);
+      e que as empresas pedem o histórico, de modo que a média do 1º ano pesa na contratação.
+      Lembrou ainda que os monitores ficaram sabendo das vagas pelos professores e se
+      cadastraram muito mais no banco de vagas da escola, que é o canal pelo qual
+      encaminhamos currículos às empresas conveniadas. O representante dos pais perguntou se,
+      com o que a secretaria tem (seleção, situação em junho, turno, curso, média do 1º ano,
+      idade e cadastro no banco de vagas), dá para dizer quanto da diferença é mérito do
+      programa. A direção ficou de levar a pergunta ao professor de estatística do noturno.
+      Nada mais havendo a tratar, lavrei a presente ata.
+    edges:
+      - turno -> monitor
+      - turno -> empregado_6m
+      - curso -> monitor
+      - curso -> empregado_6m
+      - media_1ano -> empregado_6m
+      - idade -> empregado_6m
+      - monitor -> cadastro_banco_vagas
+      - cadastro_banco_vagas -> empregado_6m
+      - monitor -> empregado_6m
+    answer:
+      identifiable: true
+      adjust_for: [curso, turno]
+      do_not_adjust_for:
+        cadastro_banco_vagas: Veio depois da seleção e por causa dela (os monitores souberam das vagas pelos professores). É parte do caminho pelo qual o programa gera emprego.
+      indifferent: [idade, media_1ano]
+    note: >-
+      Houve sorteio, mas um por laboratório, com chances diferentes por curso e turno; esses
+      dois precisam entrar no ajuste. A média pesa só na contratação. Gêmeo do caso dos
+      professores.
+
+  - id: pt_microcredito_curso_gestao
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: coordenadora de programas de uma instituição de microcrédito, sem formação em estatística
+    theme: Microcrédito, curso de gestão oferecido com o crédito
+    title: Curso Negócio em Ordem e atraso nas parcelas
+    treatment: fez_curso
+    outcome: atraso_60d
+    columns:
+      fez_curso: Concluiu o curso Negócio em Ordem (8 horas, dois sábados) no primeiro mês após a liberação do crédito (1 = sim, 0 = não).
+      atraso_60d: Alguma parcela com mais de 60 dias de atraso nos seis meses após a liberação (1 = sim, 0 = não).
+      agencia_com_sala: A agência onde o crédito foi liberado tem sala de treinamento (1 = sim, 0 = não). O curso só foi oferecido nessas.
+      tempo_negocio_meses: Tempo de existência do negócio na data da liberação, em meses, conforme o cadastro.
+      ramo: Ramo do negócio (ALI = alimentação, VES = vestuário e costura, SER = serviços, COM = comércio em geral).
+      valor_credito: Valor liberado, em reais.
+      usa_planilha_controle: Na visita do terceiro mês, o agente encontrou o cliente usando a planilha de controle ensinada no curso (1 = sim, 0 = não).
+      contato_equipe_6m: Número de contatos da equipe com o cliente (ligações e visitas) nos seis meses após a liberação, somando a ligação de acompanhamento feita a quem participou do curso e as ligações de cobrança feitas a quem entrou em atraso.
+      id_contrato: Número do contrato.
+    story: >-
+      BRIEFING PARA PROPOSTA. Avaliação do curso Negócio em Ordem. Crescer Microcrédito
+      (OSCIP, 11 agências, cerca de 6.400 clientes ativos). Contato: Luciana Prado,
+      coordenadora de programas. Proposta até 30/10/2026.
+
+      1. O que queremos saber. Se o curso Negócio em Ordem (8 horas, em dois sábados, sobre
+      separar o caixa da casa do caixa do negócio) reduz o atraso nas parcelas. O conselho
+      decide em dezembro se estende o curso à rede toda, a R$ 310 por participante.
+
+      2. Como foi oferecido. Em fevereiro, março e abril de 2026, a todos os clientes com
+      crédito liberado nesses meses nas cinco agências que têm sala de treinamento; nas outras
+      seis não houve curso, por falta de espaço mesmo. Convite aberto, 41% foram. Pelo relato
+      dos agentes, quem tem negócio mais antigo tirou o sábado para ir; quem está começando
+      diz que não pode fechar a banca. Variou muito por ramo também: costureiras e pessoal de
+      serviços foram em peso, as de alimentação quase não foram. Tempo de negócio e ramo são,
+      também, o que mais explica o atraso na nossa carteira histórica, com ou sem curso.
+
+      3. O que já vimos. Atraso acima de 60 dias nos seis meses após a liberação: 9% entre
+      quem fez o curso, 19% entre quem não fez. Na visita do terceiro mês o agente verifica se
+      o cliente usa a planilha de controle ensinada no curso: 68% dos que fizeram o curso
+      usavam, contra 12% dos outros, e quem usa a planilha paga em dia. Esse é o nosso
+      argumento para o conselho. O valor liberado pesa no atraso (parcela maior, mais atraso)
+      e é definido na análise de crédito, antes de qualquer convite.
+
+      4. Dados. Uma linha por contrato liberado entre fevereiro e abril, 1.870 contratos,
+      colunas no dicionário anexo. Sobre a coluna de contatos da equipe: soma a ligação de
+      acompanhamento que fazemos com quem participou do curso e as ligações de cobrança para
+      quem entrou em atraso. Parte da equipe quer usá-la como medida de proximidade com o
+      cliente.
+
+      5. O que esperamos. Dizer por quais colunas ajustar para comparar quem fez o curso com
+      quem não fez, ou nos dizer com franqueza se esses dados não permitem concluir.
+    edges:
+      - agencia_com_sala -> fez_curso
+      - tempo_negocio_meses -> fez_curso
+      - tempo_negocio_meses -> atraso_60d
+      - ramo -> fez_curso
+      - ramo -> atraso_60d
+      - valor_credito -> atraso_60d
+      - fez_curso -> usa_planilha_controle
+      - usa_planilha_controle -> atraso_60d
+      - fez_curso -> atraso_60d
+      - fez_curso -> contato_equipe_6m
+      - atraso_60d -> contato_equipe_6m
+    answer:
+      identifiable: true
+      adjust_for: [ramo, tempo_negocio_meses]
+      do_not_adjust_for:
+        usa_planilha_controle: Foi verificada no terceiro mês e é consequência do curso. É o caminho pelo qual o curso reduz o atraso, e faz parte do efeito que se quer medir.
+        contato_equipe_6m: Soma a ligação feita a quem fez o curso e a cobrança feita a quem atrasou. Depende do curso e do próprio atraso; ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [agencia_com_sala, id_contrato, valor_credito]
+    note: >-
+      A planilha é o argumento de venda e é consequência do curso; os contatos somam
+      acompanhamento e cobrança. A sala de treinamento só define quem foi convidado; o valor
+      só mexe no atraso.
+
+  - id: pt_microcredito_visita_agente
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenadora de programas de uma instituição de microcrédito, escrevendo a um amigo que trabalha com dados
+    theme: Microcrédito, visita do agente antes da liberação
+    title: Visita prévia do agente e atraso nas parcelas
+    treatment: visita_previa
+    outcome: atraso_30d
+    columns:
+      visita_previa: O agente de crédito visitou o negócio antes da liberação (1 = sim, 0 = não).
+      atraso_30d: Alguma parcela com mais de 30 dias de atraso nos 12 meses após a liberação (1 = sim, 0 = não).
+      distancia_agencia_km: Distância do endereço do negócio até a agência, em km, calculada pelo CEP.
+      primeiro_credito: É o primeiro crédito do cliente na instituição (1 = sim, 0 = não).
+      valor_credito: Valor liberado, em reais.
+    not_in_table:
+      impressao_agente: >-
+        A impressão do agente, na conversa de pedido, de que o negócio estava desorganizado.
+        Não tem campo no sistema; só fica o sim ou não da visita.
+    story: >-
+      Rafa, puxei os números da visita prévia: quem recebeu visita do agente antes da
+      liberação atrasou MAIS (23% x 14%) e a diretoria quer cortar a visita pra economizar.
+      Acho que é o contrário. A visita é obrigatória acima de R$ 5 mil e no primeiro crédito,
+      e esses dois grupos atrasam mais de qualquer jeito. Fora isso o agente vai em quem fica
+      na rota dele (temos a distância até a agência) e, sendo sincera, vai também quando acha
+      que o negócio tá meio bagunçado, aquele faro de agente que costuma acertar quem vai
+      atrasar; isso fica na cabeça do agente, no sistema só entra o sim/não da visita. Dá pra concluir alguma
+      coisa com visita_previa, atraso_30d, distancia_agencia_km, primeiro_credito e
+      valor_credito, ou não dá?
+    edges:
+      - distancia_agencia_km -> visita_previa
+      - primeiro_credito -> visita_previa
+      - primeiro_credito -> atraso_30d
+      - valor_credito -> visita_previa
+      - valor_credito -> atraso_30d
+      - impressao_agente -> visita_previa
+      - impressao_agente -> atraso_30d
+      - visita_previa -> atraso_30d
+    answer:
+      identifiable: false
+      missing: [impressao_agente]
+    note: >-
+      Valor e primeiro crédito estão na tabela e explicam parte da diferença; o faro do agente
+      não está, e ele decide a visita e acerta o atraso.
+
+  - id: pt_callcenter_cadeira_ergonomica
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de RH de um call center, sem formação em dados
+    theme: Call center, troca de cadeiras por modelo ergonômico
+    title: Cadeira ergonômica e afastamento osteomuscular
+    treatment: cadeira_nova
+    outcome: afastamento_osteo_6m
+    columns:
+      cadeira_nova: Recebeu a cadeira ergonômica no lote de março de 2026 (1 = sim, 0 = não).
+      afastamento_osteo_6m: Teve afastamento médico com CID osteomuscular (capítulo M) entre abril e setembro de 2026 (1 = sim, 0 = não).
+      site: Prédio onde o operador trabalha (BF = Barra Funda, OSA = Osasco, STA = Santo Amaro).
+      queixa_dor_periodico: Relatou dor nas costas, pescoço ou punho no exame periódico de janeiro/fevereiro de 2026 (1 = sim, 0 = não).
+      tempo_casa_meses: Meses de empresa em 01/03/2026.
+      turno: Turno de trabalho (M = manhã, T = tarde, N = noite).
+      visitas_ambulatorio_6m: >-
+        Número de passagens pelo ambulatório interno entre abril e setembro de 2026. O
+        ambulatório não emite atestado: recebe os atestados externos, acompanha quem volta de
+        afastamento e atende quem aparece com dor.
+    story: >-
+      Título: como comparar afastamento entre quem recebeu cadeira nova e quem não recebeu?
+
+      Sou gerente de RH de um call center (uns 2.300 operadores em três prédios em SP) e não
+      sou da área de dados, então perdoem se a pergunta for básica. Em março trocamos as
+      cadeiras de 40% das posições por um modelo ergonômico. A maior parte do lote foi para o
+      prédio da Barra Funda, porque o contrato de locação do prédio estava sendo renovado e a
+      troca entrou na negociação; o que sobrou foi dividido entre Osasco e Santo Amaro, e
+      dentro de cada prédio a Medicina do Trabalho pediu
+      prioridade para quem tinha relatado dor nas costas ou no punho no exame periódico de
+      janeiro/fevereiro. Foi só isso, prédio e queixa no periódico; antes que perguntem, turno
+      e tempo de casa não entraram na conta. De abril a setembro, 4,1% de quem recebeu a
+      cadeira teve afastamento por problema osteomuscular, contra 7,8% dos demais. Antes de eu
+      levar isso pra diretoria como "a cadeira cortou o afastamento quase pela metade": sei
+      que quem já tinha dor afasta mais, que cada prédio tem um perfil de operação e um
+      histórico de afastamento bem diferente, e que turno da noite e operador antigo afastam
+      mais, isso é assim desde sempre. Um colega sugeriu "controlar pelas visitas ao
+      ambulatório" como medida de saúde da pessoa, já que essa coluna veio junto no extract.
+      Colunas que tenho por operador: cadeira_nova, afastamento_osteo_6m, site,
+      queixa_dor_periodico, tempo_casa_meses, turno, visitas_ambulatorio_6m (descrições no
+      dicionário que o pessoal de TI me mandou). Por quais eu ajusto, e o conselho do colega
+      faz sentido?
+    edges:
+      - site -> cadeira_nova
+      - site -> afastamento_osteo_6m
+      - queixa_dor_periodico -> cadeira_nova
+      - queixa_dor_periodico -> afastamento_osteo_6m
+      - tempo_casa_meses -> afastamento_osteo_6m
+      - turno -> afastamento_osteo_6m
+      - cadeira_nova -> afastamento_osteo_6m
+      - afastamento_osteo_6m -> visitas_ambulatorio_6m
+      - queixa_dor_periodico -> visitas_ambulatorio_6m
+    answer:
+      identifiable: true
+      adjust_for: [queixa_dor_periodico, site]
+      do_not_adjust_for:
+        visitas_ambulatorio_6m: Foi contada depois e inclui a entrega dos atestados e o acompanhamento de quem volta de afastamento. É consequência do próprio afastamento; ajustar por ela distorce o efeito.
+      indifferent: [tempo_casa_meses, turno]
+    note: >-
+      Turno e tempo de casa só mexem no afastamento. As visitas ao ambulatório parecem uma
+      medida de saúde, mas vêm depois do afastamento e por causa dele.
+
+  - id: pt_condominio_app_boleto
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: síndico profissional, responsável por 28 condomínios de uma mesma administradora
+    theme: Condomínios, aplicativo com boleto e aviso de vencimento
+    title: Aplicativo do condomínio e atraso na taxa
+    treatment: ativou_app
+    outcome: atrasou_1sem
+    columns:
+      ativou_app: O responsável pela unidade ativou o aplicativo do condomínio até 28/02/2026 (1 = sim, 0 = não).
+      atrasou_1sem: Pagou alguma taxa condominial depois do vencimento entre março e agosto de 2026 (1 = sim, 0 = não).
+      idade_responsavel: Idade do responsável financeiro pela unidade, em anos, no cadastro da administradora.
+      atrasos_2025: Número de taxas pagas depois do vencimento em 2025.
+      proprietario_mora: O proprietário mora na unidade (1 = sim, 0 = unidade alugada).
+      avisos_lidos: Número de avisos de vencimento abertos no aplicativo entre março e agosto de 2026 (zero para quem não ativou).
+    not_in_table:
+      vai_assembleia: >-
+        Se o morador costuma ir às assembleias. A lista de presença fica no livro de atas, à
+        mão.
+    story: >-
+      Marcos, boa tarde, é o Sérgio (síndico do Vila Serena e dos outros 27 da Admix). Preciso
+      de um olhar seu de dados antes da reunião de quinta. A Admix lançou o app em janeiro
+      (boleto dentro do app e aviso 3 dias antes do vencimento) e no 1º semestre quem ativou
+      atrasou bem menos a taxa: 6% contra 21%. Eles querem vender isso pros outros síndicos
+      como mérito do app. Eu desconfio. O convite foi mandado primeiro pra quem tinha atrasado
+      em 2025, pra ver se melhorava, e quem atrasava continua atrasando, lógico. O morador
+      mais velho não baixou e é o que paga sempre em dia. Inquilino baixou menos, porque o
+      convite foi no nome do proprietário, e inquilino atrasa mais. E tem uma coisa que
+      ninguém vai medir: eu mostrei o app na assembleia de janeiro, quem vai em assembleia
+      ativou na hora, e esse morador que aparece em assembleia nunca atrasa, é o perfil dele.
+      A lista de presença é no livro de atas, à mão. O que a Admix tem por unidade:
+      ativou_app, atrasou_1sem, idade_responsavel, atrasos_2025, proprietario_mora e
+      avisos_lidos (quantos avisos a pessoa abriu no app, e quem abre os avisos paga em dia,
+      é o gráfico que eles mais mostram). Dá pra separar o efeito do app disso tudo ou eu
+      seguro a Admix?
+    edges:
+      - idade_responsavel -> ativou_app
+      - idade_responsavel -> atrasou_1sem
+      - atrasos_2025 -> ativou_app
+      - atrasos_2025 -> atrasou_1sem
+      - proprietario_mora -> ativou_app
+      - proprietario_mora -> atrasou_1sem
+      - vai_assembleia -> ativou_app
+      - vai_assembleia -> atrasou_1sem
+      - ativou_app -> avisos_lidos
+      - avisos_lidos -> atrasou_1sem
+      - ativou_app -> atrasou_1sem
+    answer:
+      identifiable: false
+      missing: [vai_assembleia]
+    note: >-
+      Idade, histórico e inquilino estão na tabela; a presença em assembleia está no livro de
+      atas, e esse morador ativou mais e nunca atrasa. Os avisos lidos são consequência do app,
+      apresentados como o gráfico favorito.
+
+  - id: pt_callcenter_escala_livre
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de RH de um call center, sem formação em dados
+    theme: Call center, horário de entrada flexível
+    title: Escala Livre e saída da empresa em seis meses
+    treatment: escala_flexivel
+    outcome: saiu_6m
+    columns:
+      escala_flexivel: Entrou no programa Escala Livre até 31/03/2026 (1 = sim, 0 = não).
+      saiu_6m: Desligou-se da empresa, por qualquer motivo, entre março e agosto de 2026 (1 = sim, 0 = não).
+      tempo_casa_meses: Meses de empresa em 01/02/2026.
+      nota_qualidade_jan: Nota de qualidade (monitoria de ligações) na avaliação de janeiro de 2026, de 0 a 100.
+      estudante: Declarou estar matriculado em curso superior ou técnico no cadastro de janeiro de 2026 (1 = sim, 0 = não).
+      faltas_6m: Número de faltas sem justificativa entre março e agosto de 2026.
+      operacao: Operação (cliente) em que o operador atende (BCO, TEL, VAR, SEG).
+    not_in_table:
+      cobertura_fila_dia: >-
+        Se a fila da operação estava coberta no dia em que o operador pediu a escala. Decidiu
+        a liberação do pedido; não ficou guardada.
+    story: >-
+      Briefing para a consultoria: avaliação do programa Escala Livre. De: Patrícia Nunes,
+      gerente de RH, Conecta Contact Center (unidade Campinas, 1.640 operadores). Para: equipe
+      de people analytics. Reunião de alinhamento em 21/10/2026.
+
+      O programa. Desde fevereiro de 2026 o operador que entra na Escala Livre escolhe o
+      horário de entrada dentro de uma janela de três horas, dia a dia, pelo app de ponto. A
+      diretoria acredita que isso segura gente, e o nosso problema é atrito: perdemos 31% do
+      quadro por ano.
+
+      Quem podia entrar e como entrou. Elegíveis: operadores com pelo menos 12 meses de casa e
+      nota de qualidade igual ou acima de 85 na avaliação de janeiro. O elegível pedia a
+      entrada pelo app e o supervisor liberava conforme a cobertura da fila no dia do pedido,
+      em ordem de chegada: fila coberta, liberava; fila descoberta, pedia para tentar outro
+      dia. O supervisor não escolhia pessoa, só o dia, e a cobertura da fila daquele dia não
+      fica guardada em lugar nenhum, só o resultado (entrou ou não). Entre os elegíveis, 58%
+      entraram até março. Quem estuda pediu muito mais (quer encaixar a faculdade), e
+      estudante é quem mais sai da empresa, quando forma ou arruma estágio. O programa abriu
+      para todas as operações ao mesmo tempo e a adesão ficou parecida em todas; o atrito,
+      isso a gente já sabe, varia muito de uma operação para outra.
+
+      O que já vimos. De março a agosto saíram 9% dos que entraram na Escala Livre e 17% dos
+      que não entraram, contando desligamento por qualquer motivo. As faltas sem justificativa
+      caíram pela metade entre quem entrou, e falta é o principal gatilho de desligamento
+      aqui, tanto por justa causa quanto por desistência. Operador com mais tempo de casa e
+      nota de qualidade alta sai menos, isso vale com ou sem programa.
+
+      Dados. Uma linha por operador ativo em 01/02/2026, com as colunas do dicionário anexo.
+      Queremos saber por quais colunas ajustar para comparar quem entrou com quem não entrou,
+      se é que a comparação é possível com o que temos.
+    edges:
+      - tempo_casa_meses -> escala_flexivel
+      - tempo_casa_meses -> saiu_6m
+      - nota_qualidade_jan -> escala_flexivel
+      - nota_qualidade_jan -> saiu_6m
+      - estudante -> escala_flexivel
+      - estudante -> saiu_6m
+      - cobertura_fila_dia -> escala_flexivel
+      - escala_flexivel -> faltas_6m
+      - faltas_6m -> saiu_6m
+      - escala_flexivel -> saiu_6m
+      - operacao -> saiu_6m
+    answer:
+      identifiable: true
+      adjust_for: [estudante, nota_qualidade_jan, tempo_casa_meses]
+      do_not_adjust_for:
+        faltas_6m: Foram contadas depois da entrada no programa e caíram por causa dele. São o caminho pelo qual a escala segura o operador, e fazem parte do efeito que se quer medir.
+      indifferent: [operacao]
+    note: >-
+      A cobertura da fila não está na tabela, mas só decidiu quem entrou; não mexe na saída.
+      Elegibilidade (tempo de casa e nota) e ser estudante estão na tabela e precisam entrar.
+      As faltas são consequência do programa.

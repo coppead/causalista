@@ -1,0 +1,464 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: a
+# coordenadora de um programa de microcrédito, a gerente de e-commerce de uma marca de
+# moda, o gerente de segurança do trabalho de uma mineradora, o diretor de uma escola
+# técnica estadual e a gerente de assinaturas de um jornal. Cada texto tem o estilo do
+# canal em que a pessoa escreveria (e-mail para o chefe, Slack para o time de dados,
+# trecho de dissertação, nota interna, página de wiki).
+#
+# Estes casos servem ao treino por reforço: o modelo responde, o verificador dá a nota.
+# Não são o teste da seção 7 (os de cases/simulados/) e não repetem os cenários dele.
+# Não são texto de pessoas de verdade. A resposta de cada caso é conferida contra o
+# diagrama declarado em `edges` por scripts/check_cases.py.
+
+cases:
+
+  - id: pt_microcredito_oficina
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: coordenadora de um programa de microcrédito no interior de Pernambuco, formada em serviço social
+    theme: Microcrédito
+    title: Oficina de educação financeira e atraso no primeiro ciclo
+    treatment: oficina_financeira
+    outcome: atraso_60d
+    columns:
+      oficina_financeira: Participou da oficina de educação financeira antes do desembolso do primeiro empréstimo (1 = sim, 0 = não).
+      atraso_60d: Teve parcela com mais de 60 dias de atraso durante o primeiro ciclo (1 = sim, 0 = não).
+      renda_familiar: Renda familiar mensal declarada no cadastro, em reais.
+      tempo_negocio: Tempo de funcionamento do negócio no cadastro, em anos.
+      valor_liberado: Valor do primeiro empréstimo liberado pelo comitê de crédito, em reais.
+      agente_credito: Agente de crédito responsável pelo cadastro do cliente.
+      visita_agente: Recebeu visita do agente durante o primeiro ciclo (1 = sim, 0 = não). Inclui a visita de acompanhamento do terceiro mês e a visita de cobrança.
+    not_in_table:
+      organizacao_cliente: Impressão do agente, na visita de cadastro, sobre o quanto o cliente é organizado com as contas. Não é registrada.
+    story: >-
+      Oi Ricardo, tudo bem? Segue o que eu consegui levantar sobre a oficina de educação
+      financeira, pra gente decidir se ela fica no orçamento de 2027. Desde abril de 2025
+      oferecemos uma oficina de duas tardes (fluxo de caixa, separar o dinheiro da casa do
+      dinheiro do negócio) antes do desembolso do primeiro empréstimo. Foram 412 clientes com
+      oficina e 1.130 sem, todos de primeiro ciclo. Puxei do sistema a planilha com o atraso
+      acima de 60 dias no primeiro ciclo, a renda familiar declarada no cadastro, o tempo do
+      negócio e o valor liberado. Como a oficina depende da agenda do agente, a Marta e o
+      Josué fizeram quase todas; os outros agentes mal convidaram. Quem define o valor e
+      aprova é o comitê de crédito, não o agente. Agora, o que me deixa com um pé atrás: na
+      prática os agentes convidavam de preferência quem eles achavam mais organizado, aquele
+      cliente que já chega com o caderninho anotado, e esse cliente paga melhor de qualquer
+      jeito. A gente não registra nada disso, é impressão do agente na visita. Pela regra do
+      programa, a oficina também foi oferecida primeiro às famílias de renda mais baixa, e
+      essas famílias são as que mais atrasam. Uma coisa que eu reparei: quem passou pela
+      oficina acabou pedindo valores menores, acho que a conversa sobre fluxo de caixa deixa
+      a pessoa mais pé no chão, e valor menor atrasa menos. Negócio mais antigo atrasa menos,
+      isso a gente já sabia. Tem também a coluna da visita: o agente visita quem fez a oficina
+      no terceiro mês, pra ver se está aplicando, e visita também todo mundo que passou de 60
+      dias de atraso, pra cobrar. Dá pra tirar alguma conclusão séria sobre a oficina com
+      esses dados ou não? Abraço, Lúcia
+    edges:
+      - organizacao_cliente -> oficina_financeira
+      - organizacao_cliente -> atraso_60d
+      - renda_familiar -> oficina_financeira
+      - renda_familiar -> atraso_60d
+      - tempo_negocio -> atraso_60d
+      - agente_credito -> oficina_financeira
+      - oficina_financeira -> valor_liberado
+      - valor_liberado -> atraso_60d
+      - oficina_financeira -> atraso_60d
+      - oficina_financeira -> visita_agente
+      - atraso_60d -> visita_agente
+    answer:
+      identifiable: false
+      missing: [organizacao_cliente]
+    twin: pt_microcredito_oficina_nota
+    note: A impressão do agente sobre a organização do cliente decide quem é convidado e prevê o atraso, e não está na tabela. O valor liberado é consequência da oficina; a visita vem depois do atraso.
+
+  - id: pt_microcredito_oficina_nota
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: coordenadora de um programa de microcrédito no interior de Pernambuco, formada em serviço social
+    theme: Microcrédito
+    title: Oficina de educação financeira e atraso, com a nota de organização no sistema
+    treatment: oficina_financeira
+    outcome: atraso_60d
+    columns:
+      oficina_financeira: Participou da oficina de educação financeira antes do desembolso do primeiro empréstimo (1 = sim, 0 = não).
+      atraso_60d: Teve parcela com mais de 60 dias de atraso durante o primeiro ciclo (1 = sim, 0 = não).
+      renda_familiar: Renda familiar mensal declarada no cadastro, em reais.
+      tempo_negocio: Tempo de funcionamento do negócio no cadastro, em anos.
+      valor_liberado: Valor do primeiro empréstimo liberado pelo comitê de crédito, em reais.
+      agente_credito: Agente de crédito responsável pelo cadastro do cliente.
+      nota_organizacao: Nota de 1 a 5 dada pelo agente na visita de cadastro sobre a organização do cliente com as contas.
+      visita_agente: Recebeu visita do agente durante o primeiro ciclo (1 = sim, 0 = não). Inclui a visita de acompanhamento do terceiro mês e a visita de cobrança.
+    story: >-
+      Oi Ricardo, tudo bem? Segue o que eu consegui levantar sobre a oficina de educação
+      financeira, pra gente decidir se ela fica no orçamento de 2027. Desde abril de 2025
+      oferecemos uma oficina de duas tardes (fluxo de caixa, separar o dinheiro da casa do
+      dinheiro do negócio) antes do desembolso do primeiro empréstimo. Foram 412 clientes com
+      oficina e 1.130 sem, todos de primeiro ciclo. Puxei do sistema a planilha com o atraso
+      acima de 60 dias no primeiro ciclo, a renda familiar declarada no cadastro, o tempo do
+      negócio e o valor liberado. Como a oficina depende da agenda do agente, a Marta e o
+      Josué fizeram quase todas; os outros agentes mal convidaram. Quem define o valor e
+      aprova é o comitê de crédito, não o agente. Agora, o que me deixa com um pé atrás: na
+      prática os agentes convidavam de preferência quem eles achavam mais organizado, aquele
+      cliente que já chega com o caderninho anotado, e esse cliente paga melhor de qualquer
+      jeito. Pelo menos isso a gente registra: desde 2024 o agente dá uma nota de organização
+      de 1 a 5 na visita de cadastro, e ela está na planilha junto com a renda. Pela regra do
+      programa, a oficina também foi oferecida primeiro às famílias de renda mais baixa, e
+      essas famílias são as que mais atrasam. Uma coisa que eu reparei: quem passou pela
+      oficina acabou pedindo valores menores, acho que a conversa sobre fluxo de caixa deixa
+      a pessoa mais pé no chão, e valor menor atrasa menos. Negócio mais antigo atrasa menos,
+      isso a gente já sabia. Tem também a coluna da visita: o agente visita quem fez a oficina
+      no terceiro mês, pra ver se está aplicando, e visita também todo mundo que passou de 60
+      dias de atraso, pra cobrar. Dá pra tirar alguma conclusão séria sobre a oficina com
+      esses dados ou não? Abraço, Lúcia
+    edges:
+      - nota_organizacao -> oficina_financeira
+      - nota_organizacao -> atraso_60d
+      - renda_familiar -> oficina_financeira
+      - renda_familiar -> atraso_60d
+      - tempo_negocio -> atraso_60d
+      - agente_credito -> oficina_financeira
+      - oficina_financeira -> valor_liberado
+      - valor_liberado -> atraso_60d
+      - oficina_financeira -> atraso_60d
+      - oficina_financeira -> visita_agente
+      - atraso_60d -> visita_agente
+    answer:
+      identifiable: true
+      adjust_for: [nota_organizacao, renda_familiar]
+      do_not_adjust_for:
+        valor_liberado: É consequência da oficina e faz parte do efeito que se quer medir. Quem fez a oficina pediu valores menores, e valor menor atrasa menos.
+        visita_agente: Vem depois do atraso e é causada pela oficina e pelo próprio atraso. Ajustar por ela cria uma associação falsa entre oficina e atraso.
+      indifferent: [tempo_negocio, agente_credito]
+    twin: pt_microcredito_oficina
+    note: Igual ao gêmeo, com um fato trocado. A impressão do agente virou a coluna nota_organizacao, e com ela e a renda o efeito fica identificável.
+
+  - id: pt_jornal_newsletter_alternada
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de assinaturas de um jornal regional, formada em jornalismo, sem formação em estatística
+    theme: Assinaturas de jornal
+    title: Newsletter da manhã e renovação da assinatura digital
+    treatment: newsletter_manha
+    outcome: renovou_12m
+    columns:
+      newsletter_manha: Inscrito automaticamente na newsletter Bom Dia no momento do cadastro, em março de 2025 (1 = sim, 0 = não).
+      renovou_12m: Assinatura renovada no 12º mês (1 = sim, 0 = não).
+      plano: Plano contratado no cadastro. digital ou digital_impresso.
+      canal_aquisicao: Origem do cadastro. campanha_190 (promoção de R$ 1,90 no primeiro mês) ou organico.
+      dias_app_90d: Número de dias com pelo menos uma abertura do app nos 90 dias após o cadastro.
+      respondeu_pesquisa: Respondeu a pesquisa de satisfação enviada em abril de 2026 (1 = sim, 0 = não).
+      id_assinante: Código do assinante no sistema de assinaturas.
+    story: >-
+      pessoal, preciso de uma mão com a análise da newsletter Bom Dia antes da reunião de
+      quinta. contexto: em março do ano passado a gente testou inscrever automaticamente parte
+      dos novos assinantes na newsletter. o Fábio fez na mão, pegou a lista de
+      cadastros de março em ordem de data e foi alternando, um entra, o próximo não, até
+      fechar o mês (deu 2.348 inscritos e 2.351 não). agora fechou 12 meses e eu quero saber
+      se a newsletter mexeu na renovação. a base que eu exportei tem: se entrou na newsletter,
+      se renovou no 12º mês, o plano (só digital ou digital+impresso), o canal de aquisição
+      (campanha de R$ 1,90 ou cadastro orgânico), os dias com abertura do app nos primeiros
+      90 dias, se respondeu a pesquisa de satisfação que mandamos em abril deste ano, e o id.
+      detalhe que eu acho relevante: o link da newsletter abre dentro do app, então quem está
+      inscrito abre o app bem mais, e a gente sabe de outros levantamentos que quem abre mais
+      o app renova mais. e a pesquisa de satisfação foi mandada pela newsletter e por e-mail
+      avulso, então inscrito respondeu muito mais; quem renovou também respondeu muito mais,
+      obviamente, quem cancelou nem abre nosso e-mail. plano e canal pesam na renovação
+      (impresso+digital renova mais, R$ 1,90 renova menos), isso a gente já sabe. a dúvida é
+      só o que entra na comparação e o que não entra. pode ser pra quarta?
+    edges:
+      - newsletter_manha -> dias_app_90d
+      - dias_app_90d -> renovou_12m
+      - newsletter_manha -> renovou_12m
+      - plano -> renovou_12m
+      - canal_aquisicao -> renovou_12m
+      - newsletter_manha -> respondeu_pesquisa
+      - renovou_12m -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        dias_app_90d: É consequência da newsletter e faz parte do efeito que se quer medir. Quem recebe a newsletter abre mais o app, e quem abre mais renova.
+        respondeu_pesquisa: Foi medida depois da renovação e é causada pela newsletter e pela renovação. Ajustar por ela cria uma associação falsa entre as duas.
+      indifferent: [plano, canal_aquisicao, id_assinante]
+    note: A inscrição alternada na lista por ordem de cadastro vale como sorteio. Nada precisa ser ajustado; o uso do app e a pesquisa estragam a conta.
+
+  - id: pt_ecommerce_provador_virtual
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: gerente de e-commerce de uma marca de moda feminina de médio porte, formada em administração
+    theme: E-commerce de moda
+    title: Provador virtual e devolução em 30 dias
+    treatment: usou_provador
+    outcome: devolveu_30d
+    columns:
+      usou_provador: Cliente usou o provador virtual na página do produto antes de concluir o pedido (1 = sim, 0 = não).
+      devolveu_30d: Item devolvido em até 30 dias após a entrega (1 = sim, 0 = não).
+      categoria: Categoria do item. vestido, calca ou camiseta.
+      compras_anteriores: Número de pedidos concluídos pela cliente antes deste, desde o cadastro.
+      dispositivo: Dispositivo em que o pedido foi feito. app ou site.
+      valor_item: Preço pago pelo item, em reais, sem frete.
+      avaliou_produto: Cliente enviou avaliação do produto em resposta ao pedido de avaliação, disparado quando fecha a janela de devolução (1 = sim, 0 = não).
+    not_in_table:
+      inseguranca_tamanho: Insegurança da cliente quanto ao tamanho no momento da compra. Não é registrada em lugar nenhum.
+    story: >-
+      Provador virtual: o que sabemos até agora. Página mantida pelo time de e-commerce,
+      atualizada em 22/09. Contexto. O provador virtual (a cliente informa altura, peso e o
+      caimento que prefere e recebe a sugestão de tamanho) está no ar na página de produto
+      desde fevereiro, para todas as clientes, em vestidos, calças e camisetas. Ninguém é
+      obrigado a usar; o uso ficou em torno de 11% dos itens vendidos. A pergunta que o
+      comercial faz toda semana é se o provador reduz devolução. Dados. Montamos uma base por
+      item vendido de fevereiro a agosto com: uso do provador antes da compra, devolução em
+      até 30 dias, categoria, número de compras anteriores da cliente, dispositivo, valor do
+      item e se a cliente avaliou o produto. O que já observamos. O uso concentra em vestidos
+      e calças, que são também as categorias com mais devolução por caimento; em camiseta
+      quase ninguém usa. Cliente antiga, que já conhece a nossa modelagem, usa pouco o
+      provador e devolve pouco. No app o botão fica abaixo da dobra e o uso é bem menor que
+      no site. Peça mais cara volta mais, com ou sem provador. A avaliação do produto é pedida
+      por e-mail quando fecha a janela de 30 dias de devolução, e quem usou o provador recebe
+      um e-mail específico perguntando se o tamanho sugerido serviu, por isso avalia mais;
+      quem devolveu quase nunca avalia. Ponto em aberto. A hipótese do time de produto é que a cliente que clica
+      no provador é justamente a que está insegura com o tamanho, e essa cliente devolve mais
+      com ou sem provador. Não temos nenhum registro dessa insegurança: não há pergunta no
+      checkout e o provador não guarda o que a cliente digitou. Por isso a comparação simples
+      (11,8% de devolução com provador contra 9,1% sem) não convence ninguém, e ainda não
+      sabemos se alguma comparação convenceria.
+    edges:
+      - inseguranca_tamanho -> usou_provador
+      - inseguranca_tamanho -> devolveu_30d
+      - categoria -> usou_provador
+      - categoria -> devolveu_30d
+      - compras_anteriores -> usou_provador
+      - compras_anteriores -> devolveu_30d
+      - dispositivo -> usou_provador
+      - valor_item -> devolveu_30d
+      - usou_provador -> devolveu_30d
+      - usou_provador -> avaliou_produto
+      - devolveu_30d -> avaliou_produto
+    answer:
+      identifiable: false
+      missing: [inseguranca_tamanho]
+    note: A cliente escolhe usar o provador, e a insegurança que leva a usar também leva a devolver; não está na tabela. Categoria e compras anteriores são confusões reais, mas não bastam.
+
+  - id: pt_mineradora_bloqueio_energia
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: gerente de segurança do trabalho de uma mineradora de ferro, engenheiro, cursando mestrado profissional em engenharia de produção
+    theme: Segurança do trabalho em mineração
+    title: Reciclagem em bloqueio de energias e incidentes em doze meses
+    treatment: treinamento_bloqueio
+    outcome: incidente_12m
+    columns:
+      treinamento_bloqueio: Concluiu a reciclagem de 16 h em bloqueio e etiquetagem de energias perigosas no 1º trimestre de 2025 (1 = sim, 0 = não).
+      incidente_12m: Envolvido em ao menos um incidente registrado, com ou sem afastamento, entre abril de 2025 e março de 2026 (1 = sim, 0 = não).
+      area: Área de lotação em março de 2025. mina, usina ou manutencao.
+      tempo_empresa: Tempo de casa em março de 2025, em anos completos.
+      turno: Turno fixo em março de 2025. dia ou noite.
+      relatos_quase_acidente: Número de relatos de quase-acidente abertos pelo empregado entre abril de 2025 e março de 2026.
+      modulo_complementar: Convocado para o módulo complementar de 4 h realizado em abril de 2026 (1 = sim, 0 = não).
+      matricula: Matrícula funcional do empregado.
+    story: >-
+      3.2 Base de dados e variáveis. A base reúne os 1.874 empregados próprios da unidade
+      estudada, no Quadrilátero Ferrífero, ativos em março de 2025. A intervenção analisada é
+      a reciclagem de 16 horas em bloqueio e etiquetagem de energias perigosas, realizada no
+      primeiro trimestre de 2025 e concluída por 712 empregados. A reciclagem não foi
+      oferecida a todos de uma vez: por decisão da gerência de operações, da qual o autor fez
+      parte, a área de manutenção foi atendida primeiro, por intervir diretamente em
+      equipamentos energizados, e, dentro de cada área, deu-se prioridade aos empregados com
+      menos de dois anos de casa. A variável de resultado é o envolvimento em ao menos um
+      incidente registrado, com ou sem afastamento, nos doze meses seguintes ao trimestre da
+      reciclagem. Cabe notar que a manutenção concentra historicamente a maior taxa de
+      incidentes da unidade e que empregados recém-admitidos se envolvem em mais ocorrências
+      do que os veteranos, o que desaconselha a comparação direta entre treinados e não
+      treinados. O turno noturno apresenta taxa de incidentes superior ao diurno, conforme os
+      relatórios anuais da unidade. Registram-se ainda duas variáveis coletadas ao longo do
+      período de observação. A primeira é o número de relatos de quase-acidente abertos pelo
+      empregado nos doze meses: o conteúdo da reciclagem enfatiza o relato, e observou-se
+      aumento expressivo entre os treinados; a literatura e a experiência da unidade indicam
+      que o relato antecipa correções e reduz a ocorrência de incidentes. A segunda é a
+      convocação para o módulo complementar de quatro horas, realizado em abril de 2026, ao
+      término do período de observação: foram convocados todos os envolvidos em incidentes,
+      por exigência do procedimento de investigação, e todos os que haviam concluído a
+      reciclagem de 16 horas, da qual o módulo é continuação. A matrícula funcional foi
+      mantida apenas como chave de identificação. O Quadro 3 descreve as variáveis.
+    edges:
+      - area -> treinamento_bloqueio
+      - area -> incidente_12m
+      - tempo_empresa -> treinamento_bloqueio
+      - tempo_empresa -> incidente_12m
+      - turno -> incidente_12m
+      - treinamento_bloqueio -> relatos_quase_acidente
+      - relatos_quase_acidente -> incidente_12m
+      - treinamento_bloqueio -> incidente_12m
+      - treinamento_bloqueio -> modulo_complementar
+      - incidente_12m -> modulo_complementar
+    answer:
+      identifiable: true
+      adjust_for: [area, tempo_empresa]
+      do_not_adjust_for:
+        relatos_quase_acidente: É consequência da reciclagem e faz parte do efeito que se quer medir. A reciclagem aumenta o relato, e o relato reduz incidentes.
+        modulo_complementar: Foi registrado depois do período e é causado pela reciclagem e pelo incidente. Ajustar por ele cria uma associação falsa entre os dois.
+      indifferent: [turno, matricula]
+    note: Texto formal e longo. Área e tempo de casa decidiram quem foi treinado primeiro e preveem incidentes. Os relatos são consequência; a convocação vem depois do resultado.
+
+  - id: pt_escola_tecnica_estagio
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: diretor de uma escola técnica estadual de uma cidade média de Minas Gerais, professor de eletrotécnica
+    theme: Educação profissional
+    title: Estágio pela parceria e emprego seis meses depois
+    treatment: estagio_parceria
+    outcome: empregado_6m
+    columns:
+      estagio_parceria: Fez estágio na empresa parceira durante o 3º ano, em 2024 (1 = sim, 0 = não).
+      empregado_6m: Empregado com carteira assinada em junho de 2025, seis meses após o fim do 3º ano (1 = sim, 0 = não).
+      media_2ano: Média geral do aluno ao fim do 2º ano (2023), de 0 a 10.
+      curso: Curso técnico. eletrotecnica, informatica ou administracao.
+      distancia_empresa: Distância da residência do aluno até a empresa parceira, em km.
+      idade: Idade do aluno em março de 2024, em anos.
+      frequencia_3ano: Percentual de presença do aluno nas aulas do 3º ano (2024).
+      respondeu_egressos: Respondeu a pesquisa de egressos aplicada no fim de junho de 2025 (1 = sim, 0 = não).
+    story: >-
+      Nota para a Superintendência Regional sobre a parceria de estágio com a Metalúrgica
+      Santa Rita. Em 2024, 63 alunos do 3º ano estagiaram na Santa Rita pela parceria; 148
+      não estagiaram. A empresa pediu que a escola indicasse os melhores alunos, e a
+      indicação seguiu a média do 2º ano. A parceria só abriu vagas para eletrotécnica e
+      informática; administração ficou de fora. Alguns indicados recusaram porque a empresa
+      fica na saída da BR e eles moram do outro lado da cidade. Em junho de 2025 levantamos
+      quem estava empregado com carteira. Eletrotécnica emprega bem mais que os outros cursos
+      aqui na região, e aluno com média alta se coloca com mais facilidade de qualquer forma;
+      os mais velhos também, as empresas daqui preferem quem já fez 18. A empresa cobra
+      presença dos estagiários, e isso apareceu na frequência do 3º ano; frequência baixa é o
+      que mais pesa para o aluno não concluir e ficar sem emprego. A pesquisa de egressos foi
+      aplicada no fim de junho: a Santa Rita nos ajudou a localizar os ex-estagiários, e quem
+      estava empregado respondeu bem mais. Peço orientação de como comparar os dois grupos
+      antes de levar o número para a reunião com a empresa.
+    edges:
+      - media_2ano -> estagio_parceria
+      - media_2ano -> empregado_6m
+      - curso -> estagio_parceria
+      - curso -> empregado_6m
+      - distancia_empresa -> estagio_parceria
+      - idade -> empregado_6m
+      - estagio_parceria -> frequencia_3ano
+      - frequencia_3ano -> empregado_6m
+      - estagio_parceria -> empregado_6m
+      - estagio_parceria -> respondeu_egressos
+      - empregado_6m -> respondeu_egressos
+    answer:
+      identifiable: true
+      adjust_for: [curso, media_2ano]
+      do_not_adjust_for:
+        frequencia_3ano: Foi medida durante o estágio e é consequência dele. Faz parte do efeito que se quer medir.
+        respondeu_egressos: Vem depois do emprego e é causada pelo estágio e pelo emprego. Ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [distancia_empresa, idade]
+    note: Nota curta. A frequência do 3º ano parece uma coluna anterior, mas o ano do estágio e o da frequência são o mesmo, e a nota diz que o estágio mudou a frequência.
+
+  - id: pt_jornal_desconto_retencao
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: gerente de assinaturas de um jornal regional, formada em jornalismo, sem formação em estatística
+    theme: Assinaturas de jornal
+    title: Desconto de retenção na ligação de cancelamento e assinatura ativa
+    treatment: desconto_retencao
+    outcome: ativo_6m
+    columns:
+      desconto_retencao: Recebeu oferta de 40% de desconto por seis meses na ligação de cancelamento (1 = sim, 0 = não).
+      ativo_6m: Assinatura ativa seis meses após a ligação (1 = sim, 0 = não).
+      motivo_cancelamento: Código do motivo informado na ligação. preco, conteudo, tempo ou mudanca.
+      tempo_assinatura: Meses de assinatura até a data da ligação.
+      atendente: Código do atendente que atendeu a ligação.
+    not_in_table:
+      duvida_assinante: Se o assinante parecia em dúvida sobre cancelar, percebido pelo atendente na conversa. Não é registrado.
+    story: >-
+      Nota rápida sobre o desconto de retenção, pra gente discutir na segunda. Hoje a oferta
+      de 40% por seis meses fica a critério do atendente: o roteiro manda oferecer quando o
+      motivo da ligação é preço, mas na prática o atendente oferece quando sente que a pessoa
+      está em dúvida, e quem liga em dúvida acaba ficando mais mesmo sem desconto. Essa
+      sensação não vai pra lugar nenhum, o sistema só grava o código do motivo. Peguei as
+      3.900 ligações de cancelamento do primeiro semestre, com o motivo, o tempo de
+      assinatura, o atendente e se o assinante continuava ativo seis meses depois. Pra
+      assinante antigo o atendente tende a oferecer mais, pra segurar, e assinante antigo
+      também fica mais; motivo conteúdo quase não volta, preço volta bastante. Tem atendente que oferece pra todo mundo
+      e atendente que quase nunca oferece. Faz sentido medir o efeito do desconto com essa
+      base ou eu paro de insistir nisso?
+    edges:
+      - duvida_assinante -> desconto_retencao
+      - duvida_assinante -> ativo_6m
+      - motivo_cancelamento -> desconto_retencao
+      - motivo_cancelamento -> ativo_6m
+      - tempo_assinatura -> desconto_retencao
+      - tempo_assinatura -> ativo_6m
+      - atendente -> desconto_retencao
+      - desconto_retencao -> ativo_6m
+    answer:
+      identifiable: false
+      missing: [duvida_assinante]
+    note: Caso curto, com o fator que falta dito logo no início. Motivo e tempo de assinatura são confusões reais, mas a dúvida percebida pelo atendente não está na tabela.
+
+  - id: pt_ecommerce_frete_gratis
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de e-commerce de uma marca de moda feminina de médio porte, formada em administração
+    theme: E-commerce de moda
+    title: Frete grátis acima de R$ 150 e recompra em 90 dias
+    treatment: frete_gratis_150
+    outcome: recompra_90d
+    columns:
+      frete_gratis_150: Cliente incluída na lista de frete grátis para pedidos acima de R$ 150, liberada em junho de 2026 (1 = sim, 0 = não).
+      recompra_90d: Fez ao menos um pedido nos 90 dias após a liberação da lista (1 = sim, 0 = não).
+      regiao_entrega: Região do endereço principal de entrega. sudeste, sul, nordeste, centro_oeste ou norte.
+      pedidos_2025: Número de pedidos concluídos pela cliente em 2025.
+      sessoes_app_90d: Número de sessões no app nos 90 dias após a liberação da lista.
+      cupom_reativacao: Recebeu cupom de reativação em setembro de 2026 (1 = sim, 0 = não).
+      dia_semana_cadastro: Dia da semana em que a cliente fez o cadastro no site.
+    story: >-
+      gente, bom dia. a Carol do CRM quer apresentar o frete grátis acima de 150 como case
+      no offsite e me pediu um número de recompra. antes que alguém faça o com x sem direto,
+      deixa eu contar como a lista foi montada. em junho a gente liberou frete grátis a
+      partir de R$ 150 pra um grupo de clientes: entrou quem o CRM marcou como recorrente (3
+      ou mais pedidos em 2025) e também a base do Sudeste, que o CD de Extrema entrega em até
+      2 dias, mas não foi 100% nem num grupo nem no outro, o orçamento não deu e o CRM cortou
+      aleatório dentro de cada grupo. a liberação veio com push e banner no app. o que eu tenho na base: região de entrega, pedidos em
+      2025, sessões no app nos 90 dias seguintes, se a cliente recomprou em 90 dias, se
+      recebeu cupom de reativação em setembro e o dia da semana do cadastro (veio junto no
+      export, ignorem). coisas que eu sei: cliente recorrente recompra muito mais, óbvio;
+      Sudeste recompra mais porque recebe rápido; quem ganhou frete grátis passou a abrir o
+      app bem mais (push, banner) e quem abre mais o app compra de novo. o cupom de
+      reativação é da régua automática pra quem ficou 90 dias sem comprar, só que a lista do
+      frete grátis entrou numa régua separada que também manda cupom. me ajudem a montar a
+      comparação direito pra eu não passar vergonha na frente da Carol.
+    edges:
+      - regiao_entrega -> frete_gratis_150
+      - regiao_entrega -> recompra_90d
+      - pedidos_2025 -> frete_gratis_150
+      - pedidos_2025 -> recompra_90d
+      - frete_gratis_150 -> sessoes_app_90d
+      - sessoes_app_90d -> recompra_90d
+      - frete_gratis_150 -> recompra_90d
+      - frete_gratis_150 -> cupom_reativacao
+      - recompra_90d -> cupom_reativacao
+    answer:
+      identifiable: true
+      adjust_for: [pedidos_2025, regiao_entrega]
+      do_not_adjust_for:
+        sessoes_app_90d: É consequência do frete grátis e faz parte do efeito que se quer medir. Quem ganhou frete grátis abriu mais o app, e quem abre mais compra de novo.
+        cupom_reativacao: Vem depois da recompra e é causado pela lista do frete grátis e pela própria recompra. Ajustar por ele cria uma associação falsa entre os dois.
+      indifferent: [dia_semana_cadastro]
+    note: A lista foi montada por região e por recorrência, que também preveem a recompra. As sessões no app são consequência; o cupom vem depois do resultado.

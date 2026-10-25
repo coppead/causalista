@@ -1,0 +1,541 @@
+# Casos simulados para TREINO, lote pt-06: oito casos em português do Brasil escritos
+# como se fossem de uma pessoa (o diretor de uma rede de escolas de idiomas, o dono de
+# uma rede de pet shops, o gerente de segurança do trabalho de uma mineradora, um
+# analista de uma distribuidora de medicamentos, a coordenadora pedagógica de uma rede
+# municipal), cada um no estilo em que essa pessoa escreveria: transcrição de áudio
+# informal, trecho de dissertação de mestrado, mensagem de Slack para o time de dados,
+# briefing para uma consultoria, trecho de relatório trimestral.
+#
+# Escritos pelo assistente em 2026-10-07, no papel de cada pessoa. Idioma: pt.
+#
+# Estes casos são TREINO (reforço: o modelo responde, o verificador dá a nota). Não são
+# teste e não reaproveitam nenhum cenário dos casos congelados de cases/simulados/. As
+# setas ("causa -> efeito") declaram o diagrama que o texto, as descrições das colunas e
+# o bom senso implicam; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py). Status: rascunho até aprovação por delegação.
+
+cases:
+
+  - id: pt_idiomas_clube_conversacao
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: diretor de uma rede de escolas de idiomas com cinco unidades no interior de Minas Gerais, ex-professor de inglês, sem formação em dados
+    theme: Educação privada (escola de idiomas)
+    title: Clube de conversação e rematrícula
+    treatment: clube_conversacao
+    outcome: rematriculou
+    columns:
+      id_aluno: Código do aluno no sistema acadêmico.
+      clube_conversacao: Participou do clube de conversação aos sábados em pelo menos quatro encontros no primeiro semestre de 2026 (1 = sim, 0 = não).
+      rematriculou: Fez a rematrícula para o segundo semestre de 2026 dentro do prazo, até 15 de julho (1 = sim, 0 = não).
+      nivel: Nível do aluno no início do semestre (básico, intermediário ou avançado).
+      semestres_cursados: Semestres concluídos na escola até o fim de 2025.
+      unidade: Unidade em que o aluno estuda (Centro, Shopping, Bairro Alto, Nova Era ou Rio Verde).
+      nota_prova_final: Nota na prova oral e escrita de fim de semestre, aplicada na última semana de junho de 2026, de 0 a 10.
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada por e-mail no fim de julho de 2026 (1 = sim, 0 = não).
+    not_in_table:
+      gosto_pelo_curso: O quanto o aluno gosta do curso e se envolve com ele, a impressão que cada professor tem dos seus alunos. Não existe campo para isso no sistema.
+    story: >-
+      Oi Renata, tudo bem? vou te mandar por áudio que é mais rápido, depois você me cobra
+      o que faltar. É sobre o clube de conversação, lembra? Aquele que a gente começou em
+      fevereiro, sábado de manhã, de graça, aberto pra qualquer aluno, em três unidades
+      só, Centro, Shopping e Nova Era, porque nas outras duas eu não tinha professor pra
+      pôr no sábado. Então, a rematrícula do segundo semestre fechou dia 15 de julho e eu
+      fui olhar: dos alunos que frequentaram o clube, assim, pelo menos quatro sábados,
+      81% rematricularam, contra 64% do resto. A Lu do Shopping já quer vender isso pros
+      franqueados como a grande solução da evasão, e eu queria segurar um pouco.
+
+      Porque assim, quem vai no clube é quem gosta mesmo do curso, aquele aluno que você
+      vê que participa em sala, que pergunta, que faz a lição. Esse aluno fica com a gente
+      de qualquer jeito, e vai bem na prova também. Isso de gostar do curso o professor
+      sabe de cabeça de cada um, mas não tem no sistema, não tem campo pra isso. Outra
+      coisa, o aluno de nível avançado vai muito mais no clube, porque consegue conversar,
+      né, o básico morre de vergonha. E avançado rematricula menos, porque tá acabando o
+      curso. O nível tá ligado ao tempo de casa, óbvio, quem tem mais semestre tá em nível
+      mais alto.
+
+      As unidades são diferentes também: o Shopping sempre perdeu mais aluno que as outras,
+      é um público mais rotativo, e lá o clube lotou. Eu pedi pro Diego puxar do sistema:
+      a unidade, o nível, quantos semestres o aluno já tinha, a nota da prova final de
+      junho, se foi no clube e se rematriculou. Na prova final o pessoal do clube foi bem
+      melhor, principalmente na oral, o que faz sentido, praticaram mais, e quem vai mal
+      na prova desanima e some. Ah, e tem a pesquisa de satisfação, que a gente mandou por
+      e-mail no fim de julho, depois que a rematrícula fechou. Quem rematriculou respondeu
+      bem mais, lógico, e as professoras do clube ficaram cobrando a turma delas pra
+      responder, então também respondeu mais. O Diego pôs se respondeu ou não. Enfim, me
+      diz: dá pra eu dizer que o clube segurou aluno ou não dá? Valeu, beijo.
+    edges:
+      - gosto_pelo_curso -> clube_conversacao
+      - gosto_pelo_curso -> rematriculou
+      - gosto_pelo_curso -> nota_prova_final
+      - nivel -> clube_conversacao
+      - nivel -> rematriculou
+      - semestres_cursados -> nivel
+      - unidade -> clube_conversacao
+      - unidade -> rematriculou
+      - clube_conversacao -> nota_prova_final
+      - nota_prova_final -> rematriculou
+      - clube_conversacao -> rematriculou
+      - clube_conversacao -> respondeu_pesquisa
+      - rematriculou -> respondeu_pesquisa
+    answer:
+      identifiable: false
+      missing: [gosto_pelo_curso]
+    note: >-
+      Quem vai ao clube é quem gosta do curso, e isso não está em coluna nenhuma. Nível e
+      unidade explicam parte da ida ao clube, mas não essa parte. A nota da prova final é
+      consequência do clube e a pesquisa foi respondida depois da rematrícula; nenhuma das
+      duas substitui o que falta.
+
+  - id: pt_pet_assinatura_depois
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: dono de uma rede de quatro pet shops na zona norte de Porto Alegre, administrador, mexe em planilha mas não em estatística
+    theme: Varejo (pet shop)
+    title: Assinatura de banho e gasto com produtos, com as visitas contadas depois
+    twin: pt_pet_assinatura_antes
+    treatment: assinatura_banho
+    outcome: gasto_produtos_6m
+    columns:
+      assinatura_banho: Aderiu ao plano mensal de banho (quatro banhos por mês a preço fixo) no lançamento, em março de 2026 (1 = sim, 0 = não).
+      gasto_produtos_6m: Gasto com produtos (ração, petiscos, acessórios, farmácia) de abril a setembro de 2026, em reais. Não inclui serviços.
+      gasto_produtos_6m_antes: Gasto com produtos de outubro de 2025 a março de 2026, em reais, mesmo critério.
+      porte_pet: Porte do maior cão do cliente no cadastro (pequeno, médio ou grande).
+      visitas_loja_6m: Número de vezes que o cliente passou no caixa de abril a setembro de 2026, com compra ou serviço.
+      loja: Loja em que o cliente está cadastrado (1 a 4).
+    story: >-
+      @time-dados bom dia! Lembram do plano de banho mensal que lançamos em março? Preciso
+      saber se ele puxou venda de produto, porque a margem do banho é baixa e a aposta era
+      essa: o cliente vindo toda semana pro banho leva ração, petisco, o que for. Puxei do
+      caixa, por cliente: gasto com produto de abr a set, o mesmo gasto de out a mar,
+      quantas vezes a pessoa passou no caixa de abr a set, porte do cão e a loja. Quem
+      aderiu foi muito o pessoal de cachorro grande (banho de grande é caro, o plano
+      compensa) e quem já gastava bem com a gente antes. Cachorro grande come mais e
+      cliente bom continua bom, isso vcs sabem melhor que eu. A loja 3 vendeu o dobro de
+      planos das outras porque a Carla abraçou a ideia. Bruto: assinante gastou R$ 1.340
+      em produto no período vs R$ 760 dos outros. Confio nessa diferença? Ajusto por quê?
+    edges:
+      - gasto_produtos_6m_antes -> assinatura_banho
+      - gasto_produtos_6m_antes -> gasto_produtos_6m
+      - porte_pet -> assinatura_banho
+      - porte_pet -> gasto_produtos_6m
+      - loja -> assinatura_banho
+      - assinatura_banho -> visitas_loja_6m
+      - visitas_loja_6m -> gasto_produtos_6m
+      - assinatura_banho -> gasto_produtos_6m
+    answer:
+      identifiable: true
+      adjust_for: [gasto_produtos_6m_antes, porte_pet]
+      do_not_adjust_for:
+        visitas_loja_6m: Contada de abril a setembro, depois do lançamento, e é consequência do plano. Vir toda semana e comprar enquanto está na loja é justamente o caminho pelo qual o plano age.
+      indifferent: [loja]
+    note: >-
+      Os dois motivos da adesão (porte do cão e gasto anterior) estão na tabela. A loja só
+      mexe na adesão. A armadilha são as visitas, contadas depois do lançamento.
+
+  - id: pt_pet_assinatura_antes
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: dono de uma rede de quatro pet shops na zona norte de Porto Alegre, administrador, mexe em planilha mas não em estatística
+    theme: Varejo (pet shop)
+    title: Assinatura de banho e gasto com produtos, com as visitas contadas antes
+    twin: pt_pet_assinatura_depois
+    treatment: assinatura_banho
+    outcome: gasto_produtos_6m
+    columns:
+      assinatura_banho: Aderiu ao plano mensal de banho (quatro banhos por mês a preço fixo) no lançamento, em março de 2026 (1 = sim, 0 = não).
+      gasto_produtos_6m: Gasto com produtos (ração, petiscos, acessórios, farmácia) de abril a setembro de 2026, em reais. Não inclui serviços.
+      gasto_produtos_6m_antes: Gasto com produtos de outubro de 2025 a março de 2026, em reais, mesmo critério.
+      porte_pet: Porte do maior cão do cliente no cadastro (pequeno, médio ou grande).
+      visitas_loja_6m_antes: Número de vezes que o cliente passou no caixa de outubro de 2025 a março de 2026, com compra ou serviço.
+      loja: Loja em que o cliente está cadastrado (1 a 4).
+    story: >-
+      @time-dados bom dia! Lembram do plano de banho mensal que lançamos em março? Preciso
+      saber se ele puxou venda de produto, porque a margem do banho é baixa e a aposta era
+      essa: o cliente vindo toda semana pro banho leva ração, petisco, o que for. Puxei do
+      caixa, por cliente: gasto com produto de abr a set, o mesmo gasto de out a mar,
+      quantas vezes a pessoa passou no caixa de out a mar, porte do cão e a loja. Quem
+      aderiu foi muito o pessoal de cachorro grande (banho de grande é caro, o plano
+      compensa) e quem já gastava bem com a gente antes; e as meninas do caixa ofereceram
+      o plano principalmente pra quem já vinha direto, cliente conhecido. Cachorro grande
+      come mais, cliente bom continua bom e quem vem mais vezes gasta mais, isso vcs sabem
+      melhor que eu. A loja 3 vendeu o dobro de planos das outras porque a Carla abraçou a
+      ideia. Bruto: assinante gastou R$ 1.340 em produto no período vs R$ 760 dos outros.
+      Confio nessa diferença? Ajusto por quê?
+    edges:
+      - gasto_produtos_6m_antes -> assinatura_banho
+      - gasto_produtos_6m_antes -> gasto_produtos_6m
+      - porte_pet -> assinatura_banho
+      - porte_pet -> gasto_produtos_6m
+      - visitas_loja_6m_antes -> assinatura_banho
+      - visitas_loja_6m_antes -> gasto_produtos_6m
+      - loja -> assinatura_banho
+      - assinatura_banho -> gasto_produtos_6m
+    answer:
+      identifiable: true
+      adjust_for: [gasto_produtos_6m_antes, porte_pet, visitas_loja_6m_antes]
+      indifferent: [loja]
+    note: >-
+      Mesma história do gêmeo, com as visitas contadas antes do lançamento e usadas pelo
+      caixa para oferecer o plano. Aqui elas são um motivo da adesão e entram no ajuste.
+
+  - id: pt_mineradora_colete_proximidade
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de segurança do trabalho de uma mineradora de minério de ferro em Minas Gerais, engenheiro de minas com vinte anos de operação
+    theme: Indústria (mineração, segurança do trabalho)
+    title: Colete com alerta de proximidade e incidentes com equipamentos móveis
+    treatment: colete_proximidade
+    outcome: incidente_12m
+    columns:
+      matricula: Matrícula do empregado.
+      colete_proximidade: Recebeu o colete com sensor de proximidade (alerta sonoro e vibratório ao se aproximar de equipamento móvel) na distribuição de fevereiro de 2025 (1 = sim, 0 = não).
+      incidente_12m: Registrou ao menos um incidente envolvendo equipamento móvel, com ou sem lesão, de março de 2025 a fevereiro de 2026 (1 = sim, 0 = não).
+      area: Área de lotação do empregado em fevereiro de 2025 (lavra, beneficiamento, oficina ou administrativo).
+      turno_noturno: Trabalhava em escala com turno noturno em fevereiro de 2025 (1 = sim, 0 = não).
+      tempo_funcao_anos: Anos na função atual em fevereiro de 2025.
+      horas_treinamento_12m: Horas de treinamento de segurança registradas no sistema de RH de março de 2025 a fevereiro de 2026.
+      entrevista_sst: Foi entrevistado pela equipe de segurança do trabalho entre março de 2025 e março de 2026 (1 = sim, 0 = não).
+    story: >-
+      Briefing para a proposta de análise. Programa Colete de Proximidade, Mina Córrego
+      Fundo. Setembro de 2026.
+
+      Objetivo. Estimar se o colete com sensor de proximidade reduziu os incidentes com
+      equipamentos móveis entre os empregados próprios, e definir que variáveis a análise
+      deve levar em conta.
+
+      Contexto. Em fevereiro de 2025 distribuímos 640 coletes para um efetivo de 1.910
+      empregados. O colete emite alerta sonoro e vibratório quando o empregado se aproxima
+      de caminhão fora de estrada, pá carregadeira ou motoniveladora equipados com o
+      transponder. A distribuição não foi aleatória: priorizamos a lavra e o beneficiamento,
+      onde a interação com equipamento móvel é maior e onde historicamente se concentram os
+      incidentes, e dentro dessas áreas as equipes com turno noturno, pela visibilidade
+      reduzida; o turno da noite registra mais incidentes em todas as áreas. A oficina e o
+      administrativo receberam poucos coletes. Sabemos que empregados com menos tempo na
+      função se envolvem mais em incidentes, mas o tempo na função não entrou no critério
+      de distribuição.
+
+      Quem recebeu o colete fez um módulo de treinamento de quatro horas sobre o
+      equipamento, lançado no sistema de RH junto com os demais treinamentos de segurança
+      do ano. A área entende que mais horas de treinamento reduzem a ocorrência de
+      incidentes, de modo que parte do ganho do programa, se houver, pode vir daí.
+
+      A equipe de SST entrevista todo empregado envolvido em incidente e, ao longo de 2025,
+      entrevistou também uma amostra dos usuários do colete para colher percepções sobre
+      conforto e falsos alertas.
+
+      Dados disponíveis. Base por empregado, extraída do SAP e do sistema de ocorrências:
+      matrícula, área de lotação em fevereiro de 2025, escala com turno noturno, anos na
+      função, se recebeu o colete, horas de treinamento de segurança de março de 2025 a
+      fevereiro de 2026, se registrou incidente com equipamento móvel no mesmo período e se
+      foi entrevistado pela SST. Quase-acidentes não entram.
+
+      Resultado observado. 4,1% dos usuários do colete registraram incidente, contra 5,8%
+      dos demais. A diretoria quer saber quanto desse número é do colete. Esperamos da
+      consultoria a estimativa do efeito e a indicação clara de por quais variáveis ajustar
+      e por quais não ajustar.
+    edges:
+      - area -> colete_proximidade
+      - area -> incidente_12m
+      - turno_noturno -> colete_proximidade
+      - turno_noturno -> incidente_12m
+      - tempo_funcao_anos -> incidente_12m
+      - colete_proximidade -> horas_treinamento_12m
+      - horas_treinamento_12m -> incidente_12m
+      - colete_proximidade -> incidente_12m
+      - colete_proximidade -> entrevista_sst
+      - incidente_12m -> entrevista_sst
+    answer:
+      identifiable: true
+      adjust_for: [area, turno_noturno]
+      do_not_adjust_for:
+        horas_treinamento_12m: Contadas depois da distribuição e infladas pelo módulo de quatro horas do colete. São um dos caminhos pelos quais o colete age; ajustar por elas apaga parte do efeito.
+        entrevista_sst: A SST entrevista quem se envolveu em incidente e também usuários do colete. Ajustar por essa coluna cria uma associação falsa entre o colete e o incidente.
+      indifferent: [matricula, tempo_funcao_anos]
+    note: >-
+      Os dois critérios da distribuição (área e turno) estão na tabela. O tempo na função só
+      mexe no incidente. As armadilhas são as horas de treinamento, que o próprio colete
+      infla, e a entrevista da SST, que depende do colete e do incidente.
+
+  - id: pt_distribuidora_portal_b2b
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: analista comercial de uma distribuidora de medicamentos que atende cerca de 1.800 farmácias no Nordeste, formado em administração
+    theme: Distribuição farmacêutica (B2B)
+    title: Portal de pedidos e faturamento por farmácia
+    treatment: portal_b2b
+    outcome: faturamento_t2
+    columns:
+      cod_cliente: Código da farmácia no ERP.
+      portal_b2b: Farmácia ativou o portal de pedidos on-line e fez ao menos um pedido por ele no primeiro trimestre de 2026 (1 = sim, 0 = não).
+      faturamento_t2: Faturamento da distribuidora com a farmácia no segundo trimestre de 2026, em reais.
+      faturamento_t4: Faturamento com a farmácia no quarto trimestre de 2025, em reais.
+      rede: Farmácia pertence a rede ou associação de compras (1 = sim, 0 = independente).
+      regional: Regional comercial responsável pela conta (Bahia, Pernambuco, Ceará ou Demais estados).
+      pedidos_t2: Número de pedidos faturados no segundo trimestre de 2026.
+      dia_entrega_padrao: Dia da semana da entrega programada da farmácia (segunda a sexta).
+    not_in_table:
+      expansao: Se a farmácia estava em expansão no início de 2026 (abrindo filial, reformando a loja, ampliando o mix). Os vendedores sabem disso de conversa; não há campo para isso no CRM.
+    story: >-
+      3.4 Portal de pedidos B2B
+
+      Encerramos o segundo trimestre com 486 farmácias ativas no portal, das quais 412 já
+      faziam pedidos por ele desde o primeiro trimestre. Entre essas 412, o faturamento
+      médio do T2 foi 14,2% superior ao do T4 de 2025; entre as farmácias que seguem
+      pedindo por telefone ou pelo vendedor, a variação foi de 3,1%. A diferença é
+      expressiva e tem sido apresentada internamente como resultado do portal, mas esta
+      área recomenda cautela pelas razões abaixo.
+
+      A ativação foi conduzida pela força de vendas, com bonificação de R$ 40 por farmácia
+      ativada. Como era de esperar, os vendedores começaram pelas contas maiores e pelas
+      farmácias ligadas a redes e associações, que concentram compras e respondem pela
+      maior parte do faturamento; o faturamento de um trimestre é, naturalmente, o melhor
+      preditor do seguinte. Na regional Pernambuco a ativação chegou a 41% da carteira,
+      contra 15% nas demais, por empenho da própria equipe. Nas visitas de acompanhamento,
+      os vendedores relataram ainda ter priorizado as farmácias que estavam "em movimento":
+      abrindo filial, reformando a loja, ampliando o mix. Esse tipo de informação circula
+      nas conversas de visita e fica nelas: o CRM não a recebe e ela não consta da base.
+      Farmácias nessa situação já vinham comprando mais no fim de 2025 e naturalmente
+      compraram mais em 2026, com ou sem portal.
+
+      Observamos também que, entre as farmácias ativadas, o número de pedidos no T2 cresceu
+      31%: pedidos menores e mais frequentes, como o portal facilita. Mais pedidos no
+      trimestre significam mais faturamento.
+
+      A base utilizada tem uma linha por farmácia: código do cliente, faturamento do T4 de
+      2025 e do T2 de 2026, indicador de rede ou associação, regional comercial, número de
+      pedidos no T2, dia da semana da entrega programada e indicador de ativação do portal
+      no T1. Solicitamos à área de dados parecer sobre a possibilidade de estimar o efeito
+      do portal com essa base e, em caso positivo, sobre as variáveis a considerar.
+    edges:
+      - expansao -> portal_b2b
+      - expansao -> faturamento_t2
+      - expansao -> faturamento_t4
+      - faturamento_t4 -> portal_b2b
+      - faturamento_t4 -> faturamento_t2
+      - rede -> portal_b2b
+      - rede -> faturamento_t2
+      - regional -> portal_b2b
+      - portal_b2b -> pedidos_t2
+      - pedidos_t2 -> faturamento_t2
+      - portal_b2b -> faturamento_t2
+    answer:
+      identifiable: false
+      missing: [expansao]
+    note: >-
+      Os vendedores ativaram primeiro as farmácias em expansão, e isso não está no CRM. O
+      faturamento do T4 carrega parte dessa informação, mas não toda. O número de pedidos
+      do T2 é consequência do portal, não substitui nada.
+
+  - id: pt_rede_municipal_tempo_integral
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: coordenadora pedagógica de uma rede municipal de ensino do interior de São Paulo, mestranda em educação
+    theme: Educação pública (rede municipal)
+    title: Vagas de tempo integral sorteadas e proficiência em matemática
+    treatment: tempo_integral
+    outcome: nota_mat_nov
+    columns:
+      ra_aluno: Registro do aluno na rede municipal.
+      tempo_integral: Aluno sorteado para uma vaga de tempo integral em 2026, entre os inscritos do 5º ano (1 = sim, 0 = não sorteado, permaneceu em período parcial).
+      nota_mat_nov: Proficiência em matemática na avaliação da rede aplicada em novembro de 2026, escala de 0 a 100.
+      nota_mat_2025: Proficiência em matemática na avaliação da rede de novembro de 2025, mesma escala.
+      escola: Escola em que o aluno está matriculado (código de 1 a 12).
+      bolsa_familia: Família recebe Bolsa Família conforme o cadastro de matrícula (1 = sim, 0 = não).
+      faltas_2026: Número de faltas registradas de fevereiro a outubro de 2026.
+      reuniao_familia_dez: Responsável compareceu à reunião de devolutiva de dezembro de 2026 (1 = sim, 0 = não).
+    story: >-
+      4.2 Desenho do estudo e fonte dos dados
+
+      Em 2026 a Secretaria Municipal de Educação ampliou a oferta de jornada integral (sete
+      horas diárias, com almoço e oficinas no contraturno) para o 5º ano do ensino
+      fundamental em doze escolas da rede. A procura superou a oferta: 1.218 inscrições
+      para 640 vagas. Por força do edital (Resolução SME nº 14/2025), as vagas foram
+      atribuídas por sorteio público realizado em cada escola, em dezembro de 2025, sem
+      qualquer critério acadêmico, de renda ou de frequência. A amostra deste estudo
+      compreende apenas os alunos inscritos; os sorteados cursaram 2026 em tempo integral e
+      os demais permaneceram no período parcial, na mesma escola.
+
+      Cumpre destacar que a razão entre vagas e inscritos variou de 0,31 na EMEF 4 a 0,92
+      na EMEF 11, de modo que a probabilidade de contemplação dependeu fortemente da escola
+      de matrícula. As escolas da rede, por sua vez, diferem de forma acentuada no
+      desempenho médio em matemática, como se verá na seção 5.1.
+
+      A inscrição foi mais frequente entre famílias beneficiárias do Bolsa Família, o que
+      não interfere no sorteio, mas restringe o alcance das conclusões. Como é amplamente
+      documentado, a condição socioeconômica associa-se ao desempenho nas duas avaliações
+      aqui utilizadas, e a proficiência de 2025 é o melhor preditor individual da
+      proficiência de 2026.
+
+      Dois registros administrativos posteriores ao sorteio merecem atenção. O primeiro é o
+      número de faltas de fevereiro a outubro de 2026: entre os alunos em tempo integral
+      houve redução expressiva das faltas, efeito já descrito na literatura (a oferta de
+      refeições e a reorganização da rotina familiar em torno da escola), e a assiduidade,
+      por sua vez, é um determinante conhecido do desempenho. O segundo é a presença do
+      responsável na reunião de devolutiva de dezembro de 2026, realizada após a divulgação
+      dos resultados da avaliação: as escolas convocaram para essa reunião as famílias dos
+      alunos em tempo integral, como parte das atividades do programa, e as famílias dos
+      alunos com proficiência abaixo do nível básico.
+
+      A base, fornecida pela SME em planilha anonimizada, contém, por aluno: registro na
+      rede, escola, indicador de sorteio, indicador de Bolsa Família no cadastro de
+      matrícula, proficiência em matemática nas avaliações de novembro de 2025 e de
+      novembro de 2026, faltas de 2026 e presença na reunião de dezembro. A pergunta de
+      pesquisa é o efeito da jornada integral sobre a proficiência em matemática ao fim de
+      2026; a escolha das variáveis de controle é discutida na seção 4.3.
+    edges:
+      - escola -> tempo_integral
+      - escola -> nota_mat_nov
+      - bolsa_familia -> nota_mat_2025
+      - bolsa_familia -> nota_mat_nov
+      - nota_mat_2025 -> nota_mat_nov
+      - tempo_integral -> faltas_2026
+      - faltas_2026 -> nota_mat_nov
+      - tempo_integral -> nota_mat_nov
+      - tempo_integral -> reuniao_familia_dez
+      - nota_mat_nov -> reuniao_familia_dez
+    answer:
+      identifiable: true
+      adjust_for: [escola]
+      do_not_adjust_for:
+        faltas_2026: Registradas durante o ano letivo, depois do sorteio, e reduzidas pela própria jornada integral. São um dos caminhos pelos quais o programa age; ajustar por elas apaga parte do efeito.
+        reuniao_familia_dez: Convocação feita depois da avaliação, para as famílias do tempo integral e para as famílias dos alunos com nota baixa. Ajustar por essa coluna cria uma associação falsa entre o programa e a nota.
+      indifferent: [ra_aluno, nota_mat_2025, bolsa_familia]
+    note: >-
+      Sorteio, mas com chance diferente em cada escola, e as escolas diferem em nota: a
+      escola precisa entrar no ajuste. A nota de 2025 e o Bolsa Família não mexem no
+      sorteio e podem entrar ou não. As armadilhas são as faltas de 2026 e a reunião de
+      dezembro.
+
+  - id: pt_distribuidora_reposicao_automatica
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: analista comercial de uma distribuidora de medicamentos que atende cerca de 1.800 farmácias no Nordeste, formado em administração
+    theme: Distribuição farmacêutica (B2B)
+    title: Reposição automática e ruptura na farmácia
+    treatment: reposicao_automatica
+    outcome: ruptura_mar
+    columns:
+      cod_cliente: Código da farmácia no ERP.
+      reposicao_automatica: Farmácia aderiu à reposição automática (pedido sugerido pelo sistema a partir do giro, confirmado pelo balconista) em janeiro de 2026 (1 = sim, 0 = não).
+      ruptura_mar: Percentual dos 200 medicamentos de maior giro sem estoque na farmácia na auditoria de março de 2026.
+      ruptura_out: Mesmo percentual na auditoria de outubro de 2025.
+      qtd_skus: Número de itens distintos comprados da distribuidora em 2025.
+      rede: Farmácia pertence a rede ou associação de compras (1 = sim, 0 = independente).
+      ticket_medio_fev: Valor médio dos pedidos faturados em fevereiro de 2026, em reais.
+      cod_rota: Código da rota de entrega.
+    story: >-
+      pessoal, preciso de uma ajuda pro comitê comercial de quinta. Em janeiro a gente
+      colocou 310 farmácias na reposição automática (o sistema sugere o pedido pelo giro e
+      o balconista só confirma). Na auditoria de ruptura de março, essas farmácias ficaram
+      com 6,8% dos 200 itens de maior giro em falta, contra 11,5% das outras. Antes que
+      alguém saia comemorando: a gente ofereceu a reposição primeiro pra quem tinha ruptura
+      alta na auditoria de outubro, e ruptura é crônica, farmácia que falta produto num mês
+      falta no outro. Farmácia com mix grande aderiu mais (é quem mais sofre pra controlar
+      estoque) e também é quem mais tem falta. E as redes aderiram pouco, têm sistema
+      próprio de compras, e elas quase não têm ruptura. Mandei a base no canal: código do
+      cliente, ruptura de out e de mar, qtd de SKUs comprados em 2025, se é rede, código da
+      rota de entrega, ticket médio dos pedidos e se aderiu. Sobre o ticket: a reposição
+      automática muda o perfil do pedido, fica menor e mais frequente, e pedido pequeno e
+      frequente é justamente o que segura a ruptura. Dá pra estimar o efeito direito com
+      isso? Ajusto por quais colunas?
+    edges:
+      - ruptura_out -> reposicao_automatica
+      - ruptura_out -> ruptura_mar
+      - qtd_skus -> reposicao_automatica
+      - qtd_skus -> ruptura_mar
+      - rede -> reposicao_automatica
+      - rede -> ruptura_mar
+      - reposicao_automatica -> ticket_medio_fev
+      - ticket_medio_fev -> ruptura_mar
+      - reposicao_automatica -> ruptura_mar
+    answer:
+      identifiable: true
+      adjust_for: [qtd_skus, rede, ruptura_out]
+      do_not_adjust_for:
+        ticket_medio_fev: Medido em fevereiro, depois da adesão, e alterado pela própria reposição automática. É o caminho pelo qual ela age; ajustar por ele apaga parte do efeito.
+      indifferent: [cod_cliente, cod_rota]
+    note: >-
+      Os três motivos da adesão estão na tabela. A armadilha é o ticket médio: a mensagem
+      não diz quando ele foi medido; só o dicionário diz que foi em fevereiro, depois da
+      adesão.
+
+  - id: pt_rede_municipal_robotica
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: coordenadora pedagógica de uma rede municipal de ensino do interior de São Paulo, pedagoga, vinte anos de rede
+    theme: Educação pública (rede municipal)
+    title: Kits de robótica e média de matemática por escola
+    treatment: kit_robotica
+    outcome: media_mat_2026
+    columns:
+      cod_escola: Código da escola na rede.
+      kit_robotica: Escola recebeu o kit de robótica educacional em 2025, após inscrever projeto na chamada interna (1 = sim, 0 = não).
+      media_mat_2026: Média de proficiência em matemática do 5º ano na avaliação da rede de novembro de 2026, escala de 0 a 100.
+      media_mat_2025: Média de proficiência em matemática do 5º ano na avaliação da rede de novembro de 2025, mesma escala.
+      matriculas: Número de alunos matriculados na escola em 2026.
+      nse_inep: Indicador de nível socioeconômico da escola, do INEP, em seis faixas.
+      horas_formacao_2026: Total de horas de formação continuada dos professores da escola registradas no sistema de formação em 2026.
+    not_in_table:
+      empenho_direcao: O quanto a direção da escola corre atrás das coisas (vai à Secretaria, briga por reforma, cobra os professores). Ninguém anota isso em lugar nenhum.
+    story: >-
+      Oi Patrícia, é a Mônica, da coordenação. Tô te mandando áudio do carro, desculpa o
+      barulho. É sobre os kits de robótica, a secretária pediu um número pra reunião de
+      quinta com o prefeito e eu não quero dar número errado. Então, em 2025 a gente abriu
+      uma chamada interna: a escola que quisesse o kit escrevia um projetinho de uma
+      página, e todas que escreveram receberam, foram 18 das 41 escolas. O kit veio com uma
+      formação de 20 horas pros professores, que a gente lançou no sistema de formação
+      junto com as outras formações do ano. Aí na avaliação da rede de novembro agora, a
+      média de matemática do 5º ano nas escolas com kit subiu uns 4 pontos, e nas outras
+      ficou parada.
+
+      O problema, Patrícia, é quem escreveu o projeto. Foi a diretora que corre atrás de
+      tudo, sabe? Aquela que vai na Secretaria, que briga por reforma, que cobra o
+      professor. Essas escolas já eram as melhores na avaliação de 2025 e iam continuar
+      indo bem com ou sem robótica. E isso ninguém anota em lugar nenhum, é coisa que a
+      gente sabe de conhecer as diretoras. Não teve a ver com bairro rico ou pobre, viu,
+      teve escola de periferia que fez um projeto lindo; mas escola de bairro mais pobre
+      tem nota mais baixa, isso a gente sabe, e o indicador de nível socioeconômico do INEP
+      tá na planilha. As escolas grandes se inscreveram mais, acho que porque têm mais
+      professor pra tocar o projeto. E a média de 2025 puxa a de 2026, claro, é a mesma
+      escola.
+
+      A formação eu acho que conta também: escola cujos professores fizeram mais horas de
+      formação no ano melhora, a gente vê isso. A planilha que o Jonas montou tem, por
+      escola: código, se recebeu o kit, matrículas, o indicador do INEP, horas de formação
+      dos professores em 2026, média de matemática do 5º ano em 2025 e em 2026. Me diz com
+      sinceridade se dá pra falar que foi o kit, tá? Beijo.
+    edges:
+      - empenho_direcao -> kit_robotica
+      - empenho_direcao -> media_mat_2026
+      - empenho_direcao -> media_mat_2025
+      - media_mat_2025 -> media_mat_2026
+      - nse_inep -> media_mat_2025
+      - nse_inep -> media_mat_2026
+      - matriculas -> kit_robotica
+      - kit_robotica -> horas_formacao_2026
+      - horas_formacao_2026 -> media_mat_2026
+      - kit_robotica -> media_mat_2026
+    answer:
+      identifiable: false
+      missing: [empenho_direcao]
+    note: >-
+      As escolas que pediram o kit são as de direção empenhada, e isso não está em coluna
+      nenhuma. A média de 2025 carrega parte disso, mas não tudo. O tamanho da escola só
+      mexe na inscrição; as horas de formação são consequência do kit.

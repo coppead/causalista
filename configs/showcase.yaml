@@ -1,0 +1,27 @@
+# Mundos-vitrine: fixados antes do treino, pela regra de configs/split.yaml.
+# Gerado por scripts/pick_showcase.py. Vale para a divisão de temas em vigor; se os
+# temas de teste mudarem, este arquivo é refeito antes de qualquer treino.
+
+set: teste-final
+status: proposta
+worlds:
+- email-060016-a
+- email-060016-b
+- email-060017-a
+- email-060017-b
+- email-060025-a
+- email-060025-b
+- email-060026-a
+- email-060026-b
+- email-060037-a
+- email-060037-b
+- saude-060000-a
+- saude-060000-b
+- saude-060003-a
+- saude-060003-b
+- saude-060013-a
+- saude-060013-b
+- saude-060017-a
+- saude-060017-b
+- saude-060022-a
+- saude-060022-b

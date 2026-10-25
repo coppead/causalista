@@ -1,0 +1,301 @@
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one question per block, read top to bottom. The filters scope everything
+   below them; the bars answer "what happened to the answers", the table gives every number. */
+:root {
+  --bg: #F2F4F7;
+  --surface: #FFFFFF;
+  --ink: #16202B;
+  --ink-2: #4B5969;
+  --line: #B9C4D0;
+  --line-soft: #DFE5EB;
+  --focus: #0B5FA5;
+  /* The four things that can happen to an answer. Validated as a set (adjacent pairs,
+     colour-blind separation and contrast) against each surface. */
+  --correct: #008300;          --on-correct: #FFFFFF;
+  --abstention: #EDA100;       --on-abstention: #16202B;
+  --error: #D03B3B;            --on-error: #FFFFFF;
+  --invalid: #4A3AA7;          --on-invalid: #FFFFFF;
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151B; --surface: #18202A; --ink: #E6ECF2; --ink-2: #9FADBD;
+    --line: #46566A; --line-soft: #28333F; --focus: #6DB3F2;
+    --correct: #199E70; --on-correct: #10151B;
+    --abstention: #C98500; --on-abstention: #10151B;
+    --error: #D03B3B; --on-error: #FFFFFF;
+    --invalid: #9085E9; --on-invalid: #10151B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151B; --surface: #18202A; --ink: #E6ECF2; --ink-2: #9FADBD;
+  --line: #46566A; --line-soft: #28333F; --focus: #6DB3F2;
+  --correct: #199E70; --on-correct: #10151B;
+  --abstention: #C98500; --on-abstention: #10151B;
+  --error: #D03B3B; --on-error: #FFFFFF;
+  --invalid: #9085E9; --on-invalid: #10151B;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 1rem; line-height: 1.55; }
+.page { max-width: 1120px; margin-inline: auto; padding-inline: 20px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, p, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.masthead { display: flex; flex-direction: column; gap: 6px; max-width: 46rem; }
+.eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1.15; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.25; }
+.lede { color: var(--ink-2); max-width: 44rem; }
+.note { color: var(--ink-2); font-size: 0.875rem; max-width: 52rem; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+.filter { display: flex; flex-direction: column; gap: 4px; }
+.filter span { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+.filter select { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; min-width: 11rem; }
+.count { color: var(--ink-2); font-size: 0.875rem; margin-left: auto; }
+
+.card { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.875rem; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.swatch.correct, .seg.correct { background: var(--correct); }
+.swatch.abstention, .seg.abstention { background: var(--abstention); }
+.swatch.error, .seg.error { background: var(--error); }
+.swatch.invalid, .seg.invalid { background: var(--invalid); }
+
+.rows { display: flex; flex-direction: column; gap: 10px; }
+.row { display: grid; grid-template-columns: minmax(9rem, 15rem) minmax(0, 1fr) 4.5rem; gap: 12px; align-items: center; }
+.row-name { font-size: 0.9375rem; line-height: 1.25; overflow-wrap: anywhere; }
+.row-name small { display: block; color: var(--ink-2); font-size: 0.75rem; }
+.bar { display: flex; gap: 2px; height: 22px; border-radius: 4px; overflow: visible; }
+.seg { min-width: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; cursor: default; }
+.seg:first-child { border-radius: 4px 0 0 4px; }
+.seg:last-child { border-radius: 0 4px 4px 0; }
+.seg:only-child { border-radius: 4px; }
+.seg.correct { color: var(--on-correct); }
+.seg.abstention { color: var(--on-abstention); }
+.seg.error { color: var(--on-error); }
+.seg.invalid { color: var(--on-invalid); }
+.seg:hover, .seg:focus-visible { filter: brightness(1.12); }
+.row-score { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+.axis { display: grid; grid-template-columns: minmax(9rem, 15rem) minmax(0, 1fr) 4.5rem; gap: 12px; color: var(--ink-2); font-size: 0.75rem; }
+.axis div:nth-child(2) { display: flex; justify-content: space-between; }
+.axis div:last-child { text-align: right; }
+
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--bg); padding: 6px 10px; border-radius: 6px; font-size: 0.8125rem; line-height: 1.35; max-width: 18rem; }
+.tip strong { display: block; font-size: 0.9375rem; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); text-align: right; white-space: nowrap; }
+th { font-weight: 600; color: var(--ink-2); vertical-align: bottom; white-space: normal; line-height: 1.25; }
+th:first-child, td:first-child { text-align: left; white-space: normal; min-width: 9rem; }
+td { font-variant-numeric: tabular-nums; }
+.colophon { color: var(--ink-2); font-size: 0.8125rem; }
+.empty { color: var(--ink-2); }
+
+@media (max-width: 640px) {
+  .row, .axis { grid-template-columns: minmax(0, 1fr) 3.5rem; }
+  .row-name { grid-column: 1 / -1; }
+  .axis div:first-child { display: none; }
+  .count { margin-left: 0; }
+}
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">__EYEBROW__</p>
+    <h1>__HEADING__</h1>
+    <p class="lede">__LEDE__</p>
+  </header>
+
+  <section class="filters" aria-label="Filtros" id="filters"></section>
+
+  <section class="card" aria-labelledby="bars-title">
+    <h2 id="bars-title">O que aconteceu com as respostas</h2>
+    <ul class="legend" aria-label="Legenda">
+      <li><span class="swatch correct"></span>acerto</li>
+      <li><span class="swatch abstention"></span>abstenção indevida</li>
+      <li><span class="swatch error"></span>erro confiante</li>
+      <li><span class="swatch invalid"></span>resposta inválida</li>
+    </ul>
+    <div class="axis" aria-hidden="true"><div></div><div><span>0%</span><span>50%</span><span>100% dos mundos</span></div><div>nota</div></div>
+    <div class="rows" id="rows"></div>
+    <p class="note">A nota vai de −1 a +1: acerto vale +1, abstenção indevida vale −0,5, erro confiante e resposta inválida valem −1. Erro confiante é afirmar um efeito com um conjunto de colunas inválido, ou em um mundo em que o efeito não é identificável.</p>
+  </section>
+
+  <section class="card" aria-labelledby="table-title">
+    <h2 id="table-title">Todos os números</h2>
+    <div class="table-wrap"><table id="table"></table></div>
+    <p class="note">As três últimas colunas olham só as respostas que afirmaram um efeito: em quantas o intervalo calculado pelo runner contém o efeito verdadeiro, e de quanto é o erro médio. O erro é medido em pontos percentuais e deixa de fora o tema educação, em que o resultado é uma nota.</p>
+  </section>
+
+  <p class="colophon" id="colophon"></p>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="application/json" id="scoreboard-data">/*__DATA__*/</script>
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById("scoreboard-data").textContent);
+  const OUTCOMES = [
+    ["correct", "acerto"],
+    ["abstention", "abstenção indevida"],
+    ["error", "erro confiante"],
+    ["invalid", "resposta inválida"],
+  ];
+  const SCORE = data.scores;                       // by outcome code
+  const state = { kind: "all", theme: "all", language: "all", level: "all" };
+  const el = (tag, cls, text) => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const pct = (x) => (x === null ? "–" : Math.round(100 * x) + "%");
+  const signed = (x) => (x === null ? "–" : (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2).replace(".", ","));
+
+  // -- filters ---------------------------------------------------------------
+  const filters = document.getElementById("filters");
+  const addFilter = (key, label, options, initial) => {
+    if (options.length <= 2) return;                // "all" plus a single value: nothing to choose
+    const wrap = el("label", "filter");
+    wrap.append(el("span", "", label));
+    const select = el("select");
+    select.id = "filter-" + key;
+    for (const [value, text] of options) {
+      const option = el("option", "", text);
+      option.value = value;
+      select.append(option);
+    }
+    if (initial !== undefined) { select.value = initial; state[key] = initial; }
+    select.addEventListener("change", () => { state[key] = select.value; draw(); });
+    wrap.append(select);
+    filters.append(wrap);
+  };
+  const distinct = (index) => [...new Set(data.worlds.map((w) => w[index]))].sort();
+  addFilter("kind", "Mundos", [["all", "todos"], ["yes", "identificáveis"], ["no", "não identificáveis"]]);
+  addFilter("theme", "Tema", [["all", "todos"], ...distinct(1).map((t) => [t, data.themes[t].name])]);
+  addFilter("language", "Idioma", [["all", "todos"], ...distinct(2).map((x) => [x, data.languages[x] || x])]);
+  // The page opens on the plainest way of telling a world, which every model has answered.
+  addFilter("level", "Narrativa", [["all", "todas"], ...distinct(3).map((x) => [String(x), data.levels[x] || "nível " + x])], String(distinct(3)[0]));
+  const count = el("span", "count");
+  filters.append(count);
+
+  const keep = (w) =>
+    (state.kind === "all" || (state.kind === "yes") === Boolean(w[4])) &&
+    (state.theme === "all" || w[1] === state.theme) &&
+    (state.language === "all" || w[2] === state.language) &&
+    (state.level === "all" || String(w[3]) === state.level);
+
+  // -- numbers ---------------------------------------------------------------
+  const summarise = (model) => {
+    const rows = model.records.filter((r) => keep(data.worlds[r[0]]));
+    const n = rows.length;
+    if (!n) return null;
+    const counts = [0, 0, 0, 0];
+    let score = 0, answered = 0, covered = 0, errorSum = 0, errorN = 0, rolesSum = 0, rolesN = 0;
+    for (const [w, outcome, covers, absError, roles] of rows) {
+      counts[outcome] += 1;
+      score += SCORE[outcome];
+      if (covers !== null) { answered += 1; covered += covers; }
+      if (absError !== null && data.themes[data.worlds[w][1]].unit === "pp") { errorSum += absError; errorN += 1; }
+      if (roles !== null) { rolesSum += roles; rolesN += 1; }
+    }
+    return {
+      n, counts, score: score / n, answered,
+      covers: answered ? covered / answered : null,
+      error: errorN ? errorSum / errorN : null,
+      roles: rolesN ? rolesSum / rolesN : null,
+    };
+  };
+
+  // -- tooltip ---------------------------------------------------------------
+  const tip = document.getElementById("tip");
+  const showTip = (target, strong, text) => {
+    tip.replaceChildren(el("strong", "", strong), document.createTextNode(text));
+    tip.hidden = false;
+    const box = target.getBoundingClientRect();
+    const width = tip.offsetWidth;
+    tip.style.left = Math.max(8, Math.min(window.innerWidth - width - 8, box.left + box.width / 2 - width / 2)) + "px";
+    tip.style.top = Math.max(8, box.top - tip.offsetHeight - 8) + "px";
+  };
+  const hideTip = () => { tip.hidden = true; };
+
+  // -- drawing ---------------------------------------------------------------
+  const rowsNode = document.getElementById("rows");
+  const table = document.getElementById("table");
+  const draw = () => {
+    const shown = data.worlds.filter(keep).length;
+    count.textContent = shown + " de " + data.worlds.length + " mundos";
+    const models = data.models
+      .map((model) => ({ model, numbers: summarise(model) }))
+      .filter((entry) => entry.numbers)
+      .sort((a, b) => b.numbers.score - a.numbers.score);
+
+    rowsNode.replaceChildren();
+    if (!models.length) rowsNode.append(el("p", "empty", "Nenhum mundo com estes filtros."));
+    for (const { model, numbers } of models) {
+      const row = el("div", "row");
+      const name = el("div", "row-name", model.label);
+      if (model.reference) name.append(el("small", "", "referência, sem modelo"));
+      if (model.trained) name.append(el("small", "", "treinado neste projeto"));
+      if (numbers.n < shown) name.append(el("small", "", "respondeu " + numbers.n + " dos " + shown + " mundos"));
+      const bar = el("div", "bar");
+      bar.setAttribute("role", "img");
+      bar.setAttribute("aria-label", OUTCOMES.map(([, text], i) => text + " " + pct(numbers.counts[i] / numbers.n)).join(", "));
+      OUTCOMES.forEach(([cls, text], i) => {
+        const share = numbers.counts[i] / numbers.n;
+        if (!share) return;
+        const seg = el("div", "seg " + cls, share >= 0.07 ? pct(share) : "");
+        seg.style.flex = share + " 1 0";
+        seg.tabIndex = 0;
+        const say = () => showTip(seg, pct(share) + " · " + text, numbers.counts[i] + " de " + numbers.n + " mundos");
+        seg.addEventListener("pointerenter", say);
+        seg.addEventListener("focus", say);
+        seg.addEventListener("pointerleave", hideTip);
+        seg.addEventListener("blur", hideTip);
+        bar.append(seg);
+      });
+      row.append(name, bar, el("div", "row-score", signed(numbers.score)));
+      rowsNode.append(row);
+    }
+
+    const head = ["Modelo", "Mundos", "Nota", "Acerto", "Abstenção indevida", "Erro confiante", "Resposta inválida",
+                  "Papéis certos", "Afirmou um efeito", "Intervalo contém o efeito verdadeiro", "Erro médio do efeito (p.p.)"];
+    const thead = el("thead"), tbody = el("tbody"), headRow = el("tr");
+    head.forEach((text) => { const th = el("th", "", text); th.scope = "col"; headRow.append(th); });
+    thead.append(headRow);
+    for (const { model, numbers } of models) {
+      const tr = el("tr");
+      const cells = [
+        model.label, numbers.n, signed(numbers.score),
+        ...numbers.counts.map((c) => pct(c / numbers.n)),
+        pct(numbers.roles), numbers.answered, pct(numbers.covers),
+        numbers.error === null ? "–" : (100 * numbers.error).toFixed(1).replace(".", ","),
+      ];
+      cells.forEach((value, i) => {
+        const cell = el(i ? "td" : "th", "", String(value));
+        if (!i) cell.scope = "row";
+        tr.append(cell);
+      });
+      tbody.append(tr);
+    }
+    table.replaceChildren(thead, tbody);
+  };
+
+  document.getElementById("colophon").textContent = data.colophon;
+  window.addEventListener("scroll", hideTip, { passive: true });
+  draw();
+})();
+</script>

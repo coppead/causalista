@@ -1,0 +1,90 @@
+[project]
+name = "causalista"
+dynamic = ["version"]
+description = "Small, local, honest causal analyst: decides what to adjust for, and says when the data cannot answer."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [{ name = "André Fonseca" }]
+keywords = ["causal-inference", "adjustment-set", "abstention", "synthetic-data", "small-language-models"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "doubleml>=0.11.4",
+    "networkx>=3.3",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.9.1",
+]
+
+[project.urls]
+Repository = "https://github.com/coppead/causalista"
+Model = "https://huggingface.co/coppead/causalista-4b"
+GGUF = "https://huggingface.co/coppead/causalista-4b-GGUF"
+Dataset = "https://huggingface.co/datasets/coppead/causalista-worlds"
+Issues = "https://github.com/coppead/causalista/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "hypothesis>=6.100",
+    "numpy>=2",
+]
+# Training and local inference with Hugging Face (phases 4 and 5). Not needed by the
+# published runner: the runtime dependencies above stay free of torch.
+train = [
+    "torch>=2.12,<2.13",
+    "torchvision",
+    "transformers>=5.5",
+    "peft>=0.18",
+    "trl>=0.24",
+    "unsloth>=2026.9.14",
+    "unsloth-zoo>=2026.9.9",
+    "datasets>=4.3",
+    "accelerate>=1.4",
+    "bitsandbytes>=0.45.5",
+    "safetensors",
+    "huggingface-hub>=1.0",
+]
+
+[tool.uv]
+# Both groups are installed by a plain `uv run`, so that one environment serves the
+# tests and the training.
+default-groups = ["dev", "train"]
+
+# The wheels of torch on PyPI are built for CUDA 13, and the driver of the training
+# machine (576.80) goes up to CUDA 12.9. These are the CUDA 12.6 builds.
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu126", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cu126", marker = "sys_platform == 'linux'" }]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/causalista/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/causalista"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m 'not slow'"
+markers = [
+    "slow: exhaustive checks over every small graph (run with: uv run pytest -m slow)",
+]

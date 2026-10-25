@@ -1,0 +1,847 @@
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a workbench. The cases sit on a rail at the left; one case is on the bench
+   at a time, read top to bottom: story, diagram, choice of columns, verdict. */
+:root {
+  --bg: #F2F4F7;
+  --surface: #FFFFFF;
+  --ink: #16202B;
+  --ink-2: #4B5969;
+  --line: #B9C4D0;
+  --line-soft: #DFE5EB;
+  --effect: #0B5FA5;        /* the causal path: the effect we want to measure */
+  --effect-tint: #E3EEF8;
+  --bad: #B3261E;           /* a non-causal path left open */
+  --bad-tint: #FBE7E4;
+  --good: #1B7446;
+  --good-tint: #E1F1E8;
+  --pick: #FFE680;          /* a column chosen for adjustment: highlighter */
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151B; --surface: #18202A; --ink: #E6ECF2; --ink-2: #9FADBD;
+    --line: #46566A; --line-soft: #28333F;
+    --effect: #6DB3F2; --effect-tint: #15324D;
+    --bad: #FF8A7A; --bad-tint: #47201C;
+    --good: #6FD39B; --good-tint: #163A2A;
+    --pick: #6B5600;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151B; --surface: #18202A; --ink: #E6ECF2; --ink-2: #9FADBD;
+  --line: #46566A; --line-soft: #28333F;
+  --effect: #6DB3F2; --effect-tint: #15324D;
+  --bad: #FF8A7A; --bad-tint: #47201C;
+  --good: #6FD39B; --good-tint: #163A2A;
+  --pick: #6B5600;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.page {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  padding-block: 28px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+h1, h2, h3, p, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+button, select { font: inherit; color: inherit; }
+code, .var { font-family: var(--font-mono); font-size: 0.875em; }
+:focus-visible { outline: 2px solid var(--effect); outline-offset: 2px; }
+
+/* Masthead */
+.masthead { display: flex; flex-direction: column; gap: 6px; max-width: 46rem; }
+.eyebrow {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+h1 {
+  font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1.15;
+  text-wrap: balance;
+}
+.lede { color: var(--ink-2); max-width: 40rem; }
+
+/* Workbench */
+.workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 32px; align-items: start; }
+.rail {
+  display: flex; flex-direction: column; gap: 18px;
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px);
+  max-height: calc(100vh - 32px); overflow-y: auto; padding-bottom: 8px;
+}
+.group { display: flex; flex-direction: column; gap: 4px; }
+.group-name {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-2); padding-inline: 10px;
+}
+.case-link {
+  display: block; width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: 6px 10px; border-radius: 6px; font-size: 0.9375rem; line-height: 1.3;
+}
+.case-link:hover { background: var(--line-soft); }
+.case-link[aria-current="true"] { background: var(--effect-tint); color: var(--effect); font-weight: 600; }
+.picker { display: none; flex-direction: column; gap: 6px; }
+.picker span { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+.picker select {
+  width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.bench { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.case-head { display: flex; flex-direction: column; gap: 8px; max-width: 44rem; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; line-height: 1.2; text-wrap: balance; }
+.note { color: var(--ink-2); font-size: 0.9375rem; }
+.question { font-weight: 600; }
+
+/* Diagram */
+.diagram {
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
+}
+.diagram-scroll { overflow-x: auto; }
+#graph { display: block; height: auto; margin-inline: auto; }
+.edge { fill: none; stroke: var(--ink-2); stroke-width: 1.4; marker-end: url(#arr); }
+.edge.causal { stroke: var(--effect); stroke-width: 2.4; marker-end: url(#arr-effect); }
+.arrowhead { fill: var(--ink-2); }
+.arrowhead-effect { fill: var(--effect); }
+.halo { fill: none; stroke: var(--bad); stroke-width: 11; stroke-linecap: round; opacity: 0; }
+.halo.on { opacity: 0.3; }
+.node-halo { fill: none; stroke: var(--bad); stroke-width: 5; opacity: 0; }
+.node.on-open .node-halo { opacity: 0.45; }
+.node .box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.3; }
+.node text {
+  font-family: var(--font-mono); font-size: 13px; fill: var(--ink);
+  text-anchor: middle; dominant-baseline: central; pointer-events: none;
+}
+.node .role { font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; fill: var(--effect); }
+.node.endpoint .box { fill: var(--effect-tint); stroke: var(--effect); stroke-width: 2; }
+.node.unseen .box { stroke-dasharray: 5 4; }
+.node.unseen text { fill: var(--ink-2); }
+.node.column { cursor: pointer; }
+.node.column:hover .box { stroke: var(--ink); stroke-width: 2; }
+.node.picked .box { fill: var(--pick); stroke: var(--ink); stroke-width: 2.6; rx: 2px; }
+.node.refused .box { stroke: var(--bad); }
+.node:focus-visible { outline: none; }
+.node:focus-visible .box { stroke: var(--effect); stroke-width: 3; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.8125rem; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend svg { flex: none; }
+figcaption { font-size: 0.9375rem; color: var(--ink-2); max-width: 44rem; }
+
+/* Choice */
+.choose { display: flex; flex-direction: column; gap: 10px; }
+h3 { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-family: var(--font-mono); font-size: 0.875rem; cursor: pointer;
+  padding: 7px 12px; border-radius: 8px; border: 1.3px solid var(--ink-2); background: var(--surface);
+}
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--pick); border-color: var(--ink); border-radius: 2px; box-shadow: inset 0 0 0 1.3px var(--ink); }
+.no-columns { color: var(--ink-2); font-size: 0.9375rem; }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.quick button {
+  cursor: pointer; padding: 6px 12px; border-radius: 6px; font-size: 0.875rem;
+  border: 1px solid var(--line); background: none;
+}
+.quick button:hover { background: var(--line-soft); }
+.quick .reveal { border-color: var(--effect); color: var(--effect); font-weight: 600; }
+
+/* Verdict */
+.verdict {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: start;
+  padding: 16px 18px; border-radius: 10px; border: 1.5px solid var(--good); background: var(--good-tint);
+}
+.verdict.wrong { border-color: var(--bad); background: var(--bad-tint); }
+.verdict-mark { width: 30px; height: 30px; color: var(--good); grid-row: span 2; }
+.verdict.wrong .verdict-mark { color: var(--bad); }
+.verdict-title { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.25; }
+.verdict-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.verdict-body ul { display: flex; flex-direction: column; gap: 6px; }
+.reason { display: flex; flex-direction: column; gap: 2px; }
+.path {
+  align-self: flex-start; cursor: default; text-align: left; max-width: 100%;
+  font-family: var(--font-mono); font-size: 0.875rem; overflow-wrap: anywhere;
+  padding: 3px 8px; border-radius: 6px; border: 1px solid var(--bad); background: var(--surface); color: var(--ink);
+}
+.path:hover, .path:focus-visible { box-shadow: 0 0 0 2px var(--bad); }
+.reason small { font-size: 0.8125rem; color: var(--ink-2); }
+.answer {
+  padding: 14px 18px; border-radius: 10px; border: 1px solid var(--effect); background: var(--effect-tint);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.answer strong { font-size: 0.75rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--effect); }
+.twin { font-size: 0.9375rem; color: var(--ink-2); }
+.twin button {
+  cursor: pointer; padding: 2px 9px; border-radius: 6px; font-size: 0.875rem;
+  border: 1px solid var(--line); background: none; margin-left: 4px;
+}
+.twin button:hover { background: var(--line-soft); }
+
+/* Dictionary of the table */
+.columns { display: flex; flex-direction: column; gap: 8px; }
+.table-scroll { overflow-x: auto; }
+.columns table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+.columns th, .columns td { text-align: left; vertical-align: top; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--line-soft); }
+.columns th { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+.columns td:nth-child(2) { color: var(--ink-2); white-space: nowrap; }
+
+/* The numbers: true effect, simple comparison, and the reader's choice, on one scale */
+.numbers {
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
+}
+.num-plot { display: flex; flex-direction: column; gap: 2px; }
+.num-row {
+  display: grid; grid-template-columns: 10.5rem minmax(0, 1fr) 13rem; gap: 2px 14px; align-items: center;
+  min-height: 34px;
+}
+.num-label { font-size: 0.9375rem; }
+.num-value { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.num-value small { color: var(--ink-2); font-size: 0.8125rem; }
+.num-track { position: relative; height: 34px; }
+.num-zero, .num-truth { position: absolute; top: 0; bottom: 0; width: 0; }
+.num-zero { border-left: 1px solid var(--line); }
+.num-truth { border-left: 2px solid var(--ink); }
+.num-interval { position: absolute; top: 50%; height: 2px; margin-top: -1px; background: var(--ink-2); }
+.num-dot {
+  position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%;
+  background: var(--ink-2); box-shadow: 0 0 0 2px var(--surface);
+}
+.num-diamond {
+  position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px;
+  background: var(--ink); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--surface);
+}
+.num-row.right .num-interval, .num-row.right .num-dot { background: var(--good); }
+.num-row.wrong .num-interval, .num-row.wrong .num-dot { background: var(--bad); }
+.num-axis .num-track { height: 26px; border-top: 1px solid var(--line); }
+.num-tick { position: absolute; top: 0; transform: translateX(-50%); padding-top: 5px; font-size: 0.75rem; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.num-tick::before { content: ""; position: absolute; left: 50%; top: 0; height: 4px; border-left: 1px solid var(--line); }
+.num-unit { font-size: 0.75rem; color: var(--ink-2); }
+
+.colophon { font-size: 0.8125rem; color: var(--ink-2); border-top: 1px solid var(--line-soft); padding-top: 14px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .halo, .node-halo, .node .box, .chip { transition: opacity 140ms ease, fill 140ms ease, stroke 140ms ease, background-color 140ms ease; }
+}
+@media (max-width: 780px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .rail { display: none; }
+  .picker { display: flex; }
+  h1 { font-size: 1.625rem; }
+  h2 { font-size: 1.3125rem; }
+  .diagram { padding: 12px; }
+  .numbers { padding: 12px; }
+  /* The dictionary as a list: name and type on one line, the description below. */
+  .columns thead { display: none; }
+  .columns tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding-block: 7px; border-bottom: 1px solid var(--line-soft); }
+  .columns td { border: 0; padding: 0; }
+  .columns td:nth-child(3) { grid-column: 1 / -1; }
+  .num-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .num-row .num-track { grid-column: 1 / -1; grid-row: 2; }
+  .num-axis .num-label, .num-axis .num-value { display: none; }
+}
+</style>
+
+<div class="page" lang="pt-BR">
+  <header class="masthead">
+    <p class="eyebrow">__EYEBROW__</p>
+    <h1>__HEADING__</h1>
+    <p class="lede">__LEDE__</p>
+  </header>
+
+  <div class="workspace">
+    <nav class="rail" id="rail" aria-label="__ITEMS__"></nav>
+    <label class="picker">
+      <span>__ITEM__</span>
+      <select id="case-select"></select>
+    </label>
+
+    <main class="bench">
+      <div class="case-head">
+        <h2 id="case-title"></h2>
+        <p id="case-story"></p>
+        <p id="case-note" class="note" hidden></p>
+        <p class="question">Qual o efeito de <code id="q-treatment"></code> sobre <code id="q-outcome"></code>?</p>
+        <p class="twin" id="twin" hidden></p>
+      </div>
+
+      <section class="columns" id="columns" hidden aria-labelledby="columns-title">
+        <h3 id="columns-title">Colunas da tabela</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th scope="col">Coluna</th><th scope="col">Tipo</th><th scope="col">Descrição</th></tr></thead>
+            <tbody id="columns-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <figure class="diagram">
+        <div class="diagram-scroll">
+          <svg id="graph" role="img" aria-label=""></svg>
+        </div>
+        <ul class="legend">
+          <li><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><path d="M1 5 H22" class="edge causal" style="marker-end:none"></path><path d="M20 1 L29 5 L20 9 z" class="arrowhead-effect"></path></svg>caminho causal: o efeito que se quer medir</li>
+          <li><svg width="30" height="12" viewBox="0 0 30 12" aria-hidden="true"><path d="M5 6 H25" class="halo on"></path></svg>caminho não causal aberto: distorce o efeito</li>
+          <li><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><rect x="1.5" y="1.5" width="19" height="11" rx="1.5" style="fill:var(--pick);stroke:var(--ink);stroke-width:2"></rect></svg>coluna ajustada</li>
+          <li><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><rect x="1" y="1" width="20" height="12" rx="5" style="fill:none;stroke:var(--ink-2);stroke-width:1.3;stroke-dasharray:4 3"></rect></svg>variável fora da tabela</li>
+        </ul>
+        <figcaption id="caption"></figcaption>
+      </figure>
+
+      <section class="choose" aria-labelledby="choose-title">
+        <h3 id="choose-title">Ajustar por</h3>
+        <div class="chips" id="chips"></div>
+        <p class="no-columns" id="no-columns" hidden>A tabela não tem outras colunas: a única escolha possível é não ajustar por nada.</p>
+        <div class="quick">
+          <button type="button" id="pick-none">Nada</button>
+          <button type="button" id="pick-all">Tudo</button>
+          <button type="button" id="reveal" class="reveal">Mostrar resposta</button>
+        </div>
+      </section>
+
+      <section class="verdict" id="verdict" aria-live="polite">
+        <svg class="verdict-mark" id="verdict-mark" viewBox="0 0 30 30" aria-hidden="true"></svg>
+        <p class="verdict-title" id="verdict-title"></p>
+        <div class="verdict-body" id="verdict-body"></div>
+      </section>
+
+      <figure class="numbers" id="numbers" hidden>
+        <h3 id="numbers-title">Os números</h3>
+        <div class="num-plot" id="numbers-plot" role="img" aria-labelledby="numbers-caption"></div>
+        <figcaption id="numbers-caption"></figcaption>
+      </figure>
+
+      <section class="answer" id="answer" hidden>
+        <strong>Resposta</strong>
+        <p id="answer-text"></p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="colophon" id="colophon"></footer>
+</div>
+
+<script type="application/json" id="cases-data">/*__CASES__*/</script>
+<script>
+(function () {
+  'use strict';
+  var DATA = JSON.parse(document.getElementById('cases-data').textContent);
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var STORE_KEY = 'causalista-casos:last';
+  var REASONS = {
+    mediator: 'é mediador: faz parte do caminho pelo qual a intervenção age.',
+    descendant_of_mediator: 'é consequência de um mediador.',
+    descendant_of_outcome: 'é consequência do resultado.',
+    treatment: 'é a própria intervenção.',
+    outcome: 'é o próprio resultado.'
+  };
+  var byId = {};
+  DATA.cases.forEach(function (c) { byId[c.id] = c; });
+
+  var state = { current: null, picked: new Set(), revealed: false, focus: null };
+  var drawn = { nodes: {}, edgeHalos: {} };
+
+  function $(id) { return document.getElementById(id); }
+  function html(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function svg(tag, attrs) {
+    var node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach(function (name) { node.setAttribute(name, attrs[name]); });
+    return node;
+  }
+  function setKey(names) { return Array.from(names).sort().join(','); }
+  function pretty(pathText) { return pathText.replace(/<-/g, '←').replace(/->/g, '→'); }
+
+  // "a", "a e b", "a, b e c", with each name in monospace.
+  function appendNames(parent, names) {
+    names.forEach(function (name, i) {
+      if (i > 0) parent.append(i === names.length - 1 ? ' e ' : ', ');
+      parent.append(html('code', '', name));
+    });
+  }
+  function namesAsText(names) {
+    if (names.length < 2) return names.join('');
+    return names.slice(0, -1).join(', ') + ' e ' + names[names.length - 1];
+  }
+
+  // ---- Case list ----------------------------------------------------------
+  function buildCaseList() {
+    var rail = $('rail');
+    var select = $('case-select');
+    DATA.groups.forEach(function (group) {
+      var block = html('div', 'group');
+      block.append(html('p', 'group-name', group));
+      var list = html('ul');
+      var optgroup = document.createElement('optgroup');
+      optgroup.label = group;
+      DATA.cases.filter(function (c) { return c.group === group; }).forEach(function (c) {
+        var item = html('li');
+        var link = html('button', 'case-link', c.title);
+        link.type = 'button';
+        link.dataset.case = c.id;
+        link.addEventListener('click', function () { openCase(c.id); });
+        item.append(link);
+        list.append(item);
+        var option = html('option', '', c.title);
+        option.value = c.id;
+        optgroup.append(option);
+      });
+      block.append(list);
+      rail.append(block);
+      select.append(optgroup);
+    });
+    select.addEventListener('change', function () { openCase(select.value); });
+  }
+
+  // ---- Diagram ------------------------------------------------------------
+  function drawGraph(c) {
+    var graph = $('graph');
+    graph.replaceChildren();
+    graph.setAttribute('viewBox', '0 0 ' + c.width + ' ' + c.height);
+    graph.setAttribute('width', c.width);
+    graph.setAttribute('height', c.height);
+    // Shrink a little on a narrow screen, then scroll sideways: the names must stay readable.
+    graph.style.width = '100%';
+    graph.style.maxWidth = c.width + 'px';
+    graph.style.minWidth = Math.round(c.width * 0.85) + 'px';
+
+    var defs = svg('defs');
+    [['arr', 'arrowhead'], ['arr-effect', 'arrowhead-effect']].forEach(function (pair) {
+      var marker = svg('marker', {
+        id: pair[0], viewBox: '0 0 10 10', refX: '9.2', refY: '5',
+        markerWidth: '9', markerHeight: '9', markerUnits: 'userSpaceOnUse', orient: 'auto'
+      });
+      marker.append(svg('path', { d: 'M0 0.6 L10 5 L0 9.4 z', 'class': pair[1] }));
+      defs.append(marker);
+    });
+    graph.append(defs);
+
+    var halos = svg('g');
+    var edges = svg('g');
+    var nodes = svg('g');
+    drawn = { nodes: {}, edgeHalos: {} };
+
+    c.edges.forEach(function (edge) {
+      var halo = svg('path', { d: edge.d, 'class': 'halo' });
+      halos.append(halo);
+      drawn.edgeHalos[edge.from + '>' + edge.to] = halo;
+      edges.append(svg('path', { d: edge.d, 'class': edge.causal ? 'edge causal' : 'edge' }));
+    });
+
+    c.nodes.forEach(function (n) {
+      var endpoint = n.role !== 'covariate';
+      var group = svg('g', { 'class': 'node' });
+      if (endpoint) group.classList.add('endpoint');
+      if (n.hidden) group.classList.add('unseen');
+      var x = n.x - n.w / 2;
+      var y = n.y - n.h / 2;
+      group.append(svg('rect', { x: x - 5, y: y - 5, width: n.w + 10, height: n.h + 10, rx: 14, 'class': 'node-halo' }));
+      group.append(svg('rect', { x: x, y: y, width: n.w, height: n.h, rx: 10, 'class': 'box' }));
+      if (endpoint) {
+        var role = svg('text', { x: n.x, y: n.y - 10, 'class': 'role' });
+        role.textContent = n.role === 'treatment' ? 'INTERVENÇÃO' : 'RESULTADO';
+        group.append(role);
+      }
+      var label = svg('text', { x: n.x, y: endpoint ? n.y + 8 : n.y });
+      label.textContent = n.name;
+      group.append(label);
+
+      var tip = svg('title');
+      if (n.hidden) tip.textContent = n.name + ': fora da tabela';
+      else if (endpoint) tip.textContent = n.name + (n.role === 'treatment' ? ': intervenção' : ': resultado');
+      else tip.textContent = n.name + ': clique para ajustar';
+      group.append(tip);
+
+      if (!endpoint && !n.hidden) {
+        group.classList.add('column');
+        group.setAttribute('tabindex', '0');
+        group.setAttribute('role', 'button');
+        group.setAttribute('aria-label', 'Ajustar por ' + n.name);
+        group.addEventListener('click', function () { toggle(n.name); });
+        group.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(n.name); }
+        });
+      }
+      nodes.append(group);
+      drawn.nodes[n.name] = group;
+    });
+
+    graph.append(halos, edges, nodes);
+  }
+
+  // ---- State --------------------------------------------------------------
+  function verdictNow() { return state.current.verdicts[setKey(state.picked)]; }
+
+  function toggle(name) {
+    if (state.picked.has(name)) state.picked.delete(name); else state.picked.add(name);
+    state.focus = null;
+    refresh();
+  }
+  function pickExactly(names) {
+    state.picked = new Set(names);
+    state.focus = null;
+    refresh();
+  }
+
+  function highlight() {
+    var c = state.current;
+    var verdict = verdictNow();
+    var shown = state.focus === null ? verdict.open : [verdict.open[state.focus]];
+    var edgesOn = {};
+    var nodesOn = {};
+    shown.forEach(function (path) {
+      path.nodes.forEach(function (name, i) {
+        nodesOn[name] = true;
+        if (i === 0) return;
+        var before = path.nodes[i - 1];
+        var forward = before + '>' + name;
+        edgesOn[drawn.edgeHalos[forward] ? forward : name + '>' + before] = true;
+      });
+    });
+    Object.keys(drawn.edgeHalos).forEach(function (id) {
+      drawn.edgeHalos[id].classList.toggle('on', Boolean(edgesOn[id]));
+    });
+    c.nodes.forEach(function (n) {
+      var group = drawn.nodes[n.name];
+      group.classList.toggle('on-open', Boolean(nodesOn[n.name]));
+      group.classList.toggle('picked', state.picked.has(n.name));
+      group.classList.toggle('refused', Boolean(verdict.forbidden[n.name]));
+      if (group.classList.contains('column')) {
+        group.setAttribute('aria-pressed', state.picked.has(n.name) ? 'true' : 'false');
+      }
+    });
+  }
+
+  function claim(verdict) {
+    var picked = Array.from(state.picked).sort();
+    var doing = picked.length ? 'Ajustando por ' + namesAsText(picked) : 'Sem ajustar por nada';
+    if (verdict.valid) return doing + ', nenhum caminho não causal fica aberto: o efeito sai certo.';
+    var parts = [];
+    var refused = Object.keys(verdict.forbidden);
+    if (refused.length) parts.push(refused.length === 1 ? 'uma coluna que não pode entrar no ajuste' : refused.length + ' colunas que não podem entrar no ajuste');
+    if (verdict.open.length) parts.push(verdict.open.length === 1 ? 'um caminho não causal aberto' : verdict.open.length + ' caminhos não causais abertos');
+    return doing + ', há ' + parts.join(' e ') + ': o efeito sai errado.';
+  }
+
+  function renderVerdict() {
+    var c = state.current;
+    var verdict = verdictNow();
+    var panel = $('verdict');
+    panel.classList.toggle('wrong', !verdict.valid);
+
+    var mark = $('verdict-mark');
+    mark.replaceChildren(svg('circle', { cx: 15, cy: 15, r: 13, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.4 }));
+    mark.append(svg('path', {
+      d: verdict.valid ? 'M9 15.5 L13.5 20 L21.5 10.5' : 'M10 10 L20 20 M20 10 L10 20',
+      fill: 'none', stroke: 'currentColor', 'stroke-width': 2.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+    }));
+    $('verdict-title').textContent = verdict.valid ? 'Efeito certo' : 'Efeito errado';
+
+    var body = $('verdict-body');
+    body.replaceChildren();
+    if (verdict.valid) {
+      var fine = html('p');
+      if (state.picked.size) {
+        fine.append('Ajustando por ');
+        appendNames(fine, Array.from(state.picked).sort());
+        fine.append(', todos os caminhos não causais ficam fechados.');
+      } else {
+        fine.append('Sem ajustar por nada, todos os caminhos não causais já estão fechados: a comparação simples dá o efeito certo.');
+      }
+      body.append(fine);
+    } else {
+      var why = c.why[setKey(state.picked)];
+      if (why) body.append(html('p', '', why));
+      var list = html('ul');
+      Object.keys(verdict.forbidden).forEach(function (name) {
+        var item = html('li', 'reason');
+        var line = html('span');
+        line.append(html('code', '', name), ' ' + REASONS[verdict.forbidden[name]]);
+        item.append(line);
+        list.append(item);
+      });
+      verdict.open.forEach(function (path, i) {
+        var item = html('li', 'reason');
+        var button = html('button', 'path', pretty(path.text));
+        button.type = 'button';
+        button.setAttribute('aria-label', 'Caminho aberto: ' + path.nodes.join(', '));
+        ['mouseenter', 'focus'].forEach(function (type) {
+          button.addEventListener(type, function () { state.focus = i; highlight(); });
+        });
+        ['mouseleave', 'blur'].forEach(function (type) {
+          button.addEventListener(type, function () { state.focus = null; highlight(); });
+        });
+        item.append(button);
+        var colliders = Object.keys(path.opened);
+        var note = html('small');
+        if (colliders.length) {
+          colliders.forEach(function (collider, k) {
+            var members = path.opened[collider];
+            if (k > 0) note.append(' ');
+            note.append('Aberto por ajustar por ');
+            appendNames(note, members);
+            if (members.indexOf(collider) === -1) {
+              note.append(members.length === 1 ? ', que é consequência de ' : ', que são consequência de ');
+              note.append(html('code', '', collider));
+            }
+            note.append('.');
+          });
+        } else {
+          note.textContent = 'Caminho não causal que o ajuste não fechou.';
+        }
+        item.append(note);
+        list.append(item);
+      });
+      body.append(list);
+    }
+
+    var sentence = claim(verdict);
+    $('caption').textContent = sentence;
+    $('graph').setAttribute('aria-label', 'Diagrama causal de ' + c.title + '. ' + sentence);
+  }
+
+  function renderChips() {
+    document.querySelectorAll('#chips .chip').forEach(function (chip) {
+      chip.setAttribute('aria-pressed', state.picked.has(chip.dataset.name) ? 'true' : 'false');
+    });
+  }
+
+  function renderAnswer() {
+    var c = state.current;
+    var answer = c.answer;
+    $('answer').hidden = !state.revealed;
+    $('reveal').textContent = state.revealed ? 'Esconder resposta' : 'Mostrar resposta';
+    if (!state.revealed) return;
+    var text = $('answer-text');
+    text.replaceChildren();
+    if (answer.identifiable) {
+      if (answer.smallest.length) {
+        text.append('Ajustar por ');
+        appendNames(text, answer.smallest);
+        text.append('.');
+      } else {
+        text.append('Não ajustar por nada: a comparação simples já dá o efeito certo.');
+      }
+      if (answer.validCount > 1) text.append(' Há ' + answer.validCount + ' escolhas válidas; esta é a menor.');
+    } else {
+      text.append('Não identificável com estas colunas: nenhuma escolha dá o efeito certo.');
+      if (answer.missing && answer.missing.length) {
+        text.append(' Seria identificável se a tabela tivesse ');
+        appendNames(text, answer.missing);
+        text.append('.');
+      } else {
+        text.append(' Nenhuma coluna adicional resolveria.');
+      }
+    }
+  }
+
+  // ---- Numbers (generated worlds only) ---------------------------------------
+  function formatEffect(value, numbers, withUnit) {
+    var scaled = value * numbers.scale;
+    var text = Math.abs(scaled).toFixed(1).replace('.', ',');
+    var sign = text === '0,0' ? '' : (scaled < 0 ? '−' : '+');
+    return sign + text + (withUnit ? ' ' + numbers.unit : '');
+  }
+
+  function renderNumbers() {
+    var c = state.current;
+    var numbers = c.numbers;
+    $('numbers').hidden = !numbers;
+    if (!numbers) return;
+
+    var verdict = verdictNow();
+    var chosen = numbers.estimates[setKey(state.picked)];
+    var low = numbers.domain[0];
+    var width = numbers.domain[1] - low;
+    function at(value) { return (100 * (value - low) / width) + '%'; }
+
+    function track() {
+      var holder = html('div', 'num-track');
+      if (low < 0 && numbers.domain[1] > 0) {
+        var zero = html('span', 'num-zero');
+        zero.style.left = at(0);
+        holder.append(zero);
+      }
+      var truthLine = html('span', 'num-truth');
+      truthLine.style.left = at(numbers.truth);
+      holder.append(truthLine);
+      return holder;
+    }
+
+    function truthRow() {
+      var line = html('div', 'num-row');
+      var holder = track();
+      var diamond = html('span', 'num-diamond');
+      diamond.style.left = at(numbers.truth);
+      diamond.title = 'Efeito verdadeiro: ' + formatEffect(numbers.truth, numbers, true);
+      holder.append(diamond);
+      line.append(html('span', 'num-label', 'Efeito verdadeiro'), holder,
+        html('span', 'num-value', formatEffect(numbers.truth, numbers, true)));
+      return line;
+    }
+
+    function estimateRow(className, label, estimate) {
+      var line = html('div', 'num-row ' + className);
+      var holder = track();
+      var range = formatEffect(estimate.low, numbers, false) + ' a ' + formatEffect(estimate.high, numbers, false);
+      var interval = html('span', 'num-interval');
+      interval.style.left = at(estimate.low);
+      interval.style.width = (100 * (estimate.high - estimate.low) / width) + '%';
+      var dot = html('span', 'num-dot');
+      dot.style.left = at(estimate.effect);
+      dot.title = interval.title = label + ': ' + formatEffect(estimate.effect, numbers, true) +
+        ' (intervalo de 95%: ' + range + ')';
+      holder.append(interval, dot);
+      var value = html('span', 'num-value', formatEffect(estimate.effect, numbers, true) + ' ');
+      value.append(html('small', '', '(' + range + ')'));
+      line.append(html('span', 'num-label', label), holder, value);
+      return line;
+    }
+
+    var axis = html('div', 'num-row num-axis');
+    var scale = html('div', 'num-track');
+    numbers.ticks.forEach(function (tick) {
+      var mark = html('span', 'num-tick', formatEffect(tick, numbers, false));
+      mark.style.left = at(tick);
+      scale.append(mark);
+    });
+    axis.append(html('span', 'num-label num-unit', numbers.unitLong), scale, html('span', 'num-value'));
+
+    $('numbers-plot').replaceChildren(
+      truthRow(),
+      estimateRow('naive', 'Comparação simples', numbers.estimates['']),
+      estimateRow(verdict.valid ? 'right' : 'wrong', 'Com a sua escolha', chosen),
+      axis
+    );
+
+    var picked = Array.from(state.picked).sort();
+    var covers = chosen.low <= numbers.truth && numbers.truth <= chosen.high;
+    $('numbers-caption').textContent =
+      (picked.length ? 'Ajustando por ' + namesAsText(picked) : 'Sem ajustar por nada') +
+      ', a estimativa é ' + formatEffect(chosen.effect, numbers, true) +
+      ' (intervalo de 95%: ' + formatEffect(chosen.low, numbers, false) + ' a ' +
+      formatEffect(chosen.high, numbers, false) + '). O efeito verdadeiro é ' +
+      formatEffect(numbers.truth, numbers, true) +
+      (covers ? ', dentro do intervalo.' : ', fora do intervalo.') +
+      ' A tabela tem ' + numbers.rows.toLocaleString('pt-BR') + ' linhas.';
+  }
+
+  function refresh() {
+    renderChips();
+    highlight();
+    renderVerdict();
+    renderNumbers();
+    renderAnswer();
+  }
+
+  // ---- Opening a case -----------------------------------------------------
+  function openCase(id, options) {
+    var c = byId[id] || DATA.cases[0];
+    state.current = c;
+    state.picked = new Set();
+    state.revealed = false;
+    state.focus = null;
+
+    $('case-title').textContent = c.title;
+    $('case-story').textContent = c.story;
+    $('case-note').textContent = c.note || '';
+    $('case-note').hidden = !c.note;
+    $('q-treatment').textContent = c.treatment;
+    $('q-outcome').textContent = c.outcome;
+
+    var twin = $('twin');
+    twin.replaceChildren();
+    twin.hidden = !c.twin;
+    if (c.twin) {
+      var other = html('button', '', c.twin.title);
+      other.type = 'button';
+      other.addEventListener('click', function () { openCase(c.twin.id); });
+      twin.append('Mundo gêmeo:', other, ' ' + c.twin.difference);
+    }
+
+    $('columns').hidden = !c.dictionary;
+    var body = $('columns-body');
+    body.replaceChildren();
+    (c.dictionary || []).forEach(function (entry) {
+      var line = document.createElement('tr');
+      var name = document.createElement('td');
+      name.append(html('code', '', entry.column));
+      line.append(name, html('td', '', entry.kind), html('td', '', entry.description));
+      body.append(line);
+    });
+
+    var chips = $('chips');
+    chips.replaceChildren();
+    c.columns.forEach(function (name) {
+      var chip = html('button', 'chip', name);
+      chip.type = 'button';
+      chip.dataset.name = name;
+      chip.addEventListener('click', function () { toggle(name); });
+      chips.append(chip);
+    });
+    $('no-columns').hidden = c.columns.length > 0;
+    $('pick-all').hidden = c.columns.length === 0;
+    $('pick-none').hidden = c.columns.length === 0;
+
+    document.querySelectorAll('.case-link').forEach(function (link) {
+      link.setAttribute('aria-current', link.dataset.case === c.id ? 'true' : 'false');
+    });
+    $('case-select').value = c.id;
+
+    drawGraph(c);
+    refresh();
+
+    if (!options || !options.silent) {
+      try { history.replaceState(null, '', '#' + c.id); } catch (error) { /* not allowed here */ }
+    }
+    try { localStorage.setItem(STORE_KEY, c.id); } catch (error) { /* storage unavailable */ }
+  }
+
+  function initialCase() {
+    var fromHash = decodeURIComponent((location.hash || '').slice(1));
+    if (byId[fromHash]) return fromHash;
+    try {
+      var remembered = localStorage.getItem(STORE_KEY);
+      if (remembered && byId[remembered]) return remembered;
+    } catch (error) { /* storage unavailable */ }
+    return DATA.cases[0].id;
+  }
+
+  $('pick-none').addEventListener('click', function () { pickExactly([]); });
+  $('pick-all').addEventListener('click', function () { pickExactly(state.current.columns); });
+  $('reveal').addEventListener('click', function () {
+    state.revealed = !state.revealed;
+    var answer = state.current.answer;
+    if (state.revealed && answer.identifiable) pickExactly(answer.smallest); else refresh();
+  });
+  window.addEventListener('hashchange', function () {
+    var id = decodeURIComponent((location.hash || '').slice(1));
+    if (byId[id] && id !== state.current.id) openCase(id, { silent: true });
+  });
+
+  $('colophon').textContent = DATA.colophon;
+  buildCaseList();
+  openCase(initialCase(), { silent: true });
+})();
+</script>

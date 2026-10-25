@@ -1,0 +1,61 @@
+# The three candidate bases of the specification (section 6), as found on Hugging Face.
+#
+# Checked on 2026-10-04 against the metadata of each repository
+# (https://huggingface.co/api/models/<repo>): the licence tag and the licence of the
+# model card, the commit of the main branch, and the parameter count of the safetensors
+# files. All three are public, not gated, and were downloaded to the default cache at
+# the commit recorded here. The training and the harness load a base at this commit.
+#
+# `text_parameters` was measured on this machine, with the libraries of the `train`
+# group (see scripts/README-treino.md).
+
+bases:
+  - name: Qwen3.5-4B          # as the specification calls it
+    repo: Qwen/Qwen3.5-4B
+    revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a
+    licence: apache-2.0       # licence tag, model card, and LICENSE file in the repository
+    parameters: 4659865088    # whole repository: text model and vision tower
+    text_parameters: 4205751296   # what is loaded for text only (Qwen3_5ForCausalLM)
+    architecture: Qwen3_5ForConditionalGeneration (model_type qwen3_5)
+    modalities: text, image and video in; text out. Only the text part is used here.
+    thinking: on by default; `enable_thinking=False` in the chat template turns it off
+    end_of_turn: "<|im_end|>"
+    notes: >
+      Hybrid model: 24 of its 32 layers use linear attention (gated delta net) and only
+      8 use ordinary attention. The usual LoRA targets (q_proj, k_proj, v_proj, o_proj,
+      gate_proj, up_proj, down_proj) reach the feed-forward part of the 32 layers but
+      the attention of only those 8. The linear-attention layers name their projections
+      in_proj_qkv, in_proj_z, in_proj_b, in_proj_a and out_proj.
+      The repository has no generation_config.json, and the end token of its model
+      config is <|endoftext|>: generation must be told to stop at <|im_end|>.
+
+  - name: IBM Granite 4.2 (3B)
+    repo: ibm-granite/granite-4.2-3b
+    revision: e459acceac81e5fe67c07d9cfc72329a332e7eb1
+    licence: apache-2.0       # licence tag and model card; the repository has no LICENSE file
+    parameters: 3659737600
+    text_parameters: 3659737600
+    architecture: GraniteForCausalLM (model_type granite)
+    modalities: text
+    thinking: on by default; `enable_thinking=False` in the chat template turns it off
+    end_of_turn: "<|im_end|>"
+    notes: >
+      The chat template always writes a system block, empty when no system message is
+      given. The padding token of the tokenizer is the end token (<|im_end|>); Unsloth
+      replaces it with <|fim_pad|> when it loads the base for training.
+
+  - name: Qwen3-4B
+    repo: Qwen/Qwen3-4B
+    revision: 1cfa9a7208912126459214e8b04321603b3df60c
+    licence: apache-2.0       # licence tag, model card, and LICENSE file in the repository
+    parameters: 4022468096
+    text_parameters: 4022468096
+    architecture: Qwen3ForCausalLM (model_type qwen3)
+    modalities: text
+    thinking: on by default; `enable_thinking=False` in the chat template turns it off
+    end_of_turn: "<|im_end|>"
+    notes: >
+      This is the release of April 2025, with both modes in one model. Qwen also
+      publishes Qwen/Qwen3-4B-Instruct-2507 (no thinking mode) and
+      Qwen/Qwen3-4B-Thinking-2507 (always thinking), both Apache 2.0; they are other
+      weights and were not downloaded.

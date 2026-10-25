@@ -1,0 +1,654 @@
+# Casos simulados para TREINO, lote pt-16: oito casos em português do Brasil escritos
+# como se fossem de uma pessoa (gerente de operações de um app de entregas, dono de uma
+# rede de pet shops, coordenador de um programa de habitação municipal, gerente de uma
+# concessionária de veículos, analista de BI de uma seguradora de saúde), cada um no
+# estilo em que essa pessoa escreveria: e-mail longo com anexo descrito, pergunta em um
+# fórum de analytics, transcrição de áudio informal, briefing para uma consultoria, ata
+# de reunião.
+#
+# Escritos pelo assistente em 2026-10-07, no papel de cada pessoa, sem acesso às fichas de
+# teoria. Idioma: pt. Status: rascunho (a aprovação é dada em outro lugar).
+#
+# Estes casos são TREINO (reforço com a nota do verificador), não teste. Nenhum deles
+# repete os cenários do conjunto de teste congelado em cases/simulados/, nem variantes
+# próximas. As setas ("causa -> efeito") declaram o diagrama que o texto, as descrições
+# das colunas e o bom senso implicam; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py). Um caso errado ensina uma lição errada: por isso a resposta
+# nunca é aceita sem a conferência.
+
+cases:
+
+  - id: pt_app_garantia_pico
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de operações regional de um app de entregas, formado em administração, sabe fazer tabela dinâmica e nada além disso
+    theme: Logística (app de entregas)
+    title: Garantia de ganho mínimo e horas online dos entregadores
+    treatment: grupo_garantia
+    outcome: horas_online_teste
+    columns:
+      id_entregador: Identificador do entregador na plataforma.
+      grupo_garantia: Entrou no grupo com garantia de ganho mínimo de R$ 25 por hora nas noites de sexta e sábado durante o teste de agosto de 2026 (1 = sim, 0 = não). Sorteio feito pelo sistema entre os entregadores ativos de Curitiba.
+      horas_online_teste: Horas online nas quatro semanas do teste (agosto de 2026).
+      horas_online_antes: Horas online nas quatro semanas anteriores ao teste (julho de 2026).
+      modal: Veículo cadastrado (moto ou bicicleta).
+      turnos_pico_teste: Número de turnos de pico (sexta e sábado, das 18h às 23h) em que o entregador ficou online durante as quatro semanas do teste.
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada em setembro de 2026 (1 = sim, 0 = não). A pesquisa foi enviada ao grupo da garantia e aos entregadores com mais de 120 horas online no mês do teste.
+    story: >-
+      Título: teste A/B com entregadores, por quais colunas eu ajusto?
+
+      Oi pessoal, sou de operações num app de entregas (não sou da área de dados, perdão
+      se a pergunta for básica). Em agosto a gente rodou um teste em Curitiba: metade dos
+      entregadores ativos, sorteada pelo sistema, passou a ter garantia de ganho mínimo
+      de R$ 25 por hora nas noites de sexta e sábado; a outra metade seguiu no modelo
+      normal. Quero saber se a garantia aumentou as horas online nas quatro semanas do
+      teste.
+
+      A base tem: id do entregador, se caiu no grupo da garantia, horas online nas 4
+      semanas do teste, horas online nas 4 semanas anteriores, modal (moto ou bike),
+      quantos turnos de pico (sex/sáb à noite) o entregador fez durante o teste e se
+      respondeu a pesquisa de satisfação que mandamos em setembro.
+
+      Alguns pontos. Quem tem moto roda bem mais hora que quem está de bike, isso é
+      histórico. As horas de julho ajudam a prever as de agosto, claro, quem roda muito
+      continua rodando muito. Os turnos de pico subiram bastante no grupo da garantia,
+      era essa a ideia, e turno de pico puxa a hora online total pra cima. A pesquisa de
+      setembro foi mandada pra todo mundo do grupo da garantia (pra ouvir o feedback) e
+      pra quem rodou mais de 120 horas no mês, que são os que a gente trata como
+      parceiros prioritários.
+
+      Meu chefe quer uma regressão "com todas as colunas pra ficar mais robusto". Faz
+      sentido? Ou eu só comparo as médias dos dois grupos?
+    edges:
+      - grupo_garantia -> turnos_pico_teste
+      - turnos_pico_teste -> horas_online_teste
+      - grupo_garantia -> horas_online_teste
+      - horas_online_antes -> horas_online_teste
+      - modal -> horas_online_teste
+      - grupo_garantia -> respondeu_pesquisa
+      - horas_online_teste -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        turnos_pico_teste: Contados durante o teste e consequência da garantia. São o caminho pelo qual ela age sobre as horas; ajustar por eles apaga parte do efeito.
+        respondeu_pesquisa: A pesquisa foi enviada ao grupo da garantia e a quem rodou muito. Depende do grupo e do resultado; ajustar por ela cria uma associação falsa entre a garantia e as horas.
+      indifferent: [horas_online_antes, id_entregador, modal]
+    note: >-
+      Houve sorteio, então a comparação simples já dá o efeito. A armadilha é a
+      regressão "com tudo": os turnos de pico são consequência da garantia e a pesquisa
+      foi enviada em função do grupo e das horas.
+
+  - id: pt_concessionaria_estendido_feeling
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: gerente geral de uma concessionária de veículos em Campinas, vinte anos vendendo carro, formado em administração, nunca mexeu com estatística
+    theme: Varejo automotivo (concessionária)
+    title: Test drive estendido e compra em 90 dias, oferecido pelo feeling do vendedor
+    twin: pt_concessionaria_estendido_sabado
+    treatment: test_drive_estendido
+    outcome: comprou_90d
+    columns:
+      id_lead: Identificador do lead no CRM da concessionária.
+      test_drive_estendido: Fez o test drive estendido (levou o carro na sexta e devolveu na segunda) entre março e junho de 2026 (1 = sim, 0 = não).
+      comprou_90d: Comprou um veículo novo na loja em até 90 dias após a primeira visita (1 = sim, 0 = não).
+      tem_usado_troca: Declarou na primeira visita ter um veículo usado para dar na troca (1 = sim, 0 = não).
+      faixa_versao: Faixa da versão de interesse registrada na primeira visita (entrada, intermediária ou topo).
+      visita_sabado: A primeira visita à loja foi em um sábado (1 = sim, 0 = não).
+      origem_lead: Origem do lead (site da marca, passagem na loja ou indicação).
+      ligacao_acompanhamento: Recebeu ao menos uma ligação de acompanhamento do vendedor nos 90 dias após a primeira visita (1 = sim, 0 = não).
+    not_in_table:
+      impressao_vendedor: O "feeling" do vendedor sobre quão perto o lead está de fechar. Não é registrado no CRM.
+    story: >-
+      Assunto: dados do test drive estendido, pedido de ajuda na análise
+
+      Prezada Carla, boa tarde.
+
+      Conforme conversamos no encontro de concessionárias em agosto, segue em anexo a
+      planilha do nosso piloto do test drive estendido, e peço a ajuda do seu time pra
+      tirar uma conclusão honesta disso, porque aqui a gente só sabe fazer média.
+
+      Contexto. De março a junho deste ano a loja passou a oferecer a alguns leads o
+      test drive estendido: o cliente leva o carro na sexta e devolve na segunda. A ideia
+      veio da regional e o custo não é pequeno (seguro, combustível, o carro parado no
+      fim de semana). Dos 1.180 leads que entraram na loja no período, 143 fizeram o
+      estendido. A pergunta da diretoria é se isso aumenta a conversão em 90 dias ou se
+      a gente está só emprestando carro pra quem já ia comprar.
+
+      Como foi oferecido. Aqui vai a parte que me incomoda: não teve regra. Cada vendedor
+      oferecia pra quem ele sentia que estava mais perto de fechar, aquele feeling de
+      quem vende carro há quinze anos, o cliente que volta duas vezes, que pergunta de
+      prazo de entrega. Isso não fica registrado em lugar nenhum; o CRM só tem o que
+      está na planilha. E, convenhamos, esse feeling acerta bastante: o cliente que o
+      vendedor acha quente fecha mais, com ou sem fim de semana com o carro. Fora o
+      feeling, dois critérios objetivos pesaram. Os vendedores priorizaram quem tinha
+      usado pra dar na troca, porque o negócio fica maior, e só havia carro de
+      demonstração disponível para as versões intermediária e topo, então lead de versão
+      de entrada praticamente não recebeu a oferta.
+
+      O anexo. A planilha "piloto_td_estendido.xlsx" tem uma linha por lead: id do lead,
+      se fez o estendido, se comprou em até 90 dias (qualquer veículo novo, na nossa
+      loja), se declarou ter usado pra troca na primeira visita, a faixa de versão de
+      interesse (entrada, intermediária, topo), se a primeira visita foi num sábado, a
+      origem do lead (site da marca, passagem na loja ou indicação) e se recebeu ligação
+      de acompanhamento do vendedor nos 90 dias.
+
+      Sobre essas colunas, pelo que conheço do negócio. Quem tem usado pra dar na troca
+      fecha mais, porque o financiamento sai mais fácil. Lead de versão topo converte
+      menos, demora mais pra decidir. Quem visita no sábado vem em família e normalmente
+      já está mais decidido, fecha mais. Indicação converte muito mais que lead de site.
+      A ligação de acompanhamento o vendedor faz pra todo mundo que levou o carro no fim
+      de semana (pra combinar a devolução e sentir a temperatura) e faz também pra quem
+      comprou, pra agendar a entrega e a primeira revisão; o resto do pessoal raramente
+      recebe ligação.
+
+      A média crua é 41% de conversão com estendido contra 17% sem. Eu não acredito nesse
+      número. Dá pra chegar em algo mais honesto com o que tem na planilha? Se precisar
+      de mais alguma coluna do CRM, eu puxo.
+
+      Obrigado desde já,
+      Ricardo Nunes
+      Gerente geral
+    edges:
+      - impressao_vendedor -> test_drive_estendido
+      - impressao_vendedor -> comprou_90d
+      - tem_usado_troca -> test_drive_estendido
+      - tem_usado_troca -> comprou_90d
+      - faixa_versao -> test_drive_estendido
+      - faixa_versao -> comprou_90d
+      - visita_sabado -> comprou_90d
+      - origem_lead -> comprou_90d
+      - test_drive_estendido -> comprou_90d
+      - test_drive_estendido -> ligacao_acompanhamento
+      - comprou_90d -> ligacao_acompanhamento
+    answer:
+      identifiable: false
+      missing: [impressao_vendedor]
+    note: >-
+      Os dois critérios objetivos (usado na troca, faixa de versão) estão na planilha,
+      mas o terceiro motivo da oferta, o feeling do vendedor, não está em coluna nenhuma
+      e também mexe na compra. A ligação de acompanhamento é consequência do estendido
+      e da compra.
+
+  - id: pt_concessionaria_estendido_sabado
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: gerente geral de uma concessionária de veículos em Campinas, vinte anos vendendo carro, formado em administração, nunca mexeu com estatística
+    theme: Varejo automotivo (concessionária)
+    title: Test drive estendido e compra em 90 dias, oferecido a quem visitou no sábado
+    twin: pt_concessionaria_estendido_feeling
+    treatment: test_drive_estendido
+    outcome: comprou_90d
+    columns:
+      id_lead: Identificador do lead no CRM da concessionária.
+      test_drive_estendido: Fez o test drive estendido (levou o carro na sexta e devolveu na segunda) entre março e junho de 2026 (1 = sim, 0 = não).
+      comprou_90d: Comprou um veículo novo na loja em até 90 dias após a primeira visita (1 = sim, 0 = não).
+      tem_usado_troca: Declarou na primeira visita ter um veículo usado para dar na troca (1 = sim, 0 = não).
+      faixa_versao: Faixa da versão de interesse registrada na primeira visita (entrada, intermediária ou topo).
+      visita_sabado: A primeira visita à loja foi em um sábado (1 = sim, 0 = não).
+      origem_lead: Origem do lead (site da marca, passagem na loja ou indicação).
+      ligacao_acompanhamento: Recebeu ao menos uma ligação de acompanhamento do vendedor nos 90 dias após a primeira visita (1 = sim, 0 = não).
+    story: >-
+      Assunto: dados do test drive estendido, pedido de ajuda na análise
+
+      Prezada Carla, boa tarde.
+
+      Conforme conversamos no encontro de concessionárias em agosto, segue em anexo a
+      planilha do nosso piloto do test drive estendido, e peço a ajuda do seu time pra
+      tirar uma conclusão honesta disso, porque aqui a gente só sabe fazer média.
+
+      Contexto. De março a junho deste ano a loja passou a oferecer a alguns leads o
+      test drive estendido: o cliente leva o carro na sexta e devolve na segunda. A ideia
+      veio da regional e o custo não é pequeno (seguro, combustível, o carro parado no
+      fim de semana). Dos 1.180 leads que entraram na loja no período, 143 fizeram o
+      estendido. A pergunta da diretoria é se isso aumenta a conversão em 90 dias ou se
+      a gente está só emprestando carro pra quem já ia comprar.
+
+      Como foi oferecido. Aqui teve regra, e foi mais por logística do que por
+      estratégia: o carro de demonstração roda com a equipe de venda direta durante a
+      semana e só fica na loja no sábado, então a gente combinou de oferecer o estendido
+      a quem fazia a primeira visita no sábado, já agendando o fim de semana seguinte.
+      Quem vinha em dia de semana não recebia a oferta, salvo raríssima exceção. Não
+      teve escolha do vendedor quanto ao dia: era sábado, oferecia; não era, não
+      oferecia. Entre os clientes de sábado, dois critérios objetivos pesaram. Os
+      vendedores priorizaram quem tinha usado pra dar na troca, porque o negócio fica
+      maior, e só havia carro de demonstração disponível para as versões intermediária e
+      topo, então lead de versão de entrada praticamente não recebeu a oferta.
+
+      O anexo. A planilha "piloto_td_estendido.xlsx" tem uma linha por lead: id do lead,
+      se fez o estendido, se comprou em até 90 dias (qualquer veículo novo, na nossa
+      loja), se declarou ter usado pra troca na primeira visita, a faixa de versão de
+      interesse (entrada, intermediária, topo), se a primeira visita foi num sábado, a
+      origem do lead (site da marca, passagem na loja ou indicação) e se recebeu ligação
+      de acompanhamento do vendedor nos 90 dias.
+
+      Sobre essas colunas, pelo que conheço do negócio. Quem tem usado pra dar na troca
+      fecha mais, porque o financiamento sai mais fácil. Lead de versão topo converte
+      menos, demora mais pra decidir. Quem visita no sábado vem em família e normalmente
+      já está mais decidido, fecha mais. Indicação converte muito mais que lead de site.
+      A ligação de acompanhamento o vendedor faz pra todo mundo que levou o carro no fim
+      de semana (pra combinar a devolução e sentir a temperatura) e faz também pra quem
+      comprou, pra agendar a entrega e a primeira revisão; o resto do pessoal raramente
+      recebe ligação.
+
+      A média crua é 41% de conversão com estendido contra 17% sem. Eu não acredito nesse
+      número. Dá pra chegar em algo mais honesto com o que tem na planilha? Se precisar
+      de mais alguma coluna do CRM, eu puxo.
+
+      Obrigado desde já,
+      Ricardo Nunes
+      Gerente geral
+    edges:
+      - visita_sabado -> test_drive_estendido
+      - visita_sabado -> comprou_90d
+      - tem_usado_troca -> test_drive_estendido
+      - tem_usado_troca -> comprou_90d
+      - faixa_versao -> test_drive_estendido
+      - faixa_versao -> comprou_90d
+      - origem_lead -> comprou_90d
+      - test_drive_estendido -> comprou_90d
+      - test_drive_estendido -> ligacao_acompanhamento
+      - comprou_90d -> ligacao_acompanhamento
+    answer:
+      identifiable: true
+      adjust_for: [faixa_versao, tem_usado_troca, visita_sabado]
+      do_not_adjust_for:
+        ligacao_acompanhamento: O vendedor liga pra quem levou o carro e pra quem comprou. É consequência do estendido e da compra; ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [id_lead, origem_lead]
+    note: >-
+      Igual ao gêmeo, com um fato trocado: a oferta seguiu a regra do sábado, e o dia da
+      visita está na planilha. Os três motivos da oferta viram as três colunas de ajuste.
+      A origem do lead só mexe na compra.
+
+  - id: pt_petshop_plano_banho_pt16
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: dono de uma rede de sete pet shops em Belo Horizonte e região, veterinário de formação, não mexe com planilha
+    theme: Varejo (rede de pet shops)
+    title: Plano mensal de banho e gasto total do cliente
+    treatment: assinou_plano
+    outcome: gasto_abr_set
+    columns:
+      id_cliente: Código do cliente no sistema da rede.
+      assinou_plano: Assinou em março de 2026, mês de lançamento, o plano mensal de banho (quatro banhos por mês a valor fixo) (1 = sim, 0 = não).
+      gasto_abr_set: Gasto total do cliente nas lojas da rede de abril a setembro de 2026, em reais, somando plano, banho avulso, produtos e demais serviços.
+      visitas_12m_antes: Número de visitas do cliente a qualquer loja da rede de março de 2025 a fevereiro de 2026.
+      porte_animal: Porte do animal principal do cadastro (pequeno, médio ou grande).
+      visitas_abr_set: Número de visitas do cliente a qualquer loja da rede de abril a setembro de 2026.
+    not_in_table:
+      tipo_pelo: Se o cachorro é de pelo longo, que pede banho e tosa toda semana. Raça e tipo de pelo quase nunca são preenchidos no cadastro; só o porte é.
+    story: >-
+      [áudio transcrito, 3 min 40]
+
+      Oi Fer, tudo bom? Então, deixa eu te explicar o negócio do plano de banho, que
+      você falou que ia olhar os números pra mim. A gente lançou em março nas sete lojas,
+      é assim, o cliente paga um valor fixo por mês e tem direito a quatro banhos, um por
+      semana basicamente. Eu quero saber se quem assinou passou a gastar mais na loja no
+      total, ração, petisco, acessório, tudo junto, de abril a setembro. Ou se só trocou
+      banho avulso por banho de plano e o resto ficou igual, que aí não compensa o
+      desconto.
+
+      Como a gente ofereceu, deixa eu lembrar... eu pedi pro pessoal do balcão oferecer
+      pros clientes que já vinham com frequência, que isso o sistema tem, dá pra puxar
+      quantas visitas a pessoa fez nos doze meses antes. E cliente que vem muito gasta
+      muito, óbvio, independente de plano. Aí tem o porte, o banho de cachorro grande é
+      mais caro então o plano compensa mais pra eles, assinaram bem mais, e dono de
+      cachorro grande gasta mais em ração, é saco de quinze quilos. Ah, e uma coisa que
+      eu lembrei agora, as meninas ofereceram muito mais pra quem tem cachorro de pelo
+      longo, shih tzu, lhasa, spitz, porque esses precisam de banho e tosa toda semana
+      mesmo, o dono já vem direto e já gasta com tosa, hidratação, essas coisas. Só que
+      raça o pessoal nunca preenche no cadastro, Fer, e tipo de pelo muito menos, a gente
+      só tem o porte.
+
+      Depois que assina o cliente passa a vir toda semana, né, e aí ele leva coisa junto,
+      isso a gente vê, o número de visitas de abril a setembro de quem assinou subiu
+      bastante, e visita vira venda. Isso é meio que o jeito que o plano funciona.
+
+      Então, a base que a Lu vai te mandar tem código do cliente, se assinou o plano, o
+      gasto total de abril a setembro, as visitas nos doze meses anteriores, o porte do
+      animal e as visitas de abril a setembro. Me diz se dá pra tirar alguma conclusão ou
+      se eu tô viajando. Valeu!
+    edges:
+      - visitas_12m_antes -> assinou_plano
+      - visitas_12m_antes -> gasto_abr_set
+      - porte_animal -> assinou_plano
+      - porte_animal -> gasto_abr_set
+      - tipo_pelo -> assinou_plano
+      - tipo_pelo -> gasto_abr_set
+      - tipo_pelo -> visitas_12m_antes
+      - assinou_plano -> visitas_abr_set
+      - visitas_abr_set -> gasto_abr_set
+      - assinou_plano -> gasto_abr_set
+    answer:
+      identifiable: false
+      missing: [tipo_pelo]
+    note: >-
+      Frequência anterior e porte estão na base. O tipo de pelo, que fez o balcão
+      oferecer mais e faz o dono gastar mais, não está em coluna nenhuma; as visitas
+      anteriores carregam parte disso, mas não tudo. As visitas de abril a setembro são
+      consequência do plano.
+
+  - id: pt_habitacao_sorteio_emprego
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenador do programa habitacional de uma prefeitura do interior de São Paulo, assistente social de formação
+    theme: Política pública (habitação municipal)
+    title: Casa própria por sorteio e emprego formal do responsável
+    treatment: contemplada
+    outcome: emprego_formal_dez25
+    columns:
+      id_familia: Identificador da família no cadastro habitacional do município.
+      contemplada: Família sorteada em outubro de 2024 para uma unidade do Residencial Jardim das Palmeiras, com chaves entregues em janeiro de 2025 (1 = sim, 0 = não).
+      emprego_formal_dez25: Responsável familiar com vínculo de emprego formal ativo em dezembro de 2025, conforme cruzamento com RAIS/CAGED (1 = sim, 0 = não).
+      emprego_formal_dez23: Responsável familiar com vínculo de emprego formal ativo em dezembro de 2023, pelo mesmo cruzamento (1 = sim, 0 = não).
+      cota_pcd: Família habilitada na cota para famílias com pessoa com deficiência (1 = sim, 0 = não).
+      n_filhos: Número de filhos menores de 18 anos no cadastro de outubro de 2024.
+      km_centro_dez25: Distância, em quilômetros por via pública, da residência da família em dezembro de 2025 até o marco zero da cidade.
+      atualizou_cadunico_2025: Família fez atualização cadastral no CadÚnico em algum momento de 2025 (1 = sim, 0 = não).
+    not_in_table:
+      escolaridade_responsavel: Escolaridade do responsável familiar. O cadastro habitacional não tem esse campo.
+    story: >-
+      ATA. Reunião de avaliação do Residencial Jardim das Palmeiras.
+      Data: 24/03/2026. Local: sala 3 da Secretaria de Habitação. Presentes: coordenação
+      do programa (Eduardo), equipe social (Renata e Josi), Controle Interno (Sr.
+      Almeida), estagiário de dados (Pedro).
+
+      1. Pauta. A Secretaria quer saber se receber a casa no Residencial mudou a situação
+      de emprego formal das famílias, para a prestação de contas ao conselho em maio.
+
+      2. Eduardo relembrou o processo. Em outubro de 2024 havia 2.310 famílias habilitadas
+      no cadastro; o Residencial tem 480 unidades. A seleção foi por sorteio público, em
+      cartório, como manda o edital. A única exceção foi a cota: 24 unidades (5%)
+      reservadas a famílias com pessoa com deficiência, sorteadas entre si, de modo que
+      uma família com PcD teve chance bem maior de ser contemplada do que as demais. As
+      chaves foram entregues em janeiro de 2025.
+
+      3. Renata lembrou que o Residencial fica a 14 km do centro e que boa parte das
+      famílias veio de bairros centrais ou da zona leste. A distância até o centro pesa
+      na vida de quem procura emprego, porque o ônibus é demorado e a maioria das vagas
+      formais está no centro e no distrito industrial, do outro lado da cidade.
+
+      4. Sr. Almeida perguntou se famílias com PcD têm perfil de emprego diferente.
+      Renata: sim, em geral a pessoa cuidadora deixa o trabalho formal, isso a equipe vê
+      todo dia. Renata lembrou também que a escolaridade do responsável pesa muito no
+      emprego formal e que o cadastro habitacional não tem esse campo.
+
+      5. Pedro apresentou a base: uma linha por família habilitada em outubro de 2024,
+      contemplada ou não, com o id da família, se foi contemplada, se o responsável tinha
+      emprego formal em dezembro de 2025 (cruzamento com RAIS/CAGED pedido ao
+      Ministério), se tinha emprego formal em dezembro de 2023, se a família entrou na
+      cota PcD, número de filhos, a distância em km da residência atual ao centro em
+      dezembro de 2025 e se a família atualizou o CadÚnico em 2025. Josi observou que a
+      atualização do CadÚnico é obrigatória quando muda o endereço, então praticamente
+      todas as contempladas atualizaram em 2025, e também quando muda a renda, então
+      quem arrumou ou perdeu emprego no ano também atualizou. Pedro acrescentou que quem
+      já tinha emprego formal em 2023 tende a continuar tendo, e que famílias com mais
+      filhos têm menos emprego formal entre os responsáveis, principalmente as mulheres.
+
+      6. Encaminhamento. Pedro vai pedir orientação à universidade parceira sobre quais
+      colunas usar na comparação entre contempladas e não contempladas. Eduardo pediu
+      que a resposta venha em linguagem simples, para ir à prestação de contas.
+
+      Próxima reunião: 14/04/2026.
+    edges:
+      - cota_pcd -> contemplada
+      - cota_pcd -> emprego_formal_dez25
+      - cota_pcd -> emprego_formal_dez23
+      - contemplada -> km_centro_dez25
+      - km_centro_dez25 -> emprego_formal_dez25
+      - contemplada -> emprego_formal_dez25
+      - contemplada -> atualizou_cadunico_2025
+      - emprego_formal_dez25 -> atualizou_cadunico_2025
+      - emprego_formal_dez23 -> emprego_formal_dez25
+      - n_filhos -> emprego_formal_dez25
+      - escolaridade_responsavel -> emprego_formal_dez25
+    answer:
+      identifiable: true
+      adjust_for: [cota_pcd]
+      do_not_adjust_for:
+        km_centro_dez25: Medida em dezembro de 2025 e consequência direta da mudança para o Residencial. É um dos caminhos pelos quais a casa age sobre o emprego; ajustar por ela apaga parte do efeito.
+        atualizou_cadunico_2025: A atualização é obrigatória quando muda o endereço (consequência da casa) e quando muda a renda (consequência do emprego). Ajustar por ela cria uma associação falsa entre a casa e o emprego.
+      indifferent: [emprego_formal_dez23, id_familia, n_filhos]
+    note: >-
+      Sorteio dentro de duas filas: a cota PcD teve chance maior de ser contemplada e
+      tem menos emprego formal, então é a única coluna de ajuste. A escolaridade, que
+      falta, só mexe no emprego e não atrapalha. A distância de 2025 e a atualização do
+      CadÚnico vêm depois da casa.
+
+  - id: pt_seguradora_remedio_casa
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: analista de BI de uma seguradora de saúde de porte médio (planos coletivos empresariais), formada em estatística, nunca fez inferência causal
+    theme: Saúde suplementar (seguradora)
+    title: Entrega de anti-hipertensivos em casa e internação cardiovascular
+    treatment: programa_remedio_casa
+    outcome: internacao_cardio_2025
+    columns:
+      id_beneficiario: Identificador do beneficiário na operadora.
+      programa_remedio_casa: Incluído no programa Remédio em Casa a partir de janeiro de 2025 (1 = sim, 0 = não).
+      internacao_cardio_2025: Teve ao menos uma internação com diagnóstico principal cardiovascular em 2025 (1 = sim, 0 = não).
+      idade: Idade em 31/12/2024, em anos.
+      receitas_ah_2024: Número de receitas de anti-hipertensivo dispensadas pela rede credenciada em 2024.
+      renovou_jan25: O contrato da empresa do beneficiário renovou em janeiro de 2025 (1 = sim, 0 = não).
+      pdc_2025: Proporção de dias de 2025 cobertos por anti-hipertensivo, de 0 a 1, calculada a partir das dispensações do ano.
+      contato_sac_2025: Abriu ao menos um protocolo no SAC em 2025 (1 = sim, 0 = não).
+      sexo: Sexo registrado no cadastro (F ou M).
+    story: >-
+      BRIEFING. Avaliação do programa Remédio em Casa.
+      Para: consultoria. De: BI / Gestão de Saúde. Data: 02/10/2026. Confidencial.
+
+      Objetivo. Estimar o efeito do programa Remédio em Casa sobre as internações por
+      causa cardiovascular em 2025, para subsidiar a decisão de estender o programa a
+      toda a carteira em 2027. Queremos a estimativa e, principalmente, a justificativa
+      de quais variáveis entram no ajuste e quais não entram.
+
+      O programa. Entrega mensal gratuita de anti-hipertensivos na residência do
+      beneficiário, com lembrete por SMS. Começou em janeiro de 2025. A inclusão foi
+      automática (opt-out, com 1,2% de recusa) para quem atendia a dois critérios: idade
+      igual ou superior a 50 anos em 31/12/2024 e duas ou mais receitas de
+      anti-hipertensivo dispensadas em 2024. Por limitação operacional, o programa foi
+      ativado apenas nos contratos empresariais com renovação em janeiro de 2025; nos
+      demais contratos ninguém foi incluído, mesmo cumprindo os critérios. O mês de
+      renovação é herdado do contrato original de cada empresa e, até onde sabemos, não
+      tem nada a ver com o perfil de saúde dos funcionários.
+
+      População da base. Todos os beneficiários com ao menos uma receita de
+      anti-hipertensivo em 2024 e ativos durante todo o ano de 2025 (n = 41.368). Uma
+      linha por beneficiário.
+
+      Colunas (dicionário completo em anexo). id_beneficiario; programa_remedio_casa;
+      internacao_cardio_2025; idade em 31/12/2024; receitas_ah_2024 (número de receitas
+      de anti-hipertensivo em 2024); renovou_jan25; pdc_2025 (proporção de dias cobertos
+      por anti-hipertensivo em 2025, a nossa medida de adesão); contato_sac_2025 (abriu
+      protocolo no SAC em 2025); sexo.
+
+      O que já sabemos.
+      Idade e número de receitas em 2024 são os dois critérios de inclusão e também os
+      dois melhores preditores de internação cardiovascular que temos: mais velho e mais
+      receitas, mais internação. Receitas em 2024 também predizem a adesão em 2025, quem
+      retirava direitinho continua retirando.
+      A adesão (PDC) subiu de 0,61 para 0,83 no grupo do programa; é o nosso principal
+      KPI operacional, e adesão alta reduz internação, a literatura clínica sustenta.
+      Os protocolos de SAC em 2025 concentram-se em dois grupos: participantes do
+      programa (atrasos na entrega, troca de endereço) e beneficiários que internaram
+      (autorizações, reembolso). Nos demais são raros.
+      Mulheres internam menos por causa cardiovascular na nossa carteira.
+
+      Entregáveis esperados. (1) Lista das colunas que devem entrar no ajuste e das que
+      não devem, com justificativa em linguagem acessível à diretoria. (2) Estimativa do
+      efeito com intervalo. Prazo: 30/10/2026.
+    edges:
+      - idade -> programa_remedio_casa
+      - idade -> internacao_cardio_2025
+      - receitas_ah_2024 -> programa_remedio_casa
+      - receitas_ah_2024 -> internacao_cardio_2025
+      - receitas_ah_2024 -> pdc_2025
+      - renovou_jan25 -> programa_remedio_casa
+      - programa_remedio_casa -> pdc_2025
+      - pdc_2025 -> internacao_cardio_2025
+      - programa_remedio_casa -> internacao_cardio_2025
+      - programa_remedio_casa -> contato_sac_2025
+      - internacao_cardio_2025 -> contato_sac_2025
+      - sexo -> internacao_cardio_2025
+    answer:
+      identifiable: true
+      adjust_for: [idade, receitas_ah_2024]
+      do_not_adjust_for:
+        pdc_2025: Medida em 2025 e consequência do programa. É o caminho pelo qual ele age sobre a internação; ajustar por ela apaga o efeito que se quer medir.
+        contato_sac_2025: Sobe com o programa (entrega) e com a internação (autorização). Ajustar por ela cria uma associação falsa entre o programa e a internação.
+      indifferent: [id_beneficiario, renovou_jan25, sexo]
+    note: >-
+      Os dois critérios de inclusão estão na base e são as colunas de ajuste. O mês de
+      renovação só mexe na inclusão e pode entrar ou não. A adesão é o KPI de que a área
+      se orgulha, e justamente por isso não pode entrar.
+
+  - id: pt_app_frete_gratis_zona
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de operações regional de um app de entregas, formado em administração, sabe fazer tabela dinâmica e nada além disso
+    theme: Logística (app de entregas)
+    title: Frete grátis patrocinado e pedidos dos restaurantes
+    treatment: frete_gratis
+    outcome: pedidos_ago
+    columns:
+      id_restaurante: Identificador do restaurante na plataforma.
+      frete_gratis: Participou do Frete Grátis Patrocinado de junho a agosto de 2026 (1 = sim, 0 = não).
+      pedidos_ago: Número de pedidos concluídos em agosto de 2026.
+      pedidos_mai: Número de pedidos concluídos em maio de 2026.
+      nota_media_mai: Avaliação média dos clientes acumulada até 31 de maio de 2026, de 1 a 5.
+      categoria: Categoria principal do restaurante no app (japonesa, hambúrguer, pizza, brasileira, saudável, outras).
+      visualizacoes_cardapio_ago: Número de aberturas da página do restaurante no app em agosto de 2026.
+      renovou_set: Renovou o contrato anual com a plataforma em setembro de 2026 (1 = sim, 0 = não).
+    not_in_table:
+      zona_sobra_entregadores: Se a zona do restaurante tinha mais entregadores online do que pedidos a distribuir (zonas de demanda baixa e entrega rápida). A base entregue não traz zona nem endereço.
+    story: >-
+      Briefing. Avaliação do Frete Grátis Patrocinado (jun–ago/2026).
+      Solicitante: Operações, regional Nordeste. Para: consultoria de dados.
+
+      1. O que foi feito. De junho a agosto o app pagou o frete (entrega grátis em
+      pedidos acima de R$ 30) em 318 restaurantes parceiros de Recife e Região
+      Metropolitana, de um total de 2.740 ativos. O custo ficou com a gente, não com o
+      restaurante. Queremos saber quanto o benefício aumentou os pedidos desses
+      restaurantes em agosto.
+
+      2. Como os restaurantes foram escolhidos. A escolha foi da equipe de operações, com
+      dois critérios. Primeiro, zonas da cidade onde a gente tinha entregador sobrando,
+      isto é, mais entregador online do que pedido pra distribuir; nessas zonas a entrega
+      sai rápida e o entregador fica ocioso, e a ideia era justamente gerar demanda ali.
+      Segundo, dentro dessas zonas, restaurantes de volume médio em maio: nem os muito
+      grandes, que não precisam, nem os muito pequenos, que não têm operação pra absorver
+      pico. Importante: a base que podemos entregar à consultoria não tem a zona nem o
+      endereço do restaurante (cláusula de confidencialidade dos contratos com
+      parceiros; a anonimização remove localização). Sabemos internamente que nas zonas
+      com entregador sobrando o tempo de entrega é bem menor e isso, por si só, traz
+      pedido recorrente, com ou sem frete grátis; e que são zonas de demanda
+      historicamente mais baixa, é por isso que o entregador sobra.
+
+      3. Base (uma linha por restaurante ativo em maio). id_restaurante; frete_gratis;
+      pedidos_ago (pedidos concluídos em agosto); pedidos_mai (pedidos concluídos em
+      maio, antes do programa); nota_media_mai (avaliação média dos clientes até maio, 1
+      a 5); categoria (tipo de cozinha); visualizacoes_cardapio_ago (aberturas da página
+      do restaurante no app em agosto); renovou_set (renovou o contrato anual em
+      setembro).
+
+      4. Observações da operação. Pedidos em maio são o melhor preditor de pedidos em
+      agosto; restaurante grande segue grande. Nota alta vende: acima de 4,5 o
+      restaurante recebe mais pedidos. Japonesa e hambúrguer têm volume maior que as
+      demais categorias. O selo "frete grátis" aparece na vitrine do app e aumentou muito
+      as aberturas de página dos participantes em agosto, e abertura de página converte
+      em pedido. Sobre a renovação de setembro: os participantes renovaram quase todos
+      (gostaram do benefício) e, fora eles, renovaram sobretudo os que tiveram bom volume
+      em agosto.
+
+      5. Pergunta. Com essa base, é possível estimar o efeito do frete grátis sobre os
+      pedidos de agosto? Se sim, com quais colunas de ajuste? Se não, o que precisaríamos
+      liberar?
+    edges:
+      - zona_sobra_entregadores -> frete_gratis
+      - zona_sobra_entregadores -> pedidos_ago
+      - zona_sobra_entregadores -> pedidos_mai
+      - pedidos_mai -> frete_gratis
+      - pedidos_mai -> pedidos_ago
+      - nota_media_mai -> pedidos_ago
+      - categoria -> pedidos_ago
+      - frete_gratis -> visualizacoes_cardapio_ago
+      - visualizacoes_cardapio_ago -> pedidos_ago
+      - frete_gratis -> pedidos_ago
+      - frete_gratis -> renovou_set
+      - pedidos_ago -> renovou_set
+    answer:
+      identifiable: false
+      missing: [zona_sobra_entregadores]
+    note: >-
+      A zona com entregador sobrando decidiu quem entrou e, pela entrega rápida, puxa
+      pedido por conta própria; a base não tem zona. Os pedidos de maio carregam parte
+      disso, mas não tudo. As aberturas de página são consequência do selo, e a renovação
+      vem depois dos pedidos.
+
+  - id: pt_seguradora_gestantes_telefone
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: analista de BI de uma seguradora de saúde de porte médio (planos coletivos empresariais), formada em estatística, nunca fez inferência causal
+    theme: Saúde suplementar (seguradora)
+    title: Programa para gestantes e parto prematuro, com inclusão por contato telefônico
+    treatment: programa_gestante
+    outcome: parto_prematuro
+    columns:
+      id_gestante: Identificador da beneficiária.
+      programa_gestante: Incluída no programa de acompanhamento de gestantes de 2025 (1 = sim, 0 = não).
+      parto_prematuro: Parto antes de 37 semanas completas de gestação (1 = sim, 0 = não).
+      telefone_atualizado: Flag da central de atendimento indicando que o telefone do cadastro estava correto na primeira tentativa de contato (1 = sim, 0 = não).
+      idade: Idade da gestante na data da primeira ultrassonografia, em anos.
+      semana_1a_us: Idade gestacional, em semanas, na primeira ultrassonografia paga pelo plano.
+      consultas_prenatal: Número de consultas de pré-natal realizadas entre a primeira ultrassonografia e o parto.
+    story: >-
+      Pessoal, dúvida de quem trabalha com BI mas nunca mexeu com efeito causal de
+      verdade. Operadora de saúde, programa pra gestantes em 2025: app com lembretes de
+      consulta e uma enfermeira de referência por chat, pra gestante não faltar ao
+      pré-natal, e mais consulta de pré-natal, menos prematuro, isso é consenso. A lista
+      veio do sistema (primeira ultrassom paga pelo plano); a central ligou pra todas,
+      mas só entrou quem a gente conseguiu falar, e isso foi basicamente questão de
+      telefone certo ou errado no cadastro, a central marca esse flag. Desconfio que quem
+      mantém o cadastro em dia é quem também se cuida mais na gravidez, então não é um
+      grupo igual ao outro. Fora isso, as mais novas atendem bem menos, mesmo com número
+      certo, e têm mais prematuro na nossa base; e quem fez a primeira ultrassom tarde
+      quase não dava tempo de entrar, e começar o pré-natal tarde é fator de risco
+      conhecido. Quero medir o efeito do programa em parto prematuro. Minha chefe quer que
+      eu jogue tudo numa logística, inclusive as consultas de pré-natal. As colunas estão
+      abaixo. O que entra e o que não entra? Obrigada.
+    edges:
+      - telefone_atualizado -> programa_gestante
+      - telefone_atualizado -> parto_prematuro
+      - idade -> programa_gestante
+      - idade -> parto_prematuro
+      - semana_1a_us -> programa_gestante
+      - semana_1a_us -> parto_prematuro
+      - programa_gestante -> consultas_prenatal
+      - consultas_prenatal -> parto_prematuro
+      - programa_gestante -> parto_prematuro
+    answer:
+      identifiable: true
+      adjust_for: [idade, semana_1a_us, telefone_atualizado]
+      do_not_adjust_for:
+        consultas_prenatal: Contadas da primeira ultrassonografia ao parto e consequência do programa. São o caminho pelo qual ele age; ajustar por elas apaga o efeito que se quer medir.
+      indifferent: [id_gestante]
+    note: >-
+      A inclusão dependeu do telefone, da idade e da semana da primeira ultrassom, e as
+      três colunas estão na base. A armadilha é a logística "com tudo": as consultas de
+      pré-natal são consequência do programa.

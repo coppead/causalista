@@ -1,0 +1,549 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Casos simulados, arquivo pt-2: oito casos em português do Brasil.
+#
+# Escritos pelo assistente em 2026-10-06, no papel de pessoas que escrevem como se escreve
+# no trabalho: um áudio pro analista, um e-mail com planilha anexa, um trecho de
+# relatório, uma pergunta em fórum, uma nota pro chefe. O projeto não conseguiu casos
+# escritos por pessoas a tempo; estes simulam esse teste. Cinco personas: o diretor de
+# operações de uma transportadora, a gerente de uma ONG de educação, um técnico de uma
+# secretaria municipal, uma analista de RH de um hospital e o gerente de uma loja de
+# materiais de construção.
+#
+# São casos de TESTE. Ficam congelados antes de qualquer modelo respondê-los e nunca
+# entram em treino. O formato é o de cases/fase0.yaml; as setas declaram o diagrama que
+# o texto implica, e o verificador confere a resposta (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_qualifica_sorteio
+    author: ai
+    status: aprovado
+    language: pt
+    style: trecho de relatório interno
+    persona: técnico da Secretaria Municipal de Assistência Social, responsável pelo acompanhamento do programa de qualificação; formação em serviço social, sem estatística
+    theme: Política pública (qualificação profissional)
+    title: Curso de qualificação e emprego formal, com vagas sorteadas
+    twin: pt_qualifica_indicacao
+    treatment: selecionado_curso
+    outcome: emprego_formal_12m
+    columns:
+      selecionado_curso: Inscrito selecionado para uma das vagas do curso de qualificação Qualifica Já, 1º semestre de 2025 (1 = sim, 0 = não).
+      emprego_formal_12m: Teve ao menos um vínculo formal de trabalho registrado no eSocial entre julho de 2025 e junho de 2026 (1 = sim, 0 = não).
+      idade: Idade em anos na data da inscrição.
+      escolaridade: Anos de estudo completos, conforme o CadÚnico na data da inscrição.
+      meses_sem_emprego: Meses desde o último vínculo formal, na data da inscrição.
+      cadastro_sine: Possui cadastro ativo de trabalhador no SINE municipal em julho de 2025 (1 = sim, 0 = não).
+      atualizou_cadunico: Realizou atualização cadastral no CadÚnico entre julho de 2025 e agosto de 2026 (1 = sim, 0 = não).
+      nis: Número de Identificação Social do inscrito.
+    story: >-
+      3. Resultados preliminares de inserção
+
+      O programa Qualifica Já ofertou, no primeiro semestre de 2025, 180 vagas em cursos de
+      qualificação profissional (auxiliar administrativo, eletricista predial e cuidador de
+      idosos), com carga horária de 160 horas, em parceria com o Senac. Foram recebidas 412
+      inscrições de pessoas cadastradas no CadÚnico, por meio dos CRAS. Como o número de
+      inscritos superou o de vagas, a seleção se deu por sorteio público, realizado em
+      14/02/2025 no auditório da Secretaria, conforme previsto no edital 01/2025; as listas
+      de sorteados e de não sorteados foram publicadas no Diário Oficial do Município. A
+      quase totalidade dos selecionados concluiu o curso.
+
+      Ao final de cada turma, os instrutores acompanharam os concluintes até a agência do
+      SINE para a realização do cadastro de trabalhador, de modo que praticamente todos os
+      participantes contam hoje com cadastro ativo. É sabido que o cadastro no SINE amplia
+      o acesso a vagas, uma vez que a agência faz o encaminhamento direto aos empregadores
+      conveniados.
+
+      O acompanhamento utilizou a base do CadÚnico cruzada com os registros de vínculo do
+      eSocial. Cabe registrar que os participantes foram orientados, na última aula, a
+      procurar o CRAS para atualização cadastral e inclusão do certificado no prontuário;
+      a atualização também é obrigatória para quem passa a ter renda formal, o que explica
+      o volume elevado de atualizações no período. Observa-se, como em edições anteriores,
+      que a inserção é mais difícil entre os inscritos mais velhos, com menor escolaridade
+      e afastados há mais tempo do mercado formal. Esta coordenação solicita à área de
+      monitoramento a estimativa do efeito do curso sobre a inserção formal, a fim de
+      subsidiar a decisão sobre a edição de 2027.
+    edges:
+      - idade -> emprego_formal_12m
+      - escolaridade -> emprego_formal_12m
+      - meses_sem_emprego -> emprego_formal_12m
+      - selecionado_curso -> cadastro_sine
+      - cadastro_sine -> emprego_formal_12m
+      - selecionado_curso -> emprego_formal_12m
+      - selecionado_curso -> atualizou_cadunico
+      - emprego_formal_12m -> atualizou_cadunico
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        cadastro_sine: Foi feito depois do curso e por causa dele, quando os instrutores levaram as turmas ao SINE. É parte do caminho pelo qual o curso age sobre a inserção.
+        atualizou_cadunico: Registrada depois e causada tanto pelo curso (orientação na última aula) quanto pelo emprego formal (atualização obrigatória). Ajustar por ela cria uma associação falsa entre o curso e a inserção.
+      indifferent: [idade, escolaridade, meses_sem_emprego, nis]
+    note: >-
+      Com sorteio, a comparação simples entre selecionados e não selecionados já dá o
+      efeito. A armadilha são as duas colunas de depois, o cadastro no SINE e a
+      atualização cadastral, apresentadas como rotina administrativa.
+
+  - id: pt_qualifica_indicacao
+    author: ai
+    status: aprovado
+    language: pt
+    style: trecho de relatório interno
+    persona: técnico da Secretaria Municipal de Assistência Social, responsável pelo acompanhamento do programa de qualificação; formação em serviço social, sem estatística
+    theme: Política pública (qualificação profissional)
+    title: Curso de qualificação e emprego formal, com vagas indicadas pelos CRAS
+    twin: pt_qualifica_sorteio
+    treatment: selecionado_curso
+    outcome: emprego_formal_12m
+    columns:
+      selecionado_curso: Inscrito selecionado para uma das vagas do curso de qualificação Qualifica Já, 1º semestre de 2025 (1 = sim, 0 = não).
+      emprego_formal_12m: Teve ao menos um vínculo formal de trabalho registrado no eSocial entre julho de 2025 e junho de 2026 (1 = sim, 0 = não).
+      idade: Idade em anos na data da inscrição.
+      escolaridade: Anos de estudo completos, conforme o CadÚnico na data da inscrição.
+      meses_sem_emprego: Meses desde o último vínculo formal, na data da inscrição.
+      cadastro_sine: Possui cadastro ativo de trabalhador no SINE municipal em julho de 2025 (1 = sim, 0 = não).
+      atualizou_cadunico: Realizou atualização cadastral no CadÚnico entre julho de 2025 e agosto de 2026 (1 = sim, 0 = não).
+      nis: Número de Identificação Social do inscrito.
+    not_in_table:
+      avaliacao_equipe: A avaliação da equipe técnica do CRAS sobre as condições de cada inscrito de aproveitar o curso e se recolocar. Não corresponde a nenhum campo do sistema.
+    story: >-
+      3. Resultados preliminares de inserção
+
+      O programa Qualifica Já ofertou, no primeiro semestre de 2025, 180 vagas em cursos de
+      qualificação profissional (auxiliar administrativo, eletricista predial e cuidador de
+      idosos), com carga horária de 160 horas, em parceria com o Senac. Foram recebidas 412
+      inscrições de pessoas cadastradas no CadÚnico, por meio dos CRAS. Como o número de
+      inscritos superou o de vagas, a seleção foi feita pelas equipes técnicas dos CRAS, que
+      priorizaram os inscritos há mais tempo sem vínculo formal e, entre esses, os que, na
+      avaliação da equipe, tinham mais condições de aproveitar o curso e de se recolocar.
+      Esse último critério não corresponde a nenhum campo do sistema; foi aplicado por cada
+      equipe a partir do atendimento. A quase totalidade dos selecionados concluiu o curso.
+
+      Ao final de cada turma, os instrutores acompanharam os concluintes até a agência do
+      SINE para a realização do cadastro de trabalhador, de modo que praticamente todos os
+      participantes contam hoje com cadastro ativo. É sabido que o cadastro no SINE amplia
+      o acesso a vagas, uma vez que a agência faz o encaminhamento direto aos empregadores
+      conveniados.
+
+      O acompanhamento utilizou a base do CadÚnico cruzada com os registros de vínculo do
+      eSocial. Cabe registrar que os participantes foram orientados, na última aula, a
+      procurar o CRAS para atualização cadastral e inclusão do certificado no prontuário;
+      a atualização também é obrigatória para quem passa a ter renda formal, o que explica
+      o volume elevado de atualizações no período. Observa-se, como em edições anteriores,
+      que a inserção é mais difícil entre os inscritos mais velhos, com menor escolaridade
+      e afastados há mais tempo do mercado formal. Esta coordenação solicita à área de
+      monitoramento a estimativa do efeito do curso sobre a inserção formal, a fim de
+      subsidiar a decisão sobre a edição de 2027.
+    edges:
+      - idade -> emprego_formal_12m
+      - escolaridade -> emprego_formal_12m
+      - meses_sem_emprego -> emprego_formal_12m
+      - meses_sem_emprego -> selecionado_curso
+      - avaliacao_equipe -> selecionado_curso
+      - avaliacao_equipe -> emprego_formal_12m
+      - selecionado_curso -> cadastro_sine
+      - cadastro_sine -> emprego_formal_12m
+      - selecionado_curso -> emprego_formal_12m
+      - selecionado_curso -> atualizou_cadunico
+      - emprego_formal_12m -> atualizou_cadunico
+    answer:
+      identifiable: false
+      missing: [avaliacao_equipe]
+    note: >-
+      Mesmo relatório do gêmeo, com a seleção feita pelas equipes em vez de sorteada. O
+      tempo sem emprego está na tabela e dá a impressão de resolver; a avaliação da equipe
+      não está, e nenhuma coluna a substitui.
+
+  - id: pt_frota_camera_fadiga
+    author: ai
+    status: aprovado
+    language: pt
+    style: transcrição de um áudio informal
+    persona: diretor de operações de uma transportadora rodoviária de cargas com 220 caminhões; fala direto, sem formação em dados
+    theme: Logística (segurança da frota)
+    title: Câmera de fadiga e sinistros na frota
+    treatment: camera_fadiga
+    outcome: sinistros_6m
+    columns:
+      camera_fadiga: Motorista roda com caminhão equipado com câmera de monitoramento de fadiga desde março de 2026 (1 = sim, 0 = não).
+      sinistros_6m: Número de sinistros (colisão, tombamento, saída de pista) registrados pelo setor de seguros entre abril e setembro de 2026.
+      pct_noturno: Percentual dos quilômetros rodados entre 22h e 6h, de outubro de 2025 a fevereiro de 2026, segundo o rastreador.
+      filial: Filial de lotação do motorista em março de 2026 (Betim, Paulínia ou Cuiabá).
+      anos_cnh: Anos de habilitação na categoria E em março de 2026.
+      vel_media: Velocidade média em km/h registrada pelo rastreador entre abril e setembro de 2026.
+      bonus_semestre: Recebeu o bônus de segurança do semestre, pago em outubro de 2026 (1 = sim, 0 = não).
+      matricula: Matrícula do motorista no sistema de RH.
+    not_in_table:
+      julgamento_gerente: A opinião do gerente de frota sobre quais motoristas são mais afoitos. Ficou na cabeça dele; não há nota nem registro.
+    story: >-
+      [áudio, 1min48, transcrição automática]
+
+      Ô Renata, bom dia, é o Cláudio. Então, aquela história da câmera de fadiga, a
+      diretoria quer saber se valeu a pena antes de fechar o contrato pros outros 140
+      caminhões. Deixa eu te contar como foi que a gente colocou, porque eu acho que isso
+      importa. A gente comprou 80 câmeras em março. Começamos por Betim porque o instalador
+      é de lá, depois foi Paulínia, Cuiabá ficou com pouquíssimas. E dentro de cada filial a
+      ordem foi assim: primeiro quem roda muito de madrugada, que é onde dá sono, né, isso
+      tá no rastreador. E aí o Beto, que é o gerente de frota, completou a lista com os
+      caras que ele acha mais afoitos, que ele vive dizendo que são os que batem. Isso aí
+      ele não anotou em lugar nenhum, foi de cabeça mesmo. Eu perguntei pra ele e ele riu.
+
+      O que eu vi até agora é que a velocidade média de quem tá com câmera caiu uns 4 km/h,
+      o aparelho apita quando o cara acelera, e velocidade menor é menos batida, isso é
+      claro. E a gente sabe que Cuiabá bate mais por causa da BR-163, e que motorista novo
+      de carteira bate mais, isso tá no RH. Ah, e uma coisa: o bônus de segurança desse
+      semestre a gente pagou em outubro pra quem não teve sinistro e também pra quem ficou
+      com pontuação boa na câmera, então quem tem câmera recebeu mais bônus. A Carol do
+      seguros te manda a planilha de sinistros de abril a setembro. Me diz o que dá, e se
+      dá pra fazer essa conta, porque o Beto jura que já valeu. Valeu, tchau.
+    edges:
+      - julgamento_gerente -> camera_fadiga
+      - julgamento_gerente -> sinistros_6m
+      - julgamento_gerente -> vel_media
+      - pct_noturno -> camera_fadiga
+      - pct_noturno -> sinistros_6m
+      - filial -> camera_fadiga
+      - filial -> sinistros_6m
+      - anos_cnh -> sinistros_6m
+      - camera_fadiga -> vel_media
+      - vel_media -> sinistros_6m
+      - camera_fadiga -> sinistros_6m
+      - camera_fadiga -> bonus_semestre
+      - sinistros_6m -> bonus_semestre
+    answer:
+      identifiable: false
+      missing: [julgamento_gerente]
+    note: >-
+      Filial e quilometragem noturna estão na tabela e explicam parte da escolha. O
+      resto da lista foi completado de cabeça pelo gerente de frota, com os motoristas
+      que ele acha afoitos, e isso não tem coluna.
+
+  - id: pt_ong_mentoria_evasao
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail com anexo descrito
+    persona: gerente de programas de uma ONG de educação, formada em pedagogia, prestando contas a um instituto financiador
+    theme: Terceiro setor (educação básica)
+    title: Mentoria no 9º ano e evasão no ensino médio
+    treatment: mentoria
+    outcome: evadiu_2026
+    columns:
+      mentoria: Aluno teve mentor designado pelo programa em março de 2025 (1 = sim, 0 = não).
+      evadiu_2026: Não estava matriculado em nenhuma escola da rede estadual ou municipal em 31/03/2026, conforme cruzamento com o censo escolar (1 = sim, 0 = não).
+      freq_2024: Frequência escolar no ano letivo de 2024 (8º ano), em %.
+      renda_familiar: Renda familiar per capita declarada no CadÚnico em dezembro de 2024, em reais.
+      turno: Turno da turma de 9º ano em 2025 (manhã ou tarde).
+      freq_2025: Frequência escolar no ano letivo de 2025 (9º ano), em %.
+      contato_familia: Houve ligação para a família entre abril e julho de 2026, registrada no sistema da ONG ou na ficha de busca ativa da escola (1 = sim, 0 = não).
+      cod_aluno: Código do aluno na rede municipal.
+    story: >-
+      Assunto: Dados do Mentoria 9º ano, planilha para a avaliação
+
+      Oi, Fernando, tudo bem?
+
+      Segue em anexo a planilha alunos_9ano_2025.xlsx, uma linha por aluno dos 140 do 9º
+      ano da E.M. Darcy Ribeiro, nossa escola parceira desde 2022. O Instituto pediu um
+      número de efeito do programa pra renovação do convênio, e eu confesso que não sei bem
+      como fazer essa conta sem fazer bobagem, então queria sua ajuda.
+
+      Um pouco de contexto. Tínhamos 60 vagas de mentoria em 2025 (um encontro semanal de
+      1h30 com um mentor voluntário, de março a novembro). A coordenação montou a lista
+      priorizando quem tinha frequência baixa em 2024 e renda familiar menor, os dois dados
+      que a escola nos passa do diário e do CadÚnico. O que bagunçou um pouco essa lista
+      foi o turno: a Juliana me contou que, como a tarde tinha menos mentores disponíveis,
+      entraram proporcionalmente menos alunos da tarde, e a tarde é justamente o turno que
+      mais perde aluno historicamente (vários trabalham de manhã). Também é sabido que quem já
+      faltava muito em 2024 continuou faltando em 2025, e que as famílias de renda menor
+      são as que mais tiram o filho da escola no fim do fundamental.
+
+      O dado que mais nos animou: a frequência em 2025 dos alunos com mentor subiu bastante
+      em relação ao resto da turma, e frequência alta no 9º ano é o que mais segura o aluno
+      no ensino médio. O status de matrícula que usamos como evasão é o de 31/03/2026,
+      cruzado com o censo. Em abril, nossa equipe ligou pra família de todos os mentorados
+      pra saber como tinha sido a matrícula e encerrar o acompanhamento; a escola, por sua
+      vez, faz a busca ativa e liga pra família dos que não aparecem. Registramos todas
+      essas ligações, até julho, na coluna de contato. A planilha tem ainda o código do
+      aluno na rede, que eu deixei pra vocês conseguirem cruzar.
+
+      Consegue me dizer que colunas comparar e como? Preciso mandar algo pro Instituto até
+      o dia 20.
+
+      Abraço,
+      Patrícia
+    edges:
+      - freq_2024 -> mentoria
+      - freq_2024 -> evadiu_2026
+      - freq_2024 -> freq_2025
+      - renda_familiar -> mentoria
+      - renda_familiar -> evadiu_2026
+      - turno -> mentoria
+      - turno -> evadiu_2026
+      - mentoria -> freq_2025
+      - freq_2025 -> evadiu_2026
+      - mentoria -> evadiu_2026
+      - mentoria -> contato_familia
+      - evadiu_2026 -> contato_familia
+    answer:
+      identifiable: true
+      adjust_for: [freq_2024, renda_familiar, turno]
+      do_not_adjust_for:
+        freq_2025: Medida durante o programa e consequência dele. É o caminho pelo qual a mentoria age sobre a evasão; ajustar por ela apaga parte do efeito.
+        contato_familia: Registrada depois da apuração da evasão e causada tanto pela mentoria (ligação da equipe) quanto pela evasão (busca ativa da escola). Ajustar por ela cria uma associação falsa.
+      indifferent: [cod_aluno]
+    note: >-
+      O turno aparece como detalhe de logística dos mentores, mas decide quem entrou e
+      também pesa na evasão. A frequência de 2025 é o KPI de que a ONG se orgulha e não
+      pode entrar no ajuste.
+
+  - id: pt_hospital_ergonomia
+    author: ai
+    status: aprovado
+    language: pt
+    style: nota curta para o chefe
+    persona: analista de RH de um hospital privado de médio porte, responsável pelos indicadores de absenteísmo
+    theme: RH (saúde ocupacional)
+    title: Treinamento de movimentação de pacientes e afastamentos
+    treatment: treinamento
+    outcome: afastou_6m
+    columns:
+      treinamento: Participou do treinamento de movimentação segura de pacientes, realizado em abril de 2026 (1 = sim, 0 = não).
+      afastou_6m: Teve afastamento por dor lombar ou lesão musculoesquelética (CID M) entre maio e outubro de 2026, conforme atestados registrados na medicina do trabalho (1 = sim, 0 = não).
+      setor: Setor de lotação em abril de 2026 (UTI, clínica médica, pronto-socorro, centro cirúrgico ou maternidade).
+      tempo_casa: Meses de hospital até abril de 2026.
+      avaliacao_fisio: Passou por avaliação da fisioterapia do trabalho em novembro de 2026 (1 = sim, 0 = não).
+      matricula: Matrícula funcional.
+    story: >-
+      Marcelo, segue o que você pediu pra levar pra reunião de quinta.
+
+      O treinamento de movimentação segura (abril) foi dado nos dois setores que mais
+      afastam por coluna, UTI e clínica médica; PS, centro cirúrgico e maternidade ficaram
+      pra 2027 por falta de verba. Dentro da UTI e da clínica, foi quem estava escalado nos
+      três dias do curso; quem estava de folga ou de férias ficou de fora (uns 40%). A
+      escala daquela semana eu não tenho na base, se precisar eu peço pra coordenação de
+      enfermagem. A base tem técnicos e enfermeiros dos cinco setores, com setor, tempo de
+      casa (os mais antigos afastam mais, como você sabe) e os afastamentos CID M de maio a
+      outubro que a Dra. Lúcia consolidou. Coloquei também quem passou pela avaliação da
+      fisio do trabalho, porque a diretoria perguntou: a fisio chamou quem fez o curso, que
+      é o acompanhamento previsto no protocolo, e quem tinha afastado por coluna no
+      semestre, pra ver como voltou.
+
+      Dá pra dizer, com isso, se o treinamento reduziu afastamento? Me diz por quais
+      colunas comparar que eu monto a tabela.
+    edges:
+      - setor -> treinamento
+      - setor -> afastou_6m
+      - tempo_casa -> afastou_6m
+      - treinamento -> afastou_6m
+      - treinamento -> avaliacao_fisio
+      - afastou_6m -> avaliacao_fisio
+    answer:
+      identifiable: true
+      adjust_for: [setor]
+      do_not_adjust_for:
+        avaliacao_fisio: Feita em novembro, depois do período dos afastamentos, e causada tanto pelo treinamento (acompanhamento do protocolo) quanto pelo afastamento (reavaliação de quem voltou). Ajustar por ela cria uma associação falsa entre o treinamento e o afastamento.
+      indifferent: [tempo_casa, matricula]
+    note: >-
+      Dentro dos dois setores, quem foi ao curso foi decidido pela escala, que não está na
+      base e não tem a ver com afastamento: só decide quem fez o curso. Basta ajustar por
+      setor; a avaliação da fisio, pedida pela diretoria, é a coluna que estraga. O mês da
+      avaliação só aparece no dicionário.
+
+  - id: pt_hospital_bolsa_pos
+    author: ai
+    status: aprovado
+    language: pt
+    style: pergunta em fórum
+    persona: analista de RH de um hospital filantrópico, participante de uma comunidade online de people analytics
+    theme: RH (retenção)
+    title: Bolsa de pós-graduação paga pelo hospital e saída de colaboradores
+    treatment: bolsa_pos
+    outcome: saiu_12m
+    columns:
+      bolsa_pos: Recebeu bolsa integral do hospital para pós-graduação lato sensu com início em março de 2025 (1 = sim, 0 = não).
+      saiu_12m: Desligou-se do hospital, por pedido ou por iniciativa da instituição, entre abril de 2025 e março de 2026 (1 = sim, 0 = não).
+      tempo_casa: Meses de vínculo até fevereiro de 2025.
+      cargo: Cargo em fevereiro de 2025 (enfermeiro assistencial, enfermeiro supervisor, técnico de enfermagem ou administrativo).
+      promovido_12m: Teve promoção ou mudança de cargo entre abril de 2025 e março de 2026 (1 = sim, 0 = não).
+      mes_admissao: Mês do ano em que foi admitido (1 a 12).
+      id_colaborador: Identificador interno do colaborador.
+    not_in_table:
+      vontade_crescer: A disposição de cada colaborador de ficar e crescer no hospital, que a chefia de enfermagem resume como vestir a camisa. Não há registro; a única pesquisa interna é anônima.
+    story: >-
+      Título: Como avaliar se a bolsa de pós reduziu turnover, com adesão voluntária?
+
+      Pessoal, trabalho no RH de um hospital filantrópico (uns 1.900 colaboradores) e estou
+      com uma dúvida de método. Em 2025 o hospital pagou bolsa integral de pós lato sensu
+      pra 112 pessoas da enfermagem e do administrativo. A inscrição foi aberta pra todo
+      mundo com mais de 1 ano de casa, mas não teve seleção: quem se inscreveu, ganhou.
+      Agora a direção quer saber se a bolsa "segurou" as pessoas, porque o turnover de
+      enfermagem tá em 28% ao ano e a bolsa custa caro.
+
+      O que eu tenho: tempo de casa, cargo, se saiu nos 12 meses seguintes ao início da
+      pós, se foi promovido nesse mesmo período, mais mês de admissão e o id. Sei que os
+      mais antigos aderiram mais e também saem menos, e que entre os cargos a adesão e a
+      saída variam bastante (enfermeiro assistencial é quem mais pede bolsa e quem mais
+      sai).
+
+      Outro ponto que a direção adora: 40% dos bolsistas foram promovidos no ano, contra 9%
+      do resto. A coordenação de enfermagem usa a pós como critério de promoção, e
+      promovido não sai. Faz sentido olhar a saída "controlando" promoção, ou não?
+
+      E tem uma coisa que me incomoda. Quando mostrei a lista de inscritos pra chefe da
+      enfermagem, ela disse na hora: "ah, mas esses aí são os que vestem a camisa, iam
+      ficar de qualquer jeito, e são os que eu promovo". Não tenho nenhuma coluna que
+      capture isso, e a única pesquisa interna que a gente faz é anônima, não dá pra
+      cruzar.
+
+      Alguém já passou por algo parecido? Dá pra tirar alguma conclusão com essa base ou
+      eu já desisto?
+    edges:
+      - tempo_casa -> bolsa_pos
+      - tempo_casa -> saiu_12m
+      - cargo -> bolsa_pos
+      - cargo -> saiu_12m
+      - vontade_crescer -> bolsa_pos
+      - vontade_crescer -> saiu_12m
+      - vontade_crescer -> promovido_12m
+      - bolsa_pos -> promovido_12m
+      - promovido_12m -> saiu_12m
+      - bolsa_pos -> saiu_12m
+    answer:
+      identifiable: false
+      missing: [vontade_crescer]
+    note: >-
+      Adesão voluntária. Quem se inscreveu é quem já ia ficar, e isso não tem coluna. A
+      promoção é consequência da bolsa e também da mesma disposição; ajustar por ela não
+      resolve e ainda apaga parte do efeito.
+
+  - id: pt_loja_visita_obra
+    author: ai
+    status: aprovado
+    language: pt
+    style: transcrição de um áudio informal
+    persona: gerente de uma loja de materiais de construção de uma rede regional, vinte anos de varejo, sem formação em dados
+    theme: Varejo (materiais de construção)
+    title: Visita do vendedor à obra e gasto do cliente nos 90 dias
+    treatment: visita_obra
+    outcome: gasto_90d
+    columns:
+      visita_obra: Cliente recebeu visita de vendedor externo na obra em até 15 dias após a primeira compra (1 = sim, 0 = não).
+      gasto_90d: Valor total comprado na loja nos 90 dias seguintes à primeira compra, em reais, sem contar a primeira compra.
+      valor_primeira_compra: Valor da primeira compra, em reais.
+      tipo_obra: Tipo de obra declarado no cadastro (construção nova, reforma ou manutenção).
+      distancia_km: Distância em km entre a loja e o endereço da obra, calculada no cadastro.
+      orcamentos_90d: Número de orçamentos emitidos para o cliente nos 90 dias seguintes à primeira compra.
+      dia_semana_cadastro: Dia da semana da primeira compra (1 = segunda a 7 = domingo).
+    story: >-
+      [áudio, 2min05]
+
+      Fala, Denise, tudo bom? É o Jorge aqui da loja de Contagem. Deixa eu te explicar o
+      negócio da visita na obra que você perguntou, porque o Ricardo tá querendo levar pra
+      rede toda e eu quero ter certeza antes. Então, de março a maio todo cliente novo que
+      comprou aqui entrou no cadastro com endereço da obra e tipo de obra, reforma,
+      construção nova, manutenção. E aí o Marcos e a Ju, que são os dois vendedores
+      externos, saíam visitando. Só que, óbvio, eles não visitaram todo mundo. Foram
+      priorizando quem tinha feito uma primeira compra gorda, acima de uns 5 mil, e as
+      construções novas, que é onde tem mais o que vender. E tem a questão da distância:
+      eles só foram em obra até uns 15 km, mais longe que isso não compensa a gasolina,
+      ficou de fora. Cliente de longe compra igualzinho, viu, a gente entrega na cidade
+      toda, a diferença é só o vendedor não ir lá.
+
+      O resultado que eu vejo é que quem recebeu visita pediu muito mais orçamento depois,
+      o Marcos sai de lá com orçamento feito, e orçamento vira venda, né. E eu quero saber
+      quanto a visita rendeu de compra nos 90 dias, fora a primeira compra. Lógico que quem
+      começa a obra com 8 mil de compra vai gastar mais do que quem comprou 300 reais de
+      massa corrida, e construção nova gasta mais que reforma, isso não tem a ver com
+      visita. O Tiago do TI te manda a planilha, tem até o dia da semana que o cara se
+      cadastrou, não sei pra que isso serve. Me ajuda a fazer essa conta direito? Abraço.
+    edges:
+      - valor_primeira_compra -> visita_obra
+      - valor_primeira_compra -> gasto_90d
+      - tipo_obra -> visita_obra
+      - tipo_obra -> gasto_90d
+      - distancia_km -> visita_obra
+      - visita_obra -> orcamentos_90d
+      - orcamentos_90d -> gasto_90d
+      - visita_obra -> gasto_90d
+    answer:
+      identifiable: true
+      adjust_for: [tipo_obra, valor_primeira_compra]
+      do_not_adjust_for:
+        orcamentos_90d: Contados depois da visita e consequência dela, já que o vendedor sai da obra com orçamento feito. É parte do caminho pelo qual a visita age sobre a compra.
+      indifferent: [distancia_km, dia_semana_cadastro]
+    note: >-
+      A distância decidiu quem foi visitado, mas não muda o quanto o cliente compra; pode
+      entrar ou não. Os orçamentos são o resultado de que o gerente se orgulha e não podem
+      entrar no ajuste.
+
+  - id: pt_loja_ponta_gondola
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail com anexo descrito
+    persona: gerente de uma loja de materiais de construção de uma rede regional, escrevendo para a equipe de BI da matriz
+    theme: Varejo (materiais de construção)
+    title: Ponta de gôndola e unidades vendidas por produto
+    treatment: ponta_gondola
+    outcome: venda_ago
+    columns:
+      ponta_gondola: Produto exposto em ponta de gôndola na loja em agosto de 2026, conforme planograma da matriz (1 = sim, 0 = não).
+      venda_ago: Unidades vendidas em agosto de 2026.
+      venda_jul: Unidades vendidas em julho de 2026.
+      categoria: Categoria do produto (tintas, hidráulica, elétrica, ferramentas ou acabamento).
+      preco_regular: Preço de tabela em agosto de 2026, em reais.
+      desconto_ago: Percentual de desconto aplicado em agosto de 2026 sobre o preço de tabela (0 quando não houve).
+      cod_sku: Código do produto no ERP.
+    not_in_table:
+      verba_fornecedor: A verba de trade marketing que o fornecedor paga à matriz no mês. Fica no contrato com a matriz; a loja não vê o valor.
+    story: >-
+      Assunto: RE: pedido de análise, ponta de gôndola loja 14
+
+      Oi, Bruno,
+
+      Conforme falamos na reunião de resultados, segue a base da loja 14 (Contagem) para
+      vocês olharem o efeito da ponta de gôndola. O anexo (pontas_loja14_ago26.csv) tem uma
+      linha por produto ativo na loja em agosto, 3.812 linhas, com o código do SKU, a
+      categoria, o preço de tabela, o percentual de desconto aplicado em agosto, se o
+      produto estava em ponta no mês e as unidades vendidas em julho e em agosto.
+
+      Explico como a ponta é definida, porque aqui na loja a gente só recebe o planograma
+      pronto. Quem decide é o comercial da matriz na negociação com o fornecedor, e todo
+      mundo sabe como funciona: fornecedor que coloca verba leva a ponta. Esse valor fica
+      no contrato de vocês aí, pra gente não vem nada. E o fornecedor que coloca verba no
+      mês em geral não para na ponta: manda promotor pra loja, entra no tabloide, às vezes
+      tem campanha na rádio. Também sei que o comercial olha o giro do mês anterior pra
+      fechar a lista, ninguém dá ponta pra produto parado, e que as pontas são por
+      categoria (tintas e hidráulica têm sempre mais pontas que ferramenta, por exemplo,
+      até porque giram muito mais).
+
+      Da nossa parte, todo produto que entra na ponta ganha etiqueta amarela com desconto
+      de 5 a 15%, parte bancado pelo fornecedor, e o desconto evidentemente puxa venda.
+      Produto caro vende menos unidade, isso vocês já sabem.
+
+      A pergunta da regional é simples: quantas unidades a mais a ponta vende, tirando o
+      efeito do resto? Se der pra responder com essa base, ótimo; se precisar de mais
+      alguma coluna, me diz que eu corro atrás.
+
+      Obrigado,
+      Jorge Andrade
+      Gerente, Loja 14
+    edges:
+      - verba_fornecedor -> ponta_gondola
+      - verba_fornecedor -> venda_ago
+      - verba_fornecedor -> desconto_ago
+      - venda_jul -> ponta_gondola
+      - venda_jul -> venda_ago
+      - categoria -> ponta_gondola
+      - categoria -> venda_ago
+      - preco_regular -> venda_ago
+      - ponta_gondola -> desconto_ago
+      - desconto_ago -> venda_ago
+    answer:
+      identifiable: false
+      missing: [verba_fornecedor]
+    note: >-
+      A verba do fornecedor compra a ponta e, no mesmo mês, promotor, tabloide e rádio.
+      Está no contrato da matriz, não na base da loja. Giro anterior e categoria estão na
+      tabela e explicam só parte da escolha.

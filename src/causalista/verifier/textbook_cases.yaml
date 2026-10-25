@@ -1,0 +1,721 @@
+# Casos de livro-texto do verificador.
+#
+# Cada caso é um grafo pequeno com resposta conhecida. Este arquivo é a primeira camada
+# de teste do verificador e foi escrito para ser lido por uma pessoa: se algum caso
+# parecer errado, o erro está aqui ou no verificador, e precisa ser resolvido antes de
+# seguir.
+#
+# Como ler um caso:
+#   edges        quem causa quem ("causa -> efeito")
+#   treatment    a intervenção cuja consequência queremos medir
+#   outcome      o resultado
+#   unobserved   variáveis que existem no mundo mas não estão na tabela
+#   identifiable se existe algum conjunto de colunas da tabela que dá o efeito certo
+#   valid_sets   TODOS os conjuntos de colunas da tabela que dão o efeito certo
+#                ([] é o conjunto vazio: a comparação simples já está certa)
+#   invalid_sets conjuntos tentadores que dão o efeito errado, com o motivo:
+#                  forbidden   variável pela qual nunca se pode ajustar, e por quê
+#                  open_paths  caminhos não causais que ficam abertos
+#   valid_but_not_in_table
+#                conjuntos que resolveriam, se a variável estivesse na tabela
+#   would_be_identifiable_with
+#                o menor conjunto de variáveis ocultas que, se estivessem na tabela,
+#                tornariam o efeito identificável (só em casos não identificáveis)
+#   group        em que seção da galeria o caso aparece
+#
+# "Válido" aqui quer dizer "não enviesa o efeito". Um conjunto válido pode conter uma
+# coluna inútil; isso não é erro.
+
+cases:
+
+  # ---- Peças básicas ---------------------------------------------------------
+
+  - id: confounder_observed
+    group: Peças básicas
+    title: Confundidor na tabela
+    story: >-
+      Clientes antigos recebem mais a oferta e também cancelam menos.
+      A antiguidade está na tabela.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade]
+    valid_sets:
+      - [antiguidade]
+    invalid_sets:
+      - set: []
+        why: A comparação simples mistura o efeito da oferta com o da antiguidade.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+
+  - id: confounder_hidden
+    group: Peças básicas
+    title: Confundidor fora da tabela
+    story: >-
+      A renda influencia quem recebe a oferta e quem cancela, mas a renda não está
+      na tabela.
+    edges:
+      - renda -> oferta
+      - renda -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [renda]
+    identifiable: false
+    would_be_identifiable_with: [renda]
+    valid_sets: []
+    invalid_sets:
+      - set: []
+        why: A renda mistura os dois grupos, e não há coluna que a substitua.
+        open_paths:
+          - oferta <- renda -> cancelamento
+    valid_but_not_in_table:
+      - [renda]
+
+  - id: mediator
+    group: Peças básicas
+    title: Mediador
+    story: >-
+      A oferta reduz as reclamações, e menos reclamações reduzem o cancelamento.
+      A reclamação é registrada depois da oferta.
+    edges:
+      - oferta -> reclamacao
+      - reclamacao -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [reclamacao]
+        why: >-
+          A reclamação é parte do caminho pelo qual a oferta age. Ajustar por ela apaga
+          uma parte do efeito.
+        forbidden:
+          reclamacao: mediator
+
+  - id: collider_outcome
+    group: Peças básicas
+    title: "Colisor: consequência da oferta e do cancelamento"
+    story: >-
+      A equipe de retenção liga para quem recebeu a oferta e para quem pediu
+      cancelamento.
+    edges:
+      - oferta -> contato_retencao
+      - cancelamento -> contato_retencao
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [contato_retencao]
+        why: >-
+          O contato é consequência das duas coisas. Comparar só entre contatados (ou só
+          entre não contatados) cria uma relação entre oferta e cancelamento que não
+          existe.
+        forbidden:
+          contato_retencao: descendant_of_outcome
+        open_paths:
+          - oferta -> contato_retencao <- cancelamento
+
+  - id: collider_hidden_cause
+    group: Peças básicas
+    title: "Colisor: consequência da oferta e de uma causa oculta do resultado"
+    story: >-
+      A retenção liga para quem recebeu a oferta e para quem está insatisfeito.
+      A insatisfação aumenta o cancelamento e não está na tabela.
+    edges:
+      - oferta -> contato_retencao
+      - insatisfacao -> contato_retencao
+      - insatisfacao -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [insatisfacao]
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [contato_retencao]
+        why: >-
+          Entre os contatados, quem não recebeu a oferta tende a ser o insatisfeito.
+          Ajustar pelo contato liga a oferta à insatisfação, e por ela ao cancelamento.
+        open_paths:
+          - oferta -> contato_retencao <- insatisfacao -> cancelamento
+
+  - id: descendant_of_mediator
+    group: Peças básicas
+    title: Consequência de um mediador
+    story: >-
+      A oferta reduz reclamações. Reclamações geram chamados no suporte e aumentam o
+      cancelamento.
+    edges:
+      - oferta -> reclamacao
+      - reclamacao -> cancelamento
+      - reclamacao -> chamados_suporte
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [chamados_suporte]
+        why: >-
+          Os chamados são um retrato da reclamação. Ajustar por eles é ajustar, em parte,
+          pelo próprio mediador.
+        forbidden:
+          chamados_suporte: descendant_of_mediator
+      - set: [reclamacao]
+        why: A reclamação é o caminho pelo qual a oferta age.
+        forbidden:
+          reclamacao: mediator
+
+  - id: descendant_of_outcome
+    group: Peças básicas
+    title: Consequência do resultado
+    story: Quem cancela recebe uma pesquisa de saída.
+    edges:
+      - oferta -> cancelamento
+      - cancelamento -> pesquisa_saida
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [pesquisa_saida]
+        why: A pesquisa é um retrato do próprio cancelamento.
+        forbidden:
+          pesquisa_saida: descendant_of_outcome
+
+  - id: effect_of_treatment_only
+    group: Peças básicas
+    title: Consequência só da intervenção
+    story: >-
+      Parte de quem recebe a oferta abre o e-mail de confirmação. Abrir o e-mail não
+      afeta o cancelamento.
+    note: >-
+      Ajustar por essa coluna não enviesa o efeito, mas também não ajuda. O verificador
+      a aceita; a boa prática é deixá-la de fora.
+    edges:
+      - oferta -> abriu_email
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+      - [abriu_email]
+    invalid_sets: []
+
+  - id: cause_of_outcome_only
+    group: Peças básicas
+    title: Causa só do resultado
+    story: >-
+      Clientes com fatura alta cancelam mais. O valor da fatura não influencia quem
+      recebe a oferta.
+    edges:
+      - valor_fatura -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+      - [valor_fatura]
+    invalid_sets: []
+
+  - id: cause_of_treatment_only
+    group: Peças básicas
+    title: Causa só da intervenção
+    story: >-
+      A oferta foi enviada em lotes definidos por sorteio. O lote não afeta o
+      cancelamento.
+    edges:
+      - lote_envio -> oferta
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+      - [lote_envio]
+    invalid_sets: []
+
+  - id: unrelated_column
+    group: Peças básicas
+    title: Coluna sem relação com nada
+    story: A tabela traz a cor do boleto, que não tem relação com a oferta nem com o cancelamento.
+    edges:
+      - oferta -> cancelamento
+    extra_nodes: [cor_boleto]
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+      - [cor_boleto]
+    invalid_sets: []
+
+  # ---- Combinações -----------------------------------------------------------
+
+  - id: hidden_confounder_with_observed_link
+    group: Combinações
+    title: Confundidor oculto com intermediário na tabela
+    story: >-
+      A renda (fora da tabela) define o plano contratado, e o plano define quem recebe
+      a oferta. A renda também afeta o cancelamento.
+    edges:
+      - renda -> plano
+      - plano -> oferta
+      - renda -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [renda]
+    identifiable: true
+    smallest_set: [plano]
+    valid_sets:
+      - [plano]
+    invalid_sets:
+      - set: []
+        why: A renda chega à oferta pelo plano. Sem ajustar pelo plano, o caminho fica aberto.
+        open_paths:
+          - oferta <- plano <- renda -> cancelamento
+
+  - id: instrument_does_not_rescue
+    group: Combinações
+    title: Causa só da intervenção não resolve confundidor oculto
+    story: >-
+      A oferta foi enviada em lotes sorteados, mas dentro de cada lote a renda (fora
+      da tabela) influencia quem recebe a oferta e quem cancela.
+    note: >-
+      Com variável instrumental haveria saída, mas esse método está fora da 0.1. A
+      resposta certa aqui é "não identificável por ajuste".
+    edges:
+      - lote_envio -> oferta
+      - renda -> oferta
+      - renda -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [renda]
+    identifiable: false
+    would_be_identifiable_with: [renda]
+    valid_sets: []
+    invalid_sets:
+      - set: []
+        why: A renda mistura os dois grupos.
+        open_paths:
+          - oferta <- renda -> cancelamento
+      - set: [lote_envio]
+        why: Ajustar pelo lote não fecha o caminho da renda.
+        open_paths:
+          - oferta <- renda -> cancelamento
+
+  - id: front_door
+    group: Combinações
+    title: "Porta da frente: identificável por outro método, não por ajuste"
+    story: >-
+      A renda (fora da tabela) influencia a oferta e o cancelamento. A oferta só age
+      sobre o cancelamento reduzindo as reclamações.
+    note: >-
+      O critério da porta da frente resolveria este caso, mas esse método está fora da
+      0.1. A resposta certa aqui é "não identificável por ajuste".
+    edges:
+      - renda -> oferta
+      - renda -> cancelamento
+      - oferta -> reclamacao
+      - reclamacao -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [renda]
+    identifiable: false
+    would_be_identifiable_with: [renda]
+    valid_sets: []
+    invalid_sets:
+      - set: []
+        why: A renda mistura os dois grupos.
+        open_paths:
+          - oferta <- renda -> cancelamento
+      - set: [reclamacao]
+        why: A reclamação é o mediador, e o caminho da renda continua aberto.
+        forbidden:
+          reclamacao: mediator
+        open_paths:
+          - oferta <- renda -> cancelamento
+
+  - id: confounder_through_mediator
+    group: Combinações
+    title: Confundidor que age por um mediador
+    story: >-
+      Clientes antigos recebem mais a oferta e também reclamam menos. A oferta reduz
+      as reclamações, e as reclamações aumentam o cancelamento.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> reclamacao
+      - oferta -> reclamacao
+      - reclamacao -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade]
+    valid_sets:
+      - [antiguidade]
+    invalid_sets:
+      - set: []
+        why: A antiguidade chega ao cancelamento pela reclamação.
+        open_paths:
+          - oferta <- antiguidade -> reclamacao -> cancelamento
+      - set: [reclamacao]
+        why: A reclamação é o mediador.
+        forbidden:
+          reclamacao: mediator
+      - set: [antiguidade, reclamacao]
+        why: A antiguidade está certa, mas a reclamação é o mediador.
+        forbidden:
+          reclamacao: mediator
+
+  - id: no_effect_with_confounding
+    group: Combinações
+    title: Sem efeito, só confusão
+    story: >-
+      A oferta não muda o cancelamento. Clientes antigos recebem mais a oferta e
+      cancelam menos, e por isso a comparação simples mostra um efeito que não existe.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade]
+    valid_sets:
+      - [antiguidade]
+    invalid_sets:
+      - set: []
+        why: Toda a diferença entre os grupos vem da antiguidade.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+
+  - id: two_confounders_one_hidden
+    group: Combinações
+    title: Dois confundidores, um fora da tabela
+    story: >-
+      A antiguidade e a renda influenciam a oferta e o cancelamento. Só a antiguidade
+      está na tabela.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+      - renda -> oferta
+      - renda -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [renda]
+    identifiable: false
+    would_be_identifiable_with: [renda]
+    valid_sets: []
+    invalid_sets:
+      - set: []
+        why: Os dois caminhos ficam abertos.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+          - oferta <- renda -> cancelamento
+      - set: [antiguidade]
+        why: Ajustar pela antiguidade fecha um caminho; o da renda continua aberto.
+        open_paths:
+          - oferta <- renda -> cancelamento
+    valid_but_not_in_table:
+      - [antiguidade, renda]
+
+  - id: two_confounders_both_observed
+    group: Combinações
+    title: Dois confundidores, os dois na tabela
+    story: >-
+      O gêmeo do caso anterior: a renda agora está na tabela. Um único fato mudou, e a
+      resposta mudou junto.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+      - renda -> oferta
+      - renda -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade, renda]
+    valid_sets:
+      - [antiguidade, renda]
+    invalid_sets:
+      - set: []
+        why: Os dois caminhos ficam abertos.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+          - oferta <- renda -> cancelamento
+      - set: [antiguidade]
+        why: O caminho da renda continua aberto.
+        open_paths:
+          - oferta <- renda -> cancelamento
+      - set: [renda]
+        why: O caminho da antiguidade continua aberto.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+
+  # ---- Exemplo da especificação ----------------------------------------------
+
+  - id: telecom_complaint_after_offer
+    group: Exemplo da especificação
+    title: "Telecom: reclamação e contato depois da oferta"
+    story: >-
+      Clientes antigos recebem mais a oferta e cancelam menos. A reclamação é
+      registrada depois da oferta e é afetada por ela. A retenção liga para quem
+      recebeu a oferta e para quem pediu cancelamento.
+    note: >-
+      É o exemplo da especificação. Só se deve ajustar pela antiguidade; "ajustar por
+      tudo" erra duas vezes.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+      - oferta -> reclamacao
+      - reclamacao -> cancelamento
+      - oferta -> cancelamento
+      - oferta -> contato_retencao
+      - cancelamento -> contato_retencao
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade]
+    valid_sets:
+      - [antiguidade]
+    invalid_sets:
+      - set: []
+        why: A antiguidade mistura os dois grupos.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+      - set: [antiguidade, reclamacao]
+        why: A reclamação é mediador.
+        forbidden:
+          reclamacao: mediator
+      - set: [antiguidade, contato_retencao]
+        why: O contato é consequência da oferta e do cancelamento.
+        forbidden:
+          contato_retencao: descendant_of_outcome
+        open_paths:
+          - oferta -> contato_retencao <- cancelamento
+      - set: [antiguidade, contato_retencao, reclamacao]
+        why: '"Ajustar por tudo" inclui o mediador e o colisor.'
+        forbidden:
+          reclamacao: mediator
+          contato_retencao: descendant_of_outcome
+        open_paths:
+          - oferta -> contato_retencao <- cancelamento
+
+  - id: telecom_complaint_before_offer
+    group: Exemplo da especificação
+    title: "Telecom: reclamação e contato antes da oferta"
+    story: >-
+      O gêmeo do caso anterior. Agora a reclamação é registrada antes da oferta: quem
+      reclamou recebe mais a oferta e cancela mais. O contato da retenção também vem
+      antes e só influencia quem recebe a oferta.
+    note: >-
+      As mesmas colunas, papéis diferentes. A reclamação, que antes não podia entrar no
+      ajuste, agora precisa entrar.
+    edges:
+      - antiguidade -> oferta
+      - antiguidade -> cancelamento
+      - reclamacao -> oferta
+      - reclamacao -> cancelamento
+      - contato_retencao -> oferta
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    identifiable: true
+    smallest_set: [antiguidade, reclamacao]
+    valid_sets:
+      - [antiguidade, reclamacao]
+      - [antiguidade, contato_retencao, reclamacao]
+    invalid_sets:
+      - set: []
+        why: Antiguidade e reclamação misturam os dois grupos.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+          - oferta <- reclamacao -> cancelamento
+      - set: [antiguidade]
+        why: O caminho da reclamação continua aberto.
+        open_paths:
+          - oferta <- reclamacao -> cancelamento
+      - set: [reclamacao]
+        why: O caminho da antiguidade continua aberto.
+        open_paths:
+          - oferta <- antiguidade -> cancelamento
+
+  # ---- Armadilhas clássicas --------------------------------------------------
+
+  - id: m_bias
+    group: Armadilhas clássicas
+    title: "Viés-M: variável anterior à oferta pela qual não se deve ajustar"
+    story: >-
+      O perfil de uso (oculto) influencia a oferta e o uso do aplicativo. A satisfação
+      (oculta) influencia o uso do aplicativo e o cancelamento. O uso do aplicativo é
+      medido antes da oferta.
+    note: >-
+      Este desenho está fora da família de mundos da 0.1, mas o verificador precisa
+      acertá-lo. Ele mostra que "ajustar por tudo o que vem antes" não é regra segura.
+    edges:
+      - perfil_uso -> oferta
+      - perfil_uso -> usa_app
+      - satisfacao -> usa_app
+      - satisfacao -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [perfil_uso, satisfacao]
+    identifiable: true
+    smallest_set: []
+    valid_sets:
+      - []
+    invalid_sets:
+      - set: [usa_app]
+        why: >-
+          O uso do aplicativo é consequência das duas causas ocultas. Ajustar por ele
+          liga uma à outra e abre um caminho que estava fechado.
+        open_paths:
+          - oferta <- perfil_uso -> usa_app <- satisfacao -> cancelamento
+
+  - id: butterfly
+    group: Armadilhas clássicas
+    title: "Borboleta: a mesma coluna é confundidor e colisor"
+    story: >-
+      Como no viés-M, mas o uso do aplicativo também influencia a oferta e o
+      cancelamento. Ajustar por ele abre um caminho; não ajustar deixa outro aberto.
+    edges:
+      - perfil_uso -> oferta
+      - perfil_uso -> usa_app
+      - satisfacao -> usa_app
+      - satisfacao -> cancelamento
+      - usa_app -> oferta
+      - usa_app -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [perfil_uso, satisfacao]
+    identifiable: false
+    would_be_identifiable_with: [perfil_uso]
+    valid_sets: []
+    invalid_sets:
+      - set: []
+        why: O uso do aplicativo mistura os dois grupos.
+        open_paths:
+          - oferta <- usa_app -> cancelamento
+          - oferta <- perfil_uso -> usa_app -> cancelamento
+          - oferta <- usa_app <- satisfacao -> cancelamento
+      - set: [usa_app]
+        why: Ajustar pelo uso do aplicativo liga as duas causas ocultas.
+        open_paths:
+          - oferta <- perfil_uso -> usa_app <- satisfacao -> cancelamento
+
+  - id: butterfly_one_cause_observed
+    group: Armadilhas clássicas
+    title: "Borboleta com uma das causas na tabela"
+    story: >-
+      O mesmo desenho, mas agora o perfil de uso está na tabela. Ajustar pelo uso do
+      aplicativo junto com o perfil de uso resolve.
+    edges:
+      - perfil_uso -> oferta
+      - perfil_uso -> usa_app
+      - satisfacao -> usa_app
+      - satisfacao -> cancelamento
+      - usa_app -> oferta
+      - usa_app -> cancelamento
+      - oferta -> cancelamento
+    treatment: oferta
+    outcome: cancelamento
+    unobserved: [satisfacao]
+    identifiable: true
+    smallest_set: [perfil_uso, usa_app]
+    valid_sets:
+      - [perfil_uso, usa_app]
+    invalid_sets:
+      - set: [usa_app]
+        why: Ajustar só pelo uso do aplicativo liga o perfil de uso à satisfação.
+        open_paths:
+          - oferta <- perfil_uso -> usa_app <- satisfacao -> cancelamento
+      - set: [perfil_uso]
+        why: O uso do aplicativo continua misturando os dois grupos.
+        open_paths:
+          - oferta <- usa_app -> cancelamento
+          - oferta <- usa_app <- satisfacao -> cancelamento
+
+  - id: pearl_backdoor_example
+    group: Armadilhas clássicas
+    title: Exemplo clássico da porta dos fundos
+    story: >-
+      Seis covariáveis. x4 é causa comum da intervenção e do resultado, e ao mesmo
+      tempo consequência de x1 e x2. Ajustar só por x4 não basta: é preciso ajustar por
+      x4 e por mais uma entre x1, x2, x3 e x5.
+    note: >-
+      Baseado no exemplo de Pearl (2009), Causality, seção 3.3.1. A lista de conjuntos
+      válidos aqui traz só exemplos (são quinze ao todo).
+    edges:
+      - x1 -> x3
+      - x1 -> x4
+      - x2 -> x4
+      - x2 -> x5
+      - x3 -> xi
+      - x4 -> xi
+      - x4 -> xj
+      - x5 -> xj
+      - xi -> x6
+      - x6 -> xj
+    treatment: xi
+    outcome: xj
+    identifiable: true
+    valid_sets_complete: false
+    valid_sets:
+      - [x3, x4]
+      - [x4, x5]
+      - [x1, x4]
+      - [x2, x4]
+      - [x1, x2, x3, x4, x5]
+    invalid_sets:
+      - set: []
+        why: x4 mistura os dois grupos, diretamente e por x1 e x2.
+        open_paths:
+          - xi <- x4 -> xj
+          - xi <- x3 <- x1 -> x4 -> xj
+          - xi <- x4 <- x2 -> x5 -> xj
+      - set: [x4]
+        why: Ajustar por x4 liga x1 a x2 e abre um caminho que estava fechado.
+        open_paths:
+          - xi <- x3 <- x1 -> x4 <- x2 -> x5 -> xj
+      - set: [x6]
+        why: >-
+          x6 é mediador. Além disso, por ser consequência indireta de x4, ajustar por ele
+          também abre o caminho que passa por x4.
+        forbidden:
+          x6: mediator
+        open_paths:
+          - xi <- x4 -> xj
+          - xi <- x3 <- x1 -> x4 -> xj
+          - xi <- x4 <- x2 -> x5 -> xj
+          - xi <- x3 <- x1 -> x4 <- x2 -> x5 -> xj
+      - set: [x3, x4, x6]
+        why: x3 e x4 estão certos, mas x6 é mediador.
+        forbidden:
+          x6: mediator

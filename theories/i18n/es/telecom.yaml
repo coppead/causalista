@@ -1,0 +1,190 @@
+# Tradução da ficha de teoria 'telecom' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente a partir da
+# ficha em português, theories/telecom.yaml, que é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado: esta tradução serve só aos testes (a avaliação em
+# idioma não visto no treino) e não entra em nenhum conjunto de treino.
+
+language: es
+status: revisada
+title: Oferta de fidelización en una operadora de telefonía
+context: 'Una operadora de telefonía hizo una oferta de fidelización a una parte de sus clientes:
+  un descuento en la mensualidad a cambio de un contrato de doce meses. Quiere saber si la oferta
+  reduce las cancelaciones en los seis meses siguientes.'
+randomized: Los clientes que recibieron la oferta fueron elegidos al azar.
+closing: Nada más que lo descrito influyó en la elección de quiénes recibieron la oferta.
+treatment:
+  label: la oferta
+  dictionary: Recibió la oferta de fidelización (1 = sí, 0 = no).
+outcome:
+  label: la cancelación
+  dictionary: Canceló el plan en los seis meses siguientes a la oferta (1 = sí, 0 = no).
+variables:
+  antiguidade:
+    label: la antigüedad del cliente
+    roles:
+      confounder:
+        dictionary: Meses como cliente hasta la fecha de la oferta.
+        to_treatment: La operadora hizo la oferta con más frecuencia a los clientes más antiguos.
+        to_outcome: Los clientes antiguos tienen más que perder al cambiar de operadora y cancelan
+          menos.
+      outcome_cause:
+        dictionary: Meses como cliente hasta la fecha de la oferta.
+        to_outcome: Los clientes antiguos tienen más que perder al cambiar de operadora y cancelan
+          menos.
+  renda:
+    label: el ingreso del cliente
+    hidden_fact: La operadora no tiene el ingreso de sus clientes, y por eso el ingreso no está
+      en la tabla.
+    roles:
+      confounder:
+        dictionary: Ingreso mensual estimado del cliente en la fecha de la oferta, en reales.
+        to_treatment: Los clientes de mayor ingreso recibieron la oferta con más frecuencia.
+        to_outcome: Los clientes de mayor ingreso tienen más holgura en el presupuesto y cancelan
+          menos.
+      outcome_cause:
+        dictionary: Ingreso mensual estimado del cliente en la fecha de la oferta, en reales.
+        to_outcome: Los clientes de mayor ingreso tienen más holgura en el presupuesto y cancelan
+          menos.
+  valor_fatura:
+    label: el monto de la factura
+    roles:
+      confounder:
+        dictionary: Monto promedio de la factura en los tres meses anteriores a la oferta, en
+          reales.
+        to_treatment: Los clientes con factura más alta recibieron la oferta con más frecuencia.
+        to_outcome: Quien paga una factura más alta cancela más.
+      mediator:
+        dictionary: Monto promedio de la factura en los tres meses siguientes a la oferta, en
+          reales.
+        from_treatment: La oferta da un descuento y reduce la factura de los meses siguientes.
+        to_outcome: Quien paga una factura más alta cancela más.
+      outcome_cause:
+        dictionary: Monto promedio de la factura en los tres meses anteriores a la oferta, en
+          reales.
+        to_outcome: Quien paga una factura más alta cancela más.
+  reclamacao:
+    label: el reclamo
+    roles:
+      confounder:
+        dictionary: Registró un reclamo en los tres meses anteriores a la oferta (1 = sí, 0 =
+          no).
+        to_treatment: La operadora hizo la oferta con más frecuencia a quienes habían registrado
+          un reclamo.
+        to_outcome: Quien reclama cancela más.
+      mediator:
+        dictionary: Registró un reclamo en los tres meses siguientes a la oferta (1 = sí, 0 =
+          no).
+        from_treatment: Quien recibió la oferta reclama menos en los meses siguientes.
+        to_outcome: Quien reclama cancela más.
+      outcome_cause:
+        dictionary: Registró un reclamo en los tres meses anteriores a la oferta (1 = sí, 0 =
+          no).
+        to_outcome: Quien reclama cancela más.
+  contato_retencao:
+    label: el contacto del equipo de retención
+    roles:
+      treatment_cause:
+        dictionary: Recibió una llamada del equipo de retención en el mes anterior a la oferta
+          (1 = sí, 0 = no).
+        to_treatment: La operadora hizo la oferta con más frecuencia a quienes habían recibido
+          una llamada del equipo de retención en el mes anterior.
+      collider:
+        dictionary: Recibió una llamada del equipo de retención en los seis meses siguientes a
+          la oferta (1 = sí, 0 = no).
+        from_treatment: El equipo de retención llama con más frecuencia a quienes recibieron la
+          oferta, para hacer seguimiento.
+        from_outcome: El equipo de retención llama con más frecuencia a quienes cancelaron el
+          plan, para registrar el motivo de la salida.
+  chamado_atendimento:
+    label: el ticket en atención al cliente
+    roles:
+      collider:
+        dictionary: Abrió un ticket en atención al cliente en los seis meses siguientes a la oferta
+          (1 = sí, 0 = no).
+        from_treatment: Quien recibe la oferta abre un ticket con más frecuencia, para aclarar
+          dudas sobre el contrato.
+        from_outcome: Quien cancela el plan suele abrir después un ticket en atención al cliente,
+          para resolver los pendientes del cierre.
+      outcome_cause:
+        dictionary: Abrió un ticket en atención al cliente en los tres meses anteriores a la oferta
+          (1 = sí, 0 = no).
+        to_outcome: Quien tuvo que abrir un ticket en atención al cliente cancela más.
+  uso_dados:
+    label: el uso de datos
+    roles:
+      confounder:
+        dictionary: Consumo promedio de datos en los tres meses anteriores a la oferta, en GB
+          por mes.
+        to_treatment: La oferta se dirigió con más frecuencia a quienes usan más datos.
+        to_outcome: Quien usa más datos depende más del servicio y cancela menos.
+      outcome_cause:
+        dictionary: Consumo promedio de datos en los tres meses anteriores a la oferta, en GB
+          por mes.
+        to_outcome: Quien usa más datos depende más del servicio y cancela menos.
+  multa_contratual:
+    label: la multa por cancelación anticipada
+    roles:
+      mediator:
+        dictionary: Pasó a tener un contrato con multa por cancelación anticipada en el mes
+          siguiente a la oferta (1 = sí, 0 = no).
+        from_treatment: Quien recibe la oferta pasa, con más frecuencia, a tener un contrato con
+          multa por cancelación anticipada.
+        to_outcome: Quien tiene multa por cancelación anticipada cancela menos.
+  proposta_concorrente:
+    label: la propuesta de la competencia
+    hidden_fact: La operadora no sabe quién recibió una propuesta de la competencia, y por eso
+      esa información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Recibió una propuesta de otra operadora en los tres meses anteriores a la
+          oferta (1 = sí, 0 = no).
+        to_treatment: Quien había recibido una propuesta de la competencia recibió la oferta con
+          más frecuencia.
+        to_outcome: Quien recibe una propuesta de la competencia cancela más.
+      outcome_cause:
+        dictionary: Recibió una propuesta de otra operadora en los tres meses anteriores a la
+          oferta (1 = sí, 0 = no).
+        to_outcome: Quien recibe una propuesta de la competencia cancela más.
+  satisfacao:
+    label: la satisfacción del cliente
+    hidden_fact: La satisfacción no se midió antes de la oferta, y por eso no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Nota de satisfacción en la encuesta hecha antes de la oferta, de 0 a 10.
+        to_treatment: Los clientes menos satisfechos recibieron la oferta con más frecuencia.
+        to_outcome: Los clientes más satisfechos cancelan menos.
+      mediator:
+        dictionary: Nota de satisfacción en la encuesta hecha tres meses después de la oferta,
+          de 0 a 10.
+        from_treatment: Quien recibe la oferta queda más satisfecho en los meses siguientes.
+        to_outcome: Los clientes más satisfechos cancelan menos.
+  debito_automatico:
+    label: el débito automático
+    roles:
+      confounder:
+        dictionary: Pagaba la factura por débito automático en la fecha de la oferta (1 = sí,
+          0 = no).
+        to_treatment: La oferta se envió con más frecuencia a quienes pagan por débito automático.
+        to_outcome: Quien paga por débito automático cancela menos.
+      outcome_cause:
+        dictionary: Pagaba la factura por débito automático en la fecha de la oferta (1 = sí,
+          0 = no).
+        to_outcome: Quien paga por débito automático cancela menos.
+  cidade_piloto:
+    label: la ciudad piloto
+    roles:
+      treatment_cause:
+        dictionary: Vive en una de las ciudades elegidas para el piloto de la oferta (1 = sí,
+          0 = no).
+        to_treatment: La oferta empezó por algunas ciudades piloto, y quienes viven en ellas
+          recibieron la oferta con más frecuencia.
+  dia_vencimento:
+    label: el día de vencimiento de la factura
+    roles:
+      unrelated:
+        dictionary: Día del mes en que vence la factura.
+        fact: El día de vencimiento de la factura no tiene relación con la oferta ni con la
+          cancelación.

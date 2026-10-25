@@ -1,0 +1,351 @@
+# Ficha de teoria: educação.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: educacao
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Monitoria em uma disciplina de graduação
+
+theory:
+  name: Tempo de aprendizagem
+  statement: >-
+    O quanto um aluno aprende depende do tempo que ele de fato dedica à tarefa,
+    comparado com o tempo de que ele precisa para aprender. Cada aluno precisa de um
+    tempo diferente, e quem dedica menos tempo do que precisa aprende menos. A monitoria
+    individual acrescenta tempo de estudo orientado e dá retorno imediato sobre os erros.
+    Com isso, o aluno aprende mais e tira nota final mais alta.
+  references:   # a confirmar pelo André
+    - "Carroll, J. B. (1963). A model of school learning. Teachers College Record, 64(8), 723-733."
+    - "Bloom, B. S. (1984). The 2 sigma problem: the search for methods of group instruction as effective as one-to-one tutoring. Educational Researcher, 13(6), 4-16."
+
+context: >-
+  Uma universidade abriu monitoria individual em uma disciplina de graduação: a partir
+  da quinta semana de aula, parte dos alunos passou a ter um encontro por semana com um
+  monitor, para tirar dúvidas sobre a matéria. Ela quer saber se a monitoria
+  aumenta a nota final na disciplina.
+randomized: Os alunos que participaram da monitoria foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou quem participou da monitoria.
+
+treatment:
+  column: monitoria
+  label: a monitoria
+  dictionary: Participou da monitoria da disciplina (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos alunos que participa da monitoria
+
+outcome:
+  column: nota_final
+  label: a nota final
+  kind: score
+  dictionary: Nota final na disciplina, de 0 a 10.
+  scale: {mean: [5.5, 7.0]}     # nota final típica da disciplina
+
+effect:
+  sign: "+"                  # a teoria diz que a monitoria aumenta a nota final
+
+variables:
+
+  media_anterior:
+    label: a média anterior do aluno
+    kind: score
+    scale: {mean: 6.5}
+    roles:
+      confounder:
+        dictionary: Média das notas do aluno nos semestres anteriores ao da monitoria, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Alunos com média anterior mais baixa participaram da monitoria com mais
+            frequência, porque receberam o convite antes dos demais alunos.
+        to_outcome:
+          sign: "+"
+          fact: Alunos com média anterior mais alta tiram nota final mais alta.
+      outcome_cause:
+        dictionary: Média das notas do aluno nos semestres anteriores ao da monitoria, de 0 a 10.
+        to_outcome:
+          sign: "+"
+          fact: Alunos com média anterior mais alta tiram nota final mais alta.
+
+  presenca_aulas:
+    label: a presença nas aulas
+    kind: binary
+    scale: {rate: 0.50}
+    roles:
+      confounder:
+        dictionary: Compareceu a pelo menos 75% das aulas da disciplina nas quatro semanas anteriores ao início da monitoria (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A monitoria foi divulgada em sala de aula, e por isso alunos mais presentes
+            nas aulas participaram da monitoria com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Alunos mais presentes nas aulas tiram nota final mais alta.
+      mediator:
+        dictionary: Compareceu a pelo menos 75% das aulas da disciplina nas quatro semanas seguintes ao início da monitoria (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem participa da monitoria fica mais presente nas aulas da disciplina nas semanas seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Alunos mais presentes nas aulas tiram nota final mais alta.
+      outcome_cause:
+        dictionary: Compareceu a pelo menos 75% das aulas da disciplina nas quatro semanas anteriores ao início da monitoria (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Alunos mais presentes nas aulas tiram nota final mais alta.
+
+  horas_estudo:
+    label: as horas de estudo
+    kind: continuous
+    scale: {median: 4, max: 30}
+    roles:
+      confounder:
+        dictionary: Média de horas semanais de estudo por conta própria para a disciplina nas quatro semanas anteriores ao início da monitoria.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Alunos que já estudavam mais horas por semana para a disciplina participaram
+            da monitoria com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Quem estuda mais horas por semana para a disciplina tira nota final mais alta.
+      mediator:
+        dictionary: Média de horas semanais de estudo por conta própria para a disciplina nas quatro semanas seguintes ao início da monitoria.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem participa da monitoria se prepara para os encontros com o monitor e
+            passa a estudar mais horas por semana para a disciplina.
+        to_outcome:
+          sign: "+"
+          fact: Quem estuda mais horas por semana para a disciplina tira nota final mais alta.
+      outcome_cause:
+        dictionary: Média de horas semanais de estudo por conta própria para a disciplina nas quatro semanas anteriores ao início da monitoria.
+        to_outcome:
+          sign: "+"
+          fact: Quem estuda mais horas por semana para a disciplina tira nota final mais alta.
+
+  exercicios_entregues:
+    label: os exercícios entregues
+    kind: count
+    scale: {mean: 12, max: 60}
+    roles:
+      mediator:
+        dictionary: Número de exercícios das listas entregues pelo aluno nas quatro semanas seguintes ao início da monitoria.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O monitor ajuda a resolver as listas de exercícios, e quem participa da
+            monitoria entrega mais exercícios nas semanas seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem entrega mais exercícios das listas tira nota final mais alta.
+      outcome_cause:
+        dictionary: Número de exercícios das listas entregues pelo aluno nas quatro semanas anteriores ao início da monitoria.
+        to_outcome:
+          sign: "+"
+          fact: Quem entrega mais exercícios das listas tira nota final mais alta.
+
+  motivacao:
+    label: a motivação do aluno
+    kind: score
+    scale: {mean: 6}
+    hidden_fact: >-
+      A motivação dos alunos não foi medida antes do início da monitoria, e por isso ela
+      não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota de motivação com a disciplina no questionário aplicado na semana anterior ao início da monitoria, de 0 a 10.
+        to_treatment:
+          sign: "+"
+          fact: Alunos mais motivados com a disciplina participaram da monitoria com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Alunos mais motivados com a disciplina tiram nota final mais alta.
+      mediator:
+        dictionary: Nota de motivação com a disciplina no questionário aplicado quatro semanas depois do início da monitoria, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: Quem participa da monitoria fica mais motivado com a disciplina nas semanas seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Alunos mais motivados com a disciplina tiram nota final mais alta.
+
+  base_prerequisito:
+    label: a base no conteúdo de pré-requisito
+    kind: score
+    scale: {mean: 6}
+    hidden_fact: >-
+      A disciplina não aplicou prova de nivelamento, e por isso a base dos alunos no
+      conteúdo de pré-requisito não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota na prova de nivelamento sobre o conteúdo de pré-requisito, aplicada na primeira semana de aula, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Alunos com base mais fraca no conteúdo de pré-requisito participaram da monitoria com mais frequência, porque sentiram mais dificuldade e procuraram a monitoria.
+        to_outcome:
+          sign: "+"
+          fact: Alunos com base mais forte no conteúdo de pré-requisito tiram nota final mais alta.
+      outcome_cause:
+        dictionary: Nota na prova de nivelamento sobre o conteúdo de pré-requisito, aplicada na primeira semana de aula, de 0 a 10.
+        to_outcome:
+          sign: "+"
+          fact: Alunos com base mais forte no conteúdo de pré-requisito tiram nota final mais alta.
+
+  trabalha:
+    label: o emprego ou estágio do aluno
+    kind: binary
+    scale: {rate: 0.35}
+    hidden_fact: >-
+      A universidade não registra quais alunos trabalham, e por isso essa informação não
+      está na tabela.
+    roles:
+      confounder:
+        dictionary: Trabalhava ou fazia estágio no início do semestre (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Alunos que trabalham têm menos horários livres e participaram da monitoria
+            com menos frequência.
+        to_outcome:
+          sign: "-"
+          fact: Alunos que trabalham chegam mais cansados às provas e tiram nota final mais baixa.
+      outcome_cause:
+        dictionary: Trabalhava ou fazia estágio no início do semestre (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Alunos que trabalham chegam mais cansados às provas e tiram nota final mais baixa.
+
+  bolsista:
+    label: a bolsa de estudos
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      confounder:
+        dictionary: Recebia bolsa de estudos da universidade no início do semestre (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A coordenação do curso reservou parte das vagas da monitoria para bolsistas,
+            e por isso os bolsistas participaram da monitoria com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Bolsistas perdem a bolsa se forem mal na disciplina, e por isso tiram nota final mais alta.
+      outcome_cause:
+        dictionary: Recebia bolsa de estudos da universidade no início do semestre (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Bolsistas perdem a bolsa se forem mal na disciplina, e por isso tiram nota final mais alta.
+
+  reprovacao_anterior:
+    label: a reprovação anterior na disciplina
+    kind: binary
+    scale: {rate: 0.20}
+    roles:
+      confounder:
+        dictionary: Já tinha sido reprovado nesta disciplina em um semestre anterior (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Alunos que já tinham sido reprovados na disciplina tiveram prioridade nas
+            vagas e participaram da monitoria com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Alunos que já foram reprovados na disciplina tiram nota final mais baixa.
+      outcome_cause:
+        dictionary: Já tinha sido reprovado nesta disciplina em um semestre anterior (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Alunos que já foram reprovados na disciplina tiram nota final mais baixa.
+
+  turma_piloto:
+    label: a turma-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Estava matriculado em uma das turmas escolhidas para o piloto da monitoria (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Algumas turmas da disciplina foram escolhidas para um piloto e tiveram mais vagas de monitoria, e os alunos dessas turmas participaram da monitoria com mais frequência.
+
+  atendimento_coordenacao:
+    label: o atendimento na coordenação do curso
+    kind: binary
+    scale: {rate: 0.20}
+    roles:
+      treatment_cause:
+        dictionary: Foi atendido pela coordenação do curso nas quatro semanas anteriores ao início da monitoria (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A coordenação do curso avisava os alunos das vagas de monitoria durante os atendimentos, e por isso quem tinha sido atendido pela coordenação participou
+            da monitoria com mais frequência.
+      collider:
+        dictionary: Foi atendido pela coordenação do curso depois do início da monitoria, até a matrícula do semestre seguinte (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A coordenação do curso chama com mais frequência os alunos que participam da monitoria, para um atendimento de acompanhamento.
+        from_outcome:
+          sign: "-"
+          fact: >-
+            Alunos com nota final mais baixa procuram mais a coordenação do curso depois da divulgação das notas, para pedir orientação sobre como refazer a disciplina.
+
+  pesquisa_avaliacao:
+    label: a resposta à pesquisa de avaliação
+    kind: binary
+    scale: {rate: 0.40}
+    roles:
+      collider:
+        dictionary: Respondeu à pesquisa de avaliação da disciplina, aberta depois da divulgação das notas finais (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O monitor pede aos alunos da monitoria que respondam à pesquisa de avaliação
+            da disciplina, e quem participa da monitoria responde mais à pesquisa.
+        from_outcome:
+          sign: "+"
+          fact: Alunos com nota final mais alta respondem mais à pesquisa de avaliação da disciplina.
+
+  matricula_par:
+    label: a paridade do número de matrícula
+    kind: binary
+    scale: {rate: 0.50}
+    roles:
+      unrelated:
+        dictionary: O número de matrícula do aluno é par (1 = sim, 0 = não).
+        fact: Ter número de matrícula par ou ímpar não tem relação com a monitoria nem com a nota final.

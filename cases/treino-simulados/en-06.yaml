@@ -1,0 +1,493 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-06, oito casos em inglês
+# (vozes dos EUA, do Reino Unido e do Canadá).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (analista de crédito de uma
+# cooperativa de crédito na região de Houston, diretora de pessoas de um hospital em
+# Manchester, analista de dados de uma empresa de transporte por aplicativo em Toronto,
+# gerente de marketing de um aplicativo de treino, diretora de um sistema de bibliotecas
+# públicas) descrevendo um conjunto de dados do jeito que essa pessoa escreveria: pergunta a
+# um consultor, trecho de relatório trimestral, e-mail para a equipe de dados, página de
+# wiki interna, transcrição de áudio.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado,
+# nem as intervenções já usadas nos outros arquivos desta pasta para as mesmas pessoas.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_cu_builder_reason_unlogged
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: lending analytics specialist at a credit union in the Houston area (about 110,000 members), writing to an outside consultant the credit union has used before
+    theme: Credit union / credit-builder lending
+    title: Credit Builder loan and 12-month score change, with the reason for the visit never logged
+    treatment: cb_loan
+    outcome: score_change_12m
+    twin: en_cu_builder_reason_logged
+    columns:
+      cb_loan: 1 if the member opened a Credit Builder loan ($1,000, 12 months, proceeds held in a locked share until paid off) between Jan 2 and Jun 30, 2025.
+      score_change_12m: FICO 8 at the quarterly soft pull twelve months after the start pull, minus FICO 8 at the start pull. Start pull is the last quarterly pull before the loan opened for borrowers, and the March 2025 pull for everyone else.
+      score_start: FICO 8 at the start pull.
+      branch_id: Branch of record for the membership.
+      tenure_years: Years since the membership was opened, as of Jan 2025.
+      direct_deposit: 1 if a recurring payroll direct deposit was posting to the member's checking as of Jan 2025.
+      age_band: Member age in bands (18-24, 25-34, 35-49, 50-64, 65+).
+      card_app_after: 1 if the member applied for the credit union's Visa in the 90 days following the twelve-month pull.
+    not_in_table:
+      credit_help_ask: Whether the member came into the branch asking how to fix their credit. Said at the counter, never entered anywhere.
+    story: >-
+      Hi Dana, Marcus Reyes gave me your name, he said you helped Gulf Coast with their indirect
+      lending model a couple of years back. I have a question that is probably simpler than a model,
+      I would just rather ask than guess. We have a Credit Builder loan: $1,000, 12 months, the money
+      sits in a locked share until the last payment, and we report to all three bureaus. From January
+      through June 2025 our MSRs opened about 1,400 of them. The instruction was to pitch it to anyone
+      under 640. In practice, and I have sat on the teller line enough to know, it mostly got opened
+      for members who walked in asking how to fix their credit because they wanted a truck or a house
+      within the year. Nothing about that conversation was recorded; the visit-reason dropdown only
+      went live in the branch system in March 2026, so for this group it is loan or no loan and that
+      is it. And the members who come in asking to fix their credit do the other things too, pay down
+      the cards, dispute the old collections, loan or no loan. Our two branches off the Beltway open
+      three times as many Builders as the rest, they just push it harder. What I see: members with a
+      Builder went up 38 points on average between the last quarterly soft pull before opening and
+      the one twelve months later. Everyone else under 700 went up 11. My CLO wants the 38-versus-11 in
+      the annual report. A couple of things bother me. The Builder group started lower, which is who
+      we pitched to, and a 560 has a lot more room to climb than a 690. Direct-deposit members pay
+      everything on time and always have, their scores drift up no matter what we do. The extract
+      also has whether the member applied for our Visa in the 90 days after the second pull, which I
+      am not sure what to do with: the MSRs cross-sell the card when a Builder pays off, and anyone
+      whose score jumped tends to come in and apply for something. Columns are below. Is the
+      38-versus-11 defensible if I adjust for a few things, or is this one of those where the honest
+      answer is that we cannot tell from what we have?
+    edges:
+      - score_start -> cb_loan
+      - score_start -> score_change_12m
+      - credit_help_ask -> cb_loan
+      - credit_help_ask -> score_change_12m
+      - branch_id -> cb_loan
+      - direct_deposit -> score_change_12m
+      - cb_loan -> score_change_12m
+      - cb_loan -> card_app_after
+      - score_change_12m -> card_app_after
+    answer:
+      identifiable: false
+      missing: [credit_help_ask]
+    note: >-
+      The members who asked for help with their credit both took the loan and did the other things
+      that lift a score, and nothing of that conversation was recorded. The starting score is in the
+      table and must be adjusted for, but it is not enough.
+
+  - id: en_cu_builder_reason_logged
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: lending analytics specialist at a credit union in the Houston area (about 110,000 members), writing to an outside consultant the credit union has used before
+    theme: Credit union / credit-builder lending
+    title: Credit Builder loan and 12-month score change, with the visit-reason code in the extract
+    treatment: cb_loan
+    outcome: score_change_12m
+    twin: en_cu_builder_reason_unlogged
+    columns:
+      cb_loan: 1 if the member opened a Credit Builder loan ($1,000, 12 months, proceeds held in a locked share until paid off) between Jan 2 and Jun 30, 2025.
+      score_change_12m: FICO 8 at the quarterly soft pull twelve months after the start pull, minus FICO 8 at the start pull. Start pull is the last quarterly pull before the loan opened for borrowers, and the March 2025 pull for everyone else.
+      score_start: FICO 8 at the start pull.
+      visit_reason: Reason code the MSR selects from a dropdown when opening a branch session (account question, loan inquiry, credit help, other). First code of 2025 for the member; "none" if the member had no branch session in the first half of 2025.
+      branch_id: Branch of record for the membership.
+      tenure_years: Years since the membership was opened, as of Jan 2025.
+      direct_deposit: 1 if a recurring payroll direct deposit was posting to the member's checking as of Jan 2025.
+      age_band: Member age in bands (18-24, 25-34, 35-49, 50-64, 65+).
+      card_app_after: 1 if the member applied for the credit union's Visa in the 90 days following the twelve-month pull.
+    story: >-
+      Hi Dana, Marcus Reyes gave me your name, he said you helped Gulf Coast with their indirect
+      lending model a couple of years back. I have a question that is probably simpler than a model,
+      I would just rather ask than guess. We have a Credit Builder loan: $1,000, 12 months, the money
+      sits in a locked share until the last payment, and we report to all three bureaus. From January
+      through June 2025 our MSRs opened about 1,400 of them. The instruction was to pitch it to anyone
+      under 640. In practice, and I have sat on the teller line enough to know, it mostly got opened
+      for members who walked in asking how to fix their credit because they wanted a truck or a house
+      within the year. Since the branch system upgrade in November 2024 the MSRs pick a visit reason
+      from a dropdown when they open a session (account question, loan inquiry, credit help, other),
+      and that code came over in the extract; credit help is most of the Builders. And the members
+      who come in asking to fix their credit do the other things too, pay down the cards, dispute the
+      old collections, loan or no loan. Our two branches off the Beltway open three times as many
+      Builders as the rest, they just push it harder. What I see: members with a Builder went up 38
+      points on average between the last quarterly soft pull before opening and the one twelve
+      months later. Everyone else under 700 went up 11. My CLO wants the 38-versus-11 in the annual report.
+      A couple of things bother me. The Builder group started lower, which is who we pitched to, and
+      a 560 has a lot more room to climb than a 690. Direct-deposit members pay everything on time and
+      always have, their scores drift up no matter what we do. The extract also has whether the
+      member applied for our Visa in the 90 days after the second pull, which I am not sure what to
+      do with: the MSRs cross-sell the card when a Builder pays off, and anyone whose score jumped
+      tends to come in and apply for something. Columns are below. Is the 38-versus-11 defensible if
+      I adjust for a few things, or is this one of those where the honest answer is that we cannot
+      tell from what we have?
+    edges:
+      - score_start -> cb_loan
+      - score_start -> score_change_12m
+      - visit_reason -> cb_loan
+      - visit_reason -> score_change_12m
+      - branch_id -> cb_loan
+      - direct_deposit -> score_change_12m
+      - cb_loan -> score_change_12m
+      - cb_loan -> card_app_after
+      - score_change_12m -> card_app_after
+    answer:
+      identifiable: true
+      adjust_for: [score_start, visit_reason]
+      do_not_adjust_for:
+        card_app_after: Recorded after the twelve-month pull and driven both by having had the loan (the card is cross-sold at payoff) and by the score having jumped. Adjusting for it creates a false link between the two.
+      indifferent: [age_band, branch_id, direct_deposit, tenure_years]
+    note: >-
+      Same story as the twin, but the reason for the visit is now a code in the extract, so the
+      members who came to fix their credit can be separated from the rest. The starting score still
+      has to go in; the branch only pushes the loan, and direct deposit only moves the score.
+
+  - id: en_nhs_preceptor_buddy
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: chief people officer at an acute hospital trust in Manchester, writing the workforce section of the quarterly People Committee report
+    theme: Hospital HR / retention of newly registered nurses
+    title: Preceptorship Buddy scheme on the wards with the worst vacancies, and leaving within twelve months
+    treatment: buddy_scheme
+    outcome: left_12m
+    columns:
+      buddy_scheme: 1 if the nurse started on one of the eleven wards running the Preceptorship Buddy scheme (named Band 6 buddy, one protected hour per week for six months).
+      left_12m: 1 if the nurse has a leaver record in ESR with a leaving date within twelve months of the start date.
+      ward_vacancy_pct: Registered-nurse vacancy rate of the starting ward in the month before the nurse's start date, percent of funded establishment.
+      confidence_6m: Self-rated confidence (1 to 10) recorded at the six-month preceptorship review.
+      exit_q_done: 1 if the leaver completed the exit questionnaire. The questionnaire is issued only once a leaving date is entered in ESR; 0 for everyone still in post.
+      division: Medicine, Surgery, or Women and Children.
+      intl_recruit: 1 if recruited through the international recruitment programme.
+    story: >-
+      People Committee, Quarter 1 2026/27. Section 4, retention of newly registered nurses. 4.1 The
+      Preceptorship Buddy scheme pairs each newly registered nurse with a named Band 6 buddy on the
+      same ward, with one protected hour per week for the first six months. It went live for the
+      March 2025 intake on the eleven wards with the highest registered-nurse vacancy rate at the
+      time, all above 18 percent, on the basis that these were the wards losing new starters fastest.
+      The remaining wards continue to run standard preceptorship. 4.2 Twelve-month leaver figures for
+      the March 2025 intake are now complete: 14 percent on buddy wards against 11 percent elsewhere.
+      The Committee is asked to note that the buddy wards remain the most short-staffed in the Trust,
+      with the workload that implies for a new starter, and that the headline comparison therefore
+      does not isolate the scheme. 4.3 Two indicators are encouraging. Self-rated confidence at the
+      six-month review is 1.4 points higher on buddy wards on a ten-point scale, and confidence at
+      six months has been the strongest single predictor of staying in every cohort since 2022. Exit
+      questionnaire completion among leavers is also higher on buddy wards, which the Matrons
+      attribute to buddies encouraging leavers to complete it. 4.4 Divisional attrition continues to
+      be highest in Medicine. Internationally recruited nurses rarely leave in the first year, which
+      reflects the relocation package rather than ward conditions. 4.5 Workforce Information has
+      been asked to produce an estimate of the scheme's effect on twelve-month leaving, adjusted only
+      for what is necessary and nothing more, ahead of the decision on extending the scheme to the
+      September 2026 intake.
+    edges:
+      - ward_vacancy_pct -> buddy_scheme
+      - ward_vacancy_pct -> left_12m
+      - buddy_scheme -> confidence_6m
+      - confidence_6m -> left_12m
+      - buddy_scheme -> left_12m
+      - buddy_scheme -> exit_q_done
+      - left_12m -> exit_q_done
+      - division -> left_12m
+      - intl_recruit -> left_12m
+    answer:
+      identifiable: true
+      adjust_for: [ward_vacancy_pct]
+      do_not_adjust_for:
+        confidence_6m: Recorded at six months and raised by the buddy. It is the main way the scheme is meant to keep nurses, so it is part of the effect being measured.
+        exit_q_done: Issued only after a leaving date exists and completed more often where there is a buddy. Adjusting for it ties the scheme to leaving through the questionnaire itself.
+      indifferent: [division, intl_recruit]
+    note: >-
+      The wards got the scheme because of their vacancy rate, and the same vacancy rate wears new
+      starters down. The six-month confidence score the report is proud of is the mechanism; the
+      exit questionnaire exists only for leavers.
+
+  - id: en_nhs_parking_permit
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: chief people officer at an acute hospital trust in Manchester, e-mailing the two analysts in people analytics
+    theme: Hospital HR / staff parking and retention
+    title: Staff parking permits and leaving within the year, with the postcode stripped from the extract
+    treatment: parking_permit
+    outcome: leaver_fy25
+    columns:
+      parking_permit: 1 if the staff member held a staff parking permit on 1 April 2025, after the reissue under the 2025 panel criteria.
+      leaver_fy25: 1 if left the Trust between 1 April 2025 and 31 March 2026.
+      night_shifts_pct: Percent of the person's rostered shifts in January to March 2025 that were night shifts.
+      band: Agenda for Change band.
+      staff_group: Nursing and midwifery, AHP, admin and clerical, or estates and facilities.
+      site: City site or South site.
+      wte: Contracted whole-time equivalent.
+    not_in_table:
+      commute_miles: Home-to-work distance, worked out by the permits panel from the home postcode. The postcode was removed from the extract at information-governance review and the distance was never kept as a field.
+    story: >-
+      Tom, Aisha, quick one before Thursday's exec. Estates want 300 staff permits gone when the
+      multi-storey closes, and the question back is whether the permits are "buying us retention".
+      Leavers for the year to March 2026: 9 percent with a permit, 14 percent without. Permits were
+      reissued in April 2025 on distance from home and proportion of nights, with fewer at the City
+      site because there is less tarmac. Nights are in the extract; the postcode came out at IG review,
+      so distance is not, and the people out past Bolton on nights are exactly who got a permit and
+      exactly who we lose; nights grind people down on their own, and an hour's drive home after one
+      finishes them off. Band 5 turnover is its own story. Is there
+      anything to be done with this, or do I tell the exec we cannot answer it with what we hold?
+    edges:
+      - commute_miles -> parking_permit
+      - commute_miles -> leaver_fy25
+      - night_shifts_pct -> parking_permit
+      - night_shifts_pct -> leaver_fy25
+      - site -> parking_permit
+      - band -> leaver_fy25
+      - parking_permit -> leaver_fy25
+    answer:
+      identifiable: false
+      missing: [commute_miles]
+    note: >-
+      Distance from home decided the permit and also wears people out, and it left the extract with
+      the postcode. Nights are in the table; they are not enough.
+
+  - id: en_rh_pickup_suggest
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: data analyst on the rider experience team of a ride-hailing company in Toronto, writing the dataset page, comfortable with SQL, has not done causal work
+    theme: Ride-hailing / pickup experience
+    title: Suggested pickup notes by rider-ID parity and seconds waiting at pickup
+    treatment: pickup_suggest
+    outcome: pickup_wait_s
+    columns:
+      pickup_suggest: 1 if the rider was in the test arm (even rider ID) and saw suggested pickup notes at request time. GTA trips, Oct 6 to Nov 2, 2025.
+      pickup_wait_s: Seconds from the driver's "arrived" event to the trip start event.
+      note_present: 1 if the pickup note field was non-empty at dispatch, whether typed by the rider or accepted from a suggestion.
+      pickup_rated: 1 if the rider answered the "How was your pickup?" card on the post-trip screen.
+      pickup_zone: H3 cell of the pickup point, resolution 8.
+      hour_band: Request hour in six bands (00-05, 06-09, 10-15, 16-19, 20-23, and the Fri/Sat 17-20 band flagged separately).
+      is_airport: 1 if the pickup was at YYZ or YTZ.
+      rider_tenure_d: Days between the rider's first completed trip and this trip.
+      trip_id: Trip identifier, carried from the trips table.
+    story: >-
+      Dataset page: rx_pickup_suggest_oct25. Owner: Rider Experience analytics. Last edited
+      2025-11-14. Summary. Suggested pickup notes test, GTA, Oct 6 to Nov 2, 2025. At request time
+      the test arm saw up to three suggested notes ("Meet at the Front St entrance", "North side of
+      Bloor") generated from the last 90 days of pickups at that spot; tapping one filled the pickup
+      note field. Control saw the empty field as before. Assignment. Rider ID parity, even IDs test,
+      odd IDs control, evaluated at request in the dispatch service, not in the app, so there is no
+      opt-in and no eligibility filter beyond the GTA geofence. Parity has been used for four earlier
+      tests and the AA week (Sep 29 to Oct 5) was flat on wait and on volume. Primary metric.
+      pickup_wait_s, driver arrived to trip start. The case for the feature is that a note saying
+      where you actually are saves the driver circling the block. Notes on columns. note_present went
+      from 11% of trips in control to 46% in test, and trips with a note have historically waited
+      about 40 seconds less, so this is the thing the feature does. pickup_rated is the "How was your
+      pickup?" card on the post-trip screen; it was switched on for the test arm as part of the
+      feature because product wanted qualitative feedback, while control riders only see it through
+      the standard rating flow, so test riders answer far more often. Long waits also drive card
+      responses in both arms, people who stood on the curb for five minutes want to tell you about
+      it. pickup_zone, hour_band and is_airport are the usual wait drivers: the downtown core and the
+      Friday 17-20 band wait longer, and YYZ/YTZ pickups follow the airport lot rules and wait longer
+      still. rider_tenure_d and trip_id are carried through from the trips table. Open question for
+      the readout. Marketing has asked for the lift in wait "with and without the note_present split
+      and controlling for whether they rated". Before anyone runs that: which of these columns, if
+      any, should the lift be adjusted for? Comment inline please.
+    edges:
+      - pickup_suggest -> note_present
+      - note_present -> pickup_wait_s
+      - pickup_suggest -> pickup_rated
+      - pickup_wait_s -> pickup_rated
+      - pickup_zone -> pickup_wait_s
+      - hour_band -> pickup_wait_s
+      - is_airport -> pickup_wait_s
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        note_present: Filled at dispatch and raised from 11% to 46% by the suggestions. It is how the feature shortens the wait, so it is part of the effect being measured.
+        pickup_rated: Answered on the post-trip screen, shown more to the test arm and answered more after a long wait. Adjusting for it creates a false link between the arm and the wait.
+      indifferent: [hour_band, is_airport, pickup_zone, rider_tenure_d, trip_id]
+    note: >-
+      Parity of the rider ID is as good as a coin flip, so the plain comparison is already right.
+      Marketing's two requested splits are exactly the two columns that spoil it.
+
+  - id: en_rh_zero_commission
+    author: ai
+    status: rascunho
+    language: en
+    style: voice-note transcript
+    persona: data analyst at a ride-hailing company in Toronto, leaving a voice note for a colleague on the analytics team
+    theme: Ride-hailing / driver supply incentives
+    title: Zero-commission week offered by phone and active weeks in the quarter
+    treatment: zero_comm_wk
+    outcome: active_wks_q4
+    columns:
+      zero_comm_wk: 1 if the driver accepted the zero-commission week offered by the city ops team by phone in the first half of October 2025.
+      active_wks_q4: Number of weeks in Q4 2025 (13 weeks) with at least one completed trip.
+      trips_sep: Completed trips in September 2025.
+      tenure_mo: Months since driver activation, as of Oct 1, 2025.
+      home_zone: Forward sortation area of the driver's registered address.
+      vehicle_year: Model year of the registered vehicle.
+      rating_sep: Driver rating as of Sep 30, 2025.
+    not_in_table:
+      full_time_driver: Whether driving is the person's main job. Never asked, at onboarding or anywhere else.
+    story: >-
+      [Voice note, 2:41, auto-transcribed] Hey Priya, it's Dev, I'm walking to the subway so excuse
+      the noise. So the zero-commission week thing from October, um, Jason wants a number for the Q4
+      review, like "drivers who took the week stayed active X more weeks than drivers who didn't".
+      And the raw gap is big, it's like two full weeks out of thirteen. But here's how it actually
+      went down, I talked to Sam in city ops. They pulled everyone with forty-plus completed trips in
+      September and started calling, Scarborough and Mississauga lists first because that's where
+      supply's thin, and about a third said yes to the week. Thing nobody says out loud: who says yes
+      to a free week of no commission? People who do this for a living. Someone driving Saturdays
+      for, I don't know, beer money, doesn't care about commission. And the full-timers are gonna be
+      out there every week in Q4 regardless, that's the problem. And we have never asked anybody if
+      this is their main job, it's not in onboarding, it's not in the profile, it's nowhere.
+      September trips is the closest thing we've got, and sure, someone who did a hundred trips in
+      September is going to be active in Q4, but it's not the same thing, a part-timer can have a
+      huge September. Tenure is in the table, newer drivers drop off more, that's a known thing.
+      Vehicle year and rating I pulled because they were there. Anyway, can you look at the table I
+      dropped in the channel and tell me whether there's a defensible way to cut this or whether I go
+      back to Jason and say we can't get a clean read on this one? Okay bye. [end]
+    edges:
+      - full_time_driver -> zero_comm_wk
+      - full_time_driver -> active_wks_q4
+      - full_time_driver -> trips_sep
+      - trips_sep -> zero_comm_wk
+      - trips_sep -> active_wks_q4
+      - home_zone -> zero_comm_wk
+      - tenure_mo -> active_wks_q4
+      - zero_comm_wk -> active_wks_q4
+    answer:
+      identifiable: false
+      missing: [full_time_driver]
+    note: >-
+      Whether driving is the person's main job decided who said yes and decides who is active in
+      Q4, and it was never asked. September trips are a recorded reason for the call but do not
+      stand in for it.
+
+  - id: en_fit_weekly_recap
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: growth marketing manager at a strength-training app (about 900,000 monthly actives), owns lifecycle e-mail, writing to the analytics team
+    theme: Fitness app / lifecycle e-mail and retention
+    title: Weekly Recap e-mail for eligible sign-ups and paid status at day 90
+    treatment: recap_email
+    outcome: active_d90
+    columns:
+      recap_email: 1 if the user was enrolled in the Weekly Recap e-mail (Mondays from week 3 after sign-up).
+      active_d90: 1 if the paid subscription was active on day 90 after sign-up.
+      workouts_d14: Logged workouts in the first 14 days after sign-up.
+      mkt_optin: 1 if the user ticked marketing e-mail at sign-up.
+      workouts_w3_w8: Logged workouts in weeks 3 to 8 after sign-up.
+      cancel_survey: 1 if the user completed the cancellation survey. Sent by e-mail at cancellation; 0 for users who never cancelled.
+      plan: monthly or annual.
+      platform: iOS or Android.
+    story: >-
+      Subject: Weekly Recap lift, before I put it in the Q3 deck. Hi team, Noor said you are the right
+      people. Short version: I would like to claim the Weekly Recap e-mail improves day-90 retention
+      and I want to be sure the number holds up, because Tomas will ask. Background for whoever has
+      not seen it. Since April the Recap goes out every Monday from week 3 after sign-up: your
+      workouts, your PRs, a streak. The enrolment job only picks users who logged 3 or more workouts
+      in their first 14 days (the template looks sad with fewer) and who ticked marketing e-mail at
+      sign-up. Because of the SendGrid timeout mess in May and June, roughly a fifth of the eligible
+      users never got enrolled, which is honestly the only reason we have anyone to compare to. The
+      pull has every Q2 sign-up. Numbers: among the eligible, enrolled users are active on day 90 at
+      61% versus 49% for the ones the job missed. Enrolled users also log 1.8 more workouts in weeks
+      3 to 8, and workouts are the best predictor of staying we have ever had, so I think that is
+      literally how it works. What I know is messy: anyone who logs 3 workouts in two weeks was going
+      to stick around more anyway, and the opt-in crowd is just more into us to begin with, they stay
+      longer with or without a Monday e-mail. The pull also has plan (annual folks basically cannot
+      churn inside 90 days), platform, and whether the person completed the cancel survey. On the
+      survey: it goes by e-mail to everyone who cancels, and Recap users complete it at about twice
+      the rate, Noor thinks because they are used to opening our mail. Column list attached. Which of
+      these should the comparison be adjusted for, and which should I leave alone? I would rather be
+      told now than in the meeting.
+    edges:
+      - workouts_d14 -> recap_email
+      - workouts_d14 -> active_d90
+      - mkt_optin -> recap_email
+      - mkt_optin -> active_d90
+      - recap_email -> workouts_w3_w8
+      - workouts_w3_w8 -> active_d90
+      - recap_email -> active_d90
+      - recap_email -> cancel_survey
+      - active_d90 -> cancel_survey
+      - plan -> active_d90
+    answer:
+      identifiable: true
+      adjust_for: [mkt_optin, workouts_d14]
+      do_not_adjust_for:
+        workouts_w3_w8: Logged after enrolment and raised by the Recap. It is the way the e-mail is meant to keep people, so it is part of the effect being measured.
+        cancel_survey: Sent only to users who cancelled and completed more by Recap users. Adjusting for it creates a false link between the e-mail and staying.
+      indifferent: [plan, platform]
+    note: >-
+      Two eligibility rules, early workouts and the marketing opt-in, both also predict staying, and
+      both are columns. The workouts-after KPI the manager is proud of is the mechanism; the cancel
+      survey exists only for those who left.
+
+  - id: en_lib_hold_lockers
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: director of a city public library system in the Pacific Northwest (12 branches), writing the program page on the staff intranet
+    theme: Public library / hold pickup lockers
+    title: Hold pickup lockers sited by the 2024 memo and the share of holds that expired
+    treatment: locker_branch
+    outcome: hold_expired_pct
+    columns:
+      locker_branch: 1 if exterior 24/7 hold pickup lockers were in service at the branch for all of FY2025 (July 2024 to June 2025).
+      hold_expired_pct: Holds that reached the shelf at the branch in FY2025 and were cancelled unclaimed at day 7, as a percent of holds filled at the branch.
+      open_hrs_wk: Scheduled public open hours per week in FY2025. The January 2024 siting memo prioritized branches open 40 hours or fewer.
+      has_parking: 1 if the branch has its own parking lot. The exterior locker unit needs a lot-facing wall, so this was a requirement in the siting memo.
+      after_hrs_pct: Percent of FY2025 hold pickups time-stamped outside the branch's open hours. Zero where there is no locker.
+      survey_2026: Branch mean, 1 to 5, on "How easy is it to pick up your holds?" in the spring 2026 patron survey.
+      holds_2024: Holds filled at the branch in FY2024.
+      branch_code: Three-letter branch code.
+    story: >-
+      Hold Pickup Lockers, program page. Owner: Director's office. Updated June 2026. What they are.
+      Exterior 24/7 lockers for holds, 48 doors per unit, the patron opens a door with card number
+      and PIN. In service for all of FY2025 at five branches: Ridgeview, Lents, Cedar Hills,
+      Alderwood and Riverside. The other seven run holds off the shelf behind the desk as always.
+      Where they went and why. Siting followed the January 2024 memo; the criteria are in the column
+      notes below and I will not repeat them here. I will say that both criteria are things that
+      already move the expired-hold rate on their own: the branches with the shortest schedules have
+      always lost more holds, people simply cannot get there before the seven days are up, and pickup
+      has always been better at branches where you can pull into a lot, you grab it on the way home
+      from the grocery store. What we are watching. Expired holds (reached the shelf, never picked
+      up, cancelled at day 7) as a share of all holds filled at the branch. FY2025: 7.1% at locker
+      branches, 10.4% elsewhere. Roughly a third of locker-branch pickups now happen outside open
+      hours, which is the whole idea, and a hold that gets picked up at 9 pm on a Tuesday is a hold
+      that did not expire. The spring 2026 patron survey asked "How easy is it to pick up your holds?"
+      for the first time; locker branches scored higher, and I would expect a branch where your holds
+      keep expiring to score low on that question no matter what equipment it has. Ask for the data
+      librarian. Before the Board meeting in September: the effect of the lockers on the expired-hold
+      share, with whatever adjustment the siting criteria require, or a plain statement that twelve
+      branches cannot tell us. The table is 12 rows, one per branch, columns described below.
+      Please add a note here when the number is ready.
+    edges:
+      - open_hrs_wk -> locker_branch
+      - open_hrs_wk -> hold_expired_pct
+      - has_parking -> locker_branch
+      - has_parking -> hold_expired_pct
+      - locker_branch -> after_hrs_pct
+      - after_hrs_pct -> hold_expired_pct
+      - locker_branch -> hold_expired_pct
+      - locker_branch -> survey_2026
+      - hold_expired_pct -> survey_2026
+    answer:
+      identifiable: true
+      adjust_for: [has_parking, open_hrs_wk]
+      do_not_adjust_for:
+        after_hrs_pct: Measured during the same year and only possible with a locker. It is how the lockers stop holds from expiring, so it is part of the effect being measured.
+        survey_2026: Collected the following spring and moved both by the lockers and by whether people's holds kept expiring. Adjusting for it creates a false link between the two.
+      indifferent: [branch_code, holds_2024]
+    note: >-
+      The two siting criteria are given only in the column dictionary, and both also move the
+      outcome on their own. The after-hours share the director is proud of is the mechanism; the
+      survey came after.

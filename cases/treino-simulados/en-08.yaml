@@ -1,0 +1,586 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-08, oito casos em inglês
+# (vozes do Reino Unido e dos EUA).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (coordenadora de programa de
+# uma associação habitacional britânica, diretora de uma rede de bancos de alimentos,
+# líder de operações de lojas de uma rede de materiais de construção, decana de
+# estudantes de um community college, líder de sucesso do cliente de uma empresa de
+# software de folha de pagamento) descrevendo um conjunto de dados do jeito que essa
+# pessoa escreveria: memorando de uma página, notas de uma ligação com um consultor,
+# e-mail ao time de dados, transcrição de áudio, trecho de relatório trimestral.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_housing_sensors_campaign_visits
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: programme officer at a UK housing charity with about 3,000 homes in the West Midlands, writing to the Head of Assets, no statistics training
+    theme: Social housing / damp and mould
+    title: Humidity sensors in homes picked from last winter's advice-visit list
+    twin: en_housing_sensors_alert_visits
+    treatment: sensor_installed
+    outcome: damp_report_12m
+    columns:
+      property_ref: Asset reference (UPRN-based).
+      sensor_installed: Humidity and temperature sensor fitted in the April-May 2025 programme (1 = yes).
+      damp_report_12m: At least one repairs request logged under a damp, mould or condensation category between June 2025 and May 2026 (1 = yes).
+      vent_advice_visit: Ventilation advice visit completed by a housing officer under the winter 2024/25 damp campaign, November 2024 to February 2025 (1 = yes).
+      prior_damp_report_2024: Repairs requests logged under a damp, mould or condensation category in calendar 2024 (count).
+      build_era: PRE1945, 1945_1964, 1965_1989 or POST1990, from the asset register.
+      household_size: People in the household at the last tenancy audit.
+    story: >-
+      MEMO to Head of Assets from Programme Officer, Healthy Homes, 2 July 2026. Re:
+      humidity sensors, first twelve months.
+
+      1. Where we are. 418 homes have had a humidity and temperature sensor since the
+      April-May 2025 install programme (Hygro units, from the damp and mould budget line). We
+      now have twelve months of repairs data after the install window, and the Board has
+      asked whether the sensors have made any difference to damp and mould reports.
+
+      2. How homes were chosen. The surveyors worked from two things. First, the winter
+      2024/25 damp campaign: between November and February the housing officers visited the
+      homes that had logged a damp or mould repair in 2024, as many as they could get round,
+      and talked through drying washing indoors, trickle vents and the extractor. Every home
+      that had one of those visits went on the sensor list; the surveyors worked from the
+      visit list, not from the repairs log. Second, age of the stock: the pre-war and
+      immediate post-war blocks went to the top, because that is where the condensation
+      problems are, year in year out. The 418 units did not stretch to the whole list; the
+      installers went round patch by patch in whatever order suited the van and stopped when
+      the units ran out.
+
+      3. What the data shows. Of the sensored homes, 31% logged a damp, mould or condensation
+      repair between June 2025 and May 2026, against 19% of the rest. I do not read this as
+      the sensors causing damp. The visited homes and the older blocks were always going to
+      report more, and the visits themselves will have helped some households, which muddies
+      things further. Larger households put more moisture into the air, and I would expect
+      that to show in the repairs in any year, whatever we did. A sensor may also make a
+      tenant more likely to pick up the phone and report, which would be a good thing and
+      would still look bad in this table.
+
+      4. Ask. Before the September Board I would like a comparison that allows for how the
+      homes were picked, and only for that. Which columns in the attached extract should we
+      adjust for, and which should be left alone?
+    edges:
+      - prior_damp_report_2024 -> vent_advice_visit
+      - prior_damp_report_2024 -> damp_report_12m
+      - vent_advice_visit -> sensor_installed
+      - vent_advice_visit -> damp_report_12m
+      - build_era -> sensor_installed
+      - build_era -> damp_report_12m
+      - build_era -> prior_damp_report_2024
+      - household_size -> prior_damp_report_2024
+      - household_size -> damp_report_12m
+      - sensor_installed -> damp_report_12m
+    answer:
+      identifiable: true
+      adjust_for: [build_era, vent_advice_visit]
+      indifferent: [household_size, prior_damp_report_2024, property_ref]
+    note: >-
+      The advice visits came before the sensors and decided who got one, so they are
+      something to adjust for, with the age of the stock. The 2024 reports only reach the
+      sensors through the visits. Twin of the alert-visit version, where the same column
+      must stay out.
+
+  - id: en_housing_sensors_alert_visits
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: programme officer at a UK housing charity with about 3,000 homes in the West Midlands, writing to the Head of Assets, no statistics training
+    theme: Social housing / damp and mould
+    title: Humidity sensors whose alerts trigger the advice visits
+    twin: en_housing_sensors_campaign_visits
+    treatment: sensor_installed
+    outcome: damp_report_12m
+    columns:
+      property_ref: Asset reference (UPRN-based).
+      sensor_installed: Humidity and temperature sensor fitted in the April-May 2025 programme (1 = yes).
+      damp_report_12m: At least one repairs request logged under a damp, mould or condensation category between June 2025 and May 2026 (1 = yes).
+      vent_advice_visit: Ventilation advice visit booked from a sensor alert (relative humidity above 70% for 72 hours) and completed by the patch officer, June 2025 to May 2026 (1 = yes; 0 for every home without a sensor).
+      prior_damp_report_2024: Repairs requests logged under a damp, mould or condensation category in calendar 2024 (count).
+      build_era: PRE1945, 1945_1964, 1965_1989 or POST1990, from the asset register.
+      household_size: People in the household at the last tenancy audit.
+    story: >-
+      MEMO to Head of Assets from Programme Officer, Healthy Homes, 2 July 2026. Re:
+      humidity sensors, first twelve months.
+
+      1. Where we are. 418 homes have had a humidity and temperature sensor since the
+      April-May 2025 install programme (Hygro units, from the damp and mould budget line). We
+      now have twelve months of repairs data after the install window, and the Board has
+      asked whether the sensors have made any difference to damp and mould reports.
+
+      2. How homes were chosen. The surveyors worked from two things. First, the 2024
+      repairs log: every home that had logged a damp or mould repair in 2024 went on the
+      sensor list. Second, age of the stock: the pre-war and immediate post-war blocks went
+      to the top, because that is where the condensation problems are, year in year out. The
+      418 units did not stretch to the whole list; the installers went round patch by patch
+      in whatever order suited the van and stopped when the units ran out.
+
+      3. What the sensors do. When a unit reads relative humidity above 70% for three days
+      running, the system raises an alert and the patch officer books a ventilation advice
+      visit: drying washing indoors, trickle vents, the extractor. 206 such visits by the end
+      of May, overwhelmingly in the pre-war blocks and the larger households, which is what
+      the surveyors expected. Homes without a sensor have had no such visits; the campaign
+      that used to do them was stood down when the sensors went in.
+
+      4. What the data shows. Of the sensored homes, 31% logged a damp, mould or condensation
+      repair between June 2025 and May 2026, against 19% of the rest. I do not read this as
+      the sensors causing damp. The homes on the list were always going to report more, and
+      the advice visits will have helped some households, which is part of what the sensors
+      are for. Larger households put more moisture into the air, and I would expect that to
+      show in the repairs in any year, whatever we did. A sensor may also make a tenant more
+      likely to pick up the phone and report, which would be a good thing and would still
+      look bad in this table.
+
+      5. Ask. Before the September Board I would like a comparison that allows for how the
+      homes were picked, and only for that. Which columns in the attached extract should we
+      adjust for, and which should be left alone?
+    edges:
+      - prior_damp_report_2024 -> sensor_installed
+      - prior_damp_report_2024 -> damp_report_12m
+      - build_era -> sensor_installed
+      - build_era -> damp_report_12m
+      - build_era -> prior_damp_report_2024
+      - household_size -> prior_damp_report_2024
+      - household_size -> damp_report_12m
+      - sensor_installed -> vent_advice_visit
+      - build_era -> vent_advice_visit
+      - household_size -> vent_advice_visit
+      - vent_advice_visit -> damp_report_12m
+      - sensor_installed -> damp_report_12m
+    answer:
+      identifiable: true
+      adjust_for: [build_era, prior_damp_report_2024]
+      do_not_adjust_for:
+        vent_advice_visit: Booked from the sensor's own alerts, so it is one of the ways the sensor changes the reports. Adjusting for it hides that part of the effect.
+      indifferent: [household_size, property_ref]
+    note: >-
+      Same memo as the twin, one fact changed: the advice visits are now a consequence of
+      the sensors, and the 2024 reports decided the list directly. The visit column swaps
+      from "adjust for" to "leave out".
+
+  - id: en_foodbank_reminder_every_other
+    author: ai
+    status: rascunho
+    language: en
+    style: voice-note transcript
+    persona: executive director of a food bank network with four pantry sites in a mid-sized US city, leaving a voice note for the part-time data volunteer, no statistics background
+    theme: Food bank / appointment reminders
+    title: Day-before text reminder sent to every other household on the list
+    treatment: reminder_text
+    outcome: picked_up
+    columns:
+      household_id: Household number in the intake system.
+      reminder_text: Reminder text sent the day before the household's November 2025 appointment (1 = sent, 0 = not sent).
+      picked_up: Household checked in and received food at its November 2025 appointment (1 = yes).
+      replied_confirm: Household replied "C" to the reminder text (1 = yes; 0 for households that did not reply or were not sent a text).
+      followup_call: Volunteer call to the household logged in the week after the distribution (1 = yes).
+      household_size: People in the household at the last intake update.
+      miles_to_site: Straight-line miles from the household's ZIP centroid to its assigned pantry site.
+      site: "Pantry site: RIVERSIDE, ST_MARKS, EASTGATE or HILLCREST."
+    not_in_table:
+      has_car: Whether the household has a car. Never asked at intake.
+    story: >-
+      [Voice note, 2:48, Carla to Devon, Dec 3]
+
+      Hey Devon, it's Carla, sorry for the voice memo, I'm driving back from Riverside. So,
+      the text reminder thing for the November distribution. I want to make sure we tell the
+      board the right story in January, because Pastor Jim is already saying it worked and I
+      kind of want it to have worked, so, you know, keep me honest. The way you set it up,
+      tell me if I have this wrong, you took the November appointment list, all four sites,
+      sorted it by appointment time and sent the reminder to every other row, so about half
+      the households got the text the day before and the other half got nothing, same as
+      always. Okay. What I'm seeing in the sheet is pickup was 82% with the text versus 71%
+      without. A bunch of the texted folks replied C to confirm like we asked, and nearly all
+      of those showed up, which, I mean, of course they did, that's half the point of asking.
+      The thing I'm not sure about is the follow-up calls. Marisol's crew calls everybody who
+      didn't come, that's the standing rule, and in November she also called anyone who
+      texted back with a question, and there were a lot of those, people asking if they could
+      send a neighbor and so on. So there's a call column in there and I don't know if it
+      means anything. Other stuff in the file is household size, which I'd guess matters,
+      bigger families don't skip, miles to the site, and which site. Honestly Riverside
+      always has worse pickup, it's the bus. And we have no idea who has a car, which I'm
+      sure matters too, but we've never asked. Can you tell me how many points the text
+      actually added and what, if anything, we need to adjust for? Thanks, bye.
+    edges:
+      - reminder_text -> replied_confirm
+      - replied_confirm -> picked_up
+      - reminder_text -> picked_up
+      - picked_up -> followup_call
+      - reminder_text -> followup_call
+      - household_size -> picked_up
+      - miles_to_site -> picked_up
+      - site -> picked_up
+      - has_car -> picked_up
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        replied_confirm: Only happens after the text and is one of the ways the text gets people to come. Adjusting for it hides part of the effect.
+        followup_call: Logged the week after the distribution and driven by both the text (questions) and the no-show itself. Adjusting for it creates a false link between the two.
+      indifferent: [household_id, household_size, miles_to_site, site]
+    note: >-
+      Every other row of a list sorted by appointment time is as good as a draw, so the
+      plain comparison is right. The traps are the confirmation reply, which is the
+      mechanism, and the follow-up call, logged after the fact for both reasons. The car,
+      never recorded, only matters for pickup.
+
+  - id: en_hardware_pro_desk_regionals
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: store operations lead at a regional hardware chain (118 stores in Texas, Oklahoma, Arkansas and Louisiana), writing up their own notes after a call with an outside analyst
+    theme: Hardware retail / contractor sales
+    title: Pro Desk in the stores the regionals nominated
+    treatment: pro_desk
+    outcome: pro_sales_q3_2025
+    columns:
+      store_no: Four-digit store number.
+      pro_desk: Pro Desk (dedicated contractor counter) live by March 31, 2025 (1 = yes).
+      pro_sales_q3_2025: Sales to pro accounts, Jul-Sep 2025, USD thousands.
+      pro_sales_2024: Sales to pro accounts, calendar 2024, USD thousands.
+      contractor_lic_zip: Licensed contractors (general, electrical, plumbing, HVAC) with a business address in the store's trade-area ZIPs, from state licensing boards, pulled January 2025.
+      selling_sqft: Selling floor area, thousand sq ft.
+      pro_accounts_opened_2025: New pro accounts opened at the store, Jan-Sep 2025.
+    not_in_table:
+      manager_trust: The regionals' judgment of whether the store manager could run a Pro Desk. Settled in conversation, never recorded.
+    story: >-
+      Call w/ Dana (Meridian Analytics), Oct 14, 2025, 45 min. My notes, not verbatim.
+
+      Context I gave her: 118 stores, TX/OK/AR/LA. Pro Desk (dedicated contractor counter,
+      two associates, will-call bay, net-30 accounts opened on the spot) went live in 41
+      stores between Jan and Mar 2025. Question for the board in Dec: what did the desk do
+      to pro sales in Q3.
+
+      How the 41 were picked, since she asked three times: the three regionals each
+      nominated stores. They worked off 2024 pro sales (bigger pro business first) and the
+      count of licensed contractors in the trade-area ZIPs, which marketing pulls from the
+      state boards every January. They also skipped anything under about 25k sq ft because
+      the desk and the will-call bay need the room. And, this is the part Dana latched onto,
+      they went with the store managers they trusted to run it. Her words: "is there a field
+      for that". There isn't. It's a conversation between the regional and the DM, and no
+      surprise, the managers they trust are mostly the ones who had the good numbers last
+      year anyway. Those managers also just sell more to contractors, desk or no desk; Rick
+      at 0417 has been doing net-30 out of a binder since 2019.
+
+      What's in the extract (store level): store number, desk flag, Q3 2025 pro-account
+      sales, 2024 pro-account sales, licensed contractors in trade area, selling sq ft, and
+      new pro accounts opened Jan-Sep 2025. On that last one, I told her it's the number I'm
+      proudest of: desk stores opened about 3x the accounts, and new accounts are where the
+      Q3 sales come from. She flagged that one; I didn't fully follow why. Also: bigger
+      trade areas carried bigger 2024 numbers, obviously, and bigger stores carry more pro
+      inventory so they sell more regardless.
+
+      Dana wants to think about whether the desk effect can be separated at all with what we
+      have, versus "the regionals picked the stores that were going to grow anyway". She'll
+      write it up. Follow-up for me: ask HR if there's any manager rating from 2024 we could
+      add. I doubt it.
+    edges:
+      - pro_sales_2024 -> pro_desk
+      - pro_sales_2024 -> pro_sales_q3_2025
+      - contractor_lic_zip -> pro_desk
+      - contractor_lic_zip -> pro_sales_q3_2025
+      - contractor_lic_zip -> pro_sales_2024
+      - selling_sqft -> pro_desk
+      - selling_sqft -> pro_sales_q3_2025
+      - manager_trust -> pro_desk
+      - manager_trust -> pro_sales_q3_2025
+      - manager_trust -> pro_sales_2024
+      - pro_desk -> pro_accounts_opened_2025
+      - pro_accounts_opened_2025 -> pro_sales_q3_2025
+      - pro_desk -> pro_sales_q3_2025
+    answer:
+      identifiable: false
+      missing: [manager_trust]
+    note: >-
+      Three of the four things the regionals used are columns; the fourth, their trust in
+      the manager, is not, and it also drives pro sales on its own. Last year's sales are a
+      shadow of it, not a substitute. The new-accounts KPI is the mechanism.
+
+  - id: en_hardware_color_scanner_route
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: store operations lead at a regional hardware chain (91 stores in Texas, Oklahoma, Louisiana and Arkansas), writing to the analytics team before a vendor meeting
+    theme: Hardware retail / paint department
+    title: Color-match scanners installed along the vendor's route
+    treatment: color_scanner
+    outcome: paint_sales_q3
+    columns:
+      store_no: Store number.
+      color_scanner: Color-match scanner installed at the paint counter by May 31, 2025 (1 = yes).
+      paint_sales_q3: Paint department sales, Jul-Sep 2025, USD thousands.
+      paint_sales_2024: Paint department sales, calendar 2024, USD thousands.
+      region: I35_TX, I35_OK, HILL_COUNTRY, LOUISIANA or ARKANSAS.
+      store_format: BIG_BOX or NEIGHBORHOOD.
+      tint_tickets_q3: Custom tint tickets printed at the paint counter, Jul-Sep 2025.
+      vendor_rebate_tier: Harlow Paints rebate tier (1-4) assigned in January 2026 from 2025 paint volume and participation in the color-match program.
+    story: >-
+      Subject: Q3 paint numbers, scanner stores vs the rest, need a clean read
+
+      Hi Priya, hi team,
+
+      Harlow's rep is coming in on the 24th and I'd like to walk in with a number for what
+      the color-match scanners did to paint sales in Q3, not the one on the vendor's slide.
+
+      Background in case it's not in your notes: 38 of our 91 stores got the scanner in
+      April-May 2025. The install was done by the vendor's contractor and they did it by
+      route, everything on the I-35 corridor from Laredo up through Dallas and into Oklahoma
+      got done in the first pass, the Louisiana and Arkansas stores and the Hill Country are
+      scheduled for spring 2026. Nobody at our end picked stores; I'd have picked differently,
+      honestly. The corridor stores do more paint volume than the rest every year, they always
+      have, it's the housing stock and the heat, and in general a store that sold paint last
+      year sells paint this year.
+
+      Dashboard says Q3 paint sales up 11% at scanner stores vs 2% at the others. Tint
+      tickets (custom colors mixed at the counter) are way up at scanner stores, which is the
+      whole idea, you scan the pillow, we mix it, you buy the gallon. I'm attaching the
+      store-level file: store number, scanner flag, Q3 2025 paint sales, 2024 paint sales,
+      region, store format (big box vs neighborhood; neighborhood stores sell less paint, they
+      just don't have the aisle), Q3 tint tickets, and the vendor rebate tier. On the rebate
+      tier: Harlow assigns it in January off the year's paint volume, and being in the
+      color-match program bumps you a tier, so don't read too much into it, I just left it in
+      the file.
+
+      What should I be adjusting for here, and what should I leave out? I'd rather hear it
+      from you than from the rep.
+
+      Thanks, Marcus
+    edges:
+      - region -> color_scanner
+      - region -> paint_sales_q3
+      - region -> paint_sales_2024
+      - paint_sales_2024 -> paint_sales_q3
+      - store_format -> paint_sales_q3
+      - store_format -> paint_sales_2024
+      - color_scanner -> tint_tickets_q3
+      - tint_tickets_q3 -> paint_sales_q3
+      - color_scanner -> paint_sales_q3
+      - paint_sales_q3 -> vendor_rebate_tier
+      - color_scanner -> vendor_rebate_tier
+    answer:
+      identifiable: true
+      adjust_for: [region]
+      do_not_adjust_for:
+        tint_tickets_q3: Printed during the quarter itself and pushed up by the scanner. It is how the scanner sells paint, so it is part of the effect being measured.
+        vendor_rebate_tier: Assigned in January from the year's paint volume and from having the scanner. Adjusting for it creates a false link between the two.
+      indifferent: [paint_sales_2024, store_format, store_no]
+    note: >-
+      The route decided the stores, and the route is the region, which also sells more paint
+      on its own. Last year's sales and the format only matter for the outcome. The tint
+      tickets are the mechanism and the rebate tier, described only in the dictionary as
+      assigned in January, comes after everything.
+
+  - id: en_college_coach_call_comments
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: dean of students at a US community college (about 9,000 students, three campuses), writing to the institutional research analyst, reads dashboards but does not run analyses
+    theme: Community college / early alert
+    title: Success-coach calls to the students whose alert comments sounded worst
+    treatment: coach_call
+    outcome: course_passed
+    columns:
+      student_id: College ID.
+      coach_call: Success coach reached the student by phone by the end of week 6 of fall 2025 (1 = yes). Voicemails do not count.
+      course_passed: Final grade of C or better in the flagged course (1 = yes; withdrawals and incompletes = 0).
+      flag_reason: "Reason code on the week-4 early alert: ATTENDANCE, GRADES or BOTH."
+      credits_completed_prior: Credits completed at the college before fall 2025 (0 for new students).
+      hs_gpa: High school GPA from the admission application, 4.0 scale. Missing for GED and international admits.
+      credits_enrolled_fall: Credits enrolled in fall 2025 at census.
+      attendance_wk6_10: Share of class sessions attended in weeks 6-10 of the flagged course, from the LMS attendance tool.
+    not_in_table:
+      comment_severity: How alarming the instructor's free-text comment on the alert read to the coaches. The comment is purged when the alert closes.
+    story: >-
+      Subject: Early alert / coach calls, can we actually say anything?
+
+      Hi Tomas, before I take the fall file to the Student Success Committee on the 29th I
+      want to know what we can and can't claim, because the version going around is "coach
+      calls raised pass rates 14 points" and I don't believe it for a second.
+
+      Recap: faculty submit an early alert in week 4; the form has a reason code (attendance,
+      grades, or both) and a free-text comment. Fall 2025, 1,312 alerts in the gateway
+      courses. The three success coaches work the queue and try to reach each student by
+      phone by week 6; they reached 611. Here's my problem: they don't work it in order.
+      Angela told me straight out that they read the comments and call the scary ones first,
+      "hasn't shown up since week 2 and isn't answering the instructor" before "missed one
+      quiz", and attendance flags go before grade flags because those are the students who
+      vanish. They also start with the students with the fewest credits behind them, which is
+      policy, new students first. The comment is the thing I can't give you: it gets purged
+      when the alert closes and the export only has the reason code. So the students who got
+      a call are, by design, the ones whose situation sounded worst to a human reading it,
+      and a student who hasn't been seen since week 2 is not going to be in the room in week
+      8 either, call or no call.
+
+      What's in the file: student id, call reached (1/0), passed the flagged course with a C
+      or better, reason code, credits completed before fall, high school GPA from the
+      application, credits enrolled in fall, and attendance percent in weeks 6-10 from the
+      LMS. On that last one, the coaches' whole pitch is "we get them back in the room":
+      attendance after the call is up noticeably for the students they reached, and students
+      who come to class pass, so that's the mechanism, I think. An attendance flag in week 4
+      is a worse sign for the final grade than a grades flag, and students further along pass
+      more, no surprise. High school GPA predicts passing but the coaches never see it, it
+      isn't in the queue. Full-time students pass more in these courses, I don't know why.
+
+      So: is there a defensible comparison in here, and if so, adjusted for what? If the
+      honest answer is no, I'd rather say so than walk a number back in the spring. Renée
+    edges:
+      - flag_reason -> coach_call
+      - flag_reason -> course_passed
+      - flag_reason -> attendance_wk6_10
+      - credits_completed_prior -> coach_call
+      - credits_completed_prior -> course_passed
+      - comment_severity -> coach_call
+      - comment_severity -> course_passed
+      - comment_severity -> attendance_wk6_10
+      - hs_gpa -> course_passed
+      - credits_enrolled_fall -> course_passed
+      - coach_call -> attendance_wk6_10
+      - attendance_wk6_10 -> course_passed
+      - coach_call -> course_passed
+    answer:
+      identifiable: false
+      missing: [comment_severity]
+    note: >-
+      The reason code and prior credits are in the file and did steer the calls, but the
+      coaches' main cue, the comment, was purged, and it tracks how badly the student was
+      doing. Attendance after the call is the mechanism, and the high school GPA only matters
+      for the grade.
+
+  - id: en_college_hold_lift_bands
+    author: ai
+    status: rascunho
+    language: en
+    style: notes from a call with a consultant
+    persona: dean of students at a US community college with three campuses, jotting down notes after a call with an institutional research consultant
+    theme: Community college / registration holds
+    title: Registration holds lifted for small balances at two campuses
+    treatment: hold_waived
+    outcome: spring_registered
+    columns:
+      student_id: College ID.
+      hold_waived: Registration hold lifted by the bursar's office before spring 2026 registration opened (1 = yes).
+      spring_registered: Registered for at least one spring 2026 course by the census date (1 = yes).
+      campus: DOWNTOWN, NORTHSIDE or LAKESIDE.
+      balance_band: "Balance owed as of Nov 1, 2025, in bands: 1_249, 250_499, 500_999, 1000_PLUS."
+      payment_plan_signed: Enrolled in the installment payment plan by Feb 1, 2026 (1 = yes).
+    story: >-
+      Notes, call with Luis (IR consultant), Feb 11, 2026.
+
+      - Spring hold pilot: Downtown and Northside bursars agreed to lift the registration
+      hold for students owing under $500; Lakeside didn't take part. Within the two campuses,
+      staff worked the list by balance band from the smallest balances up and got through
+      roughly 70% before registration opened, so plenty of eligible students still had the
+      hold. Order inside a band was whatever the report spat out.
+
+      - Downtown students come back at lower rates than Northside in any year; students who
+      owe more come back less, hold or no hold.
+
+      - Payment plan column: the business office signs students up for the plan at the point
+      of registering if there's a balance, and the students whose hold was lifted also got
+      the plan e-mail from us in December.
+
+      - Luis asked for the file: student id, hold lifted, registered for spring, campus,
+      balance band, payment plan signed. He'll say what to adjust for. I asked whether the
+      70% is a problem; he said no, it's a feature.
+    edges:
+      - campus -> hold_waived
+      - campus -> spring_registered
+      - balance_band -> hold_waived
+      - balance_band -> spring_registered
+      - hold_waived -> spring_registered
+      - spring_registered -> payment_plan_signed
+      - hold_waived -> payment_plan_signed
+    answer:
+      identifiable: true
+      adjust_for: [balance_band, campus]
+      do_not_adjust_for:
+        payment_plan_signed: Signed at registration or after the December e-mail, so it follows both the lifted hold and the registration itself. Adjusting for it creates a false link between the two.
+      indifferent: [student_id]
+    note: >-
+      Campus and balance band decided who was eligible and both move re-enrolment on their
+      own; within a band the order was arbitrary and the list was not finished, so there is
+      something to compare. The payment plan comes after the outcome.
+
+  - id: en_payroll_preview_csm_request
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: customer success lead at a US payroll software company (about 4,100 small and mid-sized business accounts), writing the CS section of the quarterly operations review
+    theme: Payroll software / feature early access
+    title: Payroll Preview enabled on CSM request and failed runs in Q3
+    treatment: preview_enabled
+    outcome: failed_runs_q3
+    columns:
+      account_id: Account number.
+      preview_enabled: Payroll Preview feature flag on as of July 1, 2025 (1 = yes).
+      failed_runs_q3: Payroll runs rejected at submission or reversed after submission, Jul-Sep 2025 (count).
+      employee_band: "Active employees on the account at July 1, 2025: 1_19, 20_49, 50_199 or 200_PLUS."
+      plan_tier: CORE, PLUS or PREMIUM.
+      tickets_q2: Support tickets opened by the account, Apr-Jun 2025 (count).
+      preview_opens_q3: Payroll runs in Q3 where the Preview screen was opened before submission (count; 0 for accounts without the flag).
+      escalated_q3: Account escalated to CS leadership at any point in Q3 (1 = yes). By rule, any account with two or more failed runs in the quarter is escalated; early-access accounts were additionally on the leadership watch list.
+    not_in_table:
+      payroll_complexity: Multi-state, tipped or garnishment-heavy payrolls, as known to the account's CSM. There is no account field for it.
+    story: >-
+      Customer Success, Q3 FY25 (excerpt from the quarterly operations review, section 4)
+
+      4.2 Payroll Preview early access. Payroll Preview (the pre-submit screen that lists
+      likely errors: missing hours, tax jurisdiction mismatches, negative net pay) was
+      enabled for 640 of our 4,100 accounts by July 1, ahead of general availability in Q1
+      FY26. Accounts were enabled on CSM request. Guidance to the team was to prioritise
+      Premium plans and accounts above 50 employees, since those run the most complex
+      payrolls and were the ones asking, and to use Q2 ticket volume as a sanity check. In
+      practice the CSMs put forward the accounts they knew to have the hairiest payrolls,
+      multi-state, tipped staff, garnishments, the ones that always have something going on
+      at the cutoff and, predictably, raise the most tickets. That knowledge sits with the
+      CSM rather than in any account field; we have raised a request for a complexity
+      attribute for FY26.
+
+      4.3 Results. Enabled accounts averaged 0.9 failed or reversed payroll runs in Q3
+      against 0.6 for the rest. We do not read this as Preview causing failures; the enabled
+      book was selected for difficulty. Usage is encouraging: enabled accounts opened the
+      Preview screen before 78% of their runs, and runs where it was opened were rejected far
+      less often, which is the product doing its job. Larger accounts and Premium plans fail
+      more runs in any quarter (more schedules, more jurisdictions), and larger accounts raise
+      more tickets as a matter of course.
+
+      4.4 Ask. Analytics to advise whether the account-level extract (account id, enabled
+      flag, Q3 failed runs, employee band, plan tier, Q2 tickets, Q3 preview opens, Q3
+      escalation flag) supports an estimate of Preview's effect on failed runs, and with
+      which adjustments, or whether we should wait for the GA rollout, which will be by
+      cohort date rather than by request.
+    edges:
+      - employee_band -> preview_enabled
+      - employee_band -> failed_runs_q3
+      - employee_band -> tickets_q2
+      - plan_tier -> preview_enabled
+      - plan_tier -> failed_runs_q3
+      - payroll_complexity -> preview_enabled
+      - payroll_complexity -> failed_runs_q3
+      - payroll_complexity -> tickets_q2
+      - tickets_q2 -> preview_enabled
+      - preview_enabled -> preview_opens_q3
+      - preview_opens_q3 -> failed_runs_q3
+      - preview_enabled -> failed_runs_q3
+      - failed_runs_q3 -> escalated_q3
+      - preview_enabled -> escalated_q3
+    note: >-
+      Size and plan are columns and were part of the guidance, but the CSMs' real cue, the
+      complexity of the payroll, lives in their heads and drives failures directly. Q2
+      tickets are a symptom of it, not a stand-in. Preview opens are the mechanism; the
+      escalation flag, as the dictionary says, follows the failures.
+    answer:
+      identifiable: false
+      missing: [payroll_complexity]

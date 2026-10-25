@@ -1,0 +1,282 @@
+# Tradução da ficha de teoria 'banco' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, diretamente da ficha em português, por delegação
+# do André. A ficha em português, theories/banco.yaml, é a que vale: este arquivo só
+# traz as palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado: esta tradução é usada só nos testes, nunca no treino.
+
+language: es
+status: revisada
+title: Aumento de límite de la tarjeta de crédito en un banco
+context: >-
+  Un banco aumentó el límite de la tarjeta de crédito de una parte de sus clientes. Para
+  el banco, un cliente está en mora cuando tiene algún pago con más de 90 días de atraso.
+  El banco quiere saber si el aumento de límite eleva la morosidad en los doce meses
+  siguientes.
+randomized: Los clientes que recibieron el aumento de límite fueron elegidos por sorteo.
+closing: Nada más allá de lo descrito influyó en la elección de quién recibió el aumento de límite.
+treatment:
+  label: el aumento de límite
+  dictionary: Recibió el aumento de límite de la tarjeta de crédito (1 = sí, 0 = no).
+outcome:
+  label: la morosidad
+  dictionary: >-
+    Tuvo algún pago con más de 90 días de atraso en los doce meses siguientes al aumento
+    de límite (1 = sí, 0 = no).
+variables:
+  score_credito:
+    label: el puntaje de crédito
+    roles:
+      confounder:
+        dictionary: >-
+          Puntaje de crédito del cliente en el modelo interno del banco, calculado en el
+          mes anterior al aumento de límite, de 0 a 10.
+        to_treatment: >-
+          El banco dio el aumento de límite con más frecuencia a los clientes con puntaje
+          de crédito más alto.
+        to_outcome: Los clientes con puntaje de crédito más alto caen en mora con menos frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Puntaje de crédito del cliente en el modelo interno del banco, calculado en el
+          mes anterior al aumento de límite, de 0 a 10.
+        to_outcome: Los clientes con puntaje de crédito más alto caen en mora con menos frecuencia.
+  renda:
+    label: el ingreso del cliente
+    hidden_fact: >-
+      El banco no tiene el ingreso actual de los clientes, y por eso el ingreso no está en
+      la tabla.
+    roles:
+      confounder:
+        dictionary: Ingreso mensual del cliente en la fecha del aumento de límite, en reales.
+        to_treatment: Los clientes de mayor ingreso recibieron el aumento de límite con más frecuencia.
+        to_outcome: >-
+          Los clientes de mayor ingreso tienen más holgura en el presupuesto y caen en mora
+          con menos frecuencia.
+      outcome_cause:
+        dictionary: Ingreso mensual del cliente en la fecha del aumento de límite, en reales.
+        to_outcome: >-
+          Los clientes de mayor ingreso tienen más holgura en el presupuesto y caen en mora
+          con menos frecuencia.
+  tempo_cliente:
+    label: la antigüedad como cliente
+    roles:
+      confounder:
+        dictionary: Meses como cliente del banco hasta la fecha del aumento de límite.
+        to_treatment: El banco dio el aumento de límite con más frecuencia a los clientes más antiguos.
+        to_outcome: Los clientes más antiguos del banco caen en mora con menos frecuencia.
+      outcome_cause:
+        dictionary: Meses como cliente del banco hasta la fecha del aumento de límite.
+        to_outcome: Los clientes más antiguos del banco caen en mora con menos frecuencia.
+  valor_fatura:
+    label: el monto del estado de cuenta
+    roles:
+      confounder:
+        dictionary: >-
+          Monto promedio del estado de cuenta de la tarjeta en los tres meses anteriores al
+          aumento de límite, en reales.
+        to_treatment: >-
+          El banco dio el aumento de límite con más frecuencia a los clientes con montos
+          más altos en el estado de cuenta.
+        to_outcome: >-
+          Los clientes con montos más altos en el estado de cuenta tienen más dificultad
+          para pagar y caen en mora con más frecuencia.
+      mediator:
+        dictionary: >-
+          Monto promedio del estado de cuenta de la tarjeta en los tres meses siguientes al
+          aumento de límite, en reales.
+        from_treatment: >-
+          Quienes reciben el aumento de límite gastan más con la tarjeta, y el monto del
+          estado de cuenta de los meses siguientes es más alto.
+        to_outcome: >-
+          Los clientes con montos más altos en el estado de cuenta tienen más dificultad
+          para pagar y caen en mora con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Monto promedio del estado de cuenta de la tarjeta en los tres meses anteriores al
+          aumento de límite, en reales.
+        to_outcome: >-
+          Los clientes con montos más altos en el estado de cuenta tienen más dificultad
+          para pagar y caen en mora con más frecuencia.
+  rotativo:
+    label: el crédito revolvente
+    roles:
+      confounder:
+        dictionary: >-
+          Pagó menos del total de algún estado de cuenta y financió el saldo con crédito
+          revolvente en los seis meses anteriores al aumento de límite (1 = sí, 0 = no).
+        to_treatment: >-
+          El banco dio el aumento de límite con menos frecuencia a quienes habían
+          financiado el saldo con crédito revolvente.
+        to_outcome: >-
+          Quienes financian el saldo con crédito revolvente pagan intereses altos y caen en
+          mora con más frecuencia.
+      mediator:
+        dictionary: >-
+          Pagó menos del total de algún estado de cuenta y financió el saldo con crédito
+          revolvente en los seis meses siguientes al aumento de límite (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben el aumento de límite financian el saldo con crédito revolvente
+          con más frecuencia en los meses siguientes.
+        to_outcome: >-
+          Quienes financian el saldo con crédito revolvente pagan intereses altos y caen en
+          mora con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Pagó menos del total de algún estado de cuenta y financió el saldo con crédito
+          revolvente en los seis meses anteriores al aumento de límite (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes financian el saldo con crédito revolvente pagan intereses altos y caen en
+          mora con más frecuencia.
+  compras_parceladas:
+    label: las compras en cuotas
+    roles:
+      mediator:
+        dictionary: >-
+          Número de compras en cuotas con cuotas pendientes en la tarjeta, tres meses
+          después del aumento de límite.
+        from_treatment: Quienes reciben el aumento de límite hacen más compras en cuotas con la tarjeta.
+        to_outcome: >-
+          Quienes tienen más compras en cuotas pendientes tienen más cuotas por vencer y
+          caen en mora con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Número de compras en cuotas con cuotas pendientes en la tarjeta, en la fecha del
+          aumento de límite.
+        to_outcome: >-
+          Quienes tienen más compras en cuotas pendientes tienen más cuotas por vencer y
+          caen en mora con más frecuencia.
+  parcelamento_fatura:
+    label: el pago del estado de cuenta en cuotas
+    roles:
+      mediator:
+        dictionary: >-
+          Dividió en cuotas el saldo de algún estado de cuenta de la tarjeta en los seis
+          meses siguientes al aumento de límite (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben el aumento de límite dividen el estado de cuenta de la tarjeta en
+          cuotas con más frecuencia en los meses siguientes.
+        to_outcome: >-
+          Quienes dividen el estado de cuenta en cuotas asumen cuotas con intereses y caen
+          en mora con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Dividió en cuotas el saldo de algún estado de cuenta de la tarjeta en los seis
+          meses anteriores al aumento de límite (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes dividen el estado de cuenta en cuotas asumen cuotas con intereses y caen
+          en mora con más frecuencia.
+  atraso_pagamento:
+    label: el atraso en el pago
+    roles:
+      confounder:
+        dictionary: >-
+          Pagó con atraso algún estado de cuenta de la tarjeta en los doce meses anteriores
+          al aumento de límite (1 = sí, 0 = no).
+        to_treatment: >-
+          El banco dio el aumento de límite con menos frecuencia a quienes se habían
+          atrasado en el pago de algún estado de cuenta.
+        to_outcome: >-
+          Quienes ya se atrasaron en el pago de algún estado de cuenta caen en mora con más
+          frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Pagó con atraso algún estado de cuenta de la tarjeta en los doce meses anteriores
+          al aumento de límite (1 = sí, 0 = no).
+        to_outcome: >-
+          Quienes ya se atrasaron en el pago de algún estado de cuenta caen en mora con más
+          frecuencia.
+  perda_emprego:
+    label: la pérdida del empleo
+    hidden_fact: >-
+      El banco no se entera cuando un cliente pierde el empleo, y por eso esa información
+      no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Perdió el empleo en los seis meses anteriores al aumento de límite (1 = sí, 0 = no).
+        to_treatment: >-
+          Los clientes que perdieron el empleo pidieron más límite al banco y recibieron el
+          aumento de límite con más frecuencia.
+        to_outcome: Los clientes que perdieron el empleo caen en mora con más frecuencia.
+      outcome_cause:
+        dictionary: Perdió el empleo en los seis meses anteriores al aumento de límite (1 = sí, 0 = no).
+        to_outcome: Los clientes que perdieron el empleo caen en mora con más frecuencia.
+  dividas_outros_bancos:
+    label: las deudas en otros bancos
+    hidden_fact: >-
+      El banco no tiene autorización de los clientes para consultar sus deudas en otros
+      bancos, y por eso esa información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Total de las deudas del cliente en otros bancos en la fecha del aumento de
+          límite, en reales.
+        to_treatment: >-
+          Los clientes con más deudas en otros bancos buscaron más crédito y recibieron el
+          aumento de límite con más frecuencia.
+        to_outcome: Los clientes con más deudas en otros bancos caen en mora con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Total de las deudas del cliente en otros bancos en la fecha del aumento de
+          límite, en reales.
+        to_outcome: Los clientes con más deudas en otros bancos caen en mora con más frecuencia.
+  ligacao_central:
+    label: la llamada del centro de atención al cliente
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Recibió una llamada del centro de atención al cliente del banco en el mes
+          anterior al aumento de límite (1 = sí, 0 = no).
+        to_treatment: >-
+          El banco aprovechaba la llamada del centro de atención al cliente para conceder
+          el aumento de límite, y por eso quienes habían recibido la llamada recibieron el
+          aumento de límite con más frecuencia.
+      collider:
+        dictionary: >-
+          Recibió una llamada del centro de atención al cliente del banco en los dieciocho
+          meses siguientes al aumento de límite (1 = sí, 0 = no).
+        from_treatment: >-
+          El centro de atención al cliente llama con más frecuencia a quienes recibieron el
+          aumento de límite, para avisarles del nuevo límite.
+        from_outcome: >-
+          El centro de atención al cliente llama con más frecuencia a quienes caen en mora,
+          para cobrar la deuda.
+  renegociacao:
+    label: la renegociación de deuda
+    roles:
+      confounder:
+        dictionary: >-
+          Renegoció deuda con el banco en los doce meses anteriores al aumento de límite
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          El banco dio el aumento de límite con menos frecuencia a quienes habían
+          renegociado deuda.
+        to_outcome: Quienes ya renegociaron deuda con el banco caen en mora con más frecuencia.
+      collider:
+        dictionary: >-
+          Renegoció deuda con el banco en los dieciocho meses siguientes al aumento de
+          límite (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes reciben el aumento de límite renegocian deuda con el banco con más
+          frecuencia en los meses siguientes.
+        from_outcome: >-
+          Quienes caen en mora renegocian deuda con el banco con más frecuencia, porque el
+          banco llama a esos clientes para renegociar.
+  agencia_piloto:
+    label: la sucursal piloto
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Es cliente de una de las sucursales elegidas para el piloto del aumento de límite
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          El aumento de límite empezó por algunas sucursales piloto, y los clientes de esas
+          sucursales recibieron el aumento de límite con más frecuencia.
+  dia_vencimento:
+    label: el día de vencimiento del estado de cuenta
+    roles:
+      unrelated:
+        dictionary: Día del mes en que vence el estado de cuenta de la tarjeta.
+        fact: >-
+          El día de vencimiento del estado de cuenta no tiene relación con el aumento de
+          límite ni con la morosidad.

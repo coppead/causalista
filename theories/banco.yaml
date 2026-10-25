@@ -1,0 +1,440 @@
+# Ficha de teoria: banco.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: banco
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Aumento de limite do cartão de crédito em um banco
+
+theory:
+  name: Assimetria de informação no crédito
+  statement: >-
+    O banco não enxerga por inteiro o risco do cliente nem o que o cliente fará com o
+    crédito. Um limite maior afrouxa a restrição de liquidez do cliente: ele toma mais
+    dívida e assume parcelas mais pesadas, o que aumenta a chance de inadimplência. Os
+    clientes que procuram mais crédito são, em média, os de maior risco.
+  references:   # a confirmar pelo André
+    - "Stiglitz, J. E., & Weiss, A. (1981). Credit rationing in markets with imperfect information. The American Economic Review, 71(3), 393-410."
+    - "Gross, D. B., & Souleles, N. S. (2002). Do liquidity constraints and interest rates matter for consumer behavior? Evidence from credit card data. The Quarterly Journal of Economics, 117(1), 149-185."
+
+context: >-
+  Um banco aumentou o limite do cartão de crédito de parte dos seus clientes. Para o
+  banco, fica inadimplente o cliente que tem algum pagamento com mais de 90 dias de
+  atraso. O banco quer saber se o aumento de limite eleva a inadimplência nos doze meses
+  seguintes.
+randomized: Os clientes que receberam o aumento de limite foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem recebeu o aumento de limite.
+
+treatment:
+  column: aumento_limite
+  label: o aumento de limite
+  dictionary: Recebeu o aumento de limite do cartão de crédito (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos clientes que recebe o aumento de limite
+
+outcome:
+  column: inadimplente
+  label: a inadimplência
+  kind: binary
+  dictionary: >-
+    Teve algum pagamento com mais de 90 dias de atraso nos doze meses seguintes ao
+    aumento de limite (1 = sim, 0 = não).
+  scale: {rate: [0.08, 0.25]}   # fração dos clientes que fica inadimplente
+
+effect:
+  sign: "+"                  # a teoria diz que o aumento de limite eleva a inadimplência
+
+variables:
+
+  score_credito:
+    label: o score de crédito
+    kind: score
+    scale: {mean: 6.5}
+    roles:
+      confounder:
+        dictionary: >-
+          Score de crédito do cliente no modelo interno do banco, calculado no mês
+          anterior ao aumento de limite, de 0 a 10.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O banco deu o aumento de limite com mais frequência a clientes com score de
+            crédito mais alto.
+        to_outcome:
+          sign: "-"
+          fact: Clientes com score de crédito mais alto ficam inadimplentes com menos frequência.
+      outcome_cause:
+        dictionary: >-
+          Score de crédito do cliente no modelo interno do banco, calculado no mês
+          anterior ao aumento de limite, de 0 a 10.
+        to_outcome:
+          sign: "-"
+          fact: Clientes com score de crédito mais alto ficam inadimplentes com menos frequência.
+
+  renda:
+    label: a renda do cliente
+    kind: continuous
+    scale: {median: 4500}
+    hidden_fact: >-
+      O banco não tem a renda atual dos clientes, e por isso a renda não está na tabela.
+    roles:
+      confounder:
+        dictionary: Renda mensal do cliente na data do aumento de limite, em reais.
+        to_treatment:
+          sign: "+"
+          fact: Clientes de renda mais alta receberam o aumento de limite com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Clientes de renda mais alta têm mais folga no orçamento e ficam inadimplentes
+            com menos frequência.
+      outcome_cause:
+        dictionary: Renda mensal do cliente na data do aumento de limite, em reais.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Clientes de renda mais alta têm mais folga no orçamento e ficam inadimplentes
+            com menos frequência.
+
+  tempo_cliente:
+    label: o tempo como cliente
+    kind: count
+    scale: {mean: 48}
+    roles:
+      confounder:
+        dictionary: Meses como cliente do banco até a data do aumento de limite.
+        to_treatment:
+          sign: "+"
+          fact: O banco deu o aumento de limite com mais frequência aos clientes mais antigos.
+        to_outcome:
+          sign: "-"
+          fact: Clientes mais antigos no banco ficam inadimplentes com menos frequência.
+      outcome_cause:
+        dictionary: Meses como cliente do banco até a data do aumento de limite.
+        to_outcome:
+          sign: "-"
+          fact: Clientes mais antigos no banco ficam inadimplentes com menos frequência.
+
+  valor_fatura:
+    label: o valor da fatura
+    kind: continuous
+    scale: {median: 1200}
+    roles:
+      confounder:
+        dictionary: >-
+          Valor médio da fatura do cartão nos três meses anteriores ao aumento de limite,
+          em reais.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O banco deu o aumento de limite com mais frequência a clientes com fatura
+            mais alta.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Clientes com fatura mais alta têm mais dificuldade para pagar e ficam
+            inadimplentes com mais frequência.
+      mediator:
+        dictionary: >-
+          Valor médio da fatura do cartão nos três meses seguintes ao aumento de limite,
+          em reais.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o aumento de limite gasta mais no cartão, e a fatura dos meses
+            seguintes fica mais alta.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Clientes com fatura mais alta têm mais dificuldade para pagar e ficam
+            inadimplentes com mais frequência.
+      outcome_cause:
+        dictionary: >-
+          Valor médio da fatura do cartão nos três meses anteriores ao aumento de limite,
+          em reais.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Clientes com fatura mais alta têm mais dificuldade para pagar e ficam
+            inadimplentes com mais frequência.
+
+  rotativo:
+    label: o crédito rotativo
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      confounder:
+        dictionary: >-
+          Pagou menos que o total de alguma fatura e entrou no crédito rotativo nos seis
+          meses anteriores ao aumento de limite (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            O banco deu o aumento de limite com menos frequência a quem tinha entrado no
+            crédito rotativo.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem entra no crédito rotativo paga juros altos e fica inadimplente com mais
+            frequência.
+      mediator:
+        dictionary: >-
+          Pagou menos que o total de alguma fatura e entrou no crédito rotativo nos seis
+          meses seguintes ao aumento de limite (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o aumento de limite entra no crédito rotativo com mais frequência nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem entra no crédito rotativo paga juros altos e fica inadimplente com mais
+            frequência.
+      outcome_cause:
+        dictionary: >-
+          Pagou menos que o total de alguma fatura e entrou no crédito rotativo nos seis
+          meses anteriores ao aumento de limite (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem entra no crédito rotativo paga juros altos e fica inadimplente com mais
+            frequência.
+
+  compras_parceladas:
+    label: as compras parceladas
+    kind: count
+    scale: {mean: 4}
+    roles:
+      mediator:
+        dictionary: >-
+          Número de compras parceladas com parcelas em aberto no cartão, três meses
+          depois do aumento de limite.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe o aumento de limite faz mais compras parceladas no cartão.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem tem mais compras parceladas em aberto tem mais parcelas a vencer e fica inadimplente com mais frequência.
+      outcome_cause:
+        dictionary: >-
+          Número de compras parceladas com parcelas em aberto no cartão, na data do
+          aumento de limite.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem tem mais compras parceladas em aberto tem mais parcelas a vencer e fica inadimplente com mais frequência.
+
+  parcelamento_fatura:
+    label: o parcelamento da fatura
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      mediator:
+        dictionary: >-
+          Parcelou o saldo de alguma fatura do cartão nos seis meses seguintes ao aumento
+          de limite (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o aumento de limite parcela a fatura do cartão com mais frequência nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem parcela a fatura assume parcelas com juros e fica inadimplente com mais
+            frequência.
+      outcome_cause:
+        dictionary: >-
+          Parcelou o saldo de alguma fatura do cartão nos seis meses anteriores ao aumento
+          de limite (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem parcela a fatura assume parcelas com juros e fica inadimplente com mais
+            frequência.
+
+  atraso_pagamento:
+    label: o atraso de pagamento
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      confounder:
+        dictionary: >-
+          Pagou alguma fatura do cartão com atraso nos doze meses anteriores ao aumento
+          de limite (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            O banco deu o aumento de limite com menos frequência a quem tinha atrasado o
+            pagamento de alguma fatura.
+        to_outcome:
+          sign: "+"
+          fact: Quem já atrasou o pagamento de alguma fatura fica inadimplente com mais frequência.
+      outcome_cause:
+        dictionary: >-
+          Pagou alguma fatura do cartão com atraso nos doze meses anteriores ao aumento
+          de limite (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem já atrasou o pagamento de alguma fatura fica inadimplente com mais frequência.
+
+  perda_emprego:
+    label: a perda de emprego
+    kind: binary
+    scale: {rate: 0.15}
+    hidden_fact: >-
+      O banco não fica sabendo quando um cliente perde o emprego, e por isso essa
+      informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Perdeu o emprego nos seis meses anteriores ao aumento de limite (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Clientes que perderam o emprego pediram mais limite ao banco e receberam o
+            aumento de limite com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que perderam o emprego ficam inadimplentes com mais frequência.
+      outcome_cause:
+        dictionary: Perdeu o emprego nos seis meses anteriores ao aumento de limite (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Clientes que perderam o emprego ficam inadimplentes com mais frequência.
+
+  dividas_outros_bancos:
+    label: as dívidas em outros bancos
+    kind: continuous
+    scale: {median: 5000}
+    hidden_fact: >-
+      O banco não tem autorização dos clientes para consultar as dívidas em outros
+      bancos, e por isso essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Total das dívidas do cliente em outros bancos na data do aumento de limite, em reais.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Clientes com mais dívidas em outros bancos procuraram mais crédito e
+            receberam o aumento de limite com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Clientes com mais dívidas em outros bancos ficam inadimplentes com mais
+            frequência.
+      outcome_cause:
+        dictionary: Total das dívidas do cliente em outros bancos na data do aumento de limite, em reais.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Clientes com mais dívidas em outros bancos ficam inadimplentes com mais
+            frequência.
+
+  ligacao_central:
+    label: a ligação da central de relacionamento
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Recebeu ligação da central de relacionamento do banco no mês anterior ao
+          aumento de limite (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O banco aproveitava a ligação da central de relacionamento para conceder o aumento de limite, e por isso quem tinha recebido a ligação recebeu o aumento de limite com mais frequência.
+      collider:
+        dictionary: >-
+          Recebeu ligação da central de relacionamento do banco nos dezoito meses seguintes
+          ao aumento de limite (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A central de relacionamento liga com mais frequência para quem recebeu o aumento de limite, para avisar do novo limite.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A central de relacionamento liga com mais frequência para quem fica inadimplente, para cobrar a dívida.
+
+  renegociacao:
+    label: a renegociação de dívida
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      confounder:
+        dictionary: >-
+          Renegociou dívida com o banco nos doze meses anteriores ao aumento de limite
+          (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            O banco deu o aumento de limite com menos frequência a quem tinha renegociado
+            dívida.
+        to_outcome:
+          sign: "+"
+          fact: Quem já renegociou dívida com o banco fica inadimplente com mais frequência.
+      collider:
+        dictionary: >-
+          Renegociou dívida com o banco nos dezoito meses seguintes ao aumento de limite
+          (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o aumento de limite renegocia dívida com o banco com mais frequência nos meses seguintes.
+        from_outcome:
+          sign: "+"
+          fact: Quem fica inadimplente renegocia dívida com o banco com mais frequência, porque o banco chama esses clientes para renegociar.
+
+  agencia_piloto:
+    label: a agência-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: >-
+          É cliente de uma das agências escolhidas para o piloto do aumento de limite
+          (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O aumento de limite começou por algumas agências-piloto, e os clientes dessas
+            agências receberam o aumento de limite com mais frequência.
+
+  dia_vencimento:
+    label: o dia de vencimento da fatura
+    kind: count
+    scale: {mean: 14, min: 1, max: 28}
+    roles:
+      unrelated:
+        dictionary: Dia do mês em que a fatura do cartão vence.
+        fact: >-
+          O dia de vencimento da fatura não tem relação com o aumento de limite nem com a
+          inadimplência.

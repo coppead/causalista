@@ -1,0 +1,274 @@
+# Tradução da ficha de teoria 'banco' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. Lida por inteiro e corrigida pelo
+# assistente em 2026-10-06, frase a frase contra a ficha em português (inclusive as trocas
+# listadas em theories/i18n/pendentes-2026-10-05.json), por delegação do André.
+#
+# A ficha em português, theories/banco.yaml, é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+
+language: en
+status: revisada
+title: Credit card limit increase at a bank
+context: >-
+  A bank increased the credit card limit for some of its customers. For the bank, a
+  customer is considered delinquent if they have any payment more than 90 days overdue.
+  The bank wants to know if the limit increase raises delinquency in the following
+  twelve months.
+randomized: The customers who received the limit increase were chosen at random.
+closing: Nothing other than what was described influenced the choice of who received the limit increase.
+treatment:
+  label: the limit increase
+  dictionary: Received the credit card limit increase (1 = yes, 0 = no).
+outcome:
+  label: delinquency
+  dictionary: >-
+    Had any payment more than 90 days overdue in the twelve months following the limit
+    increase (1 = yes, 0 = no).
+variables:
+  score_credito:
+    label: the credit score
+    roles:
+      confounder:
+        dictionary: >-
+          Customer credit score in the bank's internal model, calculated in the month
+          before the limit increase, from 0 to 10.
+        to_treatment: >-
+          The bank gave the limit increase more frequently to customers with a higher
+          credit score.
+        to_outcome: Customers with a higher credit score become delinquent less frequently.
+      outcome_cause:
+        dictionary: >-
+          Customer credit score in the bank's internal model, calculated in the month
+          before the limit increase, from 0 to 10.
+        to_outcome: Customers with a higher credit score become delinquent less frequently.
+  renda:
+    label: the customer's income
+    hidden_fact: The bank does not have its customers' current income, so income is not in the table.
+    roles:
+      confounder:
+        dictionary: Customer monthly income on the date of the limit increase, in reais.
+        to_treatment: Customers with higher income received the limit increase more frequently.
+        to_outcome: >-
+          Customers with higher income have more room in their budget and become
+          delinquent less frequently.
+      outcome_cause:
+        dictionary: Customer monthly income on the date of the limit increase, in reais.
+        to_outcome: >-
+          Customers with higher income have more room in their budget and become
+          delinquent less frequently.
+  tempo_cliente:
+    label: the customer's tenure
+    roles:
+      confounder:
+        dictionary: Months as a customer of the bank until the date of the limit increase.
+        to_treatment: The bank gave the limit increase more frequently to longer-standing customers.
+        to_outcome: Longer-standing customers of the bank become delinquent less frequently.
+      outcome_cause:
+        dictionary: Months as a customer of the bank until the date of the limit increase.
+        to_outcome: Longer-standing customers of the bank become delinquent less frequently.
+  valor_fatura:
+    label: the card bill amount
+    roles:
+      confounder:
+        dictionary: >-
+          Average credit card bill amount in the three months before the limit increase,
+          in reais.
+        to_treatment: >-
+          The bank gave the limit increase more frequently to customers with higher card
+          bills.
+        to_outcome: >-
+          Customers with higher card bills have more difficulty paying and become
+          delinquent more frequently.
+      mediator:
+        dictionary: >-
+          Average credit card bill amount in the three months after the limit increase,
+          in reais.
+        from_treatment: >-
+          Those who receive the limit increase spend more on the card, and their bills in
+          the following months are higher.
+        to_outcome: >-
+          Customers with higher card bills have more difficulty paying and become
+          delinquent more frequently.
+      outcome_cause:
+        dictionary: >-
+          Average credit card bill amount in the three months before the limit increase,
+          in reais.
+        to_outcome: >-
+          Customers with higher card bills have more difficulty paying and become
+          delinquent more frequently.
+  rotativo:
+    label: the revolving credit
+    roles:
+      confounder:
+        dictionary: >-
+          Paid less than the full amount of a card bill and went into revolving credit in
+          the six months before the limit increase (1 = yes, 0 = no).
+        to_treatment: >-
+          The bank gave the limit increase less frequently to those who had gone into
+          revolving credit.
+        to_outcome: >-
+          Those who go into revolving credit pay high interest and become delinquent more
+          frequently.
+      mediator:
+        dictionary: >-
+          Paid less than the full amount of a card bill and went into revolving credit in
+          the six months after the limit increase (1 = yes, 0 = no).
+        from_treatment: >-
+          Those who receive the limit increase go into revolving credit more frequently in
+          the following months.
+        to_outcome: >-
+          Those who go into revolving credit pay high interest and become delinquent more
+          frequently.
+      outcome_cause:
+        dictionary: >-
+          Paid less than the full amount of a card bill and went into revolving credit in
+          the six months before the limit increase (1 = yes, 0 = no).
+        to_outcome: >-
+          Those who go into revolving credit pay high interest and become delinquent more
+          frequently.
+  compras_parceladas:
+    label: the installment purchases
+    roles:
+      mediator:
+        dictionary: >-
+          Number of installment purchases on the card with installments still outstanding,
+          three months after the limit increase.
+        from_treatment: Those who receive the limit increase make more installment purchases on the card.
+        to_outcome: >-
+          Those with more installment purchases outstanding have more installments coming
+          due and become delinquent more frequently.
+      outcome_cause:
+        dictionary: >-
+          Number of installment purchases on the card with installments still outstanding,
+          on the date of the limit increase.
+        to_outcome: >-
+          Those with more installment purchases outstanding have more installments coming
+          due and become delinquent more frequently.
+  parcelamento_fatura:
+    label: the bill installment plan
+    roles:
+      mediator:
+        dictionary: >-
+          Paid the balance of a card bill in installments in the six months after the
+          limit increase (1 = yes, 0 = no).
+        from_treatment: >-
+          Those who receive the limit increase pay the card bill in installments more
+          frequently in the following months.
+        to_outcome: >-
+          Those who pay the bill in installments take on installments with interest and
+          become delinquent more frequently.
+      outcome_cause:
+        dictionary: >-
+          Paid the balance of a card bill in installments in the six months before the
+          limit increase (1 = yes, 0 = no).
+        to_outcome: >-
+          Those who pay the bill in installments take on installments with interest and
+          become delinquent more frequently.
+  atraso_pagamento:
+    label: the late payment
+    roles:
+      confounder:
+        dictionary: >-
+          Paid a card bill late in the twelve months before the limit increase
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The bank gave the limit increase less frequently to those who had paid a card
+          bill late.
+        to_outcome: Those who have paid a card bill late before become delinquent more frequently.
+      outcome_cause:
+        dictionary: >-
+          Paid a card bill late in the twelve months before the limit increase
+          (1 = yes, 0 = no).
+        to_outcome: Those who have paid a card bill late before become delinquent more frequently.
+  perda_emprego:
+    label: the job loss
+    hidden_fact: >-
+      The bank does not learn when a customer loses their job, and therefore this
+      information is not in the table.
+    roles:
+      confounder:
+        dictionary: Lost their job in the six months before the limit increase (1 = yes, 0 = no).
+        to_treatment: >-
+          Customers who lost their job asked the bank for a higher limit and received the
+          limit increase more frequently.
+        to_outcome: Customers who lost their job become delinquent more frequently.
+      outcome_cause:
+        dictionary: Lost their job in the six months before the limit increase (1 = yes, 0 = no).
+        to_outcome: Customers who lost their job become delinquent more frequently.
+  dividas_outros_bancos:
+    label: the debts at other banks
+    hidden_fact: >-
+      The bank does not have its customers' authorization to look up their debts at other
+      banks, and therefore this information is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Total of the customer's debts at other banks on the date of the limit increase,
+          in reais.
+        to_treatment: >-
+          Customers with more debt at other banks sought more credit and received the
+          limit increase more frequently.
+        to_outcome: Customers with more debt at other banks become delinquent more frequently.
+      outcome_cause:
+        dictionary: >-
+          Total of the customer's debts at other banks on the date of the limit increase,
+          in reais.
+        to_outcome: Customers with more debt at other banks become delinquent more frequently.
+  ligacao_central:
+    label: the call from the customer service center
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Received a call from the bank's customer service center in the month before the
+          limit increase (1 = yes, 0 = no).
+        to_treatment: >-
+          The bank took the customer service center's calls as an opportunity to grant the
+          limit increase, and therefore those who had received a call received the limit
+          increase more frequently.
+      collider:
+        dictionary: >-
+          Received a call from the bank's customer service center in the eighteen months
+          following the limit increase (1 = yes, 0 = no).
+        from_treatment: >-
+          The customer service center more often calls those who received the limit
+          increase, to tell them about the new limit.
+        from_outcome: >-
+          The customer service center more often calls those who become delinquent, to
+          collect the debt.
+  renegociacao:
+    label: the debt renegotiation
+    roles:
+      confounder:
+        dictionary: >-
+          Renegotiated debt with the bank in the twelve months before the limit increase
+          (1 = yes, 0 = no).
+        to_treatment: The bank gave the limit increase less frequently to those who had renegotiated debt.
+        to_outcome: Those who have already renegotiated debt with the bank become delinquent more frequently.
+      collider:
+        dictionary: >-
+          Renegotiated debt with the bank in the eighteen months after the limit increase
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          Those who receive the limit increase renegotiate debt with the bank more
+          frequently in the following months.
+        from_outcome: >-
+          Those who become delinquent renegotiate debt with the bank more frequently,
+          because the bank reaches out to these customers to renegotiate.
+  agencia_piloto:
+    label: the pilot branch
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Is a customer of one of the branches chosen for the limit increase pilot
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The limit increase started at some pilot branches, and customers of those
+          branches received the limit increase more frequently.
+  dia_vencimento:
+    label: the bill due date
+    roles:
+      unrelated:
+        dictionary: Day of the month when the card bill is due.
+        fact: The bill due date has no relation to the limit increase or to delinquency.

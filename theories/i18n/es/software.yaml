@@ -1,0 +1,217 @@
+# Tradução da ficha de teoria 'software' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente da ficha em
+# português (theories/software.yaml), que é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# Usada só em testes: o espanhol é um idioma reservado (held-out), que o modelo não
+# vê no treino. Espanhol latino-americano, registro neutro.
+
+language: es
+status: revisada
+title: Capacitación de implementación en una empresa de software por suscripción
+context: Una empresa de software por suscripción vende un sistema de gestión a otras empresas, con
+  contratos de doce meses. En el tercer mes de contrato, dio a una parte de las empresas clientes una
+  capacitación de implementación, que enseña a los empleados a usar el sistema. Quiere saber si la
+  capacitación aumenta la renovación del contrato al final de los doce meses.
+randomized: Las empresas clientes que recibieron la capacitación fueron elegidas por sorteo.
+closing: Nada más allá de lo descrito influyó en la elección de quiénes recibieron la capacitación.
+treatment:
+  label: la capacitación de implementación
+  dictionary: Recibió la capacitación de implementación en el tercer mes de contrato (1 = sí, 0 = no).
+outcome:
+  label: la renovación
+  dictionary: Renovó el contrato al final de los doce meses (1 = sí, 0 = no).
+variables:
+  funcionarios:
+    label: el número de empleados de la empresa cliente
+    roles:
+      confounder:
+        dictionary: Número de empleados de la empresa cliente en la fecha de firma del contrato.
+        to_treatment: La empresa de software dio la capacitación con más frecuencia a las empresas
+          clientes con más empleados.
+        to_outcome: Las empresas clientes con más empleados tienen más trabajo para cambiar de sistema
+          y renuevan más.
+      outcome_cause:
+        dictionary: Número de empleados de la empresa cliente en la fecha de firma del contrato.
+        to_outcome: Las empresas clientes con más empleados tienen más trabajo para cambiar de sistema
+          y renuevan más.
+  valor_contrato:
+    label: el valor del contrato
+    roles:
+      confounder:
+        dictionary: Valor mensual del contrato en la fecha de firma, en reales.
+        to_treatment: Las empresas clientes con un contrato de mayor valor recibieron la capacitación
+          con más frecuencia.
+        to_outcome: Las empresas clientes con un contrato de mayor valor renuevan menos, porque la
+          mensualidad pesa más en el presupuesto.
+      outcome_cause:
+        dictionary: Valor mensual del contrato en la fecha de firma, en reales.
+        to_outcome: Las empresas clientes con un contrato de mayor valor renuevan menos, porque la
+          mensualidad pesa más en el presupuesto.
+  usuarios_ativos:
+    label: los usuarios activos
+    roles:
+      confounder:
+        dictionary: Número promedio de usuarios activos en el sistema por mes, en los dos meses
+          anteriores a la capacitación.
+        to_treatment: La empresa de software dio la capacitación con más frecuencia a las empresas
+          clientes con menos usuarios activos en el sistema.
+        to_outcome: Las empresas clientes con más usuarios activos en el sistema renuevan más.
+      mediator:
+        dictionary: Número promedio de usuarios activos en el sistema por mes, en los tres meses
+          siguientes a la capacitación.
+        from_treatment: La capacitación enseña a más empleados de la empresa cliente a usar el sistema
+          y aumenta el número de usuarios activos en los meses siguientes.
+        to_outcome: Las empresas clientes con más usuarios activos en el sistema renuevan más.
+      outcome_cause:
+        dictionary: Número promedio de usuarios activos en el sistema por mes, en los dos meses
+          anteriores a la capacitación.
+        to_outcome: Las empresas clientes con más usuarios activos en el sistema renuevan más.
+  funcionalidades:
+    label: las funcionalidades en uso
+    roles:
+      mediator:
+        dictionary: Número de funcionalidades del sistema que la empresa cliente usó en los tres meses
+          siguientes a la capacitación.
+        from_treatment: La capacitación presenta funcionalidades del sistema que la empresa cliente
+          todavía no usaba y aumenta el número de funcionalidades en uso.
+        to_outcome: Las empresas clientes que usan más funcionalidades del sistema renuevan más.
+      outcome_cause:
+        dictionary: Número de funcionalidades del sistema que la empresa cliente usó en los dos meses
+          anteriores a la capacitación.
+        to_outcome: Las empresas clientes que usan más funcionalidades del sistema renuevan más.
+  chamados_suporte:
+    label: los tickets de soporte
+    roles:
+      confounder:
+        dictionary: Número de tickets abiertos en soporte en los dos meses anteriores a la capacitación.
+        to_treatment: La empresa de software dio la capacitación con más frecuencia a las empresas
+          clientes que habían abierto más tickets de soporte, porque vio en los tickets una señal de
+          dificultad con el sistema.
+        to_outcome: Las empresas clientes que abren más tickets de soporte pierden más tiempo con
+          problemas en el sistema y renuevan menos.
+      mediator:
+        dictionary: Número de tickets abiertos en soporte en los tres meses siguientes a la capacitación.
+        from_treatment: La capacitación resuelve las dudas más comunes y reduce el número de tickets
+          de soporte en los meses siguientes.
+        to_outcome: Las empresas clientes que abren más tickets de soporte pierden más tiempo con
+          problemas en el sistema y renuevan menos.
+      outcome_cause:
+        dictionary: Número de tickets abiertos en soporte en los dos meses anteriores a la capacitación.
+        to_outcome: Las empresas clientes que abren más tickets de soporte pierden más tiempo con
+          problemas en el sistema y renuevan menos.
+  satisfacao:
+    label: la satisfacción de la empresa cliente
+    hidden_fact: La satisfacción de las empresas clientes no se midió antes de la capacitación, y por
+      eso no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Puntaje de satisfacción con el sistema en la encuesta hecha antes de la
+          capacitación, de 0 a 10.
+        to_treatment: Las empresas clientes menos satisfechas con el sistema aceptaron la invitación a
+          la capacitación más veces, y por eso recibieron la capacitación con más frecuencia.
+        to_outcome: Las empresas clientes más satisfechas con el sistema renuevan más.
+      mediator:
+        dictionary: Puntaje de satisfacción con el sistema en la encuesta hecha tres meses después de
+          la capacitación, de 0 a 10.
+        from_treatment: Las empresas clientes que reciben la capacitación quedan más satisfechas con el
+          sistema en los meses siguientes.
+        to_outcome: Las empresas clientes más satisfechas con el sistema renuevan más.
+  patrocinador_interno:
+    label: el patrocinador interno
+    hidden_fact: La empresa de software no registra en qué empresas clientes hay un gerente que
+      defiende el uso del sistema, y por eso esa información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Tenía, antes de la capacitación, un gerente que defendía el uso del sistema dentro
+          de la empresa cliente (1 = sí, 0 = no).
+        to_treatment: Las empresas clientes en las que un gerente defiende el uso del sistema
+          recibieron la capacitación con más frecuencia, porque ese gerente pidió la capacitación para
+          su equipo.
+        to_outcome: Las empresas clientes en las que un gerente defiende el uso del sistema renuevan
+          más.
+      outcome_cause:
+        dictionary: Tenía, antes de la capacitación, un gerente que defendía el uso del sistema dentro
+          de la empresa cliente (1 = sí, 0 = no).
+        to_outcome: Las empresas clientes en las que un gerente defiende el uso del sistema renuevan
+          más.
+  maturidade_digital:
+    label: la madurez digital del equipo
+    hidden_fact: La empresa de software no evalúa la familiaridad del equipo de las empresas clientes
+      con los sistemas digitales, y por eso esa información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: Puntaje de familiaridad del equipo de la empresa cliente con los sistemas digitales,
+          en la evaluación hecha antes de la capacitación, de 0 a 10.
+        to_treatment: Las empresas clientes cuyo equipo tenía menos familiaridad con los sistemas
+          digitales pidieron la capacitación más veces, y por eso recibieron la capacitación con más
+          frecuencia.
+        to_outcome: Las empresas clientes cuyo equipo tiene más familiaridad con los sistemas digitales
+          aprenden el sistema más rápido y renuevan más.
+      outcome_cause:
+        dictionary: Puntaje de familiaridad del equipo de la empresa cliente con los sistemas digitales,
+          en la evaluación hecha antes de la capacitación, de 0 a 10.
+        to_outcome: Las empresas clientes cuyo equipo tiene más familiaridad con los sistemas digitales
+          aprenden el sistema más rápido y renuevan más.
+  gerente_conta:
+    label: el gerente de cuenta dedicado
+    roles:
+      confounder:
+        dictionary: Tenía un gerente de cuenta dedicado desde la firma del contrato (1 = sí, 0 = no).
+        to_treatment: Los gerentes de cuenta propusieron para la capacitación a las empresas que
+          atienden, y por eso las empresas clientes con gerente de cuenta dedicado recibieron la
+          capacitación con más frecuencia.
+        to_outcome: A las empresas clientes con gerente de cuenta dedicado les resuelven los problemas
+          más rápido, y renuevan más.
+      treatment_cause:
+        dictionary: Tenía un gerente de cuenta dedicado desde la firma del contrato (1 = sí, 0 = no).
+        to_treatment: Los gerentes de cuenta propusieron para la capacitación a las empresas que
+          atienden, y por eso las empresas clientes con gerente de cuenta dedicado recibieron la
+          capacitación con más frecuencia.
+  escritorio_piloto:
+    label: la oficina piloto
+    roles:
+      treatment_cause:
+        dictionary: Era atendida por una de las oficinas regionales elegidas para el piloto de la
+          capacitación (1 = sí, 0 = no).
+        to_treatment: La capacitación empezó por algunas oficinas regionales elegidas como piloto, y
+          las empresas clientes atendidas por esas oficinas recibieron la capacitación con más
+          frecuencia.
+  contato_sucesso_cliente:
+    label: el contacto del equipo de éxito del cliente
+    roles:
+      treatment_cause:
+        dictionary: Recibió una llamada del equipo de éxito del cliente en los dos meses anteriores a
+          la capacitación (1 = sí, 0 = no).
+        to_treatment: La capacitación se ofrecía durante la llamada del equipo de éxito del cliente, y
+          por eso las empresas clientes que habían recibido la llamada recibieron la capacitación con
+          más frecuencia.
+      collider:
+        dictionary: Recibió una llamada del equipo de éxito del cliente después de la capacitación,
+          hasta un mes después del fin del contrato (1 = sí, 0 = no).
+        from_treatment: El equipo de éxito del cliente llama con más frecuencia a las empresas clientes
+          que recibieron la capacitación, para saber cómo les fue en la capacitación.
+        from_outcome: El equipo de éxito del cliente llama con más frecuencia a las empresas clientes
+          que no renuevan, para entender el motivo de la salida.
+  reuniao_acompanhamento:
+    label: la reunión de seguimiento
+    roles:
+      collider:
+        dictionary: Participó en una reunión de seguimiento con la empresa de software después de la
+          capacitación, hasta un mes después del fin del contrato (1 = sí, 0 = no).
+        from_treatment: La empresa de software agenda reuniones de seguimiento con más frecuencia con
+          las empresas clientes que recibieron la capacitación, para evaluar lo que aprendieron.
+        from_outcome: La empresa de software agenda reuniones de seguimiento con más frecuencia con las
+          empresas clientes que renuevan, para planificar el nuevo período de contrato.
+      outcome_cause:
+        dictionary: Participó en una reunión de seguimiento con la empresa de software en los dos meses
+          anteriores a la capacitación (1 = sí, 0 = no).
+        to_outcome: Las empresas clientes que participan en una reunión de seguimiento en los primeros
+          meses de contrato resuelven las dificultades temprano y renuevan más.
+  mes_assinatura:
+    label: el mes de firma del contrato
+    roles:
+      unrelated:
+        dictionary: Mes del año en que se firmó el contrato (1 a 12).
+        fact: El mes de firma del contrato no tiene relación con la capacitación ni con la renovación.

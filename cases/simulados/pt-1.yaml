@@ -1,0 +1,500 @@
+# CONGELADO em 2026-10-06: escrito por uma instância do assistente e revisado por outra, no
+# papel de pessoas, por delegação do André. Aprovado por delegação. A partir daqui o
+# arquivo não muda; a soma de verificação está em cases/simulados/README.md.
+# Casos simulados em português do Brasil: oito textos escritos como uma pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-06, a pedido do André, no papel de cinco pessoas: uma
+# gerente de marketing de uma rede de farmácias, uma analista de dados júnior de uma
+# seguradora, um coordenador de curso de uma universidade pública, o dono de uma rede de
+# academias e uma gerente de produto de uma fintech. Cada texto tem o estilo do canal
+# em que a pessoa escreveria (e-mail, Slack, ata, relatório, fórum).
+#
+# Estes casos são o teste difícil da seção 7 da especificação: texto que nenhum modelo
+# viu, sem molde. Ficam congelados antes de qualquer modelo responder e nunca entram em
+# treino. As setas declaram o diagrama que o texto implica; o verificador confere a
+# resposta a partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_fintech_cofrinho
+    author: ai
+    status: aprovado
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de produto de uma fintech
+    theme: Fintech, funcionalidade de poupança automática
+    title: Cofrinho automático e churn em 90 dias
+    treatment: ativou_cofrinho
+    outcome: churn_90d
+    columns:
+      ativou_cofrinho: Ativou o Cofrinho nos 30 dias seguintes ao lançamento de 12/05 (1 = sim, 0 = não).
+      churn_90d: Conta encerrada ou sem nenhuma transação nos 90 dias seguintes ao lançamento (1 = sim, 0 = não).
+      sessoes_30d_antes: Número de sessões no app nos 30 dias anteriores ao lançamento.
+      saldo_medio_mes2: Saldo médio da conta no segundo mês após o lançamento (do 31º ao 60º dia), em reais.
+      dia_semana_cadastro: Dia da semana em que a conta foi aberta (1 = segunda, 7 = domingo).
+    not_in_table:
+      pediu_cofrinho: >-
+        Cliente tinha pedido uma função de guardar dinheiro automaticamente, no chat ou nas
+        redes sociais, antes do lançamento. Fica só no Zendesk.
+    story: >-
+      @time-dados bom dia! Pedido de PM, prometo que é curto. A gente lançou o Cofrinho
+      (guarda automático do troco de cada compra no cartão) no dia 12/05 pra toda a base;
+      em 30 dias 18% ativaram. O board quer saber se o Cofrinho reduz churn e eu quero
+      levar uma resposta honesta, não um gráfico bonito. O que eu já sei: (1) quem usava
+      mais o app nas semanas antes do lançamento viu o banner mais vezes e ativou mais, e
+      cliente ativo já churna menos de qualquer jeito; temos as sessões dos 30 dias antes.
+      (2) O pessoal de CS me contou que muita gente tinha pedido exatamente essa função no
+      chat e nas redes, e esses ativaram na hora; é o tipo de cliente que veste a camisa e
+      não sai nunca. O chat fica no Zendesk, nada disso está no warehouse. (3) No segundo
+      mês depois do lançamento, quem ativou estava com saldo médio bem maior (R$ 640
+      contra R$ 210), e saldo alto segura o cliente, esse é o argumento do pitch. No
+      extract veio também o dia da semana do cadastro. O que temos é isso: ativou_cofrinho,
+      churn_90d, sessoes_30d_antes, saldo_medio_mes2, dia_semana_cadastro. Por quais
+      colunas eu ajusto pra comparar quem ativou com quem não ativou?
+    edges:
+      - sessoes_30d_antes -> ativou_cofrinho
+      - sessoes_30d_antes -> churn_90d
+      - pediu_cofrinho -> ativou_cofrinho
+      - pediu_cofrinho -> churn_90d
+      - ativou_cofrinho -> saldo_medio_mes2
+      - saldo_medio_mes2 -> churn_90d
+      - ativou_cofrinho -> churn_90d
+    answer:
+      identifiable: false
+      missing: [pediu_cofrinho]
+    note: >-
+      As sessões anteriores estão na tabela, mas quem pediu a função no chat não está, e
+      esse cliente ativa mais e sai menos. O saldo do segundo mês é consequência do
+      Cofrinho e é apresentado como o argumento de venda.
+
+  - id: pt_univ_monitoria_calculo
+    author: ai
+    status: aprovado
+    language: pt
+    style: ata de reunião
+    persona: coordenador de curso de uma universidade pública
+    theme: Educação, monitoria em universidade pública
+    title: Monitoria de Cálculo I e aprovação
+    treatment: frequentou_monitoria
+    outcome: aprovado
+    columns:
+      frequentou_monitoria: >-
+        Frequentou quatro ou mais encontros da monitoria de Cálculo I em 2025.2, pela lista
+        de presença (1 = sim, 0 = não). A monitoria começou na sétima semana de aula, depois
+        da seleção dos monitores.
+      aprovado: Aprovado em Cálculo I em 2025.2 (1 = sim, 0 = não).
+      nota_p1: Nota na primeira prova, aplicada na sexta semana de aula, de 0 a 10.
+      turno: Turno da turma em que o aluno está matriculado (diurno ou noturno).
+      listas_entregues: >-
+        Número de listas de exercícios entregues, de 0 a 6. As listas são distribuídas a
+        partir da sétima semana de aula.
+      matricula: Número de matrícula do aluno.
+    story: >-
+      ATA DA 4ª REUNIÃO ORDINÁRIA DO COLEGIADO DO CURSO DE ENGENHARIA DE PRODUÇÃO, 2026.1.
+      Item 3, monitoria de Cálculo I. O coordenador apresentou os dados de 2025.2 (312
+      matriculados nas quatro turmas). A monitoria funcionou às terças e quintas, das 14h
+      às 16h, aberta a todos, com lista de presença. A Profa. Márcia observou que
+      procuraram a monitoria sobretudo os alunos que foram mal na P1, que entra na média
+      com peso 3. O representante discente lembrou que os alunos do noturno em geral
+      trabalham de dia e não conseguem comparecer, e que o noturno historicamente reprova
+      mais em Cálculo I. O coordenador acrescentou que boa parte dos encontros é dedicada
+      às listas de exercícios, que valem 20% da média, e que a entrega de listas é
+      visivelmente maior entre os frequentadores. A Profa. Márcia pediu que, antes
+      de propor ao departamento a ampliação da monitoria, a coordenação verifique se ela de
+      fato aumenta a aprovação e por quais colunas a comparação deve ser ajustada.
+      Encaminhamento: o coordenador traz a análise na próxima reunião. Nada mais havendo a
+      tratar, a reunião foi encerrada às 16h20.
+    edges:
+      - nota_p1 -> frequentou_monitoria
+      - nota_p1 -> aprovado
+      - turno -> frequentou_monitoria
+      - turno -> aprovado
+      - frequentou_monitoria -> listas_entregues
+      - listas_entregues -> aprovado
+      - frequentou_monitoria -> aprovado
+    answer:
+      identifiable: true
+      adjust_for: [nota_p1, turno]
+      do_not_adjust_for:
+        listas_entregues: >-
+          As listas são distribuídas depois que a monitoria começa, e boa parte dos
+          encontros é dedicada a elas. Entregar mais listas é parte do efeito da monitoria.
+      indifferent: [matricula]
+    note: >-
+      Quem vai à monitoria foi mal na P1, e a P1 conta na média: sem ajustar, a monitoria
+      parece piorar a aprovação. O horário da monitoria exclui o noturno.
+
+  - id: pt_seguro_app_sem_perfil
+    author: ai
+    status: aprovado
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: analista de dados júnior de uma seguradora
+    theme: Seguros, telemetria em seguro auto
+    title: App de telemetria e sinistro, com a impressão do corretor fora do sistema
+    twin: pt_seguro_app_com_perfil
+    treatment: instalou_app
+    outcome: sinistro_12m
+    columns:
+      instalou_app: Instalou o aplicativo de telemetria na renovação de 2025 (1 = sim, 0 = não).
+      sinistro_12m: Abriu ao menos um sinistro nos 12 meses de vigência da apólice (1 = sim, 0 = não).
+      idade: Idade do segurado principal na renovação, em anos.
+      classe_bonus: Classe de bônus na renovação, de 0 a 10.
+      uf: UF de pernoite do veículo.
+      respondeu_nps: Respondeu a pesquisa de satisfação enviada ao fim da vigência (1 = sim, 0 = não).
+    not_in_table:
+      impressao_corretor: >-
+        O que o corretor acha de como o cliente dirige. Fica na cabeça do corretor; não há
+        campo para isso no sistema.
+    story: >-
+      Título: Medir o efeito de um app de telemetria no sinistro quando foi o corretor que
+      escolheu quem recebia a oferta. Oi pessoal, sou analista júnior numa seguradora (ramo
+      auto) e me pediram pra avaliar se o nosso app de direção reduz sinistro. Contexto:
+      desde 2024 damos 15% de desconto pra quem instala o app, que mede frenagem,
+      velocidade, horário etc. A oferta é feita pelo corretor na renovação. Tenho a base
+      das renovações de 2025, uns 48 mil segurados, com: se instalou o app, se abriu
+      sinistro na vigência, idade, classe de bônus, UF e se respondeu a pesquisa de
+      satisfação do fim da vigência. Problemas que eu já enxerguei: os corretores oferecem
+      muito mais pros jovens (o desconto em reais é maior porque o prêmio é maior), e jovem
+      bate mais. Também oferecem mais pra quem tem bônus alto, que é justamente quem bate
+      menos. Isso tudo está na base. O que me preocupa: conversei com dois corretores e os
+      dois disseram que só oferecem pra quem eles "sentem" que dirige bem, porque senão o
+      cliente perde o desconto na renovação seguinte e reclama. E eles acertam bastante,
+      conhecem o cliente há anos: quem o corretor acha bom motorista bate pouco mesmo. Esse
+      feeling do corretor não está em lugar nenhum, não tem campo pra isso. A pesquisa de
+      satisfação a gente dispara pelo próprio app pra quem instalou e, por e-mail, pra quem
+      abriu sinistro, então quem respondeu é basicamente desses dois grupos. UF eu puxei
+      porque roubo em SP e RJ é outro mundo; o app foi oferecido na carteira toda, em todos
+      os estados. Dá pra fazer alguma coisa com isso? Por quais colunas eu ajusto?
+    edges:
+      - idade -> instalou_app
+      - idade -> sinistro_12m
+      - classe_bonus -> instalou_app
+      - classe_bonus -> sinistro_12m
+      - impressao_corretor -> instalou_app
+      - impressao_corretor -> sinistro_12m
+      - uf -> sinistro_12m
+      - instalou_app -> respondeu_nps
+      - sinistro_12m -> respondeu_nps
+      - instalou_app -> sinistro_12m
+    answer:
+      identifiable: false
+      missing: [impressao_corretor]
+    note: >-
+      Idade e bônus estão na tabela; o palpite do corretor sobre quem dirige bem, não. A
+      pesquisa de satisfação foi enviada a quem instalou e a quem teve sinistro.
+
+  - id: pt_seguro_app_com_perfil
+    author: ai
+    status: aprovado
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: analista de dados júnior de uma seguradora
+    theme: Seguros, telemetria em seguro auto
+    title: App de telemetria e sinistro, com o perfil de direção registrado pelo corretor
+    twin: pt_seguro_app_sem_perfil
+    treatment: instalou_app
+    outcome: sinistro_12m
+    columns:
+      instalou_app: Instalou o aplicativo de telemetria na renovação de 2025 (1 = sim, 0 = não).
+      sinistro_12m: Abriu ao menos um sinistro nos 12 meses de vigência da apólice (1 = sim, 0 = não).
+      idade: Idade do segurado principal na renovação, em anos.
+      classe_bonus: Classe de bônus na renovação, de 0 a 10.
+      uf: UF de pernoite do veículo.
+      perfil_direcao_corretor: >-
+        Nota de 1 a 5 dada pelo corretor ao perfil de direção do cliente, preenchida na
+        cotação da renovação.
+      respondeu_nps: Respondeu a pesquisa de satisfação enviada ao fim da vigência (1 = sim, 0 = não).
+    story: >-
+      Título: Medir o efeito de um app de telemetria no sinistro quando foi o corretor que
+      escolheu quem recebia a oferta. Oi pessoal, sou analista júnior numa seguradora (ramo
+      auto) e me pediram pra avaliar se o nosso app de direção reduz sinistro. Contexto:
+      desde 2024 damos 15% de desconto pra quem instala o app, que mede frenagem,
+      velocidade, horário etc. A oferta é feita pelo corretor na renovação. Tenho a base
+      das renovações de 2025, uns 48 mil segurados, com: se instalou o app, se abriu
+      sinistro na vigência, idade, classe de bônus, UF, o perfil de direção que o corretor
+      preenche e se respondeu a pesquisa de satisfação do fim da vigência. Problemas que eu
+      já enxerguei: os corretores oferecem muito mais pros jovens (o desconto em reais é
+      maior porque o prêmio é maior), e jovem bate mais. Também oferecem mais pra quem tem
+      bônus alto, que é justamente quem bate menos. Isso tudo está na base. Uma coisa que
+      acho que ajuda: desde 2023 o corretor preenche na cotação um campo "perfil de
+      direção" de 1 a 5, e conversei com dois corretores e os dois disseram que só oferecem
+      o app pra quem eles dão 4 ou 5, porque senão o cliente perde o desconto na renovação
+      seguinte e reclama. E, claro, quem eles acham que dirige bem bate menos mesmo. A
+      pesquisa de satisfação a gente dispara pelo próprio app pra quem instalou e, por
+      e-mail, pra quem abriu sinistro, então quem respondeu é basicamente desses dois
+      grupos. UF eu puxei porque roubo em SP e RJ é outro mundo; o app foi oferecido na
+      carteira toda, em todos os estados. Dá pra fazer alguma coisa com isso? Por quais
+      colunas eu ajusto?
+    edges:
+      - idade -> instalou_app
+      - idade -> sinistro_12m
+      - classe_bonus -> instalou_app
+      - classe_bonus -> sinistro_12m
+      - perfil_direcao_corretor -> instalou_app
+      - perfil_direcao_corretor -> sinistro_12m
+      - uf -> sinistro_12m
+      - instalou_app -> respondeu_nps
+      - sinistro_12m -> respondeu_nps
+      - instalou_app -> sinistro_12m
+    answer:
+      identifiable: true
+      adjust_for: [classe_bonus, idade, perfil_direcao_corretor]
+      do_not_adjust_for:
+        respondeu_nps: >-
+          A pesquisa foi enviada a quem instalou o app e a quem abriu sinistro. Ajustar por
+          ela cria uma associação falsa entre o app e o sinistro.
+      indifferent: [uf]
+    note: >-
+      Mesma história do caso irmão, com um fato trocado: a impressão do corretor virou um
+      campo do sistema. A UF só mexe no sinistro, não na oferta.
+
+  - id: pt_academia_avaliacao_sorteio
+    author: ai
+    status: aprovado
+    language: pt
+    style: trecho de relatório trimestral
+    persona: dono de uma rede de academias
+    theme: Esporte e lazer, rede de academias
+    title: Avaliação física sorteada na matrícula e permanência em 12 meses
+    treatment: avaliacao_fisica
+    outcome: ativo_12m
+    columns:
+      avaliacao_fisica: >-
+        Fez a avaliação física gratuita no ato da matrícula (1 = sim, 0 = não). Feita na
+        hora para os alunos sorteados pelo sistema de matrícula.
+      ativo_12m: Estava com plano ativo 12 meses após a matrícula (1 = sim, 0 = não).
+      checkins_mes_90d: Média de check-ins por mês nos primeiros 90 dias após a matrícula.
+      ligacao_recepcao: Recebeu ligação da recepção no 13º mês após a matrícula (1 = sim, 0 = não).
+      idade: Idade na matrícula, em anos.
+      unidade: Unidade da matrícula (Centro, Jardins, Norte ou Shopping).
+      plano: Plano contratado na matrícula (mensal, trimestral ou anual).
+    story: >-
+      3.2 Avaliação física na matrícula, balanço de 12 meses. Desde julho de 2025, metade
+      dos novos alunos, sorteados pelo sistema no ato da matrícula, faz a avaliação física
+      gratuita ali mesmo, antes de sair da unidade; a equipe não dá conta de todos. Na turma
+      do 3º trimestre de 2025 (2.140 matrículas, 1.065 sorteados), quem fez avaliação
+      treinou mais nos primeiros 90 dias (9,1 check-ins por mês contra 6,8), e quem treina,
+      fica. A permanência segue maior entre os mais velhos e nos planos anuais, e menor na
+      unidade Centro, por causa da concorrência. A recepção ligou para quem fez avaliação,
+      para marcar a reavaliação anual, e para quem tinha deixado o plano vencer, para tentar
+      reativar. Pedimos à consultoria que meça se a avaliação aumenta a permanência em 12
+      meses e por quais colunas ajustar.
+    edges:
+      - avaliacao_fisica -> checkins_mes_90d
+      - checkins_mes_90d -> ativo_12m
+      - avaliacao_fisica -> ativo_12m
+      - avaliacao_fisica -> ligacao_recepcao
+      - ativo_12m -> ligacao_recepcao
+      - idade -> ativo_12m
+      - unidade -> ativo_12m
+      - plano -> ativo_12m
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        checkins_mes_90d: >-
+          Medida depois da avaliação e consequência dela: quem fez a avaliação treina mais.
+          Faz parte do efeito que se quer medir.
+        ligacao_recepcao: >-
+          A recepção ligou para quem fez a avaliação e para quem deixou o plano vencer.
+          Ajustar por essa coluna cria uma associação falsa entre a avaliação e a
+          permanência.
+      indifferent: [idade, plano, unidade]
+    note: >-
+      Houve sorteio, então a comparação simples já dá o efeito. O erro é ajustar pela
+      frequência, que é o KPI de que o dono se orgulha, ou pela ligação da recepção.
+
+  - id: pt_seguro_rural_visita_agronomo
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail para o chefe
+    persona: analista de dados júnior de uma seguradora
+    theme: Agricultura, seguro rural e assistência técnica
+    title: Visita do agrônomo antes do plantio e perda da safra de soja
+    treatment: visita_agronomo
+    outcome: perda_safra_pct
+    columns:
+      visita_agronomo: >-
+        Produtor recebeu visita técnica do agrônomo da seguradora antes do plantio da safra
+        25/26 (1 = sim, 0 = não).
+      perda_safra_pct: Perda da safra em % da produção esperada, pelo laudo de colheita.
+      area_segurada_ha: Área segurada, em hectares.
+      regiao: Região da fazenda (Oeste da Bahia, Mato Grosso ou Paraná).
+      cooperado: Produtor é associado a uma cooperativa (1 = sim, 0 = não).
+      chuva_mm: >-
+        Chuva acumulada de setembro a fevereiro na estação meteorológica mais próxima da
+        fazenda, em mm.
+      mes_vencimento: Mês de vencimento da apólice.
+      plantio_na_janela: Plantou dentro da janela recomendada pelo zoneamento agrícola (1 = sim, 0 = não).
+    not_in_table:
+      irrigacao: A fazenda tem irrigação (pivô). A seguradora não registra.
+    story: >-
+      Assunto: dados das visitas do agrônomo, safra 25/26. Oi Fernanda, segue o que
+      consegui levantar pra reunião de quinta com o pessoal do rural. A base é de soja,
+      3.800 apólices da safra 25/26. Tenho: se o produtor recebeu a visita técnica do
+      nosso agrônomo antes do plantio, a perda da safra em % da produção esperada (do laudo
+      de colheita), a área segurada, a região (Oeste da Bahia, MT ou PR), se é cooperado,
+      a chuva acumulada de setembro a fevereiro na estação mais próxima, o mês de
+      vencimento da apólice e se plantou dentro da janela do zoneamento. Sobre quem recebeu
+      visita: os três agrônomos começaram pelas apólices que venciam em setembro e outubro,
+      porque aproveitavam a visita de renovação, e depois foram atendendo quem dava, com
+      prioridade para as áreas maiores (o Paulo do rural disse que foi orientação da
+      diretoria, pelo valor segurado). Pela logística, atenderam muito mais no PR e em MT,
+      onde temos escritório, e boa parte dos visitados é cooperado, porque as cooperativas
+      organizaram as agendas. Pontos que eu acho que importam: região pesa muito na perda
+      (a Bahia sofreu com a estiagem de novo e tem mais pressão de praga), e cooperado
+      costuma perder menos porque compra insumo de qualidade via cooperativa. Irrigação a
+      gente não tem na base, mas fazenda grande em geral tem pivô, e quem tem pivô perde
+      menos. A chuva eu incluí porque obviamente é o que mais pesa na perda, e a Bahia teve
+      pouca. O grande argumento do pessoal do rural: o agrônomo recomenda a janela de
+      plantio, e 91% dos visitados plantaram na janela, contra 64% dos demais, e plantar na
+      janela certa reduz muito a perda. Dá pra responder com isso se a visita reduz a perda,
+      e por quais colunas eu ajusto? Quero levar uma conta honesta na quinta. Abs, Lívia
+    edges:
+      - mes_vencimento -> visita_agronomo
+      - area_segurada_ha -> visita_agronomo
+      - area_segurada_ha -> irrigacao
+      - irrigacao -> perda_safra_pct
+      - regiao -> visita_agronomo
+      - regiao -> perda_safra_pct
+      - regiao -> chuva_mm
+      - chuva_mm -> perda_safra_pct
+      - cooperado -> visita_agronomo
+      - cooperado -> perda_safra_pct
+      - visita_agronomo -> plantio_na_janela
+      - plantio_na_janela -> perda_safra_pct
+      - visita_agronomo -> perda_safra_pct
+    answer:
+      identifiable: true
+      adjust_for: [area_segurada_ha, cooperado, regiao]
+      do_not_adjust_for:
+        plantio_na_janela: >-
+          É a recomendação do agrônomo posta em prática. Plantar na janela é parte do efeito
+          da visita.
+      indifferent: [chuva_mm, mes_vencimento]
+    note: >-
+      Três motivos da visita estão na tabela. O mês de vencimento só mexe na visita; a
+      chuva só mexe na perda (e vem da região). A irrigação não está na base, mas só vem da
+      área, que está: ajustar pela área basta. O plantio na janela é o KPI do time rural.
+
+  - id: pt_univ_auxilio_permanencia
+    author: ai
+    status: aprovado
+    language: pt
+    style: e-mail para o chefe
+    persona: coordenador de curso de uma universidade pública
+    theme: Política pública, assistência estudantil
+    title: Auxílio permanência e evasão
+    treatment: recebeu_auxilio
+    outcome: evadiu
+    columns:
+      recebeu_auxilio: Recebeu o auxílio permanência a partir de 2025.1 (1 = sim, 0 = não).
+      evadiu: >-
+        Cancelou, abandonou ou não renovou a matrícula até o fim de 2025.2 (1 = sim,
+        0 = não).
+      renda_per_capita: Renda familiar per capita declarada na inscrição do edital, em salários mínimos.
+      distancia_km: Distância do CEP de residência ao campus, em km.
+      semestre_ingresso: Semestre de ingresso no curso (2024.2 ou 2025.1).
+      atendimento_coordenacao: Teve atendimento registrado na coordenação do curso em 2025.2 (1 = sim, 0 = não).
+    not_in_table:
+      parecer_assistente: >-
+        Parecer da assistente social depois da entrevista, com a ordem de prioridade. Fica
+        na pasta física do SAE.
+    story: >-
+      Assunto: RE: evasão e auxílio permanência. Prezada Profa. Cláudia, segue o
+      levantamento que a senhora pediu na reunião de departamento. Peguei no SIGAA os 412
+      alunos do curso que ingressaram em 2024.2 e 2025.1 e marquei: quem recebeu o auxílio
+      permanência a partir de 2025.1, quem evadiu até o fim de 2025.2 (cancelamento,
+      abandono ou matrícula não renovada), a renda familiar per capita declarada na
+      inscrição do edital, a distância do CEP de residência ao campus, o semestre de
+      ingresso e se o aluno teve atendimento registrado na coordenação em 2025.2. Lembro
+      que o edital exige renda per capita de até 1,5 salário mínimo e que, dentro desse
+      grupo, a assistente social entrevista todos e define a ordem pelo que avalia na
+      conversa (se a moradia é precária, se o aluno sustenta a família, e assim por
+      diante), justamente o que mais faz o aluno largar o curso. Esse parecer fica na pasta
+      física do SAE; para o sistema vai só o deferido ou indeferido. Pelos números brutos,
+      quem recebe o auxílio evade menos (11% contra 24%), mas é claro que renda menor evade
+      mais e recebe mais auxílio, então essa comparação não vale. Quem mora longe evade
+      mais, como sempre comentamos. Marquei também o semestre de ingresso, porque calouro
+      evade mais. Sobre o atendimento na coordenação: os bolsistas
+      vêm assinar o termo de compromisso todo semestre, e quem está de saída, cancelando ou
+      simplesmente desistindo, costuma passar por mim antes para assinar o requerimento ou
+      só para avisar, então esse registro mistura as duas coisas. Com esses dados, dá para
+      afirmar que o auxílio reduz a evasão? Por quais colunas eu deveria ajustar?
+      Atenciosamente, Prof. Marcos Vinícius
+    edges:
+      - renda_per_capita -> recebeu_auxilio
+      - renda_per_capita -> evadiu
+      - parecer_assistente -> recebeu_auxilio
+      - parecer_assistente -> evadiu
+      - distancia_km -> evadiu
+      - semestre_ingresso -> evadiu
+      - recebeu_auxilio -> atendimento_coordenacao
+      - evadiu -> atendimento_coordenacao
+      - recebeu_auxilio -> evadiu
+    answer:
+      identifiable: false
+      missing: [parecer_assistente]
+    note: >-
+      A renda está na tabela, mas a ordem de prioridade dada pela assistente social ficou
+      na pasta física, e ela mede exatamente o que faz o aluno evadir. O atendimento na
+      coordenação junta bolsistas e desistentes.
+
+  - id: pt_farmacia_entrega_expressa
+    author: ai
+    status: aprovado
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de marketing de uma rede de farmácias, sem formação em estatística
+    theme: Logística, entrega expressa de farmácia
+    title: Entrega expressa e recompra em 30 dias
+    treatment: entrega_expressa
+    outcome: recomprou_30d
+    columns:
+      entrega_expressa: >-
+        Pedido entregue pela entrega expressa, com motoboy próprio da loja (1 = sim, 0 = pela
+        entrega padrão, terceirizada).
+      recomprou_30d: Cliente fez novo pedido no app nos 30 dias seguintes à entrega (1 = sim, 0 = não).
+      item_uso_continuo: Pedido contém medicamento de uso contínuo (1 = sim, 0 = não).
+      tempo_entrega_min: Minutos entre a confirmação do pedido e a entrega.
+      loja: Código da loja que atendeu o pedido.
+      id_pedido: Identificador do pedido no sistema.
+    story: >-
+      @time-dados bom dia! Preciso de uma ajuda pra fechar o business case do expresso
+      antes da reunião de orçamento, dia 20. Contexto pra quem não acompanhou: desde
+      fevereiro temos a entrega expressa (motoboy próprio, promessa de 1h) em 23 lojas. A
+      loja só entra no expresso se o gerente topar ter motoboy fixo na porta e, sendo bem
+      sincera, quem topou foram os gerentes mais ligados no digital, que são também os que
+      mantêm o app da loja bonitinho (estoque atualizado, foto, resposta rápida no chat), e
+      loja com app bem cuidado tem recompra maior, isso a gente já viu. Dentro de uma loja
+      com expresso, nem todo pedido vai de expresso: o sistema prioriza pedido com remédio
+      de uso contínuo (o cliente não pode ficar sem) e, quando sobra motoboy, vai o resto.
+      O tempo médio caiu de 2h10 pra 38 min nos pedidos expressos, e entrega rápida traz o
+      cliente de volta, esse é o nosso argumento. Óbvio que cliente de uso contínuo
+      recompra mais, isso não é mérito nosso. Quero saber se o expresso aumenta a recompra
+      em 30 dias. Na base de pedidos de fev a ago tem: se foi expresso, se o cliente fez
+      outro pedido em 30 dias, se tinha item de uso contínuo, o tempo de entrega em
+      minutos, a loja que atendeu e o id do pedido. Dá pra fechar isso com o que a gente
+      tem, e por quais colunas eu ajusto? Posso usar a queda no tempo de entrega como
+      argumento?
+    edges:
+      - loja -> entrega_expressa
+      - loja -> recomprou_30d
+      - item_uso_continuo -> entrega_expressa
+      - item_uso_continuo -> recomprou_30d
+      - entrega_expressa -> tempo_entrega_min
+      - tempo_entrega_min -> recomprou_30d
+      - entrega_expressa -> recomprou_30d
+    answer:
+      identifiable: true
+      adjust_for: [item_uso_continuo, loja]
+      do_not_adjust_for:
+        tempo_entrega_min: >-
+          O expresso existe para entregar mais rápido, e a entrega rápida traz o cliente de
+          volta. O tempo é parte do efeito que se quer medir.
+      indifferent: [id_pedido]
+    note: >-
+      O que o gerente é não está na tabela, mas é uma característica da loja, e a loja
+      está. O tempo de entrega é o argumento de venda e não deve ser ajustado.

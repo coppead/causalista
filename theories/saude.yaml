@@ -1,0 +1,381 @@
+# Ficha de teoria: saúde.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: saude
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Programa de acompanhamento em uma operadora de planos de saúde
+
+theory:
+  name: Modelo comportamental de uso de serviços de saúde
+  statement: >-
+    O uso de serviços de saúde depende de três grupos de fatores: os que predispõem a
+    pessoa (idade, crenças sobre saúde), os que facilitam o uso (acesso, cobertura,
+    apoio) e a necessidade (a carga de doença). O programa de acompanhamento, com
+    ligações de enfermagem e plano de cuidado, age sobre os fatores que facilitam e
+    sobre o modo como a necessidade é cuidada. Quem é acompanhado segue melhor o
+    tratamento e usa mais o cuidado ambulatorial. Com isso tem menos episódios agudos e,
+    portanto, menos internações.
+  references:   # a confirmar pelo André
+    - "Andersen, R. M. (1995). Revisiting the behavioral model and access to medical care: does it matter? Journal of Health and Social Behavior, 36(1), 1-10."
+    - "Wagner, E. H. (1998). Chronic disease management: what will it take to improve care for chronic illness? Effective Clinical Practice, 1(1), 2-4."
+
+context: >-
+  Uma operadora de planos de saúde inscreveu parte dos seus beneficiários em um programa
+  de acompanhamento, em que uma enfermeira combina um plano de cuidado com o beneficiário
+  e acompanha o tratamento. A operadora quer saber se o programa de acompanhamento reduz
+  a internação nos doze meses seguintes.
+randomized: Os beneficiários inscritos no programa de acompanhamento foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou quem entrou no programa de acompanhamento.
+
+treatment:
+  column: acompanhamento
+  label: o programa de acompanhamento
+  dictionary: Foi inscrito no programa de acompanhamento (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos beneficiários inscrita no programa
+
+outcome:
+  column: internou
+  label: a internação
+  kind: binary
+  dictionary: Foi internado nos doze meses seguintes ao início do programa (1 = sim, 0 = não).
+  scale: {rate: [0.08, 0.25]}   # fração dos beneficiários que é internada
+
+effect:
+  sign: "-"                  # a teoria diz que o programa reduz a internação
+
+variables:
+
+  idade:
+    label: a idade do beneficiário
+    kind: count
+    scale: {mean: 48, min: 18, max: 95}
+    roles:
+      confounder:
+        dictionary: Idade do beneficiário no início do programa, em anos.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A operadora inscreveu no programa de acompanhamento com mais frequência os
+            beneficiários mais velhos.
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários mais velhos são internados com mais frequência.
+      outcome_cause:
+        dictionary: Idade do beneficiário no início do programa, em anos.
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários mais velhos são internados com mais frequência.
+
+  doencas_cronicas:
+    label: as doenças crônicas
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      confounder:
+        dictionary: Tinha duas ou mais doenças crônicas registradas no início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Beneficiários com duas ou mais doenças crônicas foram inscritos no programa
+            de acompanhamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários com duas ou mais doenças crônicas são internados com mais frequência.
+      outcome_cause:
+        dictionary: Tinha duas ou mais doenças crônicas registradas no início do programa (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários com duas ou mais doenças crônicas são internados com mais frequência.
+
+  internacao_anterior:
+    label: a internação anterior
+    kind: binary
+    scale: {rate: 0.15}
+    roles:
+      confounder:
+        dictionary: Foi internado nos doze meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Quem tinha sido internado no ano anterior foi inscrito no programa de acompanhamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Quem foi internado no ano anterior ao programa de acompanhamento volta a ser internado com mais frequência.
+      outcome_cause:
+        dictionary: Foi internado nos doze meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem foi internado no ano anterior ao programa de acompanhamento volta a ser internado com mais frequência.
+
+  consultas:
+    label: as consultas ambulatoriais
+    kind: count
+    scale: {mean: 4}
+    roles:
+      confounder:
+        dictionary: Número de consultas ambulatoriais nos seis meses anteriores ao início do programa.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Quem ia a mais consultas ambulatoriais foi inscrito no programa de
+            acompanhamento com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Quem vai a mais consultas ambulatoriais trata os problemas mais cedo e é internado menos.
+      mediator:
+        dictionary: Número de consultas ambulatoriais nos seis meses seguintes ao início do programa.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O plano de cuidado do programa de acompanhamento prevê consultas de rotina, e
+            quem participa vai a mais consultas ambulatoriais nos meses seguintes.
+        to_outcome:
+          sign: "-"
+          fact: Quem vai a mais consultas ambulatoriais trata os problemas mais cedo e é internado menos.
+      outcome_cause:
+        dictionary: Número de consultas ambulatoriais nos seis meses anteriores ao início do programa.
+        to_outcome:
+          sign: "-"
+          fact: Quem vai a mais consultas ambulatoriais trata os problemas mais cedo e é internado menos.
+
+  pronto_socorro:
+    label: a ida ao pronto-socorro
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      confounder:
+        dictionary: Foi ao pronto-socorro nos seis meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Quem tinha ido ao pronto-socorro foi inscrito no programa de acompanhamento
+            com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem vai ao pronto-socorro é internado com mais frequência.
+      mediator:
+        dictionary: Foi ao pronto-socorro nos seis meses seguintes ao início do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "-"
+          fact: >-
+            Quem participa do programa de acompanhamento vai menos ao pronto-socorro nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem vai ao pronto-socorro é internado com mais frequência.
+      outcome_cause:
+        dictionary: Foi ao pronto-socorro nos seis meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem vai ao pronto-socorro é internado com mais frequência.
+
+  adesao_medicacao:
+    label: a adesão à medicação
+    kind: score
+    scale: {mean: 6}
+    roles:
+      confounder:
+        dictionary: Nota de adesão à medicação no questionário de saúde respondido antes do início do programa, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            A operadora inscreveu no programa de acompanhamento com mais frequência os
+            beneficiários com menor adesão à medicação.
+        to_outcome:
+          sign: "-"
+          fact: Beneficiários com maior adesão à medicação têm menos crises e são internados menos.
+      mediator:
+        dictionary: Nota de adesão à medicação no questionário de saúde respondido seis meses depois do início do programa, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A enfermeira do programa de acompanhamento confere o uso dos remédios, e quem
+            participa passa a ter maior adesão à medicação.
+        to_outcome:
+          sign: "-"
+          fact: Beneficiários com maior adesão à medicação têm menos crises e são internados menos.
+
+  fragilidade:
+    label: a fragilidade do beneficiário
+    kind: score
+    scale: {mean: 4}
+    hidden_fact: >-
+      A operadora não tem avaliação de fragilidade dos beneficiários, e por isso a
+      fragilidade não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota de fragilidade na avaliação clínica feita antes do início do programa, de 0 a 10 (quanto maior, mais frágil).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Beneficiários mais frágeis aceitaram o convite para o programa de acompanhamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários mais frágeis são internados com mais frequência.
+      outcome_cause:
+        dictionary: Nota de fragilidade na avaliação clínica feita antes do início do programa, de 0 a 10 (quanto maior, mais frágil).
+        to_outcome:
+          sign: "+"
+          fact: Beneficiários mais frágeis são internados com mais frequência.
+
+  apoio_familiar:
+    label: o apoio da família em casa
+    kind: binary
+    scale: {rate: 0.50}
+    hidden_fact: >-
+      A operadora não sabe quais beneficiários têm apoio da família em casa, e por isso
+      essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: Tinha em casa um familiar que ajudava nos cuidados de saúde, no início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Beneficiários com apoio da família em casa aceitaram o convite para o programa
+            de acompanhamento com mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: Beneficiários com apoio da família em casa são internados menos.
+      outcome_cause:
+        dictionary: Tinha em casa um familiar que ajudava nos cuidados de saúde, no início do programa (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: Beneficiários com apoio da família em casa são internados menos.
+
+  tabagismo:
+    label: o tabagismo
+    kind: binary
+    scale: {rate: 0.15}
+    hidden_fact: >-
+      A operadora não sabe quais beneficiários fumam, e por isso essa informação não está
+      na tabela.
+    roles:
+      confounder:
+        dictionary: Fumava no início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Fumantes aceitaram o convite para o programa de acompanhamento com menos
+            frequência.
+        to_outcome:
+          sign: "+"
+          fact: Fumantes são internados com mais frequência.
+      mediator:
+        dictionary: Fumava seis meses depois do início do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "-"
+          fact: >-
+            O programa de acompanhamento inclui apoio para parar de fumar, e quem
+            participa fuma menos nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Fumantes são internados com mais frequência.
+
+  indicacao_medica:
+    label: a indicação do médico
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      treatment_cause:
+        dictionary: Recebeu do seu médico a indicação para entrar no programa, antes do início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Parte dos médicos da rede indicava o programa de acompanhamento aos seus
+            pacientes, e quem recebeu a indicação foi inscrito com mais frequência.
+
+  cidade_piloto:
+    label: a cidade-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Mora em uma das cidades escolhidas para o piloto do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O programa de acompanhamento começou por algumas cidades-piloto, e quem mora
+            nelas foi inscrito com mais frequência.
+
+  ligacao_enfermagem:
+    label: a ligação da central de enfermagem
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Recebeu ligação da central de enfermagem nos três meses anteriores ao início do programa (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A central de enfermagem convidava para o programa de acompanhamento durante
+            as suas ligações, e quem tinha recebido ligação foi inscrito com mais
+            frequência.
+      collider:
+        dictionary: Recebeu ligação da central de enfermagem nos doze meses seguintes ao início do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A central de enfermagem liga com mais frequência para quem está no programa de acompanhamento, para fazer a pesquisa de satisfação do programa.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A central de enfermagem liga com mais frequência para quem recebeu alta de uma internação, para acompanhar a recuperação.
+
+  auditoria_medica:
+    label: a revisão pela auditoria médica
+    kind: binary
+    scale: {rate: 0.20}
+    roles:
+      collider:
+        dictionary: Teve atendimento revisado pela auditoria médica da operadora nos doze meses seguintes ao início do programa (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A auditoria médica revisa com mais frequência os atendimentos de quem está no programa de acompanhamento, para avaliar o programa.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A auditoria médica revisa com mais frequência os atendimentos de quem foi internado, para conferir a conta do hospital.
+
+  dia_vencimento:
+    label: o dia de vencimento da mensalidade
+    kind: count
+    scale: {mean: 14, min: 1, max: 28}
+    roles:
+      unrelated:
+        dictionary: Dia do mês em que a mensalidade do plano vence.
+        fact: >-
+          O dia de vencimento da mensalidade não tem relação com o programa de
+          acompanhamento nem com a internação.

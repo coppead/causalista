@@ -1,0 +1,211 @@
+# Casos escritos à mão: entrega da fase 0.
+#
+# Escritos pelo assistente, a pedido do André (2026-10-04). Em 2026-10-05 o André decidiu
+# não ler um a um o que o assistente escreve e pediu uma revisão independente; depois dela
+# (nenhum erro, nove ajustes de redação) os casos ficaram aprovados por delegação.
+# Não são casos escritos por pessoa: não contam para a prova de "casos humanos" da
+# seção 7 da especificação e não entram em treino.
+#
+# Cada caso tem o que um analista receberia (a pergunta, as colunas e a história) e a
+# resposta que consideramos certa. As setas ("causa -> efeito") declaram o diagrama
+# causal por trás da história; com elas o verificador confere a resposta
+# (tests/test_written_cases.py).
+#
+# Como ler um caso:
+#   author             quem escreveu: ai (um modelo de linguagem) ou andre
+#   status             rascunho ou aprovado (pelo André, ou por delegação dele)
+#   treatment          a intervenção
+#   outcome            o resultado
+#   columns            as colunas da tabela, com a descrição que diz antes ou depois
+#   not_in_table       o que influencia a história mas não está na tabela
+#   answer:
+#     identifiable       se o efeito pode ser medido com as colunas da tabela
+#     adjust_for         o menor conjunto de colunas que dá o efeito certo
+#     do_not_adjust_for  colunas que estragam o efeito, com o motivo
+#     indifferent        colunas que podem entrar ou não, sem estragar o efeito
+#     missing            se não identificável: o que faltou na tabela
+#   twin               outro caso igual a este, com um único fato trocado
+
+cases:
+
+  - id: banco_aumento_limite
+    author: ai
+    status: aprovado
+    theme: Banco
+    title: Aumento de limite e inadimplência
+    treatment: aumento_limite
+    outcome: inadimplente
+    columns:
+      aumento_limite: Teve o limite do cartão aumentado em março (1 = sim, 0 = não).
+      inadimplente: Ficou com pagamento atrasado por mais de 90 dias nos 12 meses seguintes ao aumento (1 = sim, 0 = não).
+      score_credito: Score de crédito do cliente em fevereiro, antes do aumento, de 0 a 1000.
+      meses_conta: Meses como cliente do banco até fevereiro.
+      gasto_cartao: Valor médio da fatura do cartão nos seis meses depois do aumento, em reais.
+      ligacao_central: Recebeu ligação da central do banco nos 12 meses depois do aumento (1 = sim, 0 = não).
+    story: >-
+      Em março, um banco aumentou o limite do cartão de crédito de parte dos clientes. A
+      área de crédito escolheu, de preferência, clientes com score de crédito alto e
+      clientes antigos. Quem tem score alto atrasa menos os pagamentos; o tempo de conta,
+      por si só, não muda a chance de atraso. Com mais limite, os clientes passaram a
+      gastar mais no cartão, e quem tem fatura mais alta atrasa mais. A central do banco
+      liga para avisar o cliente do novo limite e liga também para cobrar quem já passou de 90 dias de atraso. A ligação, por si só, não muda o gasto nem a chance de atraso. O banco quer saber se o aumento de limite muda a inadimplência.
+    edges:
+      - score_credito -> aumento_limite
+      - score_credito -> inadimplente
+      - meses_conta -> aumento_limite
+      - aumento_limite -> gasto_cartao
+      - gasto_cartao -> inadimplente
+      - aumento_limite -> inadimplente
+      - aumento_limite -> ligacao_central
+      - inadimplente -> ligacao_central
+    answer:
+      identifiable: true
+      adjust_for: [score_credito]
+      do_not_adjust_for:
+        gasto_cartao: Foi medido depois do aumento e é consequência dele. Faz parte do efeito que se quer medir.
+        ligacao_central: É consequência do aumento e também da inadimplência. Ajustar por essa coluna cria uma associação falsa entre o aumento e a inadimplência.
+      indifferent: [meses_conta]
+
+  - id: saude_acompanhamento
+    author: ai
+    status: aprovado
+    theme: Saúde suplementar
+    title: Programa de acompanhamento e internação
+    treatment: acompanhamento
+    outcome: internou
+    columns:
+      acompanhamento: Foi inscrito no programa de acompanhamento em janeiro (1 = sim, 0 = não).
+      internou: Teve internação hospitalar nos 12 meses seguintes à inscrição (1 = sim, 0 = não).
+      idade: Idade do paciente em janeiro, em anos.
+      doencas_cronicas: Número de doenças crônicas registradas até janeiro.
+      consultas_ano_anterior: Número de consultas no ano anterior ao programa.
+    not_in_table:
+      fragilidade: A impressão do médico sobre a fragilidade do paciente. Ficou só no prontuário.
+    story: >-
+      Uma operadora de planos de saúde criou um programa de acompanhamento: uma enfermeira
+      liga todo mês e ajuda o paciente a tomar os remédios e a seguir as orientações do médico. Os médicos da rede indicaram os pacientes para o programa, e todo paciente indicado foi inscrito. Indicaram mais os pacientes mais velhos e os que
+      tinham mais doenças crônicas, e tanto a idade quanto as doenças crônicas aumentam a
+      chance de internação. Cada médico indicou também os pacientes que lhe pareciam mais
+      frágeis, e pacientes frágeis internam mais. Essa impressão do médico ficou só no
+      prontuário e não foi para a tabela. Quem tem mais doenças crônicas fez mais consultas no ano anterior. O número de consultas, por si só, não influenciou a indicação nem muda a chance de internação. A operadora quer saber se o programa reduz as
+      internações.
+    edges:
+      - idade -> acompanhamento
+      - idade -> internou
+      - doencas_cronicas -> acompanhamento
+      - doencas_cronicas -> internou
+      - doencas_cronicas -> consultas_ano_anterior
+      - fragilidade -> acompanhamento
+      - fragilidade -> internou
+      - acompanhamento -> internou
+    answer:
+      identifiable: false
+      missing: [fragilidade]
+    note: >-
+      Ajustar por idade e doenças crônicas separa dois dos três motivos da indicação. O
+      terceiro, a fragilidade vista pelo médico, não está na tabela, e nenhuma coluna a
+      substitui.
+
+  - id: rh_avaliacao_depois
+    author: ai
+    status: aprovado
+    theme: RH
+    title: Capacitação e saída, com a avaliação feita depois do programa
+    twin: rh_avaliacao_antes
+    treatment: capacitacao
+    outcome: saiu
+    columns:
+      capacitacao: Participou do programa de capacitação (1 = sim, 0 = não).
+      saiu: Pediu demissão nos 12 meses seguintes ao programa (1 = sim, 0 = não).
+      meses_casa: Meses de empresa até o início do programa.
+      engajamento: Nota de engajamento na pesquisa de clima feita antes do programa, de 0 a 10.
+      avaliacao_desempenho: Nota na avaliação de desempenho do ciclo seguinte ao programa, de 1 a 5.
+    story: >-
+      Uma empresa ofereceu um programa de capacitação a parte dos funcionários, por indicação dos gestores, e todos os indicados participaram. Os gestores indicaram mais quem tinha mais tempo de casa e
+      quem tinha se mostrado mais engajado na pesquisa de clima feita antes do programa.
+      Funcionários antigos e funcionários engajados pedem menos demissão. A capacitação melhorou o desempenho: no ciclo de avaliação seguinte ao programa, quem participou foi mais bem avaliado por causa dela, e quem é bem avaliado pede menos demissão. A empresa quer saber se o programa reduz os pedidos de
+      demissão.
+    edges:
+      - meses_casa -> capacitacao
+      - meses_casa -> saiu
+      - engajamento -> capacitacao
+      - engajamento -> saiu
+      - capacitacao -> avaliacao_desempenho
+      - avaliacao_desempenho -> saiu
+      - capacitacao -> saiu
+    answer:
+      identifiable: true
+      adjust_for: [engajamento, meses_casa]
+      do_not_adjust_for:
+        avaliacao_desempenho: Foi feita depois do programa e é consequência dele. Faz parte do efeito que se quer medir.
+
+  - id: rh_avaliacao_antes
+    author: ai
+    status: aprovado
+    theme: RH
+    title: Capacitação e saída, com a avaliação feita antes do programa
+    twin: rh_avaliacao_depois
+    treatment: capacitacao
+    outcome: saiu
+    columns:
+      capacitacao: Participou do programa de capacitação (1 = sim, 0 = não).
+      saiu: Pediu demissão nos 12 meses seguintes ao programa (1 = sim, 0 = não).
+      meses_casa: Meses de empresa até o início do programa.
+      engajamento: Nota de engajamento na pesquisa de clima feita antes do programa, de 0 a 10.
+      avaliacao_desempenho: Nota na avaliação de desempenho do ciclo anterior ao programa, de 1 a 5.
+    story: >-
+      Uma empresa ofereceu um programa de capacitação a parte dos funcionários, por indicação dos gestores, e todos os indicados participaram. Os gestores indicaram mais quem tinha mais tempo de casa e
+      quem tinha se mostrado mais engajado na pesquisa de clima feita antes do programa.
+      Funcionários antigos e funcionários engajados pedem menos demissão. Os gestores
+      indicaram mais, também, quem tinha sido bem avaliado no ciclo de avaliação anterior
+      ao programa, e quem é bem avaliado pede menos demissão. A empresa quer saber se o
+      programa reduz os pedidos de demissão.
+    edges:
+      - meses_casa -> capacitacao
+      - meses_casa -> saiu
+      - engajamento -> capacitacao
+      - engajamento -> saiu
+      - avaliacao_desempenho -> capacitacao
+      - avaliacao_desempenho -> saiu
+      - capacitacao -> saiu
+    answer:
+      identifiable: true
+      adjust_for: [avaliacao_desempenho, engajamento, meses_casa]
+
+  - id: email_campanha_sorteio
+    author: ai
+    status: aprovado
+    theme: E-mail marketing
+    title: Campanha de e-mail enviada por sorteio
+    treatment: campanha
+    outcome: comprou
+    columns:
+      campanha: Recebeu o e-mail da campanha (1 = sim, 0 = não).
+      comprou: Comprou na loja nos 14 dias seguintes ao envio (1 = sim, 0 = não).
+      compras_12m: Número de compras nos 12 meses anteriores ao envio.
+      visitou_site: Visitou o site da loja nos 14 dias seguintes ao envio (1 = sim, 0 = não).
+      falou_chat: Falou com o atendimento por chat nos 14 dias seguintes ao envio (1 = sim, 0 = não).
+    story: >-
+      Uma loja online enviou uma campanha de e-mail a metade dos clientes, escolhida por
+      sorteio. Clientes que compraram mais vezes nos últimos 12 meses compram mais, com ou
+      sem e-mail. Quem recebe o e-mail visita mais o site nos dias seguintes, e quem visita
+      o site compra mais. O atendimento por chat é procurado por quem recebeu o e-mail,
+      para tirar dúvidas sobre a campanha, e por quem comprou, para acompanhar o pedido. Falar com o chat, por si só, não muda a chance de compra. A
+      loja quer saber se a campanha aumenta as compras.
+    edges:
+      - compras_12m -> comprou
+      - campanha -> visitou_site
+      - visitou_site -> comprou
+      - campanha -> comprou
+      - campanha -> falou_chat
+      - comprou -> falou_chat
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        visitou_site: Foi medida depois do envio e é consequência dele. Faz parte do efeito que se quer medir.
+        falou_chat: É consequência do e-mail e também da compra. Ajustar por essa coluna cria uma associação falsa entre o e-mail e a compra.
+      indifferent: [compras_12m]
+    note: >-
+      Como houve sorteio, a comparação simples entre quem recebeu e quem não recebeu já dá
+      o efeito certo. O erro aqui é ajustar por colunas medidas depois do envio.

@@ -1,0 +1,383 @@
+# Ficha de teoria: varejo.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: varejo
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Cupom de desconto em uma rede de varejo
+
+theory:
+  name: Utilidade de transação
+  statement: >-
+    O cliente compara o preço que paga com um preço de referência, aquele que acha
+    normal para o produto. Quando paga menos do que a referência, sente que fez um bom
+    negócio; esse ganho é a utilidade de transação, que se soma à utilidade do produto
+    em si. O cupom de desconto cria essa sensação de bom negócio, e ela aumenta a chance
+    de o cliente voltar a comprar. A promoção também traz o cliente de volta à loja ou
+    ao aplicativo e renova o hábito de comprar ali.
+  references:   # a confirmar pelo André
+    - "Thaler, R. (1985). Mental accounting and consumer choice. Marketing Science, 4(3), 199-214."
+    - "Blattberg, R. C., & Neslin, S. A. (1990). Sales promotion: concepts, methods, and strategies. Prentice Hall."
+
+context: >-
+  Uma rede de varejo enviou um cupom de desconto a parte dos seus clientes: 15% de
+  desconto na próxima compra, com validade de 60 dias. Ela quer saber se o cupom aumenta
+  a recompra, ou seja, a fração dos clientes que volta a comprar nos 60 dias seguintes
+  ao envio.
+randomized: Os clientes que receberam o cupom foram escolhidos por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem recebeu o cupom.
+
+treatment:
+  column: cupom
+  label: o cupom
+  dictionary: Recebeu o cupom de desconto (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração dos clientes que recebe o cupom
+
+outcome:
+  column: recomprou
+  label: a recompra
+  kind: binary
+  dictionary: Voltou a comprar na rede nos 60 dias seguintes ao envio do cupom (1 = sim, 0 = não).
+  scale: {rate: [0.15, 0.40]}   # fração dos clientes que volta a comprar
+
+effect:
+  sign: "+"                  # a teoria diz que o cupom aumenta a recompra
+
+variables:
+
+  gasto_anual:
+    label: o gasto do cliente
+    kind: continuous
+    scale: {median: 1500}
+    roles:
+      confounder:
+        dictionary: Valor gasto na rede nos doze meses anteriores ao envio do cupom, em reais.
+        to_treatment:
+          sign: "+"
+          fact: A rede enviou o cupom com mais frequência a clientes que gastavam mais na rede.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que gastam mais na rede têm mais chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Valor gasto na rede nos doze meses anteriores ao envio do cupom, em reais.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que gastam mais na rede têm mais chance de voltar a comprar.
+
+  frequencia_compras:
+    label: a frequência de compras
+    kind: count
+    scale: {mean: 3, min: 1}
+    roles:
+      confounder:
+        dictionary: Número de compras na rede nos doze meses anteriores ao envio do cupom.
+        to_treatment:
+          sign: "+"
+          fact: A rede enviou o cupom com mais frequência a clientes que compravam mais vezes por ano.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que compram mais vezes por ano têm mais chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Número de compras na rede nos doze meses anteriores ao envio do cupom.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que compram mais vezes por ano têm mais chance de voltar a comprar.
+
+  dias_sem_comprar:
+    label: o tempo sem comprar
+    kind: count
+    scale: {mean: 45}
+    roles:
+      confounder:
+        dictionary: Dias entre a última compra na rede e o envio do cupom.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A rede enviou o cupom com mais frequência a quem estava há mais tempo sem
+            comprar, para tentar trazer esses clientes de volta.
+        to_outcome:
+          sign: "-"
+          fact: Quem está há mais tempo sem comprar na rede tem menos chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Dias entre a última compra na rede e o envio do cupom.
+        to_outcome:
+          sign: "-"
+          fact: Quem está há mais tempo sem comprar na rede tem menos chance de voltar a comprar.
+
+  programa_fidelidade:
+    label: o programa de fidelidade
+    kind: binary
+    scale: {rate: 0.35}
+    roles:
+      confounder:
+        dictionary: Participava do programa de fidelidade da rede na data do envio do cupom (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: A rede enviou o cupom com mais frequência a quem participava do programa de fidelidade.
+        to_outcome:
+          sign: "+"
+          fact: Quem participa do programa de fidelidade tem mais chance de voltar a comprar.
+      mediator:
+        dictionary: Participava do programa de fidelidade da rede 30 dias depois do envio do cupom (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A mensagem do cupom convida o cliente a entrar no programa de fidelidade, e
+            por isso quem recebe o cupom adere mais ao programa de fidelidade.
+        to_outcome:
+          sign: "+"
+          fact: Quem participa do programa de fidelidade tem mais chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Participava do programa de fidelidade da rede na data do envio do cupom (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Quem participa do programa de fidelidade tem mais chance de voltar a comprar.
+
+  abriu_app:
+    label: o uso do aplicativo
+    kind: binary
+    scale: {rate: 0.40}
+    roles:
+      confounder:
+        dictionary: Abriu o aplicativo da rede nos 30 dias anteriores ao envio do cupom (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Parte dos cupons foi enviada por notificação do aplicativo, e por isso quem
+            vinha abrindo o aplicativo recebeu o cupom com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Quem abre o aplicativo da rede tem mais chance de voltar a comprar.
+      mediator:
+        dictionary: Abriu o aplicativo da rede nos 30 dias seguintes ao envio do cupom (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O cupom fica guardado no aplicativo, e por isso quem recebe o cupom abre mais
+            o aplicativo nas semanas seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Quem abre o aplicativo da rede tem mais chance de voltar a comprar.
+
+  visitas_site:
+    label: as visitas ao site
+    kind: count
+    scale: {mean: 4}
+    roles:
+      mediator:
+        dictionary: Número de visitas ao site da rede nos 30 dias seguintes ao envio do cupom.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o cupom visita mais o site da rede nas semanas seguintes, para escolher o que comprar com o desconto.
+        to_outcome:
+          sign: "+"
+          fact: Quem visita mais o site da rede tem mais chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Número de visitas ao site da rede nos 30 dias anteriores ao envio do cupom.
+        to_outcome:
+          sign: "+"
+          fact: Quem visita mais o site da rede tem mais chance de voltar a comprar.
+
+  avaliacao_precos:
+    label: a avaliação dos preços
+    kind: score
+    scale: {mean: 6}
+    roles:
+      confounder:
+        dictionary: >-
+          Nota de 0 a 10 para o quanto o cliente acha os preços da rede vantajosos, na
+          pesquisa de preços feita antes do envio do cupom.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            A rede enviou o cupom com mais frequência a clientes que achavam os preços da
+            rede pouco vantajosos.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que acham os preços da rede vantajosos têm mais chance de voltar a comprar.
+      mediator:
+        dictionary: >-
+          Nota de 0 a 10 para o quanto o cliente acha os preços da rede vantajosos, na
+          pesquisa de preços feita 30 dias depois do envio do cupom.
+        from_treatment:
+          sign: "+"
+          fact: Quem recebe o cupom passa a achar os preços da rede mais vantajosos.
+        to_outcome:
+          sign: "+"
+          fact: Clientes que acham os preços da rede vantajosos têm mais chance de voltar a comprar.
+
+  sensibilidade_preco:
+    label: a sensibilidade a preço
+    kind: score
+    scale: {mean: 5}
+    hidden_fact: >-
+      A rede não guardou o índice de sensibilidade a preço dos clientes, e por isso a sensibilidade a preço não está na tabela.
+    roles:
+      confounder:
+        dictionary: >-
+          Índice de sensibilidade a preço do cliente, de 0 a 10, calculado com as compras anteriores ao envio do cupom (quanto maior, mais o cliente compara preços antes de comprar).
+        to_treatment:
+          sign: "+"
+          fact: A rede enviou o cupom com mais frequência a clientes mais sensíveis a preço.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Clientes mais sensíveis a preço têm menos chance de voltar a comprar, porque
+            procuram a loja mais barata a cada compra.
+      outcome_cause:
+        dictionary: >-
+          Índice de sensibilidade a preço do cliente, de 0 a 10, calculado com as compras anteriores ao envio do cupom (quanto maior, mais o cliente compara preços antes de comprar).
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Clientes mais sensíveis a preço têm menos chance de voltar a comprar, porque
+            procuram a loja mais barata a cada compra.
+
+  renda:
+    label: a renda do cliente
+    kind: continuous
+    scale: {median: 3500}
+    hidden_fact: A rede não tem a renda dos clientes, e por isso a renda não está na tabela.
+    roles:
+      confounder:
+        dictionary: Renda mensal estimada do cliente, em reais.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Clientes de renda mais baixa se cadastram mais para receber ofertas da rede, e
+            por isso receberam o cupom com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Clientes de renda mais alta têm mais chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Renda mensal estimada do cliente, em reais.
+        to_outcome:
+          sign: "+"
+          fact: Clientes de renda mais alta têm mais chance de voltar a comprar.
+
+  lista_desejos:
+    label: a lista de desejos
+    kind: binary
+    scale: {rate: 0.25}
+    hidden_fact: >-
+      A rede não guarda o histórico das listas de desejos dos clientes, e por isso a
+      lista de desejos não está na tabela.
+    roles:
+      confounder:
+        dictionary: Tinha produto salvo na lista de desejos do site ou do aplicativo na data do envio do cupom (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: A rede enviou o cupom com mais frequência a quem tinha produto salvo na lista de desejos.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem tem produto salvo na lista de desejos já pretende comprar e tem mais
+            chance de voltar a comprar.
+      outcome_cause:
+        dictionary: Tinha produto salvo na lista de desejos do site ou do aplicativo na data do envio do cupom (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Quem tem produto salvo na lista de desejos já pretende comprar e tem mais
+            chance de voltar a comprar.
+
+  contato_atendimento:
+    label: o contato com o atendimento
+    kind: binary
+    scale: {rate: 0.20}
+    roles:
+      collider:
+        dictionary: Procurou o atendimento ao cliente nos 60 dias seguintes ao envio do cupom (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Quem recebe o cupom procura mais o atendimento ao cliente, para tirar dúvidas
+            sobre como usar o desconto.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            Quem volta a comprar procura mais o atendimento ao cliente, para acompanhar a
+            entrega ou pedir troca.
+      outcome_cause:
+        dictionary: Procurou o atendimento ao cliente nos três meses anteriores ao envio do cupom (1 = sim, 0 = não).
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Quem precisou procurar o atendimento ao cliente tem menos chance de voltar a comprar.
+
+  respondeu_pesquisa:
+    label: a resposta à pesquisa de satisfação
+    kind: binary
+    scale: {rate: 0.25}
+    roles:
+      treatment_cause:
+        dictionary: Respondeu à pesquisa de satisfação da rede nos três meses anteriores ao envio do cupom (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A rede usou o cupom como agradecimento a quem tinha respondido à pesquisa de
+            satisfação, e por isso quem tinha respondido recebeu o cupom com mais frequência.
+      collider:
+        dictionary: Respondeu à pesquisa de satisfação da rede nos 60 dias seguintes ao envio do cupom (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A mensagem do cupom traz o convite para a pesquisa de satisfação, e por isso
+            quem recebe o cupom responde mais à pesquisa de satisfação.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A rede convida para a pesquisa de satisfação depois de cada compra, e por isso
+            quem volta a comprar responde mais à pesquisa de satisfação.
+
+  loja_piloto:
+    label: a loja-piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: Tem como loja principal uma das lojas escolhidas para o piloto do cupom (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O envio do cupom começou por algumas lojas-piloto, e os clientes dessas lojas
+            receberam o cupom com mais frequência.
+
+  mes_aniversario:
+    label: o mês de aniversário
+    kind: count
+    scale: {mean: 6, min: 1, max: 12}
+    roles:
+      unrelated:
+        dictionary: Mês de aniversário do cliente (1 = janeiro, 12 = dezembro).
+        fact: O mês de aniversário do cliente não tem relação com o cupom nem com a recompra.

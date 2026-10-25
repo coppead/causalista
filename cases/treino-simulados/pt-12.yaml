@@ -1,0 +1,553 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: a
+# gerente de loja de uma rede de eletrodomésticos, a coordenadora pedagógica de uma rede
+# municipal, o gerente de uma rede de óticas, o diretor de operações de uma transportadora
+# de cargas frias e o gerente de manutenção de uma indústria de alimentos. Cada texto tem
+# o estilo do canal em que a pessoa escreveria (e-mail ao chefe, dissertação de mestrado,
+# ata de reunião, Slack, wiki interna).
+#
+# Estes casos servem ao treino por reforço: o modelo responde, o verificador dá a nota.
+# Não são o teste congelado de cases/simulados/ e não repetem nenhum cenário de lá. As
+# setas declaram o diagrama que o texto implica; o verificador confere a resposta a
+# partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: pt_eletro_treino_garantia_no_olho
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de loja de uma rede de eletrodomésticos
+    theme: Varejo de eletrodomésticos
+    title: Treinamento de garantia estendida com turma escolhida no olho
+    treatment: treinamento_garantia
+    outcome: taxa_garantia_tri
+    columns:
+      treinamento_garantia: Vendedor participou do treinamento de venda de garantia estendida em julho (1 = sim, 0 = não).
+      taxa_garantia_tri: Percentual das vendas de produtos elegíveis do vendedor que saíram com garantia estendida, de agosto a outubro.
+      tempo_casa: Meses de casa do vendedor em 30 de junho.
+      loja: Código da loja em que o vendedor está lotado.
+      premio_trimestre: Recebeu o prêmio de garantia do trimestre (1 = sim). Pago em novembro a quem bateu a meta de taxa de garantia de agosto a outubro.
+      matricula: Matrícula do vendedor no sistema de RH.
+    not_in_table:
+      jeito_para_servico: A impressão do Ricardo sobre quem tem mais jeito para vender serviço, que ficou só na cabeça dele.
+    story: >-
+      Oi Marcelo, bom dia.
+
+      Segue o que você pediu sobre o treinamento de garantia estendida. Puxei do BI os
+      vendedores das seis lojas da regional, 71 pessoas, com a taxa de garantia de agosto a
+      outubro, que é o período que a matriz está usando pra dizer que o treinamento "dobrou a
+      conversão".
+
+      Antes de a gente repassar esse número pra cima, queria te alertar de uma coisa. Quem
+      montou a turma de julho foi o Ricardo, do Serviços Financeiros. Ele conhece o pessoal
+      de balcão há anos e escolheu, nas palavras dele, "quem tem mais jeito pra vender
+      serviço". Não teve critério escrito nem ficha de avaliação; foi o olho dele, e olho não
+      vira coluna. A regra formal era só ter mais de três meses de casa, e, entre os que
+      passavam nessa régua, ele puxou de preferência os mais antigos. Você sabe que os
+      antigos já vendem garantia melhor que os novatos, com treinamento ou sem.
+
+      A loja do shopping e a da Avenida têm um público bem diferente das lojas de rua, e
+      isso mexe na taxa de garantia de qualquer jeito, então deixei o código da loja na
+      base.
+
+      Mais uma coisa. A meta de garantia do trimestre foi reduzida pra quem fez o
+      treinamento, "pra incentivar", então o prêmio de novembro saiu pra mais gente da
+      turma. Eu não usaria o prêmio como medida de nada, mas ele está na planilha porque o
+      RH mandou junto.
+
+      Dá pra dizer que o treinamento funcionou com o que a gente tem? Ou vou precisar pedir
+      pro Ricardo escrever o critério que ele usou?
+
+      Abraço,
+      Juliana
+    edges:
+      - jeito_para_servico -> treinamento_garantia
+      - jeito_para_servico -> taxa_garantia_tri
+      - tempo_casa -> treinamento_garantia
+      - tempo_casa -> taxa_garantia_tri
+      - loja -> taxa_garantia_tri
+      - treinamento_garantia -> taxa_garantia_tri
+      - treinamento_garantia -> premio_trimestre
+      - taxa_garantia_tri -> premio_trimestre
+    answer:
+      identifiable: false
+      missing: [jeito_para_servico]
+    twin: pt_eletro_treino_garantia_por_nota
+    note: >-
+      A turma foi escolhida pela impressão de uma pessoa sobre quem vende bem serviço, e isso
+      não está na tabela. O prêmio vem depois do resultado e depende dele e do treinamento.
+
+  - id: pt_eletro_treino_garantia_por_nota
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de loja de uma rede de eletrodomésticos
+    theme: Varejo de eletrodomésticos
+    title: Treinamento de garantia estendida com turma escolhida pela avaliação
+    treatment: treinamento_garantia
+    outcome: taxa_garantia_tri
+    columns:
+      treinamento_garantia: Vendedor participou do treinamento de venda de garantia estendida em julho (1 = sim, 0 = não).
+      taxa_garantia_tri: Percentual das vendas de produtos elegíveis do vendedor que saíram com garantia estendida, de agosto a outubro.
+      nota_avaliacao: Nota do vendedor no item "venda de serviços" da avaliação semestral de junho, de 1 a 5.
+      tempo_casa: Meses de casa do vendedor em 30 de junho.
+      loja: Código da loja em que o vendedor está lotado.
+      premio_trimestre: Recebeu o prêmio de garantia do trimestre (1 = sim). Pago em novembro a quem bateu a meta de taxa de garantia de agosto a outubro.
+      matricula: Matrícula do vendedor no sistema de RH.
+    story: >-
+      Oi Marcelo, bom dia.
+
+      Segue o que você pediu sobre o treinamento de garantia estendida. Puxei do BI os
+      vendedores das seis lojas da regional, 71 pessoas, com a taxa de garantia de agosto a
+      outubro, que é o período que a matriz está usando pra dizer que o treinamento "dobrou a
+      conversão".
+
+      Antes de a gente repassar esse número pra cima, queria te alertar de uma coisa. Quem
+      montou a turma de julho foi o Ricardo, do Serviços Financeiros. Ele usou a avaliação
+      semestral de junho: chamou quem tirou 4 ou 5 no item "venda de serviços", e essa nota
+      veio na base do RH junto com o resto. Óbvio que quem tira nota alta nesse item já vende
+      garantia melhor, com treinamento ou sem. A regra formal além dessa era ter mais de três
+      meses de casa, e, entre os que passavam nas duas réguas, ele puxou de preferência os
+      mais antigos. Você sabe que os antigos também vendem mais garantia que os novatos.
+
+      A loja do shopping e a da Avenida têm um público bem diferente das lojas de rua, e
+      isso mexe na taxa de garantia de qualquer jeito, então deixei o código da loja na
+      base.
+
+      Mais uma coisa. A meta de garantia do trimestre foi reduzida pra quem fez o
+      treinamento, "pra incentivar", então o prêmio de novembro saiu pra mais gente da
+      turma. Eu não usaria o prêmio como medida de nada, mas ele está na planilha porque o
+      RH mandou junto.
+
+      Dá pra dizer que o treinamento funcionou com o que a gente tem? Quais colunas você
+      quer que eu separe pra comparação?
+
+      Abraço,
+      Juliana
+    edges:
+      - nota_avaliacao -> treinamento_garantia
+      - nota_avaliacao -> taxa_garantia_tri
+      - tempo_casa -> treinamento_garantia
+      - tempo_casa -> taxa_garantia_tri
+      - loja -> taxa_garantia_tri
+      - treinamento_garantia -> taxa_garantia_tri
+      - treinamento_garantia -> premio_trimestre
+      - taxa_garantia_tri -> premio_trimestre
+    answer:
+      identifiable: true
+      adjust_for: [nota_avaliacao, tempo_casa]
+      do_not_adjust_for:
+        premio_trimestre: É pago depois do trimestre e depende tanto de quem fez o treinamento quanto da taxa de garantia que se quer medir.
+      indifferent: [loja, matricula]
+    twin: pt_eletro_treino_garantia_no_olho
+    note: >-
+      Mesma história do gêmeo, mas o critério de escolha da turma é uma nota que está na
+      tabela. Loja só mexe no resultado; o prêmio continua sendo armadilha.
+
+  - id: pt_rede_municipal_formacao_matematica
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: coordenadora pedagógica de uma rede municipal, cursando mestrado profissional
+    theme: Educação pública
+    title: Formação continuada em matemática e a prova de rede
+    treatment: formacao_40h
+    outcome: media_prova_nov
+    columns:
+      formacao_40h: Professor regente da turma concluiu a formação continuada em matemática de 40 horas oferecida pela Secretaria em fevereiro e março de 2026 (1 = sim, 0 = não).
+      media_prova_nov: Média da turma na prova de matemática da rede aplicada em novembro de 2026, de 0 a 10.
+      media_escola_2025: Média da escola no 5º ano na prova de matemática da rede de novembro de 2025, de 0 a 10.
+      anos_docencia: Anos de magistério do professor regente em fevereiro de 2026.
+      uso_sequencias: Quantidade de sequências didáticas do caderno da formação registradas no diário de classe eletrônico da turma entre abril e outubro de 2026.
+      turno: Turno da turma (manhã ou tarde).
+      alunos_turma: Alunos matriculados na turma em março de 2026.
+      cod_turma: Código da turma no sistema de gestão escolar.
+    story: >-
+      4.2 Delimitação da base e limites da comparação
+
+      A base analisada reúne as 112 turmas de 5º ano da rede municipal em 2026, uma linha
+      por turma, com o professor regente identificado. A formação continuada em matemática,
+      de 40 horas, foi ofertada pela Secretaria Municipal de Educação em fevereiro e março de
+      2026, em regime de adesão voluntária, com prioridade de vagas para as escolas
+      classificadas como prioritárias no Plano de Metas, isto é, aquelas cuja média no 5º
+      ano na prova de rede de novembro de 2025 ficou abaixo de 5,0. Essa prioridade, embora
+      justificável do ponto de vista da equidade, implica que as turmas formadas partem, em
+      média, de escolas com resultados historicamente mais baixos; e é sabido que o
+      desempenho de uma escola tende a se repetir de um ano para o outro (ver seção 2.2).
+
+      Um segundo aspecto diz respeito ao perfil dos docentes que aderiram. Nos registros de
+      inscrição, a adesão foi visivelmente maior entre professores em início de carreira; em
+      conversa informal, duas formadoras atribuíram isso ao fato de a formação ter sido
+      divulgada sobretudo nas reuniões de acolhimento aos novos concursados. A relação entre
+      tempo de magistério e resultados dos alunos é documentada na literatura revisada na
+      seção 2.3, ainda que não seja linear.
+
+      Vale registrar também que a formação distribuiu um caderno com doze sequências
+      didáticas e que o diário de classe eletrônico permite contar quantas delas cada
+      professor registrou entre abril e outubro. Como seria de esperar, os professores
+      formados registraram muito mais sequências; e as turmas em que as sequências foram
+      trabalhadas apresentaram, no geral, médias mais altas em novembro. É provável que boa
+      parte do que a formação produz passe por esse uso em sala, embora os encontros também
+      tenham discutido avaliação e tratamento do erro, o que pode ter efeito próprio.
+
+      Por fim, a prova de rede é aplicada no mesmo dia em todas as escolas, nos dois turnos.
+      As turmas da tarde apresentam médias sistematicamente menores na série histórica, e o
+      tamanho das turmas varia de 18 a 35 alunos, com alguma vantagem das turmas menores.
+      Nenhum desses dois fatores entrou na definição das vagas da formação.
+
+      A questão que orienta este capítulo é, portanto, se é possível, com essas variáveis,
+      isolar a contribuição da formação para a média de novembro, e de quais delas a
+      comparação precisa dar conta.
+    edges:
+      - media_escola_2025 -> formacao_40h
+      - media_escola_2025 -> media_prova_nov
+      - anos_docencia -> formacao_40h
+      - anos_docencia -> media_prova_nov
+      - formacao_40h -> uso_sequencias
+      - uso_sequencias -> media_prova_nov
+      - formacao_40h -> media_prova_nov
+      - turno -> media_prova_nov
+      - alunos_turma -> media_prova_nov
+    answer:
+      identifiable: true
+      adjust_for: [anos_docencia, media_escola_2025]
+      do_not_adjust_for:
+        uso_sequencias: É consequência da formação e é por aí que boa parte do efeito passa; registrado depois dela, entre abril e outubro.
+      indifferent: [turno, alunos_turma, cod_turma]
+    note: >-
+      Dois critérios de seleção ditos em registro acadêmico (escola prioritária, adesão dos
+      novatos) e o uso das sequências como caminho do efeito. Turno e tamanho só mexem no
+      resultado.
+
+  - id: pt_rede_municipal_busca_ativa
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenadora pedagógica de uma rede municipal
+    theme: Educação pública
+    title: Visita domiciliar da busca ativa e frequência no bimestre seguinte
+    treatment: visita_busca_ativa
+    outcome: freq_4bim
+    columns:
+      visita_busca_ativa: Aluno recebeu visita domiciliar da equipe de busca ativa em outubro de 2026 (1 = sim, 0 = não).
+      freq_4bim: Percentual de presença do aluno no 4º bimestre de 2026.
+      faltas_3bim: Número de faltas do aluno no 3º bimestre de 2026.
+      ano_escolar: Ano escolar do aluno (6 a 9).
+      escola: Código da escola.
+      encaminhamento_conselho: Aluno encaminhado ao Conselho Tutelar em dezembro de 2026 (1 = sim, 0 = não).
+      matricula_aluno: Número de matrícula do aluno.
+    not_in_table:
+      situacao_familia: A dificuldade que a família está passando, que a direção da escola conhece e usa para priorizar as visitas.
+    story: >-
+      ATA DA REUNIÃO DE COORDENAÇÃO PEDAGÓGICA, 3 de dezembro de 2026, 14h.
+      Presentes: Fátima (coordenação pedagógica), Rogério (Núcleo de Dados da SME), as
+      diretoras das EMs Castro Alves, Vinícius de Moraes e Zumbi dos Palmares, e Cláudia
+      (assistente social). Pauta única: avaliação da busca ativa do 2º semestre.
+
+      1. Fátima apresentou o levantamento. 318 alunos do 6º ao 9º ano fecharam o 3º bimestre
+      com dez faltas ou mais e entraram na lista da busca ativa. Desses, 141 receberam visita
+      domiciliar da equipe entre 5 e 30 de outubro. A frequência do 4º bimestre já está
+      fechada no sistema para os 318. Fátima lembrou que quem já faltava muito tende a
+      continuar faltando, então a comparação precisa levar as faltas do 3º bimestre em
+      conta.
+
+      2. Rogério perguntou como foi decidido quem seria visitado. As diretoras explicaram que
+      a lista era maior do que a equipe dava conta, então cada escola priorizou: primeiro
+      quem tinha mais faltas, e depois "as famílias que a gente sabe que estão passando por
+      mais dificuldade", nas palavras da diretora da Castro Alves. Cláudia observou que essa
+      leitura sobre a família fica no conhecimento da direção; não existe campo para ela no
+      sistema. Rogério registrou a preocupação de que justamente essas famílias são as que
+      têm mais dificuldade de manter o aluno frequentando.
+
+      3. A diretora da Zumbi dos Palmares lembrou que a escola dela só teve agente de busca
+      ativa disponível em duas semanas, por isso visitou proporcionalmente menos; e que a
+      frequência na Zumbi é historicamente a mais baixa das três, pela distância das casas.
+
+      4. Sobre o Conselho Tutelar: Cláudia explicou que, pelo protocolo, todo aluno visitado
+      cuja frequência não melhorou é encaminhado em dezembro, com o relatório da visita
+      anexado; os não visitados só são encaminhados se a frequência do bimestre ficar abaixo
+      de 50%. Esses encaminhamentos já constam na planilha.
+
+      5. Fátima observou que os alunos do 8º e do 9º ano faltam mais, como todo ano.
+
+      Encaminhamentos: Rogério fará a comparação da frequência do 4º bimestre entre
+      visitados e não visitados e dirá, até dia 15, se dá para afirmar que a visita melhorou
+      a frequência ou se a comparação não se sustenta com os dados que temos.
+    edges:
+      - situacao_familia -> visita_busca_ativa
+      - situacao_familia -> freq_4bim
+      - faltas_3bim -> visita_busca_ativa
+      - faltas_3bim -> freq_4bim
+      - escola -> visita_busca_ativa
+      - escola -> freq_4bim
+      - ano_escolar -> freq_4bim
+      - visita_busca_ativa -> freq_4bim
+      - visita_busca_ativa -> encaminhamento_conselho
+      - freq_4bim -> encaminhamento_conselho
+    answer:
+      identifiable: false
+      missing: [situacao_familia]
+    note: >-
+      A direção priorizou as famílias em dificuldade, e isso não é campo do sistema. As
+      faltas anteriores e a escola estão na tabela, mas não bastam. O encaminhamento vem
+      depois da frequência e depende dela e da visita.
+
+  - id: pt_otica_exame_na_loja
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de uma rede de óticas
+    theme: Varejo de óticas
+    title: Exame de vista gratuito na loja e valor das lentes
+    treatment: exame_na_loja
+    outcome: valor_lentes
+    columns:
+      exame_na_loja: 1 se a receita usada no pedido saiu do exame gratuito com o optometrista da loja; 0 se o cliente trouxe receita de fora.
+      valor_lentes: Valor das lentes no pedido, em reais, sem a armação.
+      convenio: Cliente informou plano de saúde ou convênio no cadastro (1 = sim, 0 = não). Perguntado no cadastro para aplicar o desconto de parceria.
+      idade_cliente: Idade do cliente na data do pedido.
+      indicou_antirreflexo: Pedido saiu com indicação de tratamento antirreflexo marcada (1 = sim, 0 = não).
+      avaliou_google: Cliente deixou avaliação no Google nos 30 dias seguintes à entrega dos óculos (1 = sim, 0 = não).
+      loja: Código da loja.
+    story: >-
+      @time-dados bom dia, pedido do Fernando pra reunião de sexta.
+      Ele quer saber se o exame gratuito na loja faz o cliente gastar mais em lente ou se é
+      impressão. Base: os 4.212 pedidos de óculos de grau de setembro e outubro, das 9 lojas
+      (todas têm optometrista desde 2024, então isso não é questão de loja). A coluna
+      exame_na_loja diz se a receita saiu do nosso optometrista ou se o cliente trouxe de
+      fora.
+      Contexto que vocês precisam saber: quem tem plano de saúde geralmente já passou no
+      oftalmo e chega com receita pronta; quem não tem plano é quem mais usa o exame grátis.
+      E o pessoal com plano é o público de renda maior, que leva lente melhor de qualquer
+      jeito. A gente pergunta convênio no cadastro por causa do desconto de parceria, então
+      isso vocês têm.
+      Idade pesa dos dois lados também: acima dos 45 é multifocal, que custa umas 3x, e os
+      mais velhos preferem ir no médico.
+      Uma coisa que o Fernando vai citar: o optometrista indica antirreflexo em quase todo
+      exame que faz, e lente com antirreflexo é mais cara. Isso fica marcado no pedido.
+      Ah, e a coluna avaliou_google: o link de avaliação vai por WhatsApp pra quem fez o
+      exame aqui (pra divulgar o serviço) e pra quem levou lente acima de 800 reais, que é o
+      protocolo do pós-venda. Não sei se serve pra alguma coisa.
+      As lojas de shopping vendem lente mais cara, mas isso é o público delas mesmo.
+      Dá pra fechar um número até quinta?
+    edges:
+      - convenio -> exame_na_loja
+      - convenio -> valor_lentes
+      - idade_cliente -> exame_na_loja
+      - idade_cliente -> valor_lentes
+      - exame_na_loja -> indicou_antirreflexo
+      - indicou_antirreflexo -> valor_lentes
+      - exame_na_loja -> valor_lentes
+      - loja -> valor_lentes
+      - exame_na_loja -> avaliou_google
+      - valor_lentes -> avaliou_google
+    answer:
+      identifiable: true
+      adjust_for: [convenio, idade_cliente]
+      do_not_adjust_for:
+        indicou_antirreflexo: É o que o optometrista faz durante o exame e um dos caminhos pelos quais o exame encarece a lente.
+        avaliou_google: Acontece depois da compra e o link só vai para quem fez o exame ou gastou acima de 800 reais, ou seja, depende das duas coisas que se quer comparar.
+      indifferent: [loja]
+    note: >-
+      O plano de saúde está na tabela porque se pergunta por outro motivo (desconto). A
+      indicação de antirreflexo é consequência do exame; a avaliação no Google é disparada
+      pelo exame e pelo valor.
+
+  - id: pt_cargas_frias_telemetria_temperatura
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: diretor de operações de uma transportadora de cargas frias
+    theme: Logística refrigerada
+    title: Telemetria de temperatura no baú e recusa de carga na entrega
+    treatment: telemetria
+    outcome: rejeicao_entrega
+    columns:
+      telemetria: Baú do veículo equipado com sensor de temperatura com transmissão em tempo real para a torre de controle (1 = sim; 0 = só termógrafo de papel).
+      rejeicao_entrega: Carga recusada total ou parcialmente pelo cliente no ato da entrega por motivo de temperatura (1 = sim, 0 = não).
+      idade_veiculo: Anos desde a fabricação do veículo na data da viagem.
+      cliente_farma: Cliente da viagem é do segmento farmacêutico (1 = sim; 0 = alimentos).
+      tempo_porta_aberta: Minutos totais de porta do baú aberta durante a viagem, somando as paradas intermediárias, lidos do registrador de porta.
+      km_viagem: Quilometragem da viagem.
+      mes: Mês da viagem (1 a 3).
+      id_viagem: Identificador da viagem no TMS.
+    story: >-
+      Ata do Comitê de Operações, 14/04/2026, sala 2, das 9h10 às 10h05.
+      Presentes: Antônio (Operações), Paula (Frota), Denis (Comercial), Larissa (Qualidade),
+      Thiago (TI e dados).
+
+      1. Antônio abriu com o número da Larissa: a rejeição por temperatura caiu de 3,1% para
+      1,4% nas viagens com telemetria no 1º trimestre. A diretoria quer saber se vale
+      estender a telemetria aos 38 veículos que ainda rodam só com termógrafo de papel, a R$
+      4.800 por baú.
+
+      2. Paula lembrou que os veículos a partir de 2024 já vêm com telemetria de fábrica e
+      que o retrofit nos antigos foi feito em poucos; ou seja, a frota com telemetria é bem
+      mais nova. Reforçou que aparelho de frio velho falha mais, com sensor ou sem.
+
+      3. Denis acrescentou que os clientes farmacêuticos exigem telemetria em contrato, então
+      a escala manda os veículos equipados prioritariamente para eles. Larissa observou que
+      esse segmento também recusa carga com muito mais rigor que o de alimentos; meio grau de
+      desvio já é recusa.
+
+      4. Sobre o mecanismo: Larissa explicou que, com o sensor, a torre liga para o motorista
+      assim que a temperatura sobe, e o que mais faz a temperatura subir é porta aberta em
+      parada intermediária. O registrador de porta é de série em toda a frota desde 2022, e
+      os dados mostram que as viagens com telemetria ficaram em média 11 minutos a menos de
+      porta aberta. Thiago perguntou se então bastaria olhar a porta; Larissa disse que a
+      torre também orienta a reorganizar a carga e a ajustar o setpoint, o que não passa pela
+      porta.
+
+      5. Thiago registrou que fevereiro teve pico de rejeição em toda a frota pelo calor, e
+      que viagens longas, acima de 600 km, rejeitam mais.
+
+      Deliberação: Thiago monta a comparação com a base de viagens do trimestre (12.406
+      viagens, colunas abaixo) e traz em 28/04 uma estimativa do efeito da telemetria sobre a
+      rejeição. Antônio pediu que fique explícito quais colunas entraram na conta e por quê.
+    edges:
+      - idade_veiculo -> telemetria
+      - idade_veiculo -> rejeicao_entrega
+      - cliente_farma -> telemetria
+      - cliente_farma -> rejeicao_entrega
+      - telemetria -> tempo_porta_aberta
+      - tempo_porta_aberta -> rejeicao_entrega
+      - telemetria -> rejeicao_entrega
+      - km_viagem -> rejeicao_entrega
+      - mes -> rejeicao_entrega
+    answer:
+      identifiable: true
+      adjust_for: [cliente_farma, idade_veiculo]
+      do_not_adjust_for:
+        tempo_porta_aberta: É consequência da telemetria (a torre liga e o motorista fecha a porta) e é por aí que parte do efeito passa.
+      indifferent: [km_viagem, mes, id_viagem]
+    note: >-
+      Dois critérios de alocação ditos por pessoas diferentes (frota nova, cliente
+      farmacêutico) e um KPI de que a Qualidade se orgulha que é consequência do sensor.
+      Calor e distância só mexem no resultado.
+
+  - id: pt_cargas_frias_pre_resfriamento
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: diretor de operações de uma transportadora de cargas frias
+    theme: Logística refrigerada
+    title: Pré-resfriamento do baú e minutos fora da faixa
+    treatment: pre_resfriamento
+    outcome: minutos_fora_faixa
+    columns:
+      pre_resfriamento: Checklist de carregamento com o item "baú pré-resfriado" marcado (1 = sim, 0 = não).
+      minutos_fora_faixa: Minutos em que a temperatura da carga ficou fora da faixa contratada durante a viagem, lidos do termógrafo.
+      tipo_carga: Congelado ou resfriado.
+      turno_carregamento: Turno em que o carregamento foi feito (manhã, tarde ou madrugada).
+      advertencia_qualidade: Motorista recebeu advertência da Qualidade referente a este carregamento (1 = sim, 0 = não). Emitida na semana seguinte à viagem.
+      num_carga: Número do carregamento no sistema.
+    not_in_table:
+      zelo_motorista: O capricho do motorista com o frio, que se vê no pátio mas não sai em relatório nenhum.
+    story: >-
+      pessoal, rápido: a Larissa quer provar que o pré-resfriamento do baú reduz desvio de
+      temperatura e pediu pra eu puxar a base de março (2.980 carregamentos). no checklist
+      tem se o baú foi pré-resfriado antes de carregar, e no termógrafo quantos minutos a
+      carga ficou fora da faixa na viagem. o problema é que pré-resfriar não é obrigatório
+      pra resfriado, só pra congelado (exigência dos clientes), e congelado já é a carga que
+      mais sai da faixa. de madrugada o pessoal pré-resfria mais porque o caminhão fica
+      parado esperando, e também faz menos calor. e, sendo sincero, o motorista que chega 40
+      min antes pra ligar o frio é o mesmo que confere a borracha da porta e fecha rápido na
+      entrega; esse capricho a gente vê no pátio, mas não tem como puxar de relatório nenhum.
+      tem também a coluna de advertência da qualidade, que sai quando o desvio passa de 30
+      min ou quando o checklist vem sem o pré-resfriamento marcado. dá pra tirar algo disso
+      ou é melhor eu falar pra ela que não?
+    edges:
+      - zelo_motorista -> pre_resfriamento
+      - zelo_motorista -> minutos_fora_faixa
+      - tipo_carga -> pre_resfriamento
+      - tipo_carga -> minutos_fora_faixa
+      - turno_carregamento -> pre_resfriamento
+      - turno_carregamento -> minutos_fora_faixa
+      - pre_resfriamento -> minutos_fora_faixa
+      - pre_resfriamento -> advertencia_qualidade
+      - minutos_fora_faixa -> advertencia_qualidade
+    answer:
+      identifiable: false
+      missing: [zelo_motorista]
+    note: >-
+      Texto curto e informal. O capricho do motorista explica quem pré-resfria e quem tem
+      menos desvio, e não está em coluna nenhuma. A advertência vem depois e depende do
+      desvio e do checklist.
+
+  - id: pt_alimentos_sensores_vibracao_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: gerente de manutenção de uma indústria de alimentos
+    theme: Manutenção industrial
+    title: Sensores de vibração sorteados e horas de parada não programada
+    treatment: sensor_vibracao
+    outcome: horas_parada_nao_prog
+    columns:
+      sensor_vibracao: Ativo recebeu kit de sensor de vibração em março de 2026 (1 = sim, 0 = não).
+      horas_parada_nao_prog: Horas de parada não programada atribuídas ao ativo entre abril e setembro de 2026, somadas das ordens de serviço corretivas.
+      idade_ativo: Anos desde a instalação do ativo.
+      linha: Linha de produção do ativo (biscoitos, massas ou molhos).
+      criticidade: Classe de criticidade do ativo na matriz de 2025 (A, B ou C).
+      os_preventivas: Ordens de serviço preventivas abertas para o ativo entre abril e setembro de 2026.
+      custo_pecas: Custo de peças de reposição lançado no ativo entre abril e setembro de 2026, em reais, somando corretivas e preventivas.
+      tag_ativo: TAG do ativo no SAP PM.
+    story: >-
+      Piloto de sensores de vibração (página do projeto, atualizada em 02/10/2026).
+      Responsável: Manutenção (Edson). Status: em avaliação.
+
+      O que foi feito. Em março o fornecedor cedeu 20 kits de sensor de vibração em comodato
+      por seis meses. A lista de ativos elegíveis tinha 48 motores e redutores das linhas de
+      biscoitos, massas e molhos (critério: motor acima de 15 cv com ponto de fixação para o
+      sensor). Como 20 é menos que 48 e todo supervisor queria o sensor na própria linha, a
+      decisão foi sorteio: lista no Excel, coluna com ALEATÓRIO(), os 20 primeiros levaram. A
+      planilha do sorteio está anexa (sorteio_sensores_mar26.xlsx).
+
+      Como o sensor atua. O kit manda alerta quando a vibração sai do padrão. A regra
+      combinada com o PCM: alerta vira OS preventiva em até 48h. Entre abril e setembro
+      foram abertas em média 3,4 OS preventivas por ativo com sensor, contra 1,1 nos demais.
+      A ideia toda é que a preventiva feita a tempo evita a quebra.
+
+      Dados disponíveis (extração do SAP PM em 01/10). Uma linha por ativo, 48 linhas, com as
+      colunas listadas abaixo. As horas de parada não programada vêm das OS corretivas,
+      somadas de abril a setembro. O custo de peças soma tudo o que foi lançado no ativo no
+      período, tanto o que foi trocado em corretiva quanto o que foi trocado por causa de
+      alerta.
+
+      Observações. Ativos mais velhos e os de criticidade A (rodam 24h) acumulam mais horas
+      de parada, como sempre. A linha de molhos tem ambiente mais agressivo (umidade) e
+      historicamente quebra mais.
+
+      Pergunta aberta para o time de dados: como comparar as horas de parada entre os dois
+      grupos sem inflar nem esconder o efeito do sensor? Quais colunas entram na conta?
+    edges:
+      - sensor_vibracao -> os_preventivas
+      - os_preventivas -> horas_parada_nao_prog
+      - sensor_vibracao -> horas_parada_nao_prog
+      - idade_ativo -> horas_parada_nao_prog
+      - linha -> horas_parada_nao_prog
+      - criticidade -> horas_parada_nao_prog
+      - horas_parada_nao_prog -> custo_pecas
+      - os_preventivas -> custo_pecas
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        os_preventivas: São disparadas pelos alertas do sensor; é por elas que o sensor evita quebra.
+        custo_pecas: Vem depois e soma peças trocadas nas corretivas (as quebras) e nas preventivas que o sensor gerou, então mistura efeito com resultado.
+      indifferent: [idade_ativo, linha, criticidade, tag_ativo]
+    note: >-
+      Sorteio dito de forma concreta (ALEATÓRIO() no Excel). A tentação é ajustar pelas OS
+      preventivas, que a página apresenta com orgulho, ou pelo custo de peças, que mistura as
+      duas coisas.

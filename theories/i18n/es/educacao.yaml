@@ -1,0 +1,261 @@
+# Tradução da ficha de teoria 'educacao' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente a partir da
+# ficha em português, theories/educacao.yaml, que é a que vale: este arquivo só traz as
+# palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado para o teste: esta tradução é usada só nos testes e
+# não entra em treino.
+
+language: es
+status: revisada
+title: Tutoría en una materia de pregrado
+context: >-
+  Una universidad abrió tutorías individuales en una materia de pregrado: a partir de la
+  quinta semana de clases, parte de los estudiantes pasó a tener un encuentro por semana
+  con un tutor, para resolver dudas sobre la materia. Quiere saber si la tutoría aumenta
+  la nota final en la materia.
+randomized: Los estudiantes que participaron en la tutoría fueron elegidos por sorteo.
+closing: Nada más allá de lo descrito influyó en quién participó en la tutoría.
+treatment:
+  label: la tutoría
+  dictionary: Participó en la tutoría de la materia (1 = sí, 0 = no).
+outcome:
+  label: la nota final
+  dictionary: Nota final en la materia, de 0 a 10.
+variables:
+  media_anterior:
+    label: el promedio anterior del estudiante
+    roles:
+      confounder:
+        dictionary: >-
+          Promedio de las notas del estudiante en los semestres anteriores al de la tutoría,
+          de 0 a 10.
+        to_treatment: >-
+          Los estudiantes con un promedio anterior más bajo participaron en la tutoría con
+          más frecuencia, porque recibieron la invitación antes que los demás estudiantes.
+        to_outcome: >-
+          Los estudiantes con un promedio anterior más alto obtienen una nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Promedio de las notas del estudiante en los semestres anteriores al de la tutoría,
+          de 0 a 10.
+        to_outcome: >-
+          Los estudiantes con un promedio anterior más alto obtienen una nota final más alta.
+  presenca_aulas:
+    label: la asistencia a clases
+    roles:
+      confounder:
+        dictionary: >-
+          Asistió a por lo menos el 75% de las clases de la materia en las cuatro semanas
+          anteriores al inicio de la tutoría (1 = sí, 0 = no).
+        to_treatment: >-
+          La tutoría se anunció en clase, y por eso los estudiantes que asistían más a
+          clases participaron en la tutoría con más frecuencia.
+        to_outcome: Los estudiantes que asisten más a clases obtienen una nota final más alta.
+      mediator:
+        dictionary: >-
+          Asistió a por lo menos el 75% de las clases de la materia en las cuatro semanas
+          siguientes al inicio de la tutoría (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes participan en la tutoría asisten más a las clases de la materia en las
+          semanas siguientes.
+        to_outcome: Los estudiantes que asisten más a clases obtienen una nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Asistió a por lo menos el 75% de las clases de la materia en las cuatro semanas
+          anteriores al inicio de la tutoría (1 = sí, 0 = no).
+        to_outcome: Los estudiantes que asisten más a clases obtienen una nota final más alta.
+  horas_estudo:
+    label: las horas de estudio
+    roles:
+      confounder:
+        dictionary: >-
+          Promedio de horas semanales de estudio por cuenta propia para la materia en las
+          cuatro semanas anteriores al inicio de la tutoría.
+        to_treatment: >-
+          Los estudiantes que ya estudiaban más horas por semana para la materia
+          participaron en la tutoría con más frecuencia.
+        to_outcome: >-
+          Quienes estudian más horas por semana para la materia obtienen una nota final más alta.
+      mediator:
+        dictionary: >-
+          Promedio de horas semanales de estudio por cuenta propia para la materia en las
+          cuatro semanas siguientes al inicio de la tutoría.
+        from_treatment: >-
+          Quienes participan en la tutoría se preparan para los encuentros con el tutor y
+          pasan a estudiar más horas por semana para la materia.
+        to_outcome: >-
+          Quienes estudian más horas por semana para la materia obtienen una nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Promedio de horas semanales de estudio por cuenta propia para la materia en las
+          cuatro semanas anteriores al inicio de la tutoría.
+        to_outcome: >-
+          Quienes estudian más horas por semana para la materia obtienen una nota final más alta.
+  exercicios_entregues:
+    label: los ejercicios entregados
+    roles:
+      mediator:
+        dictionary: >-
+          Número de ejercicios de las listas entregados por el estudiante en las cuatro
+          semanas siguientes al inicio de la tutoría.
+        from_treatment: >-
+          El tutor ayuda a resolver las listas de ejercicios, y quienes participan en la
+          tutoría entregan más ejercicios en las semanas siguientes.
+        to_outcome: Quienes entregan más ejercicios de las listas obtienen una nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Número de ejercicios de las listas entregados por el estudiante en las cuatro
+          semanas anteriores al inicio de la tutoría.
+        to_outcome: Quienes entregan más ejercicios de las listas obtienen una nota final más alta.
+  motivacao:
+    label: la motivación del estudiante
+    hidden_fact: >-
+      La motivación de los estudiantes no se midió antes del inicio de la tutoría, y por
+      eso no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Nota de motivación con la materia en el cuestionario aplicado la semana anterior
+          al inicio de la tutoría, de 0 a 10.
+        to_treatment: >-
+          Los estudiantes más motivados con la materia participaron en la tutoría con más
+          frecuencia.
+        to_outcome: Los estudiantes más motivados con la materia obtienen una nota final más alta.
+      mediator:
+        dictionary: >-
+          Nota de motivación con la materia en el cuestionario aplicado cuatro semanas
+          después del inicio de la tutoría, de 0 a 10.
+        from_treatment: >-
+          Quienes participan en la tutoría se sienten más motivados con la materia en las
+          semanas siguientes.
+        to_outcome: Los estudiantes más motivados con la materia obtienen una nota final más alta.
+  base_prerequisito:
+    label: la base en el contenido de prerrequisito
+    hidden_fact: >-
+      La materia no aplicó una prueba de nivelación, y por eso la base de los estudiantes
+      en el contenido de prerrequisito no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Nota en la prueba de nivelación sobre el contenido de prerrequisito, aplicada en
+          la primera semana de clases, de 0 a 10.
+        to_treatment: >-
+          Los estudiantes con una base más débil en el contenido de prerrequisito
+          participaron en la tutoría con más frecuencia, porque sintieron más dificultad y
+          buscaron la tutoría.
+        to_outcome: >-
+          Los estudiantes con una base más sólida en el contenido de prerrequisito obtienen
+          una nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Nota en la prueba de nivelación sobre el contenido de prerrequisito, aplicada en
+          la primera semana de clases, de 0 a 10.
+        to_outcome: >-
+          Los estudiantes con una base más sólida en el contenido de prerrequisito obtienen
+          una nota final más alta.
+  trabalha:
+    label: el empleo o la pasantía del estudiante
+    hidden_fact: >-
+      La universidad no registra qué estudiantes trabajan, y por eso esa información no
+      está en la tabla.
+    roles:
+      confounder:
+        dictionary: Trabajaba o hacía una pasantía al inicio del semestre (1 = sí, 0 = no).
+        to_treatment: >-
+          Los estudiantes que trabajan tienen menos horarios libres y participaron en la
+          tutoría con menos frecuencia.
+        to_outcome: >-
+          Los estudiantes que trabajan llegan más cansados a los exámenes y obtienen una
+          nota final más baja.
+      outcome_cause:
+        dictionary: Trabajaba o hacía una pasantía al inicio del semestre (1 = sí, 0 = no).
+        to_outcome: >-
+          Los estudiantes que trabajan llegan más cansados a los exámenes y obtienen una
+          nota final más baja.
+  bolsista:
+    label: la beca de estudios
+    roles:
+      confounder:
+        dictionary: >-
+          Recibía una beca de estudios de la universidad al inicio del semestre (1 = sí, 0 = no).
+        to_treatment: >-
+          La coordinación de la carrera reservó parte de los cupos de la tutoría para los
+          becarios, y por eso los becarios participaron en la tutoría con más frecuencia.
+        to_outcome: >-
+          Los becarios pierden la beca si les va mal en la materia, y por eso obtienen una
+          nota final más alta.
+      outcome_cause:
+        dictionary: >-
+          Recibía una beca de estudios de la universidad al inicio del semestre (1 = sí, 0 = no).
+        to_outcome: >-
+          Los becarios pierden la beca si les va mal en la materia, y por eso obtienen una
+          nota final más alta.
+  reprovacao_anterior:
+    label: la reprobación anterior de la materia
+    roles:
+      confounder:
+        dictionary: Ya había reprobado esta materia en un semestre anterior (1 = sí, 0 = no).
+        to_treatment: >-
+          Los estudiantes que ya habían reprobado la materia tuvieron prioridad en los cupos
+          y participaron en la tutoría con más frecuencia.
+        to_outcome: Los estudiantes que ya reprobaron la materia obtienen una nota final más baja.
+      outcome_cause:
+        dictionary: Ya había reprobado esta materia en un semestre anterior (1 = sí, 0 = no).
+        to_outcome: Los estudiantes que ya reprobaron la materia obtienen una nota final más baja.
+  turma_piloto:
+    label: el grupo piloto
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Estaba inscrito en uno de los grupos elegidos para el piloto de la tutoría
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          Algunos grupos de la materia fueron elegidos para un piloto y tuvieron más cupos de
+          tutoría, y los estudiantes de esos grupos participaron en la tutoría con más
+          frecuencia.
+  atendimento_coordenacao:
+    label: la atención en la coordinación de la carrera
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Fue atendido por la coordinación de la carrera en las cuatro semanas anteriores al
+          inicio de la tutoría (1 = sí, 0 = no).
+        to_treatment: >-
+          La coordinación de la carrera avisaba a los estudiantes sobre los cupos de tutoría
+          cuando los atendía, y por eso quienes habían sido atendidos por la coordinación
+          participaron en la tutoría con más frecuencia.
+      collider:
+        dictionary: >-
+          Fue atendido por la coordinación de la carrera después del inicio de la tutoría,
+          hasta la inscripción del semestre siguiente (1 = sí, 0 = no).
+        from_treatment: >-
+          La coordinación de la carrera llama con más frecuencia a los estudiantes que
+          participan en la tutoría, para una cita de seguimiento.
+        from_outcome: >-
+          Los estudiantes con una nota final más baja acuden más a la coordinación de la
+          carrera después de la publicación de las notas, para pedir orientación sobre cómo
+          volver a cursar la materia.
+  pesquisa_avaliacao:
+    label: la respuesta a la encuesta de evaluación
+    roles:
+      collider:
+        dictionary: >-
+          Respondió la encuesta de evaluación de la materia, abierta después de la
+          publicación de las notas finales (1 = sí, 0 = no).
+        from_treatment: >-
+          El tutor les pide a los estudiantes de la tutoría que respondan la encuesta de
+          evaluación de la materia, y quienes participan en la tutoría responden más la
+          encuesta.
+        from_outcome: >-
+          Los estudiantes con una nota final más alta responden más la encuesta de
+          evaluación de la materia.
+  matricula_par:
+    label: la paridad del número de matrícula
+    roles:
+      unrelated:
+        dictionary: El número de matrícula del estudiante es par (1 = sí, 0 = no).
+        fact: >-
+          Tener un número de matrícula par o impar no tiene relación con la tutoría ni con
+          la nota final.

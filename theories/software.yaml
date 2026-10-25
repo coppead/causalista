@@ -1,0 +1,418 @@
+# Ficha de teoria: software.
+#
+# Escrita pelo assistente em 2026-10-04. Em 2026-10-05 o André decidiu não ler as fichas uma a
+# uma; esta passou por uma revisão independente, frase por frase, foi corrigida e ficou
+# aprovada por delegação dele (docs/status.md, seção 23).
+#
+# A ficha diz o que a teoria afirma sobre este tema: quais variáveis existem, quais
+# papéis cada uma pode ter e com que sinal ela age. O gerador de mundos só sorteia
+# estruturas que a ficha permite, e os sinais dos efeitos seguem o que está escrito
+# aqui. As frases ("fact") entram nas narrativas tal como estão.
+#
+# Como ler uma variável:
+#   label        como a variável é chamada nas frases
+#   kind         binary (0 ou 1), count (contagem), continuous (valor), score (nota 0 a 10)
+#   scale        o tamanho típico: rate (fração de 1), mean (média), median (mediana)
+#   hidden_fact  se existir, a variável pode ficar fora da tabela, e esta frase avisa
+#   roles        os papéis que a teoria permite para a variável:
+#     confounder       causa da intervenção e do resultado
+#     mediator         consequência da intervenção e causa do resultado
+#     collider         consequência da intervenção e do resultado
+#     outcome_cause    causa só do resultado
+#     treatment_cause  causa só da intervenção
+#     unrelated        sem relação com a intervenção nem com o resultado
+#   Em cada papel:
+#     dictionary       a descrição da coluna na tabela (é ela que diz antes ou depois)
+#     to_treatment     como a variável age sobre a intervenção: sinal e frase
+#     to_outcome       como a variável age sobre o resultado
+#     from_treatment   como a intervenção age sobre a variável
+#     from_outcome     como o resultado age sobre a variável
+#
+# A mesma variável pode ter papéis diferentes em mundos diferentes. É isso que impede
+# o modelo de decorar "esta coluna sempre entra no ajuste".
+
+id: software
+status: aprovada   # por delegação do André em 2026-10-05, depois de revisão independente (docs/status.md, seção 23)
+title: Treinamento de implantação em uma empresa de software por assinatura
+
+theory:
+  name: Expectativa e confirmação na continuidade de uso
+  statement: >-
+    Uma empresa cliente continua com um sistema quando o uso confirma o que ela esperava
+    dele. A confirmação aumenta a utilidade percebida e a satisfação, e as duas alimentam
+    a intenção de continuar. O treinamento de implantação torna o sistema mais fácil de
+    usar e faz o valor aparecer cedo. Assim, a expectativa da empresa cliente se confirma
+    mais cedo.
+  references:   # a confirmar pelo André
+    - "Bhattacherjee, A. (2001). Understanding information systems continuance: an expectation-confirmation model. MIS Quarterly, 25(3), 351-370."
+    - "Davis, F. D. (1989). Perceived usefulness, perceived ease of use, and user acceptance of information technology. MIS Quarterly, 13(3), 319-340."
+
+context: >-
+  Uma empresa de software por assinatura vende um sistema de gestão a outras empresas,
+  em contratos de doze meses. No terceiro mês de contrato, ela deu a parte das empresas
+  clientes um treinamento de implantação, que ensina os funcionários a usar o sistema.
+  Ela quer saber se o treinamento aumenta a renovação do contrato ao fim dos doze meses.
+randomized: As empresas clientes que receberam o treinamento foram escolhidas por sorteio.
+closing: Nada além do que foi descrito influenciou a escolha de quem recebeu o treinamento.
+
+treatment:
+  column: treinamento
+  label: o treinamento de implantação
+  dictionary: Recebeu o treinamento de implantação no terceiro mês de contrato (1 = sim, 0 = não).
+  share: [0.20, 0.50]        # fração das empresas clientes que recebe o treinamento
+
+outcome:
+  column: renovou
+  label: a renovação
+  kind: binary
+  dictionary: Renovou o contrato ao fim dos doze meses (1 = sim, 0 = não).
+  scale: {rate: [0.55, 0.80]}   # fração das empresas clientes que renova
+
+effect:
+  sign: "+"                  # a teoria diz que o treinamento aumenta a renovação
+
+variables:
+
+  funcionarios:
+    label: o número de funcionários da empresa cliente
+    kind: count
+    scale: {mean: 80}
+    roles:
+      confounder:
+        dictionary: Número de funcionários da empresa cliente na data de assinatura do contrato.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A empresa de software deu o treinamento com mais frequência às empresas
+            clientes com mais funcionários.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes com mais funcionários têm mais trabalho para trocar de
+            sistema e renovam mais.
+      outcome_cause:
+        dictionary: Número de funcionários da empresa cliente na data de assinatura do contrato.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes com mais funcionários têm mais trabalho para trocar de
+            sistema e renovam mais.
+
+  valor_contrato:
+    label: o valor do contrato
+    kind: continuous
+    scale: {median: 3000}
+    roles:
+      confounder:
+        dictionary: Valor mensal do contrato na data de assinatura, em reais.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Empresas clientes com contrato de valor mais alto receberam o treinamento com
+            mais frequência.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Empresas clientes com contrato de valor mais alto renovam menos, porque a
+            mensalidade pesa mais no orçamento.
+      outcome_cause:
+        dictionary: Valor mensal do contrato na data de assinatura, em reais.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Empresas clientes com contrato de valor mais alto renovam menos, porque a
+            mensalidade pesa mais no orçamento.
+
+  usuarios_ativos:
+    label: os usuários ativos
+    kind: count
+    scale: {mean: 20}
+    roles:
+      confounder:
+        dictionary: >-
+          Número médio de usuários ativos no sistema por mês, nos dois meses anteriores
+          ao treinamento.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            A empresa de software deu o treinamento com mais frequência às empresas clientes com menos usuários ativos no sistema.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes com mais usuários ativos no sistema renovam mais.
+      mediator:
+        dictionary: >-
+          Número médio de usuários ativos no sistema por mês, nos três meses seguintes
+          ao treinamento.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O treinamento ensina mais funcionários da empresa cliente a usar o sistema e
+            aumenta o número de usuários ativos nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes com mais usuários ativos no sistema renovam mais.
+      outcome_cause:
+        dictionary: >-
+          Número médio de usuários ativos no sistema por mês, nos dois meses anteriores
+          ao treinamento.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes com mais usuários ativos no sistema renovam mais.
+
+  funcionalidades:
+    label: as funcionalidades em uso
+    kind: count
+    scale: {mean: 6}
+    roles:
+      mediator:
+        dictionary: >-
+          Número de funcionalidades do sistema que a empresa cliente usou nos três meses
+          seguintes ao treinamento.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            O treinamento apresenta funcionalidades do sistema que a empresa cliente
+            ainda não usava e aumenta o número de funcionalidades em uso.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes que usam mais funcionalidades do sistema renovam mais.
+      outcome_cause:
+        dictionary: >-
+          Número de funcionalidades do sistema que a empresa cliente usou nos dois meses
+          anteriores ao treinamento.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes que usam mais funcionalidades do sistema renovam mais.
+
+  chamados_suporte:
+    label: os chamados no suporte
+    kind: count
+    scale: {mean: 5}
+    roles:
+      confounder:
+        dictionary: Número de chamados abertos no suporte nos dois meses anteriores ao treinamento.
+        to_treatment:
+          sign: "+"
+          fact: >-
+            A empresa de software deu o treinamento com mais frequência às empresas
+            clientes que tinham aberto mais chamados no suporte, porque viu nos chamados
+            um sinal de dificuldade com o sistema.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Empresas clientes que abrem mais chamados no suporte perdem mais tempo com
+            problemas no sistema e renovam menos.
+      mediator:
+        dictionary: Número de chamados abertos no suporte nos três meses seguintes ao treinamento.
+        from_treatment:
+          sign: "-"
+          fact: >-
+            O treinamento tira as dúvidas mais comuns e reduz o número de chamados no
+            suporte nos meses seguintes.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Empresas clientes que abrem mais chamados no suporte perdem mais tempo com
+            problemas no sistema e renovam menos.
+      outcome_cause:
+        dictionary: Número de chamados abertos no suporte nos dois meses anteriores ao treinamento.
+        to_outcome:
+          sign: "-"
+          fact: >-
+            Empresas clientes que abrem mais chamados no suporte perdem mais tempo com
+            problemas no sistema e renovam menos.
+
+  satisfacao:
+    label: a satisfação da empresa cliente
+    kind: score
+    scale: {mean: 7}
+    hidden_fact: >-
+      A satisfação das empresas clientes não foi medida antes do treinamento, e por isso
+      ela não está na tabela.
+    roles:
+      confounder:
+        dictionary: Nota de satisfação com o sistema na pesquisa feita antes do treinamento, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Empresas clientes menos satisfeitas com o sistema aceitaram o convite para o treinamento mais vezes, e por isso receberam o treinamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes mais satisfeitas com o sistema renovam mais.
+      mediator:
+        dictionary: >-
+          Nota de satisfação com o sistema na pesquisa feita três meses depois do
+          treinamento, de 0 a 10.
+        from_treatment:
+          sign: "+"
+          fact: >-
+            Empresas clientes que recebem o treinamento ficam mais satisfeitas com o
+            sistema nos meses seguintes.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes mais satisfeitas com o sistema renovam mais.
+
+  patrocinador_interno:
+    label: o patrocinador interno
+    kind: binary
+    scale: {rate: 0.35}
+    hidden_fact: >-
+      A empresa de software não registra em quais empresas clientes há um gestor que defende o uso do sistema, e por isso essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: >-
+          Tinha, antes do treinamento, um gestor que defendia o uso do sistema dentro da
+          empresa cliente (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Empresas clientes em que um gestor defende o uso do sistema receberam o
+            treinamento com mais frequência, porque esse gestor pediu o treinamento para a equipe.
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes em que um gestor defende o uso do sistema renovam mais.
+      outcome_cause:
+        dictionary: >-
+          Tinha, antes do treinamento, um gestor que defendia o uso do sistema dentro da
+          empresa cliente (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: Empresas clientes em que um gestor defende o uso do sistema renovam mais.
+
+  maturidade_digital:
+    label: a maturidade digital da equipe
+    kind: score
+    scale: {mean: 6}
+    hidden_fact: >-
+      A empresa de software não avalia a familiaridade da equipe das empresas clientes
+      com sistemas digitais, e por isso essa informação não está na tabela.
+    roles:
+      confounder:
+        dictionary: >-
+          Nota de familiaridade da equipe da empresa cliente com sistemas digitais, na
+          avaliação feita antes do treinamento, de 0 a 10.
+        to_treatment:
+          sign: "-"
+          fact: >-
+            Empresas clientes cuja equipe tinha menos familiaridade com sistemas digitais pediram o treinamento mais vezes, e por isso receberam o treinamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes cuja equipe tem mais familiaridade com sistemas digitais
+            aprendem o sistema mais rápido e renovam mais.
+      outcome_cause:
+        dictionary: >-
+          Nota de familiaridade da equipe da empresa cliente com sistemas digitais, na
+          avaliação feita antes do treinamento, de 0 a 10.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes cuja equipe tem mais familiaridade com sistemas digitais
+            aprendem o sistema mais rápido e renovam mais.
+
+  gerente_conta:
+    label: o gerente de conta dedicado
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      confounder:
+        dictionary: Tinha gerente de conta dedicado desde a assinatura do contrato (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Os gerentes de conta indicaram para o treinamento as empresas que atendem, e
+            por isso as empresas clientes com gerente de conta dedicado receberam o
+            treinamento com mais frequência.
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes com gerente de conta dedicado têm os problemas resolvidos
+            mais rápido e renovam mais.
+      treatment_cause:
+        dictionary: Tinha gerente de conta dedicado desde a assinatura do contrato (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            Os gerentes de conta indicaram para o treinamento as empresas que atendem, e
+            por isso as empresas clientes com gerente de conta dedicado receberam o
+            treinamento com mais frequência.
+
+  escritorio_piloto:
+    label: o escritório piloto
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Era atendida por um dos escritórios regionais escolhidos para o piloto do
+          treinamento (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O treinamento começou por alguns escritórios regionais escolhidos como
+            piloto, e as empresas clientes atendidas por esses escritórios receberam o
+            treinamento com mais frequência.
+
+  contato_sucesso_cliente:
+    label: o contato da equipe de sucesso do cliente
+    kind: binary
+    scale: {rate: 0.30}
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Recebeu ligação da equipe de sucesso do cliente nos dois meses anteriores ao
+          treinamento (1 = sim, 0 = não).
+        to_treatment:
+          sign: "+"
+          fact: >-
+            O treinamento era oferecido durante a ligação da equipe de sucesso do
+            cliente, e por isso as empresas clientes que tinham recebido a ligação
+            receberam o treinamento com mais frequência.
+      collider:
+        dictionary: >-
+          Recebeu ligação da equipe de sucesso do cliente depois do treinamento, até um
+          mês depois do fim do contrato (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A equipe de sucesso do cliente liga com mais frequência para as empresas clientes que receberam o treinamento, para saber como foi o treinamento.
+        from_outcome:
+          sign: "-"
+          fact: >-
+            A equipe de sucesso do cliente liga com mais frequência para as empresas clientes que não renovam, para entender o motivo da saída.
+
+  reuniao_acompanhamento:
+    label: a reunião de acompanhamento
+    kind: binary
+    scale: {rate: 0.35}
+    roles:
+      collider:
+        dictionary: >-
+          Participou de reunião de acompanhamento com a empresa de software depois do
+          treinamento, até um mês depois do fim do contrato (1 = sim, 0 = não).
+        from_treatment:
+          sign: "+"
+          fact: >-
+            A empresa de software marca reunião de acompanhamento com mais frequência com as empresas clientes que receberam o treinamento, para avaliar o que foi aprendido.
+        from_outcome:
+          sign: "+"
+          fact: >-
+            A empresa de software marca reunião de acompanhamento com mais frequência com as empresas clientes que renovam, para planejar o novo período de contrato.
+      outcome_cause:
+        dictionary: >-
+          Participou de reunião de acompanhamento com a empresa de software nos dois
+          meses anteriores ao treinamento (1 = sim, 0 = não).
+        to_outcome:
+          sign: "+"
+          fact: >-
+            Empresas clientes que participam de reunião de acompanhamento nos primeiros
+            meses de contrato resolvem as dificuldades cedo e renovam mais.
+
+  mes_assinatura:
+    label: o mês de assinatura do contrato
+    kind: count
+    scale: {mean: 6, min: 1, max: 12}
+    roles:
+      unrelated:
+        dictionary: Mês do ano em que o contrato foi assinado (1 a 12).
+        fact: O mês de assinatura do contrato não tem relação com o treinamento nem com a renovação.

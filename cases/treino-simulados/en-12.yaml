@@ -1,0 +1,483 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-12, oito casos em inglês
+# (vozes dos EUA).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (analista de uma cooperativa de
+# crédito no Texas, diretora de um sistema de bibliotecas públicas, gerente de produto de uma
+# empresa de kits de refeição, líder de operações de lojas de uma rede de materiais de
+# construção, decana de estudantes de um community college) descrevendo um conjunto de dados
+# do jeito que essa pessoa escreveria: memorando de uma página, trecho de documento para o
+# conselho, mensagem de Slack, e-mail para o time de dados, pergunta em fórum.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado,
+# e as intervenções são outras que não as dos demais arquivos de treino com as mesmas personas.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_cu_reminder_texts_handpicked
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: consumer lending analyst at a credit union in the Rio Grande Valley, Texas (about 55,000 members, nine branches), writing to the VP of Consumer Lending; finance degree, no statistics beyond one course
+    theme: Credit union / collections
+    title: Payment reminder texts on auto loans, list worked over by hand
+    treatment: reminder_text
+    outcome: dpd30_apr_sep
+    columns:
+      reminder_text: 1 if the loan was on the three-day payment reminder text list from March 1, 2026.
+      dpd30_apr_sep: 1 if the loan was 30 or more days past due at any month-end from April through September 2026.
+      credit_tier_orig: Internal credit tier at origination, A (best) through E.
+      autopay: 1 if the payment was set to automatic transfer from a share or checking account as of March 1, 2026.
+      loan_age_mo: Months since origination as of March 1, 2026.
+      branch: Servicing branch.
+      promoter_oct: 1 if the member answered the October 2026 member survey with a 9 or 10 on likelihood to recommend. Blank if no response.
+      loan_id: Core system loan number.
+    not_in_table:
+      collector_judgment: The collections team's sense, from past calls and free-text notes, of which members needed a nudge and which were good for the money. Not coded anywhere.
+    story: >-
+      TO Marisol Treviño, VP Consumer Lending. FROM Consumer Lending Analytics (Derek Pruitt).
+      DATE October 2, 2026. RE Payment reminder texts on the indirect auto book, what the numbers
+      can and can't tell us. Background. Starting March 1 we began texting members three days before
+      the due date on indirect auto loans (the dealer-originated book, about 6,400 loans). The list
+      came from the collections side. Rudy's team pulled the C, D and E tier loans out of the core
+      system as a starting point and then went through the list by hand: they dropped members they
+      knew from past calls were good for the money, and added a few dozen A and B tier members they
+      had a bad feeling about. That knowledge is in their call notes and in their heads. The notes
+      are free text and nobody is going to code six thousand of them. Anyone on automatic payment
+      from a share or checking account was left off, they don't need the nudge. Results to date. On
+      the raw numbers the texted loans look worse, not better: 7.9% of them hit 30 days past due at
+      some month-end between April and September, against 5.1% of the loans that got no text. I
+      don't read that as the texts hurting anybody. The loans that got picked were the ones the team
+      was worried about, and the team is usually right about who is going to be late. For what it's
+      worth, in the October member survey the texted members scored us higher (61% promoters vs
+      54%), though members who have been late with us this year rate us lower regardless, so I would
+      not lean on that either. Loan age is in the extract because the first six months are where
+      dealer paper goes bad. Branch is the servicing branch, mostly so we can see McAllen against
+      Harlingen. Ask. I can produce a tier-and-autopay-adjusted comparison for the board packet, but
+      I don't believe it answers whether the text itself does anything, and I'd rather say that in
+      the packet than put a number next to it. Please let me know if you'd like me to proceed anyway.
+    edges:
+      - credit_tier_orig -> reminder_text
+      - credit_tier_orig -> dpd30_apr_sep
+      - autopay -> reminder_text
+      - autopay -> dpd30_apr_sep
+      - collector_judgment -> reminder_text
+      - collector_judgment -> dpd30_apr_sep
+      - reminder_text -> dpd30_apr_sep
+      - loan_age_mo -> dpd30_apr_sep
+      - reminder_text -> promoter_oct
+      - dpd30_apr_sep -> promoter_oct
+    answer:
+      identifiable: false
+      missing: [collector_judgment]
+    twin: en_cu_reminder_texts_rule
+    note: >-
+      The tier list was only the starting point; the collections team edited it from what they
+      knew about each member, and that knowledge is in free-text notes. Tier and autopay are in the
+      table and are not enough.
+
+  - id: en_cu_reminder_texts_rule
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: consumer lending analyst at a credit union in the Rio Grande Valley, Texas (about 55,000 members, nine branches), writing to the VP of Consumer Lending; finance degree, no statistics beyond one course
+    theme: Credit union / collections
+    title: Payment reminder texts on auto loans, list built by the tier rule
+    treatment: reminder_text
+    outcome: dpd30_apr_sep
+    columns:
+      reminder_text: 1 if the loan was on the three-day payment reminder text list from March 1, 2026.
+      dpd30_apr_sep: 1 if the loan was 30 or more days past due at any month-end from April through September 2026.
+      credit_tier_orig: Internal credit tier at origination, A (best) through E.
+      autopay: 1 if the payment was set to automatic transfer from a share or checking account as of March 1, 2026.
+      loan_age_mo: Months since origination as of March 1, 2026.
+      branch: Servicing branch.
+      promoter_oct: 1 if the member answered the October 2026 member survey with a 9 or 10 on likelihood to recommend. Blank if no response.
+      loan_id: Core system loan number.
+    story: >-
+      TO Marisol Treviño, VP Consumer Lending. FROM Consumer Lending Analytics (Derek Pruitt).
+      DATE October 2, 2026. RE Payment reminder texts on the indirect auto book, what the numbers
+      can and can't tell us. Background. Starting March 1 we began texting members three days before
+      the due date on indirect auto loans (the dealer-originated book, about 6,400 loans). The list
+      came from the collections side and it was mechanical: every C, D and E tier loan in the core
+      system as of March 1, nothing added or dropped by hand. Rudy wanted his team to go through it
+      and weed out the members they knew were good for the money, and we didn't have the time, which
+      I now think was lucky. Anyone on automatic payment from a share or checking account was left
+      off, they don't need the nudge. Results to date. On the raw numbers the texted loans look
+      worse, not better: 7.9% of them hit 30 days past due at some month-end between April and
+      September, against 5.1% of the loans that got no text. I don't read that as the texts hurting
+      anybody. A C-through-E list is going to run late more than the A and B loans whatever we text
+      them, and the autopay members we skipped almost never miss. For what it's worth, in the
+      October member survey the texted members scored us higher (61% promoters vs 54%), though
+      members who have been late with us this year rate us lower regardless, so I would not lean on
+      that either. Loan age is in the extract because the first six months are where dealer paper
+      goes bad. Branch is the servicing branch, mostly so we can see McAllen against Harlingen. Ask.
+      I can produce a comparison for the board packet that accounts for how the list was built. Two
+      questions before I do: is tier plus autopay the right comparison, and should the survey score
+      be in there at all? Please let me know by Friday.
+    edges:
+      - credit_tier_orig -> reminder_text
+      - credit_tier_orig -> dpd30_apr_sep
+      - autopay -> reminder_text
+      - autopay -> dpd30_apr_sep
+      - reminder_text -> dpd30_apr_sep
+      - loan_age_mo -> dpd30_apr_sep
+      - reminder_text -> promoter_oct
+      - dpd30_apr_sep -> promoter_oct
+    answer:
+      identifiable: true
+      adjust_for: [autopay, credit_tier_orig]
+      do_not_adjust_for:
+        promoter_oct: Collected in October, after the delinquency window closed, and shaped both by having received the texts and by having been late. Comparing within survey score invents a link between the two.
+      indifferent: [branch, loan_age_mo, loan_id]
+    twin: en_cu_reminder_texts_handpicked
+    note: >-
+      Same memo, but the list followed the tier rule with the autopay exclusion and nothing else.
+      Both inputs to the rule are columns, so adjusting for them is enough; the October survey is
+      the trap.
+
+  - id: en_library_sunday_hours
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: executive director of a city-county public library system on Colorado's Front Range (12 branches), writing the staff paper for the Board of Trustees; librarian by training
+    theme: Public library / opening hours
+    title: Sunday service at the busiest branches and the two cities that paid for it
+    treatment: sunday_hours
+    outcome: visits_q1_2026
+    columns:
+      sunday_hours: 1 if the branch opened Sundays 1 to 5 p.m. from September 2025.
+      visits_q1_2026: Door count, January through March 2026.
+      visits_2024: Door count, calendar year 2024.
+      city_match: 1 if the branch's city funds half of the Sunday staffing cost under a three-year agreement (Linden and Fort Avery).
+      open_hours_wk: Scheduled public open hours per week in the FY2026 schedule.
+      friends_pledge_2026: Dollars pledged to the branch's Friends group in the spring 2026 pledge drive (April and May 2026).
+      sqft: Public floor area, square feet.
+      branch_code: Three-letter branch code.
+    story: >-
+      Board of Trustees, Regular Meeting, October 15, 2026. Agenda item 6, Sunday service, first-year
+      review. Staff paper prepared by the Executive Director. 6.1 Background. Sunday service (1 to 5
+      p.m.) began at six of our twelve branches in September 2025, as approved at the June 2025
+      meeting. The Board will recall how the six were chosen: the four branches with the highest
+      door counts in 2024, on the reasoning that Sunday hours should go where the demand already is,
+      and the two branches in Linden and Fort Avery, whose city councils agreed to fund half of the
+      Sunday staffing cost for three years. 6.2 Early results. Door counts for January through March
+      2026 are up 11 percent at the Sunday branches against 2 percent at the other six. Staff rightly
+      point out that part of this is simply more open hours, the Sunday branches now offer 54 hours a
+      week against 50 everywhere else, and that the two funded branches sit in the fastest-growing
+      part of the service area; Linden alone has added about 1,900 households since the census. We
+      should also be candid that our largest branches have been outgrowing the small ones for a
+      decade and would have done so this year with or without Sundays. 6.3 Friends groups. The
+      spring pledge drive brought in $64,000 system-wide, a record. Pledges were strongest at the
+      Sunday branches, where the Friends groups organized around the new hours, and, as in every
+      year, at the branches with the most people coming through the door. 6.4 Recommendation. Before
+      the Board considers extending Sunday service to the remaining six branches in FY2028, staff
+      will bring to the December meeting an estimate of what Sunday hours themselves did for visits,
+      given how the six were chosen. Floor area and branch code are carried in the appendix table
+      for reference.
+    edges:
+      - visits_2024 -> sunday_hours
+      - visits_2024 -> visits_q1_2026
+      - city_match -> sunday_hours
+      - city_match -> visits_q1_2026
+      - sunday_hours -> open_hours_wk
+      - open_hours_wk -> visits_q1_2026
+      - sunday_hours -> visits_q1_2026
+      - sunday_hours -> friends_pledge_2026
+      - visits_q1_2026 -> friends_pledge_2026
+    answer:
+      identifiable: true
+      adjust_for: [city_match, visits_2024]
+      do_not_adjust_for:
+        open_hours_wk: The extra four hours a week are what Sunday service is; the only reason the schedules differ is the Sunday opening. Holding weekly hours fixed removes most of the effect being measured.
+        friends_pledge_2026: Pledged in April and May, after the quarter being measured, and driven both by the Sunday opening and by how busy the branch was. Comparing within pledge level distorts the effect.
+      indifferent: [branch_code, sqft]
+    note: >-
+      Two selection rules, both recorded (2024 door count and the matching-funds cities). The
+      weekly-hours figure is the intervention restated, and the pledge drive came afterwards and
+      answers to both the opening and the visits.
+
+  - id: en_mealkit_pause_screen_ab
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: product manager for retention at a US meal-kit subscription company (about 140,000 active accounts), messaging the data scientist in the retention channel
+    theme: Meal-kit subscription / cancellation flow
+    title: Pause-before-cancel screen tested on even-numbered accounts
+    treatment: pause_screen
+    outcome: active_d90
+    columns:
+      pause_screen: 1 if the account was in the test arm and saw the "Pause your plan" screen before the cancel button from Feb 2, 2026 (even last digit of the account id).
+      active_d90: 1 if the account had a paid delivery in the 13th week after Feb 2, 2026.
+      paused_any: 1 if the account used a plan pause at least once between Feb 2, 2026 and the 90-day mark.
+      csat_may: Score from 1 to 5 on the May 2026 customer survey, sent to every account in the test including cancelled ones. Blank if no response.
+      tenure_wk: Weeks since first delivery as of Feb 2, 2026.
+      plan_size: 2 or 4 servings.
+    story: >-
+      hey @Tomás, the pause-before-cancel test, quick context since you weren't on the team when it
+      launched. Feb 2 we started showing a "Pause your plan for 2, 4 or 6 weeks" screen before the
+      cancel button to half of all active accounts, split on the last digit of the account id (even
+      got the pause screen, odd got the old flow). nobody could opt in or out and support didn't know
+      which arm anyone was in, which caused its own fun. what I'm seeing in Looker: pause usage is
+      way up in the even group (obviously, the odd group barely knew pause existed) and the paused
+      accounts come back at something like 70%, so active-at-90-days is up about 2.3 pts in the test
+      arm. leadership wants to call it. before I do: Priya ran the May CSAT survey on everyone incl.
+      churned accounts, and the test arm scores higher, which is nice, but churned customers always
+      rate us lower so I don't know how much of that is the flow. also the usual stuff, long-tenure
+      accounts and 4-serving plans churn less no matter what we do. can you give me the clean lift on
+      active-at-90 and tell me whether I should be cutting it by pause usage or by the CSAT at all? I
+      have a slide due Thursday
+    edges:
+      - pause_screen -> paused_any
+      - paused_any -> active_d90
+      - pause_screen -> active_d90
+      - tenure_wk -> active_d90
+      - plan_size -> active_d90
+      - pause_screen -> csat_may
+      - active_d90 -> csat_may
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        paused_any: Only the test arm really had pause available, and pausing is the main way the screen keeps accounts active. Cutting by pause usage removes the effect being measured.
+        csat_may: Collected in May, after the 90-day mark, and shaped both by which arm the account was in and by whether it stayed active. Comparing within score creates a false link.
+      indifferent: [plan_size, tenure_wk]
+    note: >-
+      The split on the last digit of the account id makes the plain comparison right. The traps are
+      the pause-usage KPI, which is the mechanism, and the May survey, which came afterwards and
+      answers to both arm and churn.
+
+  - id: en_mealkit_delivery_window
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: product manager for delivery experience at a US meal-kit subscription company, writing to the data team before a carrier contract renewal
+    theme: Meal-kit subscription / last-mile delivery
+    title: Two-hour delivery window where the regional carrier offers it
+    treatment: window_option
+    outcome: churn_120d
+    columns:
+      window_option: 1 if the account could choose a two-hour delivery window in the app as of Oct 6, 2025 (Rivet-served account in a window-enabled ZIP).
+      churn_120d: 1 if the account cancelled within 120 days of Oct 6, 2025.
+      missed_deliv_90d: Number of deliveries in the 90 days from Oct 6, 2025 flagged as missed (not received, or returned to the depot).
+      carrier: Rivet (regional) or national.
+      zip_density: Households per square mile in the account's delivery ZIP, from the census append.
+      tenure_wk: Weeks since first delivery as of Oct 6, 2025.
+      signup_weekday: Day of the week the account was created.
+    story: >-
+      Subject, Delivery window pilot, need a real number before the carrier renewal. Hi all, context
+      for whoever picks this up (Dana is out until the 19th). Since last October, accounts delivered
+      by Rivet, our regional carrier in the Northeast and the Bay Area, can pick a two-hour delivery
+      window in the app instead of getting the all-day 8-to-8 estimate. Rivet only offers windows in
+      the parts of their network where route density supports it, which in practice means the city
+      cores and the first ring of suburbs. Everything outside that, and everything on our national
+      carrier, stayed on the all-day estimate. So the window accounts are overwhelmingly urban, and
+      we know from last year's churn work that our city customers leave faster regardless: lots of
+      restaurants, lots of alternatives, and the newer accounts churn more as always. What I can see
+      in the dashboard: missed deliveries (box left when no one is home, box returned) are down about
+      40 percent for window accounts over the first 90 days, and missed deliveries are the number one
+      thing in the cancel reasons, so the churn number looks great. Rivet in general also has a
+      better damage rate than the national carrier, so windows or not, Rivet accounts churn a bit
+      less. What I need: the effect of having the window option on 120-day churn, with the right
+      comparisons, by October 24 for the Rivet contract renewal. The extract Dana built is attached,
+      dictionary below. I kept the sign-up weekday column in because Marketing asked for it for
+      something else. Thanks, Jess
+    edges:
+      - carrier -> window_option
+      - carrier -> churn_120d
+      - zip_density -> window_option
+      - zip_density -> churn_120d
+      - window_option -> missed_deliv_90d
+      - missed_deliv_90d -> churn_120d
+      - window_option -> churn_120d
+      - tenure_wk -> churn_120d
+    answer:
+      identifiable: true
+      adjust_for: [carrier, zip_density]
+      do_not_adjust_for:
+        missed_deliv_90d: Counted after the option was live and reduced by it; fewer missed boxes is the main way the window keeps people from cancelling. Holding it fixed removes most of the effect.
+      indifferent: [signup_weekday, tenure_wk]
+    note: >-
+      The story talks about city cores and never names a density column, but the dictionary has
+      one; with carrier it covers how accounts got the option. The missed-delivery KPI is the
+      mechanism.
+
+  - id: en_hardware_pro_desk_en12
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: store operations lead at a regional hardware chain (38 stores in the Carolinas and Georgia), posting on a retail analytics forum; came up through store management, no analyst on staff
+    theme: Hardware retail / contractor service counter
+    title: Pro Desk at the stores where the VPs saw trucks in the lot
+    treatment: pro_desk
+    outcome: pro_sales_growth
+    columns:
+      pro_desk: 1 if the store opened a Pro Desk between February and April 2025.
+      pro_sales_growth: Percent change in pro-category sales (lumber, drywall, electrical and plumbing rough-in), May 2025 to April 2026 versus the twelve months before.
+      new_pro_accounts: Pro accounts opened at the store, May 2025 to April 2026.
+      sales_2024: Total store sales, calendar 2024, dollars.
+      sqft: Selling floor, square feet.
+      region: Coastal or Piedmont (the two VP regions).
+      store_no: Store number.
+    not_in_table:
+      contractor_traffic: How much contractor business the store already had before 2025, as the VPs judged it from the parking lot. Receipts carry no customer type, so it is recorded nowhere.
+    story: >-
+      How do I compare stores that got a Pro Desk vs. stores that didn't, when the picks weren't
+      random? Long-time lurker. I run store operations for a hardware chain, 38 stores, Carolinas
+      and Georgia, and I've been handed the job of "proving the Pro Desk works" for a budget meeting
+      in November. Pro Desk = a dedicated contractor counter with its own two associates, phone line
+      and will-call pickup, put into 11 stores between Feb and Apr 2025. Here's the problem. The 11
+      weren't picked by me or by any list. Our two regional VPs each picked their stores, and when I
+      asked how, Dale said "the ones where you see trucks in the lot at 6:30 a.m." and Kim basically
+      said the same, the stores where the contractors already shop. We don't track that anywhere,
+      there's no customer type on the register receipt for cash or card customers, and the stores'
+      2024 sales were used only as a starting point (they both worked from the top-20 list by total
+      sales and picked from it). What I have per store: pro desk yes/no, pro-category sales growth
+      (lumber, drywall, electrical rough-in, plumbing rough-in) for May 2025 to Apr 2026 vs. the
+      year before, new pro accounts opened in that period (the desk associates sign them up, this is
+      the KPI the VPs keep showing, and account holders obviously buy more pro stuff), 2024 total
+      sales, store square footage, region, and store number. Pro-category growth at the desk stores
+      is +18% vs +6% elsewhere. Can I adjust for 2024 sales and square footage and call it a day? My
+      gut says the trucks-in-the-lot thing is the whole ballgame and I can't adjust for something I
+      don't have. Am I being too careful? And anything I should know about the new accounts column?
+    edges:
+      - contractor_traffic -> pro_desk
+      - contractor_traffic -> pro_sales_growth
+      - sales_2024 -> pro_desk
+      - pro_desk -> new_pro_accounts
+      - new_pro_accounts -> pro_sales_growth
+      - pro_desk -> pro_sales_growth
+    answer:
+      identifiable: false
+      missing: [contractor_traffic]
+    note: >-
+      The VPs picked on contractor traffic they could see and nobody recorded. 2024 sales only
+      narrowed the list and does not stand in for it. The new-accounts KPI is a consequence of the
+      desk, not a fix.
+
+  - id: en_hardware_shelf_scanner
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: store operations lead at a regional hardware chain (38 stores), messaging the analyst in the ops analytics channel after the weekly call
+    theme: Hardware retail / out-of-stock scanning
+    title: Handheld gap scanners at the high-shrink and big-box stores
+    treatment: shelfcheck
+    outcome: oos_rate_q2
+    columns:
+      shelfcheck: 1 if the store had ShelfCheck handheld gap scanners in use from October 2025.
+      oos_rate_q2: Share of audited SKU-locations found out of stock in the Q2 2026 audit (June 2026).
+      shrink_2024: Inventory shrink as a percent of sales, FY2024 physical count.
+      format: big_box or neighborhood.
+      sku_count: Active SKUs on the store planogram, May 2026.
+      district: Operating district, which also sets the distribution center that serves the store.
+      recount_req: 1 if the store filed a recount request after the Q2 2026 audit results were published in July 2026.
+      open_year: Year the store opened.
+      store_no: Store number.
+    story: >-
+      @Lena following up from the ops call, the ShelfCheck handhelds. we put them in 16 stores last
+      fall. order was the 8 stores with the worst 2024 shrink, then every big-box format store
+      because that's where the shelf count is, a few overlapped. the Q2 out-of-stock audit came back
+      and the ShelfCheck stores sit at 4.1% OOS vs 6.3% in the rest. two things before anyone puts
+      that on a slide. (1) the high-shrink stores have always had the worst gaps, product walks out
+      the door and the shelf shows empty. and the big boxes carry 2 to 3x the SKUs of a neighborhood
+      store, more SKUs more holes, plus the high racking means the overstock sits up top and the
+      shelf below runs empty between restocks, that's the format. (2) 11 stores filed recount
+      requests on the audit. the ShelfCheck stores filed more because they have their own counts to
+      argue with, and anyone with an ugly number files. Neil wants to drop the recount stores from
+      the comparison and I don't love it. district is in the file because the Savannah DC has been
+      shorting everybody since the system cutover. open year and store number are just there. can
+      you give me the honest number and a yes/no on the recount thing?
+    edges:
+      - shrink_2024 -> shelfcheck
+      - shrink_2024 -> oos_rate_q2
+      - format -> shelfcheck
+      - format -> sku_count
+      - sku_count -> oos_rate_q2
+      - format -> oos_rate_q2
+      - shelfcheck -> oos_rate_q2
+      - shelfcheck -> recount_req
+      - oos_rate_q2 -> recount_req
+      - district -> oos_rate_q2
+    answer:
+      identifiable: true
+      adjust_for: [format, shrink_2024]
+      do_not_adjust_for:
+        recount_req: Filed in July, after the audit result, and driven both by having the scanners and by the audit number itself. Dropping or splitting by it skews the comparison.
+      indifferent: [district, open_year, sku_count, store_no]
+    note: >-
+      Two recorded selection rules, shrink and format. SKU count is one of the ways format matters,
+      so it can go in or out. The recount request is the post-outcome trap, and the colleague's
+      suggestion to drop those stores is the same mistake in disguise.
+
+  - id: en_college_early_alert
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: dean of students at a community college in central Ohio (about 6,500 students, two campuses), former counselor, posting on a student-success listserv while the institutional research position is vacant
+    theme: Community college / early alert
+    title: Early-alert outreach to the students faculty were worried about
+    treatment: alert_reached
+    outcome: passed_c_or_better
+    columns:
+      alert_reached: 1 if the student was flagged in early alert in weeks 3 to 6 of fall 2025 and reached by an advisor (two-way contact within 48 hours of the flag).
+      passed_c_or_better: 1 if the student earned a C or better in the gateway course.
+      wk4_lms_grade: Gradebook percentage in the LMS at the end of week 4.
+      pell: 1 if Pell-eligible in 2025-26.
+      ft_status: FT or PT by fall 2025 credit load.
+      first_gen: 1 if neither parent holds a bachelor's degree, from the admissions record.
+      advising_visits_wk7_15: Number of Student Success Center appointments attended in weeks 7 to 15 of fall 2025.
+    not_in_table:
+      engagement_in_class: Whether the student was showing up and paying attention in class, as the instructor saw it. Attendance is not recorded in any system.
+    story: >-
+      Early alert, can we say anything about whether the outreach works? Apologies in advance, our
+      IR director left in June and the position is frozen, so I'm doing this with a spreadsheet and
+      goodwill. Our early alert process, for those who don't know it: in weeks 3 through 6 faculty in
+      the gateway courses (ENG 101, MATH 101, BIO 110, PSY 101) can flag a student in the roster
+      tool, the flag goes to the Student Success Center, and an advisor calls, texts and e-mails the
+      student within 48 hours and offers an appointment. Fall 2025 we had 1,140 flags across about
+      4,800 gateway enrollments, and 1,010 students were actually reached (we count a two-way
+      contact). The question from the VP is simple: do the students we reach pass at a higher rate
+      than they would have otherwise? The raw number says no, 48% C-or-better among reached students
+      vs 71% among everyone else. Of course it does, faculty flag the students they're worried
+      about. When I ask faculty what makes them flag someone, it's "she stopped coming," "he sits in
+      the back on his phone," "she hasn't turned in the last two things." We do pull the week-4
+      gradebook percentage from the LMS, so the missing-work part is in the data in some form, but
+      attendance is not in anything, we don't take attendance in Banner, it's whatever the
+      instructor sees in the room, and I think that's most of the flag decision and most of who
+      passes. Also in the file: Pell status, full-time/part-time, first-generation flag (all from the
+      admissions record; our equity report shows the usual gaps on all three), and the number of
+      advising visits in weeks 7 to 15 (students we reached had way more, since the first appointment
+      usually leads to a second, and frankly the students who were going to come to advising anyway
+      come to advising). Is there a defensible way to compare, or is the honest answer "not with this
+      data"? I'd rather tell the VP that than fake it.
+    edges:
+      - engagement_in_class -> alert_reached
+      - engagement_in_class -> passed_c_or_better
+      - engagement_in_class -> wk4_lms_grade
+      - engagement_in_class -> advising_visits_wk7_15
+      - wk4_lms_grade -> alert_reached
+      - wk4_lms_grade -> passed_c_or_better
+      - alert_reached -> advising_visits_wk7_15
+      - advising_visits_wk7_15 -> passed_c_or_better
+      - alert_reached -> passed_c_or_better
+      - pell -> passed_c_or_better
+      - ft_status -> passed_c_or_better
+      - first_gen -> passed_c_or_better
+    answer:
+      identifiable: false
+      missing: [engagement_in_class]
+    note: >-
+      Faculty flag from what they see in the room, and attendance is recorded nowhere; the week-4
+      gradebook captures only part of it. The advising-visits count is downstream of the outreach
+      and of the same unrecorded engagement.

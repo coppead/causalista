@@ -1,0 +1,184 @@
+# Tradução da ficha de teoria 'telecom' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. A ficha em português,
+# theories/telecom.yaml, é a que vale: este arquivo só traz as palavras, e a sua
+# estrutura tem de espelhar a da ficha.
+#
+# Lida por inteiro e corrigida pelo assistente em 2026-10-06, por delegação do André, frase
+# a frase contra a ficha em português (já com as frases trocadas na revisão independente
+# de 2026-10-05, listadas em theories/i18n/pendentes-2026-10-05.json). As traduções boas
+# ficaram como estavam; as que diziam outra coisa (agente, direção, "com mais
+# frequência", janela de tempo) foram reescritas.
+
+language: en
+status: revisada
+title: Loyalty offer at a phone operator
+context: 'A phone operator made a loyalty offer to some of its customers: a discount on the monthly
+  fee in exchange for a twelve-month contract. It wants to know whether the offer reduces churn
+  over the following six months.'
+randomized: The customers who received the offer were chosen at random.
+closing: Nothing other than what was described influenced the choice of who received the offer.
+treatment:
+  label: the offer
+  dictionary: Received the loyalty offer (1 = yes, 0 = no).
+outcome:
+  label: the cancellation
+  dictionary: Canceled the plan in the six months following the offer (1 = yes, 0 = no).
+variables:
+  antiguidade:
+    label: the customer's tenure
+    roles:
+      confounder:
+        dictionary: Months as a customer up to the offer date.
+        to_treatment: The operator made the offer more often to longer-standing customers.
+        to_outcome: Long-standing customers have more to lose when switching operators and churn
+          less.
+      outcome_cause:
+        dictionary: Months as a customer up to the offer date.
+        to_outcome: Long-standing customers have more to lose when switching operators and churn
+          less.
+  renda:
+    label: the customer's income
+    hidden_fact: The operator has no data on its customers' income, so income is not in the table.
+    roles:
+      confounder:
+        dictionary: Customer's estimated monthly income on the offer date, in reais.
+        to_treatment: Higher-income customers received the offer more often.
+        to_outcome: Higher-income customers have more room in their budget and churn less.
+      outcome_cause:
+        dictionary: Customer's estimated monthly income on the offer date, in reais.
+        to_outcome: Higher-income customers have more room in their budget and churn less.
+  valor_fatura:
+    label: the bill amount
+    roles:
+      confounder:
+        dictionary: Average bill amount in the three months before the offer, in reais.
+        to_treatment: Customers with higher bill amounts received the offer more frequently.
+        to_outcome: Customers who pay higher bill amounts churn more.
+      mediator:
+        dictionary: Average bill amount in the three months after the offer, in reais.
+        from_treatment: The offer gives a discount and reduces the bill amount in the following
+          months.
+        to_outcome: Customers who pay higher bill amounts churn more.
+      outcome_cause:
+        dictionary: Average bill amount in the three months before the offer, in reais.
+        to_outcome: Customers who pay higher bill amounts churn more.
+  reclamacao:
+    label: the complaint
+    roles:
+      confounder:
+        dictionary: Registered a complaint in the three months before the offer (1 = yes, 0 =
+          no).
+        to_treatment: The operator made the offer more often to customers who had registered a
+          complaint.
+        to_outcome: Customers who complain churn more.
+      mediator:
+        dictionary: Registered a complaint in the three months after the offer (1 = yes, 0 = no).
+        from_treatment: Customers who received the offer complain less in the following months.
+        to_outcome: Customers who complain churn more.
+      outcome_cause:
+        dictionary: Registered a complaint in the three months before the offer (1 = yes, 0 =
+          no).
+        to_outcome: Customers who complain churn more.
+  contato_retencao:
+    label: the retention team's call
+    roles:
+      treatment_cause:
+        dictionary: Received a call from the retention team in the month before the offer (1 =
+          yes, 0 = no).
+        to_treatment: The operator made the offer more often to customers who had received a call
+          from the retention team in the previous month.
+      collider:
+        dictionary: Received a call from the retention team in the six months following the offer
+          (1 = yes, 0 = no).
+        from_treatment: The retention team more often calls customers who received the offer,
+          to follow up.
+        from_outcome: The retention team more often calls customers who canceled the plan, to
+          record the reason for leaving.
+  chamado_atendimento:
+    label: the customer service ticket
+    roles:
+      collider:
+        dictionary: Opened a support ticket in the six months following the offer (1 = yes, 0
+          = no).
+        from_treatment: Customers who receive the offer open a support ticket more often, to clear
+          up questions about the contract.
+        from_outcome: Customers who cancel the plan usually open a support ticket afterwards,
+          to settle loose ends from the termination.
+      outcome_cause:
+        dictionary: Opened a support ticket in the three months before the offer (1 = yes, 0 =
+          no).
+        to_outcome: Customers who needed to open a support ticket churn more.
+  uso_dados:
+    label: the data usage
+    roles:
+      confounder:
+        dictionary: Average data usage in the three months before the offer, in GB per month.
+        to_treatment: The offer was directed more frequently to customers who use more data.
+        to_outcome: Customers who use more data depend more on the service and churn less.
+      outcome_cause:
+        dictionary: Average data usage in the three months before the offer, in GB per month.
+        to_outcome: Customers who use more data depend more on the service and churn less.
+  multa_contratual:
+    label: the early termination fee
+    roles:
+      mediator:
+        dictionary: Moved to a contract with an early termination fee in the month after the offer
+          (1 = yes, 0 = no).
+        from_treatment: Customers who receive the offer more often move to a contract with an
+          early termination fee.
+        to_outcome: Customers who have an early termination fee churn less.
+  proposta_concorrente:
+    label: the proposal from a competitor
+    hidden_fact: The operator does not know which customers received a proposal from a competitor,
+      so this information is not in the table.
+    roles:
+      confounder:
+        dictionary: Received a proposal from another operator in the three months before the offer
+          (1 = yes, 0 = no).
+        to_treatment: Customers who had received a proposal from a competitor received the offer
+          more often.
+        to_outcome: Customers who receive a proposal from a competitor churn more.
+      outcome_cause:
+        dictionary: Received a proposal from another operator in the three months before the offer
+          (1 = yes, 0 = no).
+        to_outcome: Customers who receive a proposal from a competitor churn more.
+  satisfacao:
+    label: the customer's satisfaction
+    hidden_fact: Satisfaction was not measured before the offer, so it is not in the table.
+    roles:
+      confounder:
+        dictionary: Satisfaction score from the survey conducted before the offer, from 0 to 10.
+        to_treatment: Less satisfied customers received the offer more often.
+        to_outcome: More satisfied customers churn less.
+      mediator:
+        dictionary: Satisfaction score from the survey conducted three months after the offer,
+          from 0 to 10.
+        from_treatment: Customers who receive the offer become more satisfied in the following
+          months.
+        to_outcome: More satisfied customers churn less.
+  debito_automatico:
+    label: the automatic debit
+    roles:
+      confounder:
+        dictionary: Paid the bill via automatic debit on the offer date (1 = yes, 0 = no).
+        to_treatment: The offer was sent more frequently to customers who pay via automatic debit.
+        to_outcome: Customers who pay via automatic debit churn less.
+      outcome_cause:
+        dictionary: Paid the bill via automatic debit on the offer date (1 = yes, 0 = no).
+        to_outcome: Customers who pay via automatic debit churn less.
+  cidade_piloto:
+    label: the pilot city
+    roles:
+      treatment_cause:
+        dictionary: Lives in one of the cities chosen for the pilot of the offer (1 = yes, 0 =
+          no).
+        to_treatment: The offer started in some pilot cities, and customers who live there received
+          the offer more frequently.
+  dia_vencimento:
+    label: the bill's due date
+    roles:
+      unrelated:
+        dictionary: Day of the month when the bill is due.
+        fact: The bill's due date has no relation to the offer or to churn.

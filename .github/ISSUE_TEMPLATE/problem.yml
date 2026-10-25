@@ -1,0 +1,24 @@
+name: Problem or wrong answer
+description: Something fails, or the model or the verifier gave an answer you believe is wrong.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran, or the case you gave the model, and what came back. A world or case id from the dataset is ideal.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: For a wrong answer, say which columns you believe are the right adjustment set, or why the effect is not identifiable, and the arrows of the diagram you have in mind.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release or commit, and whether you used the GGUF, the safetensors model or only the code.
+      placeholder: v0.1.0, GGUF Q4_K_M through Ollama

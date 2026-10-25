@@ -1,0 +1,464 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: um
+# gerente de operações de um app de entregas, uma professora de pós-graduação em
+# administração, um gerente de manutenção de uma indústria de alimentos, a diretora de
+# um museu municipal e uma gerente de assinaturas de um jornal. Cada texto tem o estilo
+# do canal em que a pessoa escreveria (Slack, briefing, relatório trimestral, fórum,
+# e-mail ao chefe).
+#
+# Ao contrário dos casos de cases/simulados/, estes servem ao treino por reforço: o
+# modelo responde, o verificador dá a nota. Nenhum cenário aqui repete os do conjunto de
+# teste congelado. As setas declaram o diagrama que o texto implica; o verificador
+# confere a resposta a partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_entregas_bolsa_termica
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de Slack para o time de dados
+    persona: gerente de operações de um app de entregas
+    theme: Logística urbana, equipamento dos entregadores
+    title: Bolsa térmica nova e reclamações de comida fria
+    treatment: bolsa_nova
+    outcome: taxa_reclamacao_frio_30d
+    columns:
+      bolsa_nova: Entregador recebeu a bolsa térmica rígida nova na distribuição de agosto (1 = sim, 0 = não).
+      taxa_reclamacao_frio_30d: Reclamações de "comida chegou fria" por 100 entregas, nos 30 dias seguintes à distribuição das bolsas.
+      modal: Veículo cadastrado do entregador (moto ou bicicleta).
+      meses_app: Meses desde o cadastro na plataforma, contados até julho.
+      praca: Cidade de atuação do entregador (cinco praças no piloto).
+      nota_media_jul: Nota média dada pelos clientes ao entregador em julho, de 1 a 5.
+    not_in_table:
+      capricho: A impressão dos líderes de praça sobre quais entregadores são mais cuidadosos. Ficou nas conversas com cada líder.
+    story: >-
+      pessoal, ajuda rápida pro slide da bolsa térmica nova (a rígida) antes de quinta. Em
+      agosto distribuímos 1.200 bolsas em cinco praças, cada praça com uma cota diferente,
+      e a qualidade quer saber se caiu a reclamação de comida fria. Quem escolheu quem
+      recebia foram os líderes de praça, no olho: a orientação era priorizar os
+      entregadores mais cuidadosos, que já recebiam menos reclamação antes da bolsa porque
+      fecham a bolsa direito e não param no caminho. Isso não está em lugar nenhum da base,
+      foi WhatsApp com cada líder. Sei que também deram preferência pra quem anda de moto (a
+      bolsa não cabe na bike) e pra quem está há mais tempo na plataforma. Puxei por
+      entregador: modal, meses de cadastro, praça, nota média de julho e reclamações de frio
+      por 100 entregas nos 30 dias depois. Bike esfria mais a comida porque demora, novato
+      leva mais reclamação, e Curitiba em agosto é Curitiba em agosto. A nota de julho
+      entrou porque entregador caprichoso costuma ter nota melhor, mas os líderes juraram
+      que não olharam nota nenhuma. Dá pra tirar o efeito da bolsa disso ou falo que não dá?
+    edges:
+      - capricho -> bolsa_nova
+      - capricho -> taxa_reclamacao_frio_30d
+      - capricho -> nota_media_jul
+      - modal -> bolsa_nova
+      - modal -> taxa_reclamacao_frio_30d
+      - meses_app -> bolsa_nova
+      - meses_app -> taxa_reclamacao_frio_30d
+      - praca -> bolsa_nova
+      - praca -> taxa_reclamacao_frio_30d
+      - bolsa_nova -> taxa_reclamacao_frio_30d
+    answer:
+      identifiable: false
+      missing: [capricho]
+    note: >-
+      Modal, tempo de casa e praça são ajustáveis; o cuidado do entregador, visto pelos
+      líderes, não está na tabela. A nota de julho é consequência dele, não substituto.
+
+  - id: pt_mba_simulador_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: professora de pós-graduação em administração
+    theme: Educação executiva, simulador de negócios
+    title: Simulador de negócios sorteado e nota da prova final
+    treatment: simulador
+    outcome: nota_prova_final
+    columns:
+      simulador: Aluno foi sorteado para receber licença do simulador de negócios no semestre (1 = sim, 0 = não).
+      nota_prova_final: Nota na prova final de Estratégia, de 0 a 10, igual para as duas turmas.
+      horas_ava: Total de horas logadas no ambiente virtual de aprendizagem ao longo do semestre.
+      anos_experiencia: Anos de experiência profissional declarados no formulário de matrícula.
+      turma: Turma do aluno (noite ou sábado).
+      pediu_carta: Aluno pediu carta de recomendação à professora depois da divulgação das notas (1 = sim, 0 = não).
+    story: >-
+      Dou aula de Estratégia num mestrado profissional em administração e este semestre
+      consegui 40 licenças de um simulador de negócios (daqueles de tocar uma empresa por
+      "anos" contra as outras equipes). Como não dava pra todo mundo, fiz um sorteio no
+      Excel dentro de cada turma, metade dos alunos da noite e metade dos do sábado (as
+      duas turmas têm 40 alunos), e a coordenação topou. Agora quero mostrar no colegiado
+      se o simulador melhorou a nota da prova final,
+      que é a mesma pras duas turmas. A base que exportei do AVA tem, por aluno: se foi
+      sorteado, a nota da prova, as horas logadas no ambiente virtual ao longo do semestre,
+      anos de experiência profissional (do formulário de matrícula), a turma, e se o aluno
+      me pediu carta de recomendação depois que saíram as notas. Algumas coisas que sei de
+      experiência própria: quem tem mais bagagem profissional tira nota melhor em
+      Estratégia, isso é sempre assim; a turma da noite chega cansada e historicamente vai
+      pior na prova. Quem ganhou o simulador obviamente passou muito mais horas no AVA (o
+      jogo roda lá dentro), e eu acredito que quem passa mais tempo lá estuda mais e vai
+      melhor. E as cartas: me pediram carta sobretudo os que tiraram nota alta, e também
+      vários do grupo do simulador, porque conviveram mais comigo nas rodadas. Minha dúvida
+      é bem básica. Eu comparo a média da nota dos dois grupos e pronto, ou coloco horas no
+      AVA e o resto numa regressão? Um colega disse que "colocar tudo é sempre melhor" e eu
+      não tenho certeza.
+    edges:
+      - simulador -> horas_ava
+      - horas_ava -> nota_prova_final
+      - simulador -> nota_prova_final
+      - anos_experiencia -> nota_prova_final
+      - turma -> nota_prova_final
+      - simulador -> pediu_carta
+      - nota_prova_final -> pediu_carta
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        horas_ava: >-
+          O simulador roda dentro do AVA; as horas sobem por causa dele e levam à nota.
+          Ajustar por elas tira parte do efeito que se quer medir.
+        pediu_carta: >-
+          Pediu carta quem tirou nota alta e quem conviveu com a professora no simulador.
+          Ajustar por isso cria uma associação falsa entre o simulador e a nota.
+      indifferent: [anos_experiencia, turma]
+    note: >-
+      Sorteio dentro de cada turma: a comparação simples já serve. O erro é "colocar tudo".
+
+  - id: pt_alimentos_sensor_vibracao
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente de manutenção de uma indústria de alimentos
+    theme: Indústria, manutenção preditiva
+    title: Sensor de vibração e horas de parada não programada
+    treatment: sensor_vibracao
+    outcome: horas_parada_q2
+    columns:
+      sensor_vibracao: Equipamento recebeu sensor de vibração com monitoramento remoto em janeiro (1 = sim, 0 = não).
+      horas_parada_q2: Horas de parada não programada do equipamento no 2º trimestre.
+      idade_maquina: Anos desde a instalação do equipamento na planta.
+      turnos_dia: Número de turnos em que o equipamento opera (1, 2 ou 3).
+      fabricante: Fabricante do equipamento.
+      os_preventivas_q2: Ordens de serviço preventivas abertas para o equipamento no 2º trimestre.
+      codigo_sap: Código do ativo no SAP.
+    story: >-
+      3.2 Monitoramento de vibração, balanço do 2º trimestre. Em janeiro foram instalados
+      sensores de vibração com monitoramento remoto em 38 dos 112 equipamentos rotativos da
+      planta de Uberlândia (bombas, misturadores, exaustores e redutores das linhas de
+      envase). A seleção seguiu o critério do plano anual: equipamentos mais antigos e os
+      que operam em três turnos tiveram prioridade, por concentrarem historicamente as
+      paradas não programadas. Registra-se que o fabricante não entrou no critério, embora
+      os equipamentos da Rotomix continuem com índice de falha acima da média da planta,
+      como nos trimestres anteriores. Os alertas do sistema geraram no trimestre 64 ordens
+      de serviço preventivas nos equipamentos monitorados, contra 11 nos demais; a área
+      entende que essas intervenções antecipadas evitam parte das quebras. As horas de
+      parada não programada por equipamento constam da tabela anexa (código SAP, idade,
+      turnos, fabricante, presença de sensor, OS preventivas abertas no período e horas
+      paradas). Solicita-se à área de dados uma estimativa do efeito do sensor sobre as
+      horas paradas que separe esse efeito do perfil dos equipamentos escolhidos, para
+      subsidiar a extensão do monitoramento aos 74 restantes no orçamento de 2027.
+    edges:
+      - idade_maquina -> sensor_vibracao
+      - idade_maquina -> horas_parada_q2
+      - turnos_dia -> sensor_vibracao
+      - turnos_dia -> horas_parada_q2
+      - fabricante -> horas_parada_q2
+      - sensor_vibracao -> os_preventivas_q2
+      - os_preventivas_q2 -> horas_parada_q2
+      - sensor_vibracao -> horas_parada_q2
+    answer:
+      identifiable: true
+      adjust_for: [idade_maquina, turnos_dia]
+      do_not_adjust_for:
+        os_preventivas_q2: >-
+          As preventivas nascem dos alertas do sensor e é por elas que ele evita quebras.
+          Ajustar por essa coluna apaga o caminho principal do efeito.
+      indifferent: [codigo_sap, fabricante]
+
+  - id: pt_museu_visita_educador
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: diretora de um museu municipal
+    theme: Cultura, programa educativo de um museu
+    title: Visita com educador e retorno das escolas
+    treatment: visita_educador
+    outcome: reagendou_2sem
+    columns:
+      visita_educador: Turma fez a visita com educador do museu no 1º semestre de 2025 (1 = sim; 0 = visita livre com o professor).
+      reagendou_2sem: Escola agendou nova visita no 2º semestre de 2025 (1 = sim, 0 = não).
+      rede: Rede da escola (municipal, estadual ou privada).
+      n_alunos: Número de alunos da turma na visita.
+      distancia_km: Distância da escola ao museu, em km.
+      respondeu_pesquisa: Professor responsável pela turma respondeu a pesquisa de satisfação enviada por e-mail em dezembro de 2025 (1 = sim, 0 = não).
+      codigo_inep: Código INEP da escola.
+    story: >-
+      Marcos, bom dia. Segue o que consegui levantar para responder ao vereador sobre o
+      programa de educadores, antes que a comissão volte a perguntar. No primeiro semestre
+      de 2025 recebemos 212 turmas escolares. Para 95 delas conseguimos oferecer a visita
+      com educador (uma hora e meia, roteiro da exposição de longa duração e oficina); as
+      outras fizeram a visita livre com o professor. Como você sabe, a Secretaria de
+      Educação pediu que as vagas com educador fossem preferencialmente para as escolas da
+      rede municipal, e foi isso que a equipe de agendamento fez, dentro do possível. Outra
+      regra prática: turmas acima de 35 alunos não cabiam na visita com educador e iam
+      direto para a livre. A pergunta do vereador é se a visita com educador faz a escola
+      voltar. Eu olhei quais escolas agendaram nova visita no segundo semestre. O problema
+      é que as escolas municipais voltam mais de qualquer jeito, porque têm o ônibus da
+      Secretaria garantido, e as escolas mais longe do centro voltam menos, o que também é
+      esperado. Em dezembro a Fernanda enviou a pesquisa de satisfação aos professores
+      responsáveis, e as respostas estão na mesma planilha; responderam mais os professores
+      que tiveram educador (os educadores pediram pessoalmente) e os das escolas que já
+      tinham voltado no segundo semestre, o que não me surpreende. A planilha tem, por
+      turma: código INEP da escola, rede, número de alunos, distância até o museu em km, se
+      teve educador, se a escola reagendou no segundo semestre e se o professor respondeu
+      a pesquisa. Dá para dizer algo honesto com isso, ou devo responder que o museu não
+      tem como medir? Prefiro a segunda opção a inventar número. Abraço, Lúcia.
+    edges:
+      - rede -> visita_educador
+      - rede -> reagendou_2sem
+      - n_alunos -> visita_educador
+      - distancia_km -> reagendou_2sem
+      - visita_educador -> reagendou_2sem
+      - visita_educador -> respondeu_pesquisa
+      - reagendou_2sem -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: [rede]
+      do_not_adjust_for:
+        respondeu_pesquisa: >-
+          A pesquisa foi respondida em dezembro, mais por quem teve educador e por quem já
+          tinha voltado. Ajustar por ela cria uma associação falsa entre a visita e o retorno.
+      indifferent: [codigo_inep, distancia_km, n_alunos]
+    note: >-
+      Só a rede influencia os dois lados. O tamanho da turma só influencia quem teve
+      educador; a distância só influencia o retorno.
+
+  - id: pt_jornal_clube_score_na_base
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de assinaturas de um jornal
+    theme: Mídia, clube de benefícios para assinantes
+    title: Clube do Assinante e renovação, com a pontuação de risco na base
+    twin: pt_jornal_clube_score_perdido
+    treatment: clube_ativado
+    outcome: renovou
+    columns:
+      clube_ativado: Assinante recebeu acesso ao Clube do Assinante em março de 2026 (1 = sim, 0 = não).
+      renovou: Renovou a assinatura no vencimento anual, até dezembro de 2026 (1 = sim, 0 = não).
+      plano: Plano em março (impresso+digital ou só digital).
+      meses_assinatura: Meses de assinatura ininterrupta até março de 2026.
+      score_risco_fev: Pontuação de risco de cancelamento gerada em fevereiro de 2026 pelo modelo do CRM antigo, de 0 a 100.
+      usou_beneficio: Usou ao menos um desconto do clube entre a ativação e o vencimento (1 = sim, 0 = não).
+      dia_semana_cadastro: Dia da semana em que a assinatura original foi feita. Campo herdado do sistema antigo.
+    story: >-
+      Briefing para a proposta da consultoria: avaliação do Clube do Assinante. Contexto. O
+      Diário do Vale tem cerca de 31 mil assinaturas ativas, entre impresso+digital e só
+      digital. Em março de 2026 lançamos o Clube do Assinante, descontos em teatros,
+      restaurantes e cursos da região, acessados pelo app. Por limitação de orçamento com os
+      parceiros, liberamos o clube para 8.400 assinantes, não para todos. Como escolhemos.
+      Dois critérios. Primeiro, a pontuação de risco de cancelamento gerada em fevereiro
+      pelo modelo do CRM antigo: quanto maior o risco, mais prioridade, a ideia era segurar
+      quem estava saindo. Segundo, demos preferência a quem tinha mais tempo de assinatura,
+      porque o clube foi comunicado como reconhecimento de fidelidade. Além disso, o clube
+      só funciona no app, então na prática os assinantes do plano só digital receberam em
+      proporção bem maior que os do impresso+digital. O que queremos saber. Se o clube
+      aumentou a renovação no vencimento anual; para cada assinante temos se renovou até
+      dezembro. O que já sabemos e a consultoria deve levar em conta. Assinante com
+      pontuação de risco alta cancela mais, é para isso que a pontuação existe. Assinante
+      antigo renova mais. Assinante só digital renova menos que o do impresso. Quem usou ao
+      menos um benefício do clube renovou muito mais, e consideramos isso parte do que o
+      clube faz. Base disponível. Uma linha por assinante: plano, meses de assinatura em
+      março, pontuação de risco de fevereiro, se recebeu o clube, se usou algum benefício
+      até o vencimento, dia da semana em que a assinatura original foi feita (campo herdado
+      do sistema antigo, não usamos para nada) e se renovou.
+    edges:
+      - score_risco_fev -> clube_ativado
+      - score_risco_fev -> renovou
+      - meses_assinatura -> clube_ativado
+      - meses_assinatura -> renovou
+      - plano -> clube_ativado
+      - plano -> renovou
+      - clube_ativado -> usou_beneficio
+      - usou_beneficio -> renovou
+      - clube_ativado -> renovou
+    answer:
+      identifiable: true
+      adjust_for: [meses_assinatura, plano, score_risco_fev]
+      do_not_adjust_for:
+        usou_beneficio: >-
+          Só usa benefício quem recebeu o clube, e usar é o caminho pelo qual o clube
+          segura o assinante. Ajustar por isso tira parte do efeito que se quer medir.
+      indifferent: [dia_semana_cadastro]
+
+  - id: pt_jornal_clube_score_perdido
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente de assinaturas de um jornal
+    theme: Mídia, clube de benefícios para assinantes
+    title: Clube do Assinante e renovação, com a pontuação de risco perdida na troca de CRM
+    twin: pt_jornal_clube_score_na_base
+    treatment: clube_ativado
+    outcome: renovou
+    columns:
+      clube_ativado: Assinante recebeu acesso ao Clube do Assinante em março de 2026 (1 = sim, 0 = não).
+      renovou: Renovou a assinatura no vencimento anual, até dezembro de 2026 (1 = sim, 0 = não).
+      plano: Plano em março (impresso+digital ou só digital).
+      meses_assinatura: Meses de assinatura ininterrupta até março de 2026.
+      usou_beneficio: Usou ao menos um desconto do clube entre a ativação e o vencimento (1 = sim, 0 = não).
+      dia_semana_cadastro: Dia da semana em que a assinatura original foi feita. Campo herdado do sistema antigo.
+    not_in_table:
+      score_risco_fev: A pontuação de risco de cancelamento de fevereiro, do CRM antigo. Não foi migrada na troca de sistema em abril.
+    story: >-
+      Briefing para a proposta da consultoria: avaliação do Clube do Assinante. Contexto. O
+      Diário do Vale tem cerca de 31 mil assinaturas ativas, entre impresso+digital e só
+      digital. Em março de 2026 lançamos o Clube do Assinante, descontos em teatros,
+      restaurantes e cursos da região, acessados pelo app. Por limitação de orçamento com os
+      parceiros, liberamos o clube para 8.400 assinantes, não para todos. Como escolhemos.
+      Dois critérios. Primeiro, a pontuação de risco de cancelamento gerada em fevereiro
+      pelo modelo do CRM antigo: quanto maior o risco, mais prioridade, a ideia era segurar
+      quem estava saindo. Segundo, demos preferência a quem tinha mais tempo de assinatura,
+      porque o clube foi comunicado como reconhecimento de fidelidade. Além disso, o clube
+      só funciona no app, então na prática os assinantes do plano só digital receberam em
+      proporção bem maior que os do impresso+digital. Observação importante. O CRM foi
+      trocado em abril e a pontuação de fevereiro não foi migrada; o fornecedor antigo não a
+      entrega mais. Sobrou apenas a lista final de quem recebeu o clube. O que queremos
+      saber. Se o clube aumentou a renovação no vencimento anual; para cada assinante temos
+      se renovou até dezembro. O que já sabemos e a consultoria deve levar em conta.
+      Assinante com pontuação de risco alta cancela mais, é para isso que a pontuação
+      existe. Assinante antigo renova mais. Assinante só digital renova menos que o do
+      impresso. Quem usou ao menos um benefício do clube renovou muito mais, e consideramos
+      isso parte do que o clube faz. Base disponível. Uma linha por assinante: plano, meses
+      de assinatura em março, se recebeu o clube, se usou algum benefício até o vencimento,
+      dia da semana em que a assinatura original foi feita (campo herdado do sistema antigo,
+      não usamos para nada) e se renovou.
+    edges:
+      - score_risco_fev -> clube_ativado
+      - score_risco_fev -> renovou
+      - meses_assinatura -> clube_ativado
+      - meses_assinatura -> renovou
+      - plano -> clube_ativado
+      - plano -> renovou
+      - clube_ativado -> usou_beneficio
+      - usou_beneficio -> renovou
+      - clube_ativado -> renovou
+    answer:
+      identifiable: false
+      missing: [score_risco_fev]
+    note: >-
+      Mesmo briefing do gêmeo, com um fato trocado: a pontuação que guiou a escolha se
+      perdeu na troca de CRM. Plano e tempo de casa não a substituem.
+
+  - id: pt_mestrado_auxilio_congresso
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: professora de pós-graduação em administração
+    theme: Pós-graduação acadêmica, auxílio para congressos
+    title: Auxílio para congresso e publicação em periódico
+    treatment: auxilio_congresso
+    outcome: publicou_24m
+    columns:
+      auxilio_congresso: Aluno recebeu auxílio do programa (passagem e inscrição) para apresentar trabalho em congresso (1 = sim, 0 = não).
+      publicou_24m: Teve artigo aceito em periódico até 24 meses depois do edital do auxílio (1 = sim, 0 = não).
+      dedicacao_exclusiva: Bolsista com dedicação exclusiva no ingresso (1 = sim, 0 = não).
+      linha_pesquisa: Linha de pesquisa do aluno (Finanças, Operações ou Estudos Organizacionais).
+      destaque_boletim: Aluno foi mencionado no boletim semestral do programa em algum número posterior aos 24 meses (1 = sim, 0 = não).
+    not_in_table:
+      avanco_pesquisa: Em que estágio estava a pesquisa do aluno quando o edital saiu. Ficou nas conversas de orientação.
+    story: >-
+      Assunto: auxílio congresso x publicação, o que dá pra dizer na autoavaliação. Ricardo,
+      antes de a gente escrever na autoavaliação da CAPES que o auxílio para congressos
+      "aumentou a produção discente", queria te mostrar o que tenho e o que não tenho.
+      Peguei as turmas de 2022 a 2024 do mestrado acadêmico, 118 alunos. Desses, 41
+      receberam o auxílio para apresentar trabalho em congresso (passagem e inscrição), e eu
+      marquei quem teve artigo aceito em periódico até 24 meses depois do edital. Quem
+      recebeu publicou bem mais, 56% contra 22%. Só que o edital era por demanda: o aluno
+      pedia, anexava o resumo aceito e a comissão aprovava. Quem pedia, você sabe melhor do
+      que eu, era quem já tinha resultado na mão, com a pesquisa adiantada, e quem já tem
+      resultado publica, com ou sem congresso; quem estava patinando no projeto nem tentava.
+      A gente nunca registrou em que estágio estava a pesquisa de cada um na hora do
+      pedido, isso ficou nas conversas de orientação. Duas coisas eu tenho na planilha e sei
+      que pesam: bolsista com dedicação exclusiva pediu mais (tem tempo pra escrever) e
+      publica mais; e a comissão priorizou as linhas de Finanças e Operações, porque os
+      congressos do ano eram dessas áreas, e essas linhas publicam mais que Estudos
+      Organizacionais de qualquer forma. Também marquei quem apareceu no boletim do
+      programa, porque o boletim destaca tanto quem apresentou em congresso quanto quem
+      publicou, e isso sai depois de tudo; não sei se serve pra alguma coisa. Colunas:
+      recebeu auxílio, publicou em 24 meses, dedicação exclusiva, linha de pesquisa,
+      destaque no boletim. Minha sensação é que o número bonito não se sustenta. Se você
+      concordar, escrevo de forma mais modesta. Abraço, Helena.
+    edges:
+      - avanco_pesquisa -> auxilio_congresso
+      - avanco_pesquisa -> publicou_24m
+      - dedicacao_exclusiva -> auxilio_congresso
+      - dedicacao_exclusiva -> publicou_24m
+      - linha_pesquisa -> auxilio_congresso
+      - linha_pesquisa -> publicou_24m
+      - auxilio_congresso -> publicou_24m
+      - auxilio_congresso -> destaque_boletim
+      - publicou_24m -> destaque_boletim
+    answer:
+      identifiable: false
+      missing: [avanco_pesquisa]
+    note: >-
+      Edital por demanda: quem pediu era quem já tinha resultado. Dedicação exclusiva e
+      linha são ajustáveis; o estágio da pesquisa não foi registrado.
+
+  - id: pt_entregas_botao_pronto
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de relatório trimestral
+    persona: gerente de operações de um app de entregas
+    theme: Logística urbana, painel do restaurante parceiro
+    title: Botão "Pedido pronto" e espera do entregador no restaurante
+    treatment: botao_pronto
+    outcome: espera_media_q3
+    columns:
+      botao_pronto: Restaurante ativou o botão "Pedido pronto" no painel do parceiro, que só chama o entregador quando o pedido sai da cozinha (1 = sim, 0 = não). Pensado para reduzir a espera e entregar a comida mais quente.
+      espera_media_q3: Tempo médio, em minutos, que o entregador esperou no restaurante entre a chegada e a retirada, nos pedidos do 3º trimestre.
+      pedidos_dia_q2: Média de pedidos por dia do restaurante no 2º trimestre.
+      tipo_cozinha: Categoria principal do restaurante no app (pizza, japonesa, lanches, brasileira, outras).
+      shopping: Restaurante fica em praça de alimentação de shopping (1 = sim, 0 = não).
+      nota_parceiro: Nota média, de 1 a 5, dada pelos clientes ao restaurante nos pedidos de outubro, o primeiro mês após o trimestre. Comida quente e entrega rápida puxam a nota para cima.
+      id_parceiro: Identificador do restaurante na plataforma.
+    story: >-
+      Operações, parceiros, 3º trimestre. O botão "Pedido pronto" no painel do parceiro,
+      lançado na primeira semana de julho, foi ativado em 1.870 restaurantes ainda naquele
+      mês. A ativação foi conduzida pelo time de contas, começando pelos parceiros de maior
+      volume e pelas pizzarias, os dois perfis em que o entregador mais espera. O tempo médio de espera do
+      entregador no restaurante, no trimestre, foi de 6,1 min nos parceiros com o botão e
+      9,4 min nos demais. Restaurantes em praça de alimentação de shopping seguem com espera
+      acima da média pela logística de acesso, e isso independe do botão. A base por
+      parceiro (id, tipo de cozinha, pedidos/dia no 2º tri, shopping, botão, espera média no
+      3º tri e nota do parceiro) está à disposição da área de dados para estimar o efeito do
+      botão separado do perfil dos parceiros ativados.
+    edges:
+      - pedidos_dia_q2 -> botao_pronto
+      - pedidos_dia_q2 -> espera_media_q3
+      - tipo_cozinha -> botao_pronto
+      - tipo_cozinha -> espera_media_q3
+      - shopping -> espera_media_q3
+      - botao_pronto -> espera_media_q3
+      - botao_pronto -> nota_parceiro
+      - espera_media_q3 -> nota_parceiro
+    answer:
+      identifiable: true
+      adjust_for: [pedidos_dia_q2, tipo_cozinha]
+      do_not_adjust_for:
+        nota_parceiro: >-
+          É de outubro, depois do trimestre medido, e sobe tanto com o botão (comida mais
+          quente) quanto com a espera curta. Ajustar por ela cria uma associação falsa
+          entre o botão e a espera.
+      indifferent: [id_parceiro, shopping]
+    note: >-
+      O texto só diz "nota do parceiro"; que ela é de outubro e depende da espera está só
+      no dicionário de colunas.

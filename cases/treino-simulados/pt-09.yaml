@@ -1,0 +1,526 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: o
+# diretor de uma escola técnica estadual, a gerente de RH de um call center, o gerente
+# regional de uma rede de hotéis de estrada, o gerente de operações de um app de entregas
+# e a diretora de um museu municipal. Cada texto tem o estilo do canal em que a pessoa
+# escreveria (briefing para consultoria, WhatsApp, fórum, e-mail ao chefe, dissertação).
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: não repetem nenhum cenário de cases/simulados/, nem variante próxima.
+# As setas declaram o diagrama que o texto implica; o verificador confere a resposta a
+# partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: pt_callcenter_home_office
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de RH de um call center com cerca de 1.200 operadores no Rio de Janeiro; formação em psicologia, sem estatística
+    theme: RH (call center, trabalho remoto)
+    title: Home office e desligamento em seis meses
+    treatment: home_office
+    outcome: desligamento_6m
+    columns:
+      home_office: Operador passou a trabalhar em regime remoto a partir de fevereiro de 2026 (1 = sim, 0 = presencial).
+      desligamento_6m: Desligado da empresa (pedido de demissão ou dispensa) entre fevereiro e julho de 2026 (1 = sim, 0 = não).
+      tempo_casa_meses: Meses de empresa em 1º de fevereiro de 2026.
+      advertencia_tri: Recebeu advertência formal no último trimestre de 2025 (1 = sim, 0 = não).
+      distancia_km: Distância entre o CEP residencial do cadastro e o site, em km.
+      operacao: Operação em que o operador atuava em fevereiro de 2026 (cobrança, SAC ou vendas).
+      faltas_pos: Número de faltas não justificadas entre março e maio de 2026.
+      pesquisa_clima: Respondeu à pesquisa de clima aplicada em agosto de 2026 aos colaboradores ativos (1 = sim, 0 = não).
+    story: >-
+      Marcelo, boa tarde.
+
+      Segue o que levantei sobre o home office, para a reunião de quinta com o cliente.
+
+      Em fevereiro passamos 310 operadores para o regime remoto. A regra foi a que você
+      aprovou em janeiro: só quem tinha pelo menos seis meses de casa e não tinha levado
+      advertência no último trimestre de 2025, e o operador precisava pedir. Quem pediu, em
+      peso, foi o pessoal que mora longe do site (Nova Iguaçu, Campo Grande, Itaboraí), que
+      gasta duas horas de ônibus por trecho. Você sabe que esse pessoal de longe é o que
+      mais pede demissão, e que novato e quem já levou advertência também saem mais, por
+      vontade própria ou porque a gente desliga.
+
+      Um dado bom: as faltas injustificadas de quem está remoto despencaram de março para
+      cá, e falta é o que mais leva a desligamento aqui. A cobrança continua com o turnover
+      mais alto das três operações, mas a adesão ao remoto lá foi igual à do SAC e à de
+      vendas. Outra coisa que chamou atenção: a pesquisa de clima de agosto teve adesão de
+      quase 80% entre os remotos, contra uns 50% no presencial.
+
+      A base por operador está pronta, com as colunas que a Priscila montou. O cliente quer
+      um número: o home office reduz o desligamento em quanto? Minha dúvida é se faz
+      sentido ajustar pelas faltas e pela pesquisa de clima, que foram as duas coisas que
+      mais mudaram, ou se isso atrapalha. Me dá um retorno até quarta?
+
+      Abraço,
+      Renata
+    edges:
+      - tempo_casa_meses -> home_office
+      - tempo_casa_meses -> desligamento_6m
+      - advertencia_tri -> home_office
+      - advertencia_tri -> desligamento_6m
+      - distancia_km -> home_office
+      - distancia_km -> desligamento_6m
+      - operacao -> desligamento_6m
+      - home_office -> faltas_pos
+      - faltas_pos -> desligamento_6m
+      - home_office -> desligamento_6m
+      - home_office -> pesquisa_clima
+      - desligamento_6m -> pesquisa_clima
+    answer:
+      identifiable: true
+      adjust_for: [advertencia_tri, distancia_km, tempo_casa_meses]
+      do_not_adjust_for:
+        faltas_pos: Foram contadas depois da mudança para o remoto e caíram por causa dela; são parte do caminho pelo qual o home office reduz o desligamento.
+        pesquisa_clima: Só os ativos em agosto responderam, e os remotos responderam mais. A coluna depende do desligamento e do home office ao mesmo tempo; ajustar por ela cria uma associação falsa.
+      indifferent: [operacao]
+    note: >-
+      A autora pergunta justamente pelas duas colunas que não podem entrar. A dependência
+      da pesquisa de clima em relação ao desligamento está só no dicionário ("aos
+      colaboradores ativos"), não na história.
+
+  - id: pt_escola_visitas_tecnicas
+    author: ai
+    status: rascunho
+    language: pt
+    style: trecho de dissertação de mestrado
+    persona: diretor de uma escola técnica estadual no interior de São Paulo, cursando mestrado profissional em gestão educacional
+    theme: Educação profissional (visitas técnicas e inserção no mercado)
+    title: Visitas técnicas e emprego na área após a conclusão
+    treatment: turma_visitas
+    outcome: emprego_area_6m
+    columns:
+      turma_visitas: Turma do aluno participou do Programa de Visitas Técnicas no 2º ano do curso (1 = sim, 0 = não).
+      emprego_area_6m: Egresso com vínculo formal em ocupação da área do curso em até seis meses após a conclusão, conforme o Novo CAGED (1 = sim, 0 = não).
+      curso: Curso técnico (Eletrotécnica, Informática, Administração ou Enfermagem).
+      turno: Turno da turma (matutino, vespertino ou noturno).
+      idade_ingresso: Idade do aluno, em anos, na matrícula no 1º ano.
+      estagio_concluido: Concluiu estágio supervisionado durante o 3º ano do curso (1 = sim, 0 = não).
+      questionario_egresso: Respondeu ao questionário de acompanhamento de egressos, aplicado oito meses após a conclusão (1 = sim, 0 = não).
+      matricula: Número de matrícula do aluno no sistema acadêmico da unidade.
+    not_in_table:
+      vinculo_docente_empresa: A relação pessoal dos docentes de cada turma com empresas da região, que viabilizou as visitas e por meio da qual alunos e egressos são indicados para vagas. Não consta de nenhum sistema da unidade.
+    story: >-
+      4.3 A base de dados e as condições de atribuição do programa
+
+      A base reúne os 612 concluintes dos cursos técnicos de nível médio das turmas de 2023
+      e 2024 da unidade (Eletrotécnica, Informática, Administração e Enfermagem). A
+      situação ocupacional dos egressos foi obtida do Novo CAGED, com as ocupações da área
+      de formação classificadas pela CBO (seção 3.2).
+
+      O Programa de Visitas Técnicas foi implementado no segundo ano de cada turma, entre
+      2021 e 2023, em um ciclo de quatro a seis visitas a empresas da região. A seleção das
+      turmas contempladas não seguiu critério formal: coube aos coordenadores de curso
+      viabilizar as visitas, o que dependeu, na prática, de haver na turma docente com
+      relação pessoal com empresas da região disposto a intermediar o contato. Nas
+      entrevistas, os coordenadores reconheceram que esses mesmos docentes são os que
+      rotineiramente indicam alunos e egressos para vagas nessas empresas. Esse vínculo
+      entre docente e empresa não consta de nenhum sistema da unidade.
+
+      As visitas ocorreram em horário comercial, o que restringiu a participação das
+      turmas do período noturno, compostas majoritariamente por alunos que já trabalham,
+      em muitos casos na própria área do curso. Eletrotécnica e Enfermagem concentraram a
+      maior parte das visitas, por contarem com mais empresas conveniadas, e são também os
+      eixos de maior absorção de egressos na região (Oliveira e Castro, 2022). Parte das
+      empresas visitadas passou a ofertar vagas de estágio supervisionado (Lei nº
+      11.788/2008) aos alunos das turmas visitantes, no terceiro ano, e a conclusão do
+      estágio é reconhecidamente a principal porta de entrada para a contratação na área.
+      Egressos que ingressaram mais velhos, em geral já inseridos no mercado de trabalho,
+      apresentam maior ocupação na área, independentemente do curso.
+
+      Registre-se que o questionário de acompanhamento de egressos, aplicado oito meses
+      após a conclusão, teve adesão maior entre os egressos ocupados na área e entre os das
+      turmas contempladas, que mantiveram grupos de mensagens com a coordenação. O capítulo
+      seguinte estima se a participação no programa elevou a probabilidade de o egresso
+      estar empregado na área nos seis meses posteriores à conclusão.
+    edges:
+      - curso -> turma_visitas
+      - curso -> emprego_area_6m
+      - turno -> turma_visitas
+      - turno -> emprego_area_6m
+      - idade_ingresso -> turno
+      - vinculo_docente_empresa -> turma_visitas
+      - vinculo_docente_empresa -> emprego_area_6m
+      - idade_ingresso -> emprego_area_6m
+      - turma_visitas -> estagio_concluido
+      - estagio_concluido -> emprego_area_6m
+      - turma_visitas -> emprego_area_6m
+      - turma_visitas -> questionario_egresso
+      - emprego_area_6m -> questionario_egresso
+    answer:
+      identifiable: false
+      missing: [vinculo_docente_empresa]
+    note: >-
+      Curso e turno estão na tabela e dão a impressão de bastar. O que decidiu quais turmas
+      visitaram foi o professor com contatos em empresas, e é ele quem indica os egressos
+      para vagas; isso não está em coluna nenhuma.
+
+  - id: pt_app_bag_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: gerente de operações regional de um app de entregas em Curitiba; veio da logística, fala direto
+    theme: Logística urbana (app de entregas, equipamento do entregador)
+    title: Bag térmica sorteada e reclamações de comida fria
+    twin: pt_app_bag_retirada
+    treatment: bag_oficial
+    outcome: reclamacoes_temp_set
+    columns:
+      bag_oficial: Entregador retirou a bag térmica oficial do app em agosto de 2026 (1 = sim, 0 = não).
+      reclamacoes_temp_set: Reclamações de cliente do tipo "comida chegou fria" em setembro de 2026, por 100 entregas do entregador.
+      entregas_jul: Número de entregas concluídas em julho de 2026.
+      modal: Veículo cadastrado (moto ou bicicleta).
+      zona: Zona da cidade em que o entregador mais rodou em julho de 2026 (Centro, Norte, Sul, CIC ou Boqueirão).
+      nota_media_set: Média das notas de 1 a 5 dadas pelos clientes ao entregador em setembro de 2026.
+      id_entregador: Identificador do entregador na plataforma.
+    story: >-
+      Jéssica, bom dia! Sobre as bags novas. Em agosto chegaram 400 bags térmicas da
+      Thermobag pra Curitiba e, como não dava pra todo mundo (tem uns 1.100 ativos), o Rafa
+      fez um sorteio no Excel entre os entregadores ativos e mandou o código de retirada
+      pra quem saiu sorteado. Quase todo mundo foi buscar no ponto de apoio da Marechal.
+      Agora o marketing quer colocar no release que a bag reduziu em X% as reclamações de
+      comida fria e me pediram o número. Tenho a base por entregador: entregas de julho, se
+      é moto ou bike, zona em que mais roda, reclamações de temperatura em setembro por 100
+      entregas e nota média do cliente em setembro. A nota subiu bonito pra quem tá com a
+      bag, acho que o cliente vê a bag com a marca e já dá 5 estrelas, e comida fria
+      obviamente derruba a nota. Bike e CIC sempre tiveram mais reclamação (a distância
+      pesa), e o pessoal que roda mais tem menos, isso é histórico. Consegue me dizer o
+      efeito da bag nas reclamações? Vale colocar a nota na conta? Valeu!
+    edges:
+      - entregas_jul -> reclamacoes_temp_set
+      - modal -> reclamacoes_temp_set
+      - zona -> reclamacoes_temp_set
+      - bag_oficial -> reclamacoes_temp_set
+      - bag_oficial -> nota_media_set
+      - reclamacoes_temp_set -> nota_media_set
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        nota_media_set: Foi medida em setembro e depende tanto da bag (o cliente vê a marca) quanto das reclamações de comida fria. Ajustar por ela cria uma associação falsa entre a bag e as reclamações.
+      indifferent: [entregas_jul, id_entregador, modal, zona]
+    note: >-
+      Sorteio: nada precisa entrar. A armadilha é a nota média, que o gerente quer "colocar
+      na conta" e que vem depois do resultado.
+
+  - id: pt_hotel_quarto_reformado
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: gerente regional de uma rede de 14 hotéis de estrada nas BR-116 e BR-381; formação em hotelaria
+    theme: Hotelaria de estrada (reforma de quartos e satisfação)
+    title: Quarto reformado e nota da pesquisa pós-estadia
+    treatment: quarto_reformado
+    outcome: nota_pos_estadia
+    columns:
+      quarto_reformado: Estadia em quarto reformado em 2025 ou 2026 (colchão novo, ar-condicionado inverter, chuveiro novo) (1 = sim, 0 = não).
+      nota_pos_estadia: Nota de 0 a 10 dada pelo hóspede na pesquisa por SMS enviada no dia do check-out.
+      fidelidade: Hóspede cadastrado no programa Estrada+ na data do check-in (1 = sim, 0 = não).
+      hotel: Unidade da estadia (código de 1 a 14).
+      canal_reserva: Canal da reserva (balcão, telefone/WhatsApp, site próprio ou OTA).
+      noites: Número de noites da estadia.
+      reclamacao_recepcao: Hóspede registrou reclamação na recepção durante a estadia (ar-condicionado, chuveiro, barulho etc.) (1 = sim, 0 = não).
+      avaliacao_google: Deixou avaliação no perfil do hotel no Google nos 30 dias após o check-out (1 = sim, 0 = não).
+    story: >-
+      Briefing: análise do impacto da reforma dos quartos. Rede Rota 116 Hotéis, gerência
+      regional, setembro de 2026.
+
+      Contexto. Somos 14 hotéis de beira de estrada entre Curitiba e Governador Valadares,
+      público de caminhoneiro, representante comercial e família em viagem. Desde 2025
+      estamos reformando os quartos (colchão novo, ar-condicionado inverter, chuveiro,
+      pintura), a R$ 18 mil por quarto. Cada unidade reformou o que o caixa permitiu, entre
+      30% e 70% dos quartos; as unidades mineiras da BR-381 estão mais adiantadas e, aliás,
+      sempre tiveram nota melhor que as do Paraná, o público lá é outro.
+
+      Como o quarto é distribuído. Regra da rede: quarto reformado vai primeiro para quem é
+      do programa Estrada+, que é basicamente o caminhoneiro frequente; esse hóspede, por
+      ser de casa, costuma dar nota alta de qualquer jeito. Depois disso, é por ordem de
+      chegada, sem outro critério.
+
+      O que já observamos. Nos quartos antigos ainda é comum reclamação na recepção de
+      ar-condicionado e de chuveiro; nos reformados quase sumiu. E quem reclama na
+      recepção dá nota baixa na pesquisa, sem surpresa. Nos quartos reformados colocamos
+      um adesivo com QR code pedindo avaliação no Google, e a taxa de avaliação nesses
+      quartos disparou; a gente sabe que quem avalia no Google é quem amou ou quem odiou a
+      estadia. Hóspede de OTA (Booking, Expedia) dá nota mais baixa, isso é do setor
+      inteiro. Estadia longa cansa um pouco a nota.
+
+      Dados. Base por estadia, de março a agosto de 2026, 41 mil linhas, com as colunas da
+      aba "dicionário" da planilha anexa.
+
+      O que precisamos. Qual é o efeito de estar num quarto reformado na nota da pesquisa
+      pós-estadia? A diretoria decide em novembro se acelera os 40% restantes ou se segura
+      o caixa, e eu preciso de um número defensável, não da comparação bruta que o pessoal
+      da unidade 7 fez.
+    edges:
+      - fidelidade -> quarto_reformado
+      - fidelidade -> nota_pos_estadia
+      - hotel -> quarto_reformado
+      - hotel -> nota_pos_estadia
+      - canal_reserva -> nota_pos_estadia
+      - noites -> nota_pos_estadia
+      - quarto_reformado -> reclamacao_recepcao
+      - reclamacao_recepcao -> nota_pos_estadia
+      - quarto_reformado -> nota_pos_estadia
+      - quarto_reformado -> avaliacao_google
+      - nota_pos_estadia -> avaliacao_google
+    answer:
+      identifiable: true
+      adjust_for: [fidelidade, hotel]
+      do_not_adjust_for:
+        reclamacao_recepcao: Acontece durante a estadia e quase sumiu nos quartos reformados; é parte do caminho pelo qual a reforma melhora a nota.
+        avaliacao_google: Vem depois da nota e depende dela (quem amou ou odiou avalia) e do quarto (o QR code só está nos reformados). Ajustar por ela cria uma associação falsa.
+      indifferent: [canal_reserva, noites]
+    note: >-
+      A unidade entra porque cada hotel reformou uma fração diferente e tem público
+      diferente. OTA e número de noites só mexem na nota.
+
+  - id: pt_museu_visita_mediada
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: diretora de um museu histórico municipal em uma cidade de 80 mil habitantes; historiadora, sem formação em dados
+    theme: Cultura (museu, programa educativo)
+    title: Visita com educadora e retorno do aluno ao museu
+    treatment: visita_mediada
+    outcome: retornou_12m
+    columns:
+      visita_mediada: Turma do aluno fez a visita escolar acompanhada por uma educadora do museu (1 = sim; 0 = visita livre, só com o professor da escola).
+      retornou_12m: Aluno voltou ao museu em até 12 meses após a visita escolar, segundo o carimbo no Passaporte do Estudante (1 = sim, 0 = não).
+      rede_escola: Rede da escola (municipal, estadual ou particular).
+      ano_escolar: Ano escolar do aluno na data da visita (1º ao 9º ano).
+      distancia_km: Distância da escola ao museu, em km, pelo endereço da escola.
+      turno_visita: Turno do agendamento (manhã ou tarde).
+      mes_visita: Mês da visita escolar em 2025.
+      id_agendamento: Número do agendamento no sistema do museu.
+    not_in_table:
+      engajamento_professor: O quanto o professor da turma se envolve com a visita (prepara a turma antes, manda bilhete aos pais sugerindo a volta em família). O museu não registra nada sobre o professor.
+    story: >-
+      Título: Como saber se a visita com educadora faz o aluno voltar ao museu?
+
+      Oi, pessoal. Sou diretora de um museu histórico municipal (cidade de uns 80 mil
+      habitantes) e não sou da área de dados, então me perdoem se a pergunta for básica.
+      Desde 2024 a gente dá a cada aluno que vem em visita escolar um "Passaporte do
+      Estudante", que ganha carimbo cada vez que ele volta, com a família ou sozinho. Com
+      isso temos, para cada aluno das visitas de 2025 (uns 3.400), se ele voltou em 12
+      meses.
+
+      As turmas vêm de dois jeitos: visita livre, com o professor da escola, ou visita
+      acompanhada por uma educadora nossa. A acompanhada só acontece de manhã, porque as
+      duas educadoras trabalham meio período, e de agosto em diante ficamos com uma só,
+      então caiu bastante. A prefeitura pediu prioridade para a rede municipal, e esses
+      alunos moram na cidade; os da rede estadual vêm muito de distritos e de cidades
+      vizinhas, e aí voltar é mais difícil. A gente desenhou a visita acompanhada pensando
+      no 4º e no 5º ano, que estudam a história do município, então essas séries pedem
+      mais; e criança menor também volta mais, porque arrasta os pais. Escola longe quase
+      não volta, isso a gente vê no mapa.
+
+      O que me incomoda: quem marca a visita acompanhada no agendamento é o professor, e
+      pela minha experiência é sempre aquele professor que já preparou a turma, que manda
+      bilhete para os pais sugerindo a visita em família. Do professor a gente não registra
+      nada, só o nome da escola e a turma.
+
+      Com essa base, dá para dizer quanto a visita acompanhada aumenta o retorno? A
+      Secretaria quer usar isso para pedir mais uma educadora no orçamento de 2027.
+    edges:
+      - rede_escola -> visita_mediada
+      - rede_escola -> retornou_12m
+      - ano_escolar -> visita_mediada
+      - ano_escolar -> retornou_12m
+      - distancia_km -> retornou_12m
+      - turno_visita -> visita_mediada
+      - mes_visita -> visita_mediada
+      - engajamento_professor -> visita_mediada
+      - engajamento_professor -> retornou_12m
+      - visita_mediada -> retornou_12m
+    answer:
+      identifiable: false
+      missing: [engajamento_professor]
+    note: >-
+      Rede, série, turno e mês explicam boa parte de quem teve educadora, mas quem pede é
+      o professor engajado, que também faz o aluno voltar. Nada sobre ele está na tabela.
+
+  - id: pt_app_bag_retirada
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: gerente de operações regional de um app de entregas em Curitiba; veio da logística, fala direto
+    theme: Logística urbana (app de entregas, equipamento do entregador)
+    title: Bag térmica retirada por quem quis e reclamações de comida fria
+    twin: pt_app_bag_sorteio
+    treatment: bag_oficial
+    outcome: reclamacoes_temp_set
+    columns:
+      bag_oficial: Entregador retirou a bag térmica oficial do app em agosto de 2026 (1 = sim, 0 = não).
+      reclamacoes_temp_set: Reclamações de cliente do tipo "comida chegou fria" em setembro de 2026, por 100 entregas do entregador.
+      entregas_jul: Número de entregas concluídas em julho de 2026.
+      modal: Veículo cadastrado (moto ou bicicleta).
+      zona: Zona da cidade em que o entregador mais rodou em julho de 2026 (Centro, Norte, Sul, CIC ou Boqueirão).
+      nota_media_set: Média das notas de 1 a 5 dadas pelos clientes ao entregador em setembro de 2026.
+      id_entregador: Identificador do entregador na plataforma.
+    not_in_table:
+      capricho: O quanto o entregador cuida da entrega (como acondiciona e transporta o pedido). Não é registrado na plataforma.
+    story: >-
+      Jéssica, bom dia! Sobre as bags novas. Em agosto chegaram 400 bags térmicas da
+      Thermobag pra Curitiba e, como não dava pra todo mundo (tem uns 1.100 ativos), o Rafa
+      avisou no grupo que quem quisesse podia ir buscar no ponto de apoio da Marechal, até
+      acabar. Acabou em quatro dias. Pelo que vi lá, quem foi buscar foi o pessoal que roda
+      mais, mais os de moto (de bike é longe) e quem já roda pelo Centro, que é do lado. E,
+      sendo sincero, foi o pessoal mais caprichoso, que cuida da entrega, que já embala
+      tudo direitinho; isso a gente não tem como marcar na base, é de conhecer os caras.
+      Agora o marketing quer colocar no release que a bag reduziu em X% as reclamações de
+      comida fria e me pediram o número. Tenho a base por entregador: entregas de julho, se
+      é moto ou bike, zona em que mais roda, reclamações de temperatura em setembro por 100
+      entregas e nota média do cliente em setembro. A nota subiu bonito pra quem tá com a
+      bag, acho que o cliente vê a bag com a marca e já dá 5 estrelas, e comida fria
+      obviamente derruba a nota. Bike e CIC sempre tiveram mais reclamação (a distância
+      pesa), e o pessoal que roda mais tem menos, isso é histórico. Consegue me dizer o
+      efeito da bag nas reclamações? Vale colocar a nota na conta? Valeu!
+    edges:
+      - entregas_jul -> bag_oficial
+      - entregas_jul -> reclamacoes_temp_set
+      - modal -> bag_oficial
+      - modal -> reclamacoes_temp_set
+      - zona -> bag_oficial
+      - zona -> reclamacoes_temp_set
+      - capricho -> bag_oficial
+      - capricho -> reclamacoes_temp_set
+      - bag_oficial -> reclamacoes_temp_set
+      - bag_oficial -> nota_media_set
+      - reclamacoes_temp_set -> nota_media_set
+    answer:
+      identifiable: false
+      missing: [capricho]
+    note: >-
+      Gêmeo do sorteio com um fato trocado: quem quis foi buscar. Volume, modal e zona
+      estão na tabela e parecem resolver; o capricho do entregador não está.
+
+  - id: pt_museu_audioguia
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: diretora de um museu histórico municipal em uma cidade de 80 mil habitantes; historiadora, sem formação em dados
+    theme: Cultura (museu, audioguia)
+    title: Audioguia e tempo de permanência no museu
+    treatment: audioguia
+    outcome: tempo_permanencia_min
+    columns:
+      audioguia: Visitante retirou o audioguia gratuito na recepção (1 = sim, 0 = não).
+      tempo_permanencia_min: Minutos entre a leitura do ingresso na catraca de entrada e na de saída.
+      origem: Origem do visitante declarada no ingresso (cidade, região, outro estado ou exterior).
+      faixa_etaria: Faixa etária declarada no ingresso (18 a 39, 40 a 59, 60 ou mais).
+      fim_de_semana: Visita em sábado, domingo ou feriado (1 = sim, 0 = não).
+      exposicao_temporaria: Havia exposição temporária em cartaz na data da visita (1 = sim, 0 = não).
+      visitou_anexo: Passou pela catraca do anexo (prédio da antiga cadeia pública) durante a visita (1 = sim, 0 = não).
+      num_ingresso: Número sequencial do ingresso.
+    story: >-
+      Secretário, boa tarde.
+
+      Conforme o senhor pediu depois da sessão da Câmara, segue o que temos sobre o
+      audioguia, para o senhor responder ao vereador Ademir.
+
+      Os 20 aparelhos foram comprados em dezembro com recurso da Lei Paulo Gustavo (R$ 38
+      mil, incluindo a gravação). O visitante pega na recepção se quiser, sem custo, e
+      devolve na saída. Pela catraca, que lê o ingresso na entrada e na saída, temos o
+      tempo que cada visitante ficou dentro do museu, de janeiro a junho: 9.800 visitantes
+      adultos. Quem mais pega o aparelho é o visitante de fora, principalmente de outros
+      estados, e o público com mais idade; o visitante de fora também fica mais tempo,
+      porque veio para isso, e o pessoal mais velho igualmente demora mais nas salas. O
+      roteiro do audioguia termina no anexo da antiga cadeia, e quem vai até o anexo soma
+      uns 15 minutos de visita só pelo deslocamento. Em abril e maio tivemos a exposição
+      temporária do acervo Kaingang no salão principal, que prendeu o visitante bem mais
+      tempo. Nos fins de semana e feriados as pessoas também ficam mais, vêm sem pressa.
+
+      A pergunta do vereador, se entendi, é se o audioguia faz o visitante ficar mais
+      tempo no museu, e se isso justificou os R$ 38 mil. A planilha por visitante está no
+      Drive da Secretaria (pasta Museu, subpasta Audioguia), com o dicionário das colunas
+      na primeira aba. Se o senhor achar melhor, posso pedir uma análise ao pessoal da
+      universidade, mas gostaria de levar algo já na reunião de terça.
+
+      Atenciosamente,
+      Lúcia Mendes
+      Diretora, Museu Histórico Municipal
+    edges:
+      - origem -> audioguia
+      - origem -> tempo_permanencia_min
+      - faixa_etaria -> audioguia
+      - faixa_etaria -> tempo_permanencia_min
+      - fim_de_semana -> tempo_permanencia_min
+      - exposicao_temporaria -> tempo_permanencia_min
+      - audioguia -> visitou_anexo
+      - visitou_anexo -> tempo_permanencia_min
+      - audioguia -> tempo_permanencia_min
+    answer:
+      identifiable: true
+      adjust_for: [faixa_etaria, origem]
+      do_not_adjust_for:
+        visitou_anexo: O roteiro do audioguia leva ao anexo, e ir ao anexo soma minutos; é parte do efeito que se quer medir.
+      indifferent: [exposicao_temporaria, fim_de_semana, num_ingresso]
+    note: >-
+      O anexo é consequência do audioguia; que a passagem pela catraca acontece durante a
+      visita está só no dicionário. Exposição e fim de semana só mexem no tempo.
+
+  - id: pt_callcenter_curso_lideranca
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de RH de um call center com cerca de 1.200 operadores no Rio de Janeiro; formação em psicologia, sem estatística
+    theme: RH (call center, treinamento de supervisores)
+    title: Curso de liderança dos supervisores e absenteísmo da equipe
+    treatment: supervisor_treinado
+    outcome: absenteismo_abr_jun
+    columns:
+      supervisor_treinado: Supervisor direto do operador concluiu o curso de liderança em março de 2026 (1 = sim, 0 = não).
+      absenteismo_abr_jun: Percentual das horas escaladas do operador não trabalhadas (faltas e atrasos) de abril a junho de 2026.
+      absenteismo_jan_mar: Mesmo percentual, de janeiro a março de 2026.
+      operacao: Operação do operador (cobrança, SAC ou vendas).
+      tempo_casa: Meses de empresa do operador em 1º de abril de 2026.
+      turno: Turno do operador (manhã, tarde ou noite).
+      feedbacks_1a1: Número de conversas individuais de feedback com o operador registradas pelo supervisor no sistema entre abril e junho de 2026.
+      matricula: Matrícula do operador.
+    not_in_table:
+      avaliacao_diretor: O julgamento do diretor de operações sobre quais supervisores "têm futuro". Foi dito em conversa; não há registro.
+    story: >-
+      Pergunta de leiga, sejam gentis. Sou de RH de um call center (uns 1.200 operadores,
+      61 supervisores) e preciso dizer até sexta se o curso de liderança que 22
+      supervisores fizeram em março reduziu o absenteísmo das equipes. Quem escolheu os 22
+      foi o diretor de operações: pegou as equipes com absenteísmo mais alto no primeiro
+      trimestre e, dentro delas, os supervisores que ele acha que "têm futuro". Isso foi
+      conversa de sala, não tem nada escrito, e, convenhamos, supervisor bom já segura a
+      equipe sem curso nenhum. Vendas ficou de fora porque estava em campanha, e vendas
+      sempre teve bem menos falta que cobrança. Depois do curso, os treinados passaram a
+      registrar muito mais conversas individuais de feedback no sistema, e operador que
+      recebe feedback falta menos, a gente vê isso todo ano. Novato e turno da noite
+      faltam mais, sempre faltaram. Tenho a base por operador, com o absenteísmo de
+      janeiro a março e de abril a junho. Basta comparar as equipes treinadas com as
+      outras, ajustando pelo absenteísmo anterior?
+    edges:
+      - absenteismo_jan_mar -> supervisor_treinado
+      - absenteismo_jan_mar -> absenteismo_abr_jun
+      - operacao -> supervisor_treinado
+      - operacao -> absenteismo_abr_jun
+      - avaliacao_diretor -> supervisor_treinado
+      - avaliacao_diretor -> absenteismo_abr_jun
+      - tempo_casa -> absenteismo_abr_jun
+      - turno -> absenteismo_abr_jun
+      - supervisor_treinado -> feedbacks_1a1
+      - feedbacks_1a1 -> absenteismo_abr_jun
+      - supervisor_treinado -> absenteismo_abr_jun
+    answer:
+      identifiable: false
+      missing: [avaliacao_diretor]
+    note: >-
+      O absenteísmo anterior e a operação estão na tabela e parecem bastar; o julgamento
+      do diretor sobre o supervisor, que também segura a equipe, não está. Os feedbacks
+      são consequência do curso.

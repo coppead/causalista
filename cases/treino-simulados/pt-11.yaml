@@ -1,0 +1,600 @@
+# Casos simulados para TREINO, lote pt-11: oito casos em português do Brasil escritos
+# como se fossem de uma pessoa (um analista de distribuidora de medicamentos, um gerente
+# de cobrança de operadora de cartões, um produtor de laranja, um analista de clube de
+# assinatura de vinhos, um coordenador de programa municipal de habitação), cada um no
+# estilo em que essa pessoa escreveria: nota interna curta, transcrição de áudio,
+# pergunta em fórum de analytics, briefing para consultoria, mensagem de WhatsApp.
+#
+# Escritos pelo assistente em 2026-10-07, no papel de cada pessoa, sem acesso às fichas de
+# teoria. Não são texto de pessoas de verdade e o relatório do projeto não pode dizer
+# que são. Idioma: pt.
+#
+# Estes casos são TREINO (reforço: o modelo responde, o verificador dá a nota), não
+# teste. Nenhum cenário do conjunto de teste congelado (cases/simulados/) é reusado
+# aqui. As setas ("causa -> efeito") declaram o diagrama que o texto, as descrições das
+# colunas e o bom senso implicam; o verificador confere a resposta a partir delas
+# (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_distribuidora_app_pedidos
+    author: ai
+    status: rascunho
+    language: pt
+    style: briefing para uma consultoria
+    persona: analista de inteligência comercial de uma distribuidora de medicamentos do interior de São Paulo, formado em administração
+    theme: Distribuição farmacêutica (B2B)
+    title: Aplicativo de pedidos e faturamento das farmácias
+    treatment: usa_app
+    outcome: faturamento_3t
+    columns:
+      cod_cliente: Código da farmácia no ERP da distribuidora.
+      usa_app: Farmácia faz pedidos pelo aplicativo da distribuidora desde antes de 1º de julho de 2025 (1 = sim, 0 = não).
+      faturamento_3t: Faturamento da farmácia com a distribuidora no terceiro trimestre de 2025 (julho a setembro), em reais.
+      faturamento_1t: Faturamento da farmácia com a distribuidora no primeiro trimestre de 2025 (janeiro a março, antes do lançamento do aplicativo), em reais.
+      tipo_cliente: Tipo de cliente (independente ou rede).
+      regiao_comercial: Regional de vendas que atende a farmácia (Ribeirão Preto, Araçatuba ou Sul de Minas).
+      pedidos_mes_3t: Média de pedidos por mês feitos pela farmácia no terceiro trimestre de 2025.
+      visitas_rep_out_nov: Número de visitas presenciais do representante à farmácia em outubro e novembro de 2025.
+    not_in_table:
+      relacionamento: Proximidade entre o representante e o dono da farmácia (atende o telefone, aceita sugestão, almoça com o representante). Não está em sistema nenhum.
+    story: >-
+      Briefing para proposta de consultoria. Avaliação do aplicativo de pedidos.
+      Preparado pela inteligência comercial em 30/09/2025.
+
+      1. Quem somos. Distribuidora de medicamentos e perfumaria com cerca de 2.300
+      farmácias ativas no interior de São Paulo e no sul de Minas, a maioria
+      independentes, mais umas 180 pequenas redes (de 3 a 8 lojas). Três regionais de
+      vendas: Ribeirão Preto, Araçatuba e Sul de Minas, cada uma com sua equipe de
+      representantes.
+
+      2. O que aconteceu. Em abril de 2025 lançamos um aplicativo para a farmácia fazer
+      o pedido sozinha, em vez de passar por telefone ou WhatsApp para o representante.
+      Até o fim de setembro, 870 farmácias tinham migrado. A diretoria quer saber se o
+      app aumentou o faturamento da farmácia com a gente, para decidir se paga a
+      segunda fase do desenvolvimento (integração com os sistemas das redes).
+
+      3. O que sabemos sobre quem migrou.
+      - Os representantes receberam meta de migração e foram atrás primeiro das
+      farmácias com quem têm mais proximidade: o dono que atende o telefone, que
+      aceita sugestão, que almoça com o representante. Isso não está em sistema
+      nenhum, é da cabeça de cada um. E farmácia com essa relação compra mais da gente,
+      sempre comprou, com ou sem app.
+      - Também priorizaram as contas maiores, pelo faturamento do começo do ano. Conta
+      grande em março continua grande em setembro, isso é o normal.
+      - As redes aderiram pouco: quase todas têm sistema de compras próprio e não
+      quiseram trocar. Rede compra bem mais que independente, pela quantidade de lojas.
+      - O lançamento foi escalonado por regional (Ribeirão em abril, as outras duas em
+      junho), por ordem de implantação da TI, sem relação com o perfil da farmácia.
+
+      4. O que observamos depois. A farmácia que usa o app pede mais vezes por mês
+      (pedidos pequenos, quase diários, em vez de um pedido grande por semana), e
+      pedir com mais frequência puxa o faturamento, porque a farmácia deixa de perder
+      venda por falta de produto e aproveita as ofertas do dia.
+
+      5. Uma coluna que merece cuidado: visitas do representante em outubro e novembro.
+      O representante visita menos quem já está no app, porque não precisa ir lá tirar
+      pedido, e visita mais quem caiu no terceiro trimestre, porque a lista de
+      recuperação de clientes é montada pela queda de faturamento. A coluna carrega as
+      duas coisas.
+
+      6. Dados. Extração do ERP, uma linha por farmácia: código, tipo (independente ou
+      rede), regional, faturamento do primeiro trimestre e do terceiro, se usa o app,
+      média de pedidos por mês no terceiro trimestre, visitas do representante em
+      outubro e novembro.
+
+      7. Pergunta para a proposta. Com esses dados, é possível estimar o efeito do app
+      no faturamento do terceiro trimestre? Se sim, por quais colunas ajustar e quais
+      deixar de fora; se não, o que faltaria coletar. A comparação simples dá R$ 41 mil
+      contra R$ 27 mil por farmácia no trimestre, e ninguém aqui acredita nela.
+    edges:
+      - relacionamento -> usa_app
+      - relacionamento -> faturamento_3t
+      - relacionamento -> faturamento_1t
+      - faturamento_1t -> usa_app
+      - faturamento_1t -> faturamento_3t
+      - tipo_cliente -> usa_app
+      - tipo_cliente -> faturamento_3t
+      - tipo_cliente -> faturamento_1t
+      - regiao_comercial -> usa_app
+      - usa_app -> pedidos_mes_3t
+      - pedidos_mes_3t -> faturamento_3t
+      - usa_app -> faturamento_3t
+      - usa_app -> visitas_rep_out_nov
+      - faturamento_3t -> visitas_rep_out_nov
+      - faturamento_1t -> visitas_rep_out_nov
+    answer:
+      identifiable: false
+      missing: [relacionamento]
+    note: >-
+      Os representantes migraram primeiro as farmácias com quem têm relação próxima, e
+      essa relação, que também puxa a venda, não está em coluna nenhuma. O faturamento
+      do primeiro trimestre carrega parte disso, mas não tudo. A frequência de pedidos
+      é consequência do app, e as visitas de outubro e novembro são consequência do app
+      e do faturamento; nenhuma das duas substitui o que falta.
+
+  - id: pt_cartao_desconto_quitacao
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: gerente de cobrança de uma operadora de cartões de bandeira própria, vinte anos de varejo, pouca paciência com relatório longo
+    theme: Cobrança (cartões de crédito)
+    title: Desconto para quitação à vista e recuperação em 60 dias
+    treatment: oferta_desconto
+    outcome: recuperado_60d
+    columns:
+      id_contrato: Número do contrato do cartão.
+      oferta_desconto: Recebeu em agosto de 2025, por SMS e e-mail, a oferta de 40% de desconto para quitação à vista (1 = sim, 0 = não).
+      recuperado_60d: Dívida quitada ou acordo firmado e primeira parcela paga em até 60 dias após a oferta (1 = sim, 0 = não).
+      dias_atraso_ago: Dias de atraso da fatura mais antiga em 1º de agosto de 2025.
+      saldo_devedor: Saldo devedor total em 1º de agosto de 2025, em reais.
+      score_interno: Score de risco interno calculado em julho de 2025, de 0 a 1000.
+    story: >-
+      Nota interna. Resultado da oferta de quitação à vista (carteira 60-180).
+      Para a diretoria de crédito e cobrança, com cópia para o time de dados.
+
+      Em agosto rodou a oferta de 40% de desconto para quitação à vista na carteira de
+      60 a 180 dias de atraso. A régua foi saldo e atraso: contratos com saldo acima de
+      R$ 2 mil e mais de 90 dias de atraso em 1º de agosto entraram, o resto ficou de
+      fora. A oferta saiu por SMS e e-mail, sem passar pela central. Recuperação em 60
+      dias: 31% com oferta, 19% sem. Antes de levar esse número adiante, lembro que
+      saldo maior e atraso mais velho recuperam menos, e a régua escolheu justamente
+      esse pessoal, então 19% e 31% não são comparáveis assim. O score interno de julho
+      também pesa na recuperação (score pior paga menos), mas não entrou na régua.
+      Base: id do contrato, dias de atraso e saldo em 1º de agosto, score de julho,
+      oferta (sim ou não) e recuperação em 60 dias. Peço ao time de dados o efeito
+      ajustado antes da reunião de quinta.
+    edges:
+      - dias_atraso_ago -> oferta_desconto
+      - dias_atraso_ago -> recuperado_60d
+      - saldo_devedor -> oferta_desconto
+      - saldo_devedor -> recuperado_60d
+      - score_interno -> recuperado_60d
+      - oferta_desconto -> recuperado_60d
+    answer:
+      identifiable: true
+      adjust_for: [dias_atraso_ago, saldo_devedor]
+      indifferent: [id_contrato, score_interno]
+    note: >-
+      A oferta seguiu uma régua de saldo e atraso, e as duas colunas estão na tabela.
+      O score só mexe na recuperação; pode entrar ou não.
+
+  - id: pt_laranja_braquiaria
+    author: ai
+    status: rascunho
+    language: pt
+    style: transcrição de áudio informal
+    persona: produtor de laranja de Itápolis (SP), 61 talhões, manda áudio para a sobrinha que cuida das planilhas da fazenda
+    theme: Agricultura (citricultura)
+    title: Braquiária na entrelinha e caixas por planta
+    treatment: braquiaria
+    outcome: cx_por_planta
+    columns:
+      talhao: Número do talhão no mapa da fazenda.
+      braquiaria: Talhão com braquiária plantada na entrelinha em outubro de 2024 (1 = sim, 0 = não).
+      cx_por_planta: Caixas de 40,8 kg colhidas por planta na safra 2025 (colheita de julho a dezembro de 2025), média do talhão.
+      idade_pomar: Idade das plantas do talhão em 2025, em anos.
+      solo: Textura predominante do solo do talhão (arenoso, médio ou argiloso), pelo levantamento de 2019.
+      variedade: Variedade de laranja do talhão (Pera, Valência, Hamlin ou Natal).
+      umidade_solo_jun: Umidade do solo a 20 cm de profundidade, em %, medida com sonda em junho de 2025, um ponto por talhão.
+      dist_sede_km: Distância do talhão até a sede da fazenda, em km.
+    story: >-
+      [transcrição de áudio, 2 min 51 s]
+
+      Ô Rafa, beleza? Então, é sobre a planilha que você montou dos talhões, da safra
+      25. Eu queria que você olhasse uma coisa pra mim. Lembra que em outubro do ano
+      retrasado, 24, eu plantei braquiária na entrelinha de uma parte dos talhões? Deu
+      28 talhões dos 61. Aí agora eu fechei a colheita e quero saber se valeu, porque o
+      Zé Carlos da revenda tá me empurrando semente pra plantar em tudo.
+
+      Deixa eu te contar como eu escolhi, pra você não achar que foi na sorte. Eu botei
+      braquiária primeiro nos talhões de terra mais arenosa, que é onde a terra seca
+      mais rápido, e nos talhões mais novos, de planta de quatro, cinco anos, porque a
+      entrelinha tá aberta ainda, pega sol, dá pra formar a braquiária direito. Nos
+      pomares velhos, fechados, nem adianta, não forma. E confesso que escolhi os
+      talhões mais perto da sede também, porque a plantadeira tava lá e eu não ia
+      ficar rodando a fazenda inteira com ela.
+
+      Agora, você sabe, planta nova produz menos caixa que planta formada, e terra
+      arenosa produz menos, com ou sem braquiária. E a variedade também, Pera carrega
+      mais que Valência aqui pra nós. Isso tudo tá na planilha, idade do talhão, tipo
+      de solo, variedade, distância da sede.
+
+      Tem a medida de umidade também, aquela que o Rafael da consultoria fez com o
+      aparelho dele e você colocou na planilha. Nos talhões com braquiária a terra
+      tava bem mais úmida, isso eu já esperava, braquiária segura água. E fruta com
+      água engorda, enche a caixa. Então pra mim o caminho é esse.
+
+      A conta grossa deu 2,1 caixas por planta a mais nos talhões com braquiária. Mas
+      eu tô desconfiado porque, pelo que eu te falei, a escolha não foi igual. Dá pra
+      você fazer uma conta decente com isso? Quais colunas tem que levar em conta e
+      quais não? Me liga depois do almoço.
+    edges:
+      - idade_pomar -> braquiaria
+      - idade_pomar -> cx_por_planta
+      - solo -> braquiaria
+      - solo -> cx_por_planta
+      - solo -> umidade_solo_jun
+      - variedade -> cx_por_planta
+      - dist_sede_km -> braquiaria
+      - braquiaria -> umidade_solo_jun
+      - umidade_solo_jun -> cx_por_planta
+      - braquiaria -> cx_por_planta
+    answer:
+      identifiable: true
+      adjust_for: [idade_pomar, solo]
+      do_not_adjust_for:
+        umidade_solo_jun: Foi medida em junho de 2025, depois da braquiária e antes da colheita, e é consequência dela. É o caminho pelo qual a braquiária enche a caixa; ajustar por ela apaga parte do efeito.
+      indifferent: [dist_sede_km, talhao, variedade]
+    note: >-
+      A história não diz quando a umidade foi medida; só a descrição da coluna diz
+      (junho de 2025, oito meses depois do plantio da braquiária). A distância da sede
+      só mexeu na escolha dos talhões.
+
+  - id: pt_vinhos_live_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: analista de dados de um clube de assinatura de vinhos com 9 mil assinantes, dois anos de experiência, usa Python
+    theme: Assinatura (clube de vinhos)
+    title: Convite sorteado para degustação ao vivo e retenção
+    treatment: convite_live
+    outcome: ativo_nov
+    columns:
+      id_assinante: Identificador do assinante.
+      convite_live: Recebeu, em maio de 2025, o convite por e-mail e push para a degustação ao vivo (1 = sim, 0 = não).
+      ativo_nov: Assinatura ativa em 1º de novembro de 2025 (1 = sim, 0 = não).
+      participou_live: Entrou na transmissão ao vivo da degustação de maio de 2025 (1 = sim, 0 = não). Só convidados receberam o link.
+      plano: Plano de assinatura em maio de 2025 (2, 4 ou 6 garrafas por mês).
+      meses_de_casa_mai: Meses como assinante em 1º de maio de 2025.
+      respondeu_pesquisa_saida: Respondeu à pesquisa de cancelamento (1 = sim, 0 = não). A pesquisa é enviada por e-mail a quem cancela; quem não cancelou fica com 0.
+      dia_semana_cadastro: Dia da semana em que o cadastro foi feito (1 = segunda a 7 = domingo).
+    not_in_table:
+      engajamento: O quanto a pessoa gosta da marca e acompanha o clube. Não é medido.
+    story: >-
+      Título: Teste A/B com convite pra evento. Ajusto pela participação ou não?
+
+      Oi, pessoal. Trabalho com dados num clube de assinatura de vinhos (uns 9 mil
+      assinantes ativos) e tô com uma dúvida de desenho de análise, mais do que de
+      ferramenta.
+
+      Em maio a gente fez uma degustação ao vivo no YouTube com o sommelier da casa, e
+      o convite foi um teste: separei a base ativa em dois grupos com random.sample no
+      Python, metade recebeu o convite por e-mail e push, a outra metade não ficou
+      sabendo (não divulgamos nas redes). Dos ~4.500 convidados, 1.100 entraram na
+      live.
+
+      A métrica que interessa é se a pessoa continuava assinante em 1º de novembro.
+      Comparação direta: 78% no grupo convidado, 74% no grupo sem convite. Até aí ok.
+
+      Minha dúvida: o pessoal de marketing quer que eu "olhe só quem participou de
+      fato", ou então que eu coloque participação como variável no modelo, porque
+      "convite sem participação não faz nada". Faz sentido? Pra mim quem participou da
+      live saiu mais ligado no clube e isso ajuda a renovar. Mas participar foi
+      escolha da pessoa, não minha: quem já era mais fã da marca é quem entrou na
+      live, e esse pessoal renova mais de qualquer jeito.
+
+      Outra coluna que tenho é se a pessoa respondeu à pesquisa de cancelamento. Essa
+      pesquisa vai por e-mail pra quem cancela, e a taxa de resposta é bem maior entre
+      quem tinha sido convidado pra live (acho que a pessoa que recebeu mais contato da
+      marca responde mais). Alguém do time sugeriu usar isso como "proxy de
+      engajamento" no modelo.
+
+      Também tenho plano (2, 4 ou 6 garrafas), tempo de casa em maio e, por algum
+      motivo, o dia da semana do cadastro. Plano maior e mais tempo de casa renovam
+      mais, isso é conhecido aqui.
+
+      Resumindo: pra estimar o efeito do convite na retenção, eu ajusto por alguma
+      dessas colunas? Ou a comparação simples já é o número certo, dado o sorteio?
+      Valeu.
+    edges:
+      - convite_live -> participou_live
+      - participou_live -> ativo_nov
+      - convite_live -> ativo_nov
+      - engajamento -> participou_live
+      - engajamento -> ativo_nov
+      - plano -> ativo_nov
+      - meses_de_casa_mai -> ativo_nov
+      - convite_live -> respondeu_pesquisa_saida
+      - ativo_nov -> respondeu_pesquisa_saida
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        participou_live: É consequência do convite e o caminho pelo qual ele age. Ajustar por ela apaga o efeito e ainda mistura o gosto pela marca, que levou a pessoa à live e também a renovar.
+        respondeu_pesquisa_saida: Só existe para quem cancelou e depende de ter sido convidado. É consequência do convite e do resultado; ajustar por ela cria uma associação falsa.
+      indifferent: [dia_semana_cadastro, id_assinante, meses_de_casa_mai, plano]
+    note: >-
+      O convite foi sorteado, então a comparação simples já dá o efeito. A tentação é
+      olhar só quem participou ou pôr a participação no modelo; a pesquisa de
+      cancelamento é registrada depois do resultado.
+
+  - id: pt_habitacao_reforma_sem_laudo
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenador do programa de melhorias habitacionais de uma prefeitura de 200 mil habitantes, assistente social de formação
+    theme: Política pública (habitação e saúde infantil)
+    title: Reforma de casas e crises respiratórias em crianças (nota de precariedade no papel)
+    treatment: reforma
+    outcome: crianca_ubs_resp
+    columns:
+      id_familia: Código da família no cadastro do programa.
+      reforma: Casa recebeu a melhoria habitacional em 2024 (telhado, reboco interno, banheiro com esgoto ligado) (1 = sim, 0 = não).
+      crianca_ubs_resp: Alguma criança da casa teve atendimento na UBS por crise respiratória entre janeiro e dezembro de 2025 (1 = sim, 0 = não), pelo prontuário eletrônico da saúde.
+      renda_familiar: Renda familiar per capita no CadÚnico, em reais, na atualização de 2023.
+      n_criancas: Número de crianças de até 12 anos na casa, pelo CadÚnico de 2023.
+      atend_resp_2023: Número de atendimentos na UBS por crise respiratória de crianças da casa em 2023, antes da obra.
+      bairro: Bairro da casa (um dos três bairros atendidos pelo programa).
+    not_in_table:
+      precariedade: Nota de precariedade da casa (mofo, goteira, piso) dada pela assistente social na visita de inscrição em 2023. Ficou nos formulários de papel; nunca foi digitada.
+    story: >-
+      Oi Renata, tudo bem? Desculpa te encher num sábado 😅 É sobre o programa de
+      melhorias habitacionais, aquele que você perguntou no evento da federal. Me
+      falaram que você sabe fazer essas análises.
+
+      Resumo: em 2024 a gente reformou 412 casas em três bairros da zona norte (troca
+      de telhado, reboco interno, banheiro com esgoto ligado). O público eram famílias
+      do CadÚnico com criança até 12 anos. A secretária quer mostrar pro Ministério que
+      a reforma reduziu problema respiratório em criança, e a saúde me passou, por
+      família, se alguma criança da casa foi atendida na UBS por crise respiratória em
+      2025 e quantos atendimentos desse tipo teve em 2023, antes da obra.
+
+      Como escolheu quem reformar: as assistentes sociais visitaram umas 1.400 casas
+      inscritas e deram prioridade pras mais precárias (mofo, goteira, piso de terra
+      batido), pras de renda menor e pras que já tinham criança "vivendo na UBS" por
+      causa de tosse e chiado, que os agentes de saúde levantaram pelos atendimentos de
+      2023. A quantidade de casas por bairro foi o que o orçamento de cada regional
+      permitiu, não teve critério de família aí.
+
+      O problema é que a nota de precariedade que as assistentes davam na visita ficou
+      nos formulários de papel, ninguém digitou. Então eu não tenho isso na planilha. E
+      é óbvio que casa com mofo e goteira é a que mais adoece criança, com ou sem
+      reforma, e era a que mais entrava no programa. Casa mais pobre é mais precária
+      também, claro. Renda baixa adoece mais por outros motivos, alimentação, essas
+      coisas. E criança que já tinha crise em 2023 continua tendo.
+
+      Na planilha tem: id da família, bairro, renda per capita do CadÚnico de 2023,
+      número de crianças até 12 (quanto mais criança em casa, mais chance de alguma ir
+      pra UBS, né), atendimentos por crise respiratória em 2023, se reformou e se teve
+      atendimento em 2025.
+
+      Comparação direta: 34% das casas reformadas tiveram criança atendida em 2025,
+      contra 27% das não reformadas. Ou seja, deu ao contrário do que a gente queria
+      mostrar 😬 Mas pela forma de escolher, eu acho que esse número não diz nada. Você
+      consegue me dizer se dá pra estimar o efeito de verdade com o que eu tenho, e por
+      quais colunas ajustar? Se não der, eu preciso saber também, pra não entregar
+      bobagem pro Ministério.
+    edges:
+      - precariedade -> reforma
+      - precariedade -> crianca_ubs_resp
+      - precariedade -> atend_resp_2023
+      - renda_familiar -> precariedade
+      - renda_familiar -> reforma
+      - renda_familiar -> crianca_ubs_resp
+      - renda_familiar -> atend_resp_2023
+      - atend_resp_2023 -> reforma
+      - atend_resp_2023 -> crianca_ubs_resp
+      - n_criancas -> crianca_ubs_resp
+      - n_criancas -> atend_resp_2023
+      - bairro -> reforma
+      - reforma -> crianca_ubs_resp
+    answer:
+      identifiable: false
+      missing: [precariedade]
+    twin: pt_habitacao_reforma_com_laudo
+    note: >-
+      A precariedade da casa decidiu quem entrava e é o que mais adoece criança, e a
+      nota ficou no papel. Renda e atendimentos de 2023 carregam parte disso, não tudo.
+      No gêmeo, a nota foi digitada e vira coluna.
+
+  - id: pt_habitacao_reforma_com_laudo
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: coordenador do programa de melhorias habitacionais de uma prefeitura de 200 mil habitantes, assistente social de formação
+    theme: Política pública (habitação e saúde infantil)
+    title: Reforma de casas e crises respiratórias em crianças (nota de precariedade digitada)
+    treatment: reforma
+    outcome: crianca_ubs_resp
+    columns:
+      id_familia: Código da família no cadastro do programa.
+      reforma: Casa recebeu a melhoria habitacional em 2024 (telhado, reboco interno, banheiro com esgoto ligado) (1 = sim, 0 = não).
+      crianca_ubs_resp: Alguma criança da casa teve atendimento na UBS por crise respiratória entre janeiro e dezembro de 2025 (1 = sim, 0 = não), pelo prontuário eletrônico da saúde.
+      renda_familiar: Renda familiar per capita no CadÚnico, em reais, na atualização de 2023.
+      n_criancas: Número de crianças de até 12 anos na casa, pelo CadÚnico de 2023.
+      atend_resp_2023: Número de atendimentos na UBS por crise respiratória de crianças da casa em 2023, antes da obra.
+      laudo_precariedade: Nota de precariedade da casa, de 0 a 10, dada pela assistente social na visita de inscrição em 2023 (mofo, goteira, piso).
+      bairro: Bairro da casa (um dos três bairros atendidos pelo programa).
+    story: >-
+      Oi Renata, tudo bem? Desculpa te encher num sábado 😅 É sobre o programa de
+      melhorias habitacionais, aquele que você perguntou no evento da federal. Me
+      falaram que você sabe fazer essas análises.
+
+      Resumo: em 2024 a gente reformou 412 casas em três bairros da zona norte (troca
+      de telhado, reboco interno, banheiro com esgoto ligado). O público eram famílias
+      do CadÚnico com criança até 12 anos. A secretária quer mostrar pro Ministério que
+      a reforma reduziu problema respiratório em criança, e a saúde me passou, por
+      família, se alguma criança da casa foi atendida na UBS por crise respiratória em
+      2025 e quantos atendimentos desse tipo teve em 2023, antes da obra.
+
+      Como escolheu quem reformar: as assistentes sociais visitaram umas 1.400 casas
+      inscritas e deram prioridade pras mais precárias (mofo, goteira, piso de terra
+      batido), pras de renda menor e pras que já tinham criança "vivendo na UBS" por
+      causa de tosse e chiado, que os agentes de saúde levantaram pelos atendimentos de
+      2023. A quantidade de casas por bairro foi o que o orçamento de cada regional
+      permitiu, não teve critério de família aí.
+
+      A nota de precariedade que as assistentes davam na visita (de 0 a 10, olhando
+      mofo, goteira, piso) foi digitada no sistema junto com a inscrição, então eu
+      tenho ela por família. E é óbvio que casa com mofo e goteira é a que mais adoece
+      criança, com ou sem reforma, e era a que mais entrava no programa. Casa mais
+      pobre é mais precária também, claro. Renda baixa adoece mais por outros motivos,
+      alimentação, essas coisas. E criança que já tinha crise em 2023 continua tendo.
+
+      Na planilha tem: id da família, bairro, renda per capita do CadÚnico de 2023,
+      número de crianças até 12 (quanto mais criança em casa, mais chance de alguma ir
+      pra UBS, né), atendimentos por crise respiratória em 2023, a nota de
+      precariedade, se reformou e se teve atendimento em 2025.
+
+      Comparação direta: 34% das casas reformadas tiveram criança atendida em 2025,
+      contra 27% das não reformadas. Ou seja, deu ao contrário do que a gente queria
+      mostrar 😬 Mas pela forma de escolher, eu acho que esse número não diz nada. Você
+      consegue me dizer se dá pra estimar o efeito de verdade com o que eu tenho, e por
+      quais colunas ajustar? Se não der, eu preciso saber também, pra não entregar
+      bobagem pro Ministério.
+    edges:
+      - laudo_precariedade -> reforma
+      - laudo_precariedade -> crianca_ubs_resp
+      - laudo_precariedade -> atend_resp_2023
+      - renda_familiar -> laudo_precariedade
+      - renda_familiar -> reforma
+      - renda_familiar -> crianca_ubs_resp
+      - atend_resp_2023 -> reforma
+      - atend_resp_2023 -> crianca_ubs_resp
+      - n_criancas -> crianca_ubs_resp
+      - bairro -> reforma
+      - reforma -> crianca_ubs_resp
+    answer:
+      identifiable: true
+      adjust_for: [atend_resp_2023, laudo_precariedade, renda_familiar]
+      indifferent: [bairro, id_familia, n_criancas]
+    twin: pt_habitacao_reforma_sem_laudo
+    note: >-
+      Igual ao gêmeo, com um fato trocado: a nota de precariedade foi digitada. Os três
+      critérios de escolha (precariedade, renda, criança já atendida) estão na tabela e
+      todos mexem no resultado; o bairro só mexeu na quantidade de reformas.
+
+  - id: pt_vinhos_bilhete_sommelier
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta
+    persona: analista de dados de um clube de assinatura de vinhos com 9 mil assinantes, dois anos de experiência, usa Python
+    theme: Assinatura (clube de vinhos)
+    title: Bilhete manuscrito na primeira caixa e renovação na terceira cobrança
+    treatment: bilhete
+    outcome: renovou_3m
+    columns:
+      id_assinante: Identificador do assinante.
+      bilhete: Primeira caixa enviada com bilhete manuscrito do sommelier (1 = sim, 0 = não). Assinantes que entraram de agosto a novembro de 2025.
+      renovou_3m: Terceira cobrança mensal paga, sem cancelamento até ela (1 = sim, 0 = não).
+      plano: Plano escolhido no cadastro (2, 4 ou 6 garrafas por mês).
+      idade_cadastro: Idade informada no cadastro, em anos.
+      mora_capital: Endereço de entrega em capital de estado (1 = sim, 0 = não).
+    not_in_table:
+      origem_indicacao: Entrou pela campanha de indicação de amigos (em vez de mídia paga ou busca orgânica). O campo de origem foi perdido na migração do CRM em outubro de 2025.
+    story: >-
+      Nota rápida pro Thiago (growth), sobre o bilhete do sommelier.
+
+      Resumo da análise que você pediu do bilhete manuscrito na primeira caixa. O
+      bilhete rodou de agosto a novembro: o Caio escreveu pra todo mundo que entrou
+      pela campanha de indicação de amigos (era a ideia original, agradecer a
+      indicação) e, nas semanas em que sobrou tempo, pra uma parte dos novos do plano
+      de 6 garrafas. Ao todo 1.240 assinantes novos no período, 390 com bilhete.
+
+      Retenção na terceira cobrança: 81% com bilhete, 66% sem. Antes de comemorar: quem
+      entra por indicação de amigo fica muito mais tempo, a gente já sabia disso das
+      coortes de 2024, e esse grupo é quase todo bilhete. E o campo de origem
+      (indicação, mídia paga, orgânico) a gente perdeu na migração do CRM em outubro;
+      a Lu da TI confirmou que não tem como recuperar pra essa coorte. O plano eu
+      tenho, e plano de 6 também renova mais, independente de bilhete.
+
+      Na base: id, plano, idade no cadastro, se mora em capital (entrega chega mais
+      rápido e isso segura o assinante) e, claro, bilhete e renovação na terceira. Minha
+      leitura é que não dá pra separar o efeito do bilhete do efeito da indicação com o
+      que temos, mas queria uma segunda opinião antes de responder ao Caio. Se você
+      discordar, me chama.
+    edges:
+      - origem_indicacao -> bilhete
+      - origem_indicacao -> renovou_3m
+      - plano -> bilhete
+      - plano -> renovou_3m
+      - mora_capital -> renovou_3m
+      - bilhete -> renovou_3m
+    answer:
+      identifiable: false
+      missing: [origem_indicacao]
+    note: >-
+      O bilhete foi para quase todo mundo que veio por indicação, e indicação renova
+      mais; o campo de origem se perdeu na migração. O plano está na tabela e não
+      resolve sozinho.
+
+  - id: pt_cartao_bloqueio_15d
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de cobrança de uma operadora de cartões de bandeira própria, vinte anos de varejo, pergunta no fórum sem se identificar
+    theme: Cobrança (cartões de crédito)
+    title: Bloqueio preventivo no 15º dia de atraso e regularização até o 60º
+    treatment: bloqueio_15d
+    outcome: regularizou_60d
+    columns:
+      id_conta: Identificador da conta do cartão.
+      bloqueio_15d: Cartão bloqueado preventivamente no 15º dia de atraso (1 = sim, 0 = não). Atrasos de junho a agosto de 2025.
+      regularizou_60d: Pagou pelo menos o valor mínimo da fatura em atraso até o 60º dia (1 = sim, 0 = não).
+      limite_cartao: Limite de crédito do cartão na data do vencimento, em reais.
+      score_interno: Score de risco interno no mês anterior ao vencimento, de 0 a 1000.
+      idade_conta_meses: Meses desde a abertura da conta até o vencimento.
+      compra_negada: Teve ao menos uma tentativa de compra negada entre o 15º e o 60º dia de atraso (1 = sim, 0 = não).
+      ligacoes_central_90d: Número de ligações da conta para a central de atendimento nos 90 dias após o vencimento.
+    story: >-
+      Título: Bloqueio preventivo de cartão e regularização. Como tratar as colunas
+      "do meio"?
+
+      Trabalho na cobrança de uma operadora de cartões (bandeira própria, varejo).
+      Desde junho de 2025 a gente bloqueia preventivamente o cartão no 15º dia de
+      atraso de parte das contas: a régua pega quem tem limite acima de R$ 3 mil
+      (exposição maior) e, independentemente do limite, quem está com score interno
+      baixo. O resto segue sem bloqueio até o 60º dia, como era antes. Quero medir se o
+      bloqueio no 15º dia aumenta a regularização até o 60º dia (pagou pelo menos o
+      mínimo).
+
+      Comparação crua, atrasos de junho a agosto: 52% regularizaram no grupo bloqueado
+      contra 58% no não bloqueado. Só que os dois critérios da régua têm tudo a ver
+      com pagar ou não: cliente com limite maior tem renda maior e paga mais; score
+      baixo paga menos. Então o bruto não vale.
+
+      Minhas dúvidas são sobre duas colunas que tenho:
+
+      1. Se o cliente teve compra negada entre o 15º e o 60º dia. Isso só acontece com
+      cartão bloqueado, claro, e é o "susto" que a gente acha que faz a pessoa pagar.
+      Coloco no modelo?
+
+      2. Número de ligações pra central nos 90 dias depois do vencimento. Quem foi
+      bloqueado liga pra reclamar, e quem paga liga pra pedir o desbloqueio. Esse
+      volume sobe com as duas coisas.
+
+      Fora isso tenho id da conta, limite, score interno (do mês anterior ao
+      vencimento) e idade da conta em meses; conta mais antiga regulariza mais, pelo
+      que já vi. Base de uns 38 mil atrasos.
+
+      Alguém pode me dizer quais dessas colunas entram no ajuste e quais não?
+      Obrigado.
+    edges:
+      - limite_cartao -> bloqueio_15d
+      - limite_cartao -> regularizou_60d
+      - score_interno -> bloqueio_15d
+      - score_interno -> regularizou_60d
+      - idade_conta_meses -> regularizou_60d
+      - bloqueio_15d -> compra_negada
+      - compra_negada -> regularizou_60d
+      - bloqueio_15d -> regularizou_60d
+      - bloqueio_15d -> ligacoes_central_90d
+      - regularizou_60d -> ligacoes_central_90d
+    answer:
+      identifiable: true
+      adjust_for: [limite_cartao, score_interno]
+      do_not_adjust_for:
+        compra_negada: Só acontece depois do bloqueio e é o caminho pelo qual ele age. Ajustar por ela apaga parte do efeito.
+        ligacoes_central_90d: Contada até o 90º dia, depois do resultado, e sobe tanto com o bloqueio quanto com o pagamento. Ajustar por ela cria uma associação falsa entre os dois.
+      indifferent: [id_conta, idade_conta_meses]
+    note: >-
+      A régua de bloqueio usou limite e score, e os dois estão na tabela. A compra
+      negada é consequência do bloqueio; as ligações são consequência do bloqueio e da
+      regularização, e a descrição da coluna é que diz que a janela vai até o 90º dia.

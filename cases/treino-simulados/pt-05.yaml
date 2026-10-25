@@ -1,0 +1,497 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria, para o modelo treinar por reforço (ele responde, o verificador dá a
+# nota; ele nunca vê este arquivo). Não são o teste congelado de cases/simulados/ e não
+# repetem os cenários dele.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: um
+# coordenador de atendimento de um plano odontológico, um gerente de concessionária de
+# veículos, um analista de uma companhia de água e esgoto, uma coordenadora de extensão
+# universitária e uma gerente de e-commerce de moda. Estilos: mensagem de WhatsApp,
+# página de wiki interna, e-mail longo com anexo descrito, ata de reunião e nota interna
+# curta. As setas (edges) são o diagrama que o texto implica; o verificador confere a
+# resposta a partir delas (scripts/check_cases.py).
+
+cases:
+
+  - id: pt_odonto_programa_periodontal
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp para a analista de BI
+    persona: coordenador de atendimento de um plano odontológico, sem formação em estatística
+    theme: Saúde suplementar (odontologia)
+    title: Programa periodontal e extrações
+    treatment: programa_periodontal
+    outcome: extracao_12m
+    columns:
+      cod_beneficiario: Código do beneficiário no sistema de gestão do plano.
+      idade: Idade em anos completos em 1/3/2025.
+      tipo_contrato: individual ou empresarial.
+      programa_periodontal: Beneficiário inscrito no programa de cuidado periodontal por indicação do dentista da rede, entre março e maio de 2025 (1 = sim, 0 = não).
+      limpezas_12m: Quantidade de profilaxias (limpezas) autorizadas entre junho de 2025 e maio de 2026.
+      extracao_12m: Teve ao menos uma extração dentária autorizada entre junho de 2025 e maio de 2026 (1 = sim, 0 = não).
+    not_in_table:
+      estado_gengiva: Condição da gengiva vista pelo dentista na consulta em que indicou ou não o programa. Fica no prontuário do consultório e não chega ao plano.
+    story: >-
+      Oi Pati, bom dia! Desculpa te chamar por aqui, mas a Dra. Renata quer uma resposta até
+      sexta sobre o programa periodontal (aquele das duas limpezas extras sem coparticipação
+      que a rede começou a indicar em março de 2025). A pergunta dela é se o programa
+      diminuiu extração. Já puxei a base: código do beneficiário, idade, tipo de contrato, se
+      entrou no programa, quantas limpezas fez de junho/25 a maio/26 e se teve extração
+      autorizada nesse mesmo período. Dois pontos que me incomodam. Quem entrou fez bem mais
+      limpeza (3,1 contra 1,2 de média) e limpeza em dia segura o dente, isso qualquer
+      dentista te diz. E quem indicava era o dentista da rede, na cadeira. Conversando com
+      eles na reunião de credenciados, eles indicavam quem chegava com a gengiva mais
+      comprometida (que é justamente quem acaba perdendo dente, com ou sem programa), e
+      também os de mais idade. Gengiva fica no prontuário do consultório, pra gente só vem
+      a guia com o código do procedimento. Idade pesa na extração, claro. Nos contratos
+      empresariais o programa já estava coberto, bastava a indicação; no individual, além
+      da indicação, o beneficiário tinha que aderir à parte, e muitos não aderiram. Dá pra
+      comparar quem entrou com quem não entrou levando em conta a idade? Se precisar de
+      mais alguma coluna me fala que eu puxo.
+    edges:
+      - estado_gengiva -> programa_periodontal
+      - estado_gengiva -> extracao_12m
+      - idade -> programa_periodontal
+      - idade -> extracao_12m
+      - tipo_contrato -> programa_periodontal
+      - programa_periodontal -> limpezas_12m
+      - limpezas_12m -> extracao_12m
+      - programa_periodontal -> extracao_12m
+    answer:
+      identifiable: false
+      missing: [estado_gengiva]
+    note: >-
+      O dentista indicou pela condição da gengiva, que também causa extração e não está na
+      base. A idade está na base e é só parte do problema; as limpezas são consequência do
+      programa.
+
+  - id: pt_concessionaria_testdrive_fds
+    author: ai
+    status: rascunho
+    language: pt
+    style: nota interna curta para o gerente financeiro
+    persona: gerente de uma concessionária de veículos
+    theme: Varejo automotivo
+    title: Test drive de fim de semana e fechamento da venda
+    treatment: testdrive_fds
+    outcome: comprou_60d
+    columns:
+      vendedor: Código do consultor de vendas responsável pelo lead.
+      origem_lead: site, loja ou indicação.
+      modelo_interesse: Modelo pelo qual o lead perguntou no primeiro atendimento (hatch, sedã, SUV ou picape).
+      avaliou_usado: Fez avaliação do veículo usado para troca no primeiro atendimento (1 = sim, 0 = não).
+      testdrive_fds: Lead levou o veículo para casa de sexta a segunda (1 = sim, 0 = não). Programa iniciado em fevereiro de 2026.
+      visitas_pos: Número de retornos à loja registrados no CRM depois do primeiro atendimento, até a compra ou até 60 dias.
+      comprou_60d: Lead fechou a compra de um veículo novo em até 60 dias do primeiro atendimento (1 = sim, 0 = não).
+      pesquisa_respondida: Respondeu à pesquisa de pós-venda do marketing, enviada ao fim dos 60 dias a quem comprou e a quem levou o carro no fim de semana (1 = sim, 0 = não).
+    story: >-
+      Ricardo, sobre o test drive de fim de semana (carro liberado de sexta a segunda, desde
+      fevereiro): preciso saber se vende mais, porque cada liberação custa uns R$ 400 entre
+      combustível, lavagem e seguro. Do CRM saem, por lead, as colunas da planilha anexa.
+      Avisos: os consultores liberam mais pra quem já avaliou o usado (esse já tá com um pé
+      dentro, fecha muito mais) e pra quem quer SUV, que é o que tem no pátio, e SUV fecha
+      menos porque o preço assusta. Cada consultor libera do seu jeito, o Jorge quase não
+      libera. Indicação fecha mais que site. Quem leva o carro volta mais à loja, e voltar é
+      meio caminho pra fechar; pra mim isso é parte do que o fim de semana faz. A pesquisa de
+      pós-venda o marketing manda quando fecham os 60 dias, pra quem comprou e pra quem
+      levou o carro; não sei se serve. Me diz o que comparar com o quê.
+    edges:
+      - avaliou_usado -> testdrive_fds
+      - avaliou_usado -> comprou_60d
+      - modelo_interesse -> testdrive_fds
+      - modelo_interesse -> comprou_60d
+      - vendedor -> testdrive_fds
+      - origem_lead -> comprou_60d
+      - testdrive_fds -> visitas_pos
+      - visitas_pos -> comprou_60d
+      - testdrive_fds -> comprou_60d
+      - testdrive_fds -> pesquisa_respondida
+      - comprou_60d -> pesquisa_respondida
+    answer:
+      identifiable: true
+      adjust_for: [avaliou_usado, modelo_interesse]
+      do_not_adjust_for:
+        visitas_pos: Consequência do test drive e um dos caminhos até a compra. Faz parte do efeito que se quer medir.
+        pesquisa_respondida: Enviada depois, a quem levou o carro e a quem comprou. Ajustar por ela cria uma associação falsa entre o test drive e a compra.
+      indifferent: [vendedor, origem_lead]
+    note: >-
+      Duas colunas a ajustar ditas de passagem; o retorno à loja é consequência da
+      intervenção, e a pesquisa vem depois do resultado e depende dos dois.
+
+  - id: pt_saneamento_troca_hidrometro
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: analista de planejamento comercial de uma companhia de água e esgoto
+    theme: Saneamento
+    title: Troca de hidrômetro e consumo faturado
+    treatment: troca_hidrometro
+    outcome: consumo_pos_m3
+    columns:
+      matricula: Número da matrícula da ligação de água.
+      idade_hidrometro_antigo: Idade, em anos, do hidrômetro instalado antes de setembro de 2025, pelo cadastro técnico.
+      consumo_pre_m3: Consumo médio mensal faturado de março a agosto de 2025, em m3.
+      troca_hidrometro: Hidrômetro substituído por aparelho novo classe C em setembro de 2025 (1 = sim, 0 = não).
+      vazamento_registrado: Técnico registrou vazamento no cavalete durante a visita de troca e fez o reparo no ato (1 = sim, 0 = não). Só há visita nas ligações com troca.
+      consumo_pos_m3: Consumo médio mensal faturado de outubro de 2025 a março de 2026, em m3.
+      reclamacao_conta_alta: Abriu reclamação de conta alta no atendimento entre outubro de 2025 e março de 2026 (1 = sim, 0 = não).
+    story: >-
+      Troca de hidrômetros, piloto na rota de leitura 14 (Jardim Alvorada). Última edição por
+      Marcos Vinícius, Planejamento Comercial, em 12/03/2026. Contexto. Em setembro de 2025
+      recebemos 600 hidrômetros classe C e a rota 14 tem 1.187 ligações ativas. Como não dava
+      pra todo mundo, a equipe de campo seguiu a ordem do roteiro de leitura e trocou uma
+      ligação sim, uma não, até acabar o estoque; o restante fica pra quando chegar o próximo
+      lote. A pergunta da gerência é se o hidrômetro novo aumenta o consumo faturado, porque
+      a hipótese de sempre é que o aparelho velho marca menos água do que passa. Base (uma
+      linha por matrícula, aba rota14_piloto no servidor da GCOM): matrícula; idade do
+      hidrômetro antigo pelo cadastro técnico; consumo médio faturado nos seis meses antes da
+      troca; se trocou; se o técnico registrou vazamento no cavalete na hora da troca (ele só
+      olha isso quando vai trocar, e conserta no ato); consumo médio faturado nos seis meses
+      seguintes; se o cliente abriu reclamação de conta alta nesse mesmo período. Observações.
+      Hidrômetro mais velho marca menos, antes e depois (nos não trocados ele continua lá).
+      Consumo anterior é o melhor previsor do posterior, como sempre. Vazamento consertado
+      derruba o consumo dos meses seguintes, o que joga contra a hipótese. Reclamação de conta
+      alta disparou depois da troca: parte porque a conta subiu mesmo, parte porque o pessoal
+      viu o aparelho novo e já desconfiou. Dúvida aberta (favor responder aqui embaixo ou no
+      Teams): dá pra comparar direto trocados e não trocados ou precisa ajustar por alguma
+      dessas colunas?
+    edges:
+      - troca_hidrometro -> consumo_pos_m3
+      - troca_hidrometro -> vazamento_registrado
+      - vazamento_registrado -> consumo_pos_m3
+      - idade_hidrometro_antigo -> consumo_pre_m3
+      - idade_hidrometro_antigo -> consumo_pos_m3
+      - consumo_pre_m3 -> consumo_pos_m3
+      - troca_hidrometro -> reclamacao_conta_alta
+      - consumo_pos_m3 -> reclamacao_conta_alta
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        vazamento_registrado: Só existe porque houve a troca, e o reparo é um dos caminhos pelos quais a troca muda o consumo. Faz parte do efeito.
+        reclamacao_conta_alta: Registrada depois do consumo e causada tanto pela troca quanto pela conta alta. Ajustar por ela cria uma associação falsa.
+      indifferent: [matricula, idade_hidrometro_antigo, consumo_pre_m3]
+    note: >-
+      Alternar casa sim, casa não pela ordem do roteiro equivale a um sorteio. O que sobra é
+      não ajustar pela consequência da troca nem pela reclamação posterior.
+
+  - id: pt_saneamento_visita_orientacao
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail longo com anexo descrito
+    persona: analista de planejamento comercial de uma companhia de água e esgoto
+    theme: Saneamento
+    title: Visita de orientação de consumo
+    treatment: visita_orientacao
+    outcome: consumo_pos_m3
+    columns:
+      visita_orientacao: Ligação recebeu visita de orientação de consumo de um agente da companhia entre abril e junho de 2025 (1 = sim, 0 = não).
+      consumo_pre_m3: Consumo médio mensal medido de outubro de 2024 a março de 2025, em m3.
+      consumo_pos_m3: Consumo médio mensal medido de julho a dezembro de 2025, em m3.
+      bairro_piloto: Ligação fica em um dos quatro bairros do piloto (1 = sim, 0 = não).
+      moradores_cadastro: Número de moradores declarado no cadastro comercial da ligação.
+      redutor_instalado: Agente instalou redutores de vazão nas torneiras durante a visita (1 = sim, 0 = não). Sempre 0 onde não houve visita.
+      segunda_visita: Ligação incluída na segunda rodada de visitas, marcada em janeiro de 2026 para as ligações visitadas cujo consumo médio de julho a dezembro de 2025 continuou acima de 25 m3/mês (1 = sim, 0 = não).
+      tipo_ligacao: água ou água e esgoto.
+    story: >-
+      Assunto: base do programa de orientação de consumo (anexo), pedido de análise. Carla,
+      boa tarde. Conforme combinamos na reunião de ontem, segue em anexo a planilha
+      orientacao_consumo_2025.xlsx. A aba "base" tem 3.412 linhas, uma por ligação de água,
+      e a aba "dicionario" explica cada coluna; copio abaixo o essencial pra você não precisar
+      abrir agora. Contexto: o programa rodou de abril a junho de 2025 em quatro bairros (Vila
+      Nova, Centro-Sul, Jardim das Palmeiras e São Benedito), escolhidos pelo diretor de
+      operações porque ficam perto da base das equipes. A regra era visitar as ligações com
+      consumo médio acima de 25 m3/mês no semestre anterior; quando sobrava agenda, os
+      agentes também visitavam as casas com mais moradores no cadastro, porque são as que
+      costumam ter conta grande. Na visita o agente orienta sobre hábitos e, se o morador
+      aceita, instala redutores de vazão nas torneiras; o redutor sozinho já derruba o
+      consumo. A base inclui, além das ligações desses bairros, as dos outros bairros da
+      mesma zona, que não receberam visita. Colunas da aba base: visita_orientacao;
+      consumo_pre_m3 e consumo_pos_m3 (médias mensais dos seis meses antes e dos seis meses
+      depois; o consumo anterior, claro, continua sendo o que mais explica o posterior);
+      bairro_piloto; moradores_cadastro (que, como você imagina, puxa o consumo pra cima
+      antes e depois); redutor_instalado; segunda_visita (está explicada no dicionário);
+      tipo_ligacao. O diretor quer um número: quanto a visita reduziu o consumo. Minha dúvida
+      é quais colunas entram na comparação e quais não entram. Se puder me devolver até
+      quarta, agradeço. Abraço, Rodrigo. Anexo: orientacao_consumo_2025.xlsx (412 KB).
+    edges:
+      - consumo_pre_m3 -> visita_orientacao
+      - consumo_pre_m3 -> consumo_pos_m3
+      - bairro_piloto -> visita_orientacao
+      - moradores_cadastro -> visita_orientacao
+      - moradores_cadastro -> consumo_pre_m3
+      - moradores_cadastro -> consumo_pos_m3
+      - visita_orientacao -> redutor_instalado
+      - redutor_instalado -> consumo_pos_m3
+      - visita_orientacao -> consumo_pos_m3
+      - visita_orientacao -> segunda_visita
+      - consumo_pos_m3 -> segunda_visita
+    answer:
+      identifiable: true
+      adjust_for: [consumo_pre_m3, moradores_cadastro]
+      do_not_adjust_for:
+        redutor_instalado: Consequência da visita e um dos caminhos pelos quais ela reduz o consumo. Faz parte do efeito.
+        segunda_visita: Marcada depois do período de consumo e decidida pelo consumo posterior, só entre as visitadas. Ajustar por ela cria uma associação falsa.
+      indifferent: [bairro_piloto, tipo_ligacao]
+    note: >-
+      A regra de visita usa duas colunas da base. O que diz que a segunda visita veio depois
+      do resultado está só no dicionário; o e-mail apenas remete a ele.
+
+  - id: pt_extensao_visita_lab_sorteio
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenadora de extensão de um centro de ciências exatas de universidade pública
+    theme: Educação (extensão universitária)
+    title: Visita aos laboratórios e inscrição no vestibular (sorteio)
+    treatment: visita_lab
+    outcome: inscreveu_vestibular
+    columns:
+      cod_aluno: Código anônimo do aluno gerado pela equipe do projeto.
+      ideb_escola: IDEB do ensino médio da escola do aluno, edição 2023.
+      distancia_campus_km: Distância, em km, da escola ao campus, pelo endereço do cadastro.
+      serie: Série do aluno em 2025 (2 ou 3).
+      turno: Turno em que o aluno estuda (manhã, tarde ou noite).
+      visita_lab: Aluno participou da visita guiada aos laboratórios do campus promovida pelo projeto Portas Abertas, entre maio e agosto de 2025 (1 = sim, 0 = não).
+      participou_feira: Aluno compareceu à Feira das Profissões no campus, em setembro de 2025, pela lista de presença (1 = sim, 0 = não).
+      inscreveu_vestibular: Aluno se inscreveu no vestibular da universidade em novembro de 2025, por cruzamento de CPF com a COPERVE (1 = sim, 0 = não).
+    story: >-
+      Ata da 7ª reunião ordinária da Comissão de Extensão do Centro de Ciências Exatas,
+      realizada em 19 de fevereiro de 2026, às 14h, na sala 204. Presentes: Profa. Luciana
+      Barreto (coordenadora de extensão), Prof. Henrique Sá, Prof. Daniel Moura, a servidora
+      Tânia Ribeiro e a bolsista Ana Clara Nunes. Item 3, avaliação do projeto Portas Abertas
+      2025. A coordenadora relatou que o projeto levou turmas de 2º e 3º ano de escolas
+      estaduais para visitas guiadas aos laboratórios entre maio e agosto de 2025, e que a
+      Pró-Reitoria pede um indicador de resultado: se a visita aumentou a inscrição desses
+      alunos no vestibular de novembro. Explicou como as escolas foram escolhidas. Pelo
+      edital, eram elegíveis as escolas que preencheram o formulário de interesse com IDEB
+      abaixo de 4,0 e a até 30 km do campus, por causa do ônibus da universidade; como houve
+      41 escolas elegíveis para 18 vagas, a equipe sorteou as 18 em sessão pública, com ata
+      própria. Dentro de cada escola, as turmas de 3º ano tiveram prioridade quando não
+      cabiam todos no ônibus. O Prof. Henrique observou que o 3º ano se inscreve muito mais
+      no vestibular, obviamente, e que escola com IDEB melhor e mais perto do campus também
+      manda mais aluno para o vestibular, com ou sem visita, como o relatório da COPERVE de
+      2024 já mostrava; e que os alunos do noturno se inscrevem menos. A bolsista Ana Clara
+      acrescentou que os alunos visitados compareceram muito mais à Feira das Profissões de
+      setembro, e que a feira por si só puxa inscrição, o que a comissão entendeu ser parte
+      do efeito do projeto. A servidora Tânia informou que a base foi montada com uma linha
+      por aluno (código anônimo, IDEB da escola, distância da escola ao campus, série, turno,
+      se participou da visita, se foi à feira e se se inscreveu no vestibular, por cruzamento
+      de CPF com a COPERVE), cobrindo os alunos de todas as 73 escolas que preencheram o
+      formulário. A comissão deliberou encaminhar a base ao Núcleo de Estatística com a
+      pergunta: quais colunas devem ser levadas em conta na comparação entre visitados e não
+      visitados. Nada mais havendo a tratar, a reunião foi encerrada às 15h20. Lavrei a
+      presente ata, Tânia Ribeiro.
+    edges:
+      - ideb_escola -> visita_lab
+      - ideb_escola -> inscreveu_vestibular
+      - distancia_campus_km -> visita_lab
+      - distancia_campus_km -> inscreveu_vestibular
+      - serie -> visita_lab
+      - serie -> inscreveu_vestibular
+      - turno -> inscreveu_vestibular
+      - visita_lab -> participou_feira
+      - participou_feira -> inscreveu_vestibular
+      - visita_lab -> inscreveu_vestibular
+    answer:
+      identifiable: true
+      adjust_for: [distancia_campus_km, ideb_escola, serie]
+      do_not_adjust_for:
+        participou_feira: Consequência da visita e um dos caminhos até a inscrição. Faz parte do efeito do projeto.
+      indifferent: [turno, cod_aluno]
+    twin: pt_extensao_visita_lab_escolha
+    note: >-
+      Sorteio entre as elegíveis, mas a elegibilidade e a prioridade dentro da escola usam
+      três colunas da base. A feira é consequência da visita.
+
+  - id: pt_extensao_visita_lab_escolha
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: coordenadora de extensão de um centro de ciências exatas de universidade pública
+    theme: Educação (extensão universitária)
+    title: Visita aos laboratórios e inscrição no vestibular (escolha da equipe)
+    treatment: visita_lab
+    outcome: inscreveu_vestibular
+    columns:
+      cod_aluno: Código anônimo do aluno gerado pela equipe do projeto.
+      ideb_escola: IDEB do ensino médio da escola do aluno, edição 2023.
+      distancia_campus_km: Distância, em km, da escola ao campus, pelo endereço do cadastro.
+      serie: Série do aluno em 2025 (2 ou 3).
+      turno: Turno em que o aluno estuda (manhã, tarde ou noite).
+      visita_lab: Aluno participou da visita guiada aos laboratórios do campus promovida pelo projeto Portas Abertas, entre maio e agosto de 2025 (1 = sim, 0 = não).
+      participou_feira: Aluno compareceu à Feira das Profissões no campus, em setembro de 2025, pela lista de presença (1 = sim, 0 = não).
+      inscreveu_vestibular: Aluno se inscreveu no vestibular da universidade em novembro de 2025, por cruzamento de CPF com a COPERVE (1 = sim, 0 = não).
+    not_in_table:
+      empenho_direcao: Quanto a direção da escola pareceu empenhada no primeiro contato por telefone com a equipe do projeto. Não foi registrado.
+    story: >-
+      Ata da 7ª reunião ordinária da Comissão de Extensão do Centro de Ciências Exatas,
+      realizada em 19 de fevereiro de 2026, às 14h, na sala 204. Presentes: Profa. Luciana
+      Barreto (coordenadora de extensão), Prof. Henrique Sá, Prof. Daniel Moura, a servidora
+      Tânia Ribeiro e a bolsista Ana Clara Nunes. Item 3, avaliação do projeto Portas Abertas
+      2025. A coordenadora relatou que o projeto levou turmas de 2º e 3º ano de escolas
+      estaduais para visitas guiadas aos laboratórios entre maio e agosto de 2025, e que a
+      Pró-Reitoria pede um indicador de resultado: se a visita aumentou a inscrição desses
+      alunos no vestibular de novembro. Explicou como as escolas foram escolhidas. Pelo
+      edital, eram elegíveis as escolas que preencheram o formulário de interesse com IDEB
+      abaixo de 4,0 e a até 30 km do campus, por causa do ônibus da universidade; como houve
+      41 escolas elegíveis para 18 vagas, a equipe escolheu as 18 cujas direções pareceram
+      mais empenhadas no primeiro contato por telefone. O Prof. Daniel lembrou que esse
+      critério não ficou registrado em lugar nenhum, e que direção empenhada é também a que
+      mais empurra aluno para o vestibular. Dentro de cada escola, as turmas de 3º ano
+      tiveram prioridade quando não cabiam todos no ônibus. O Prof. Henrique observou que o
+      3º ano se inscreve muito mais no vestibular, obviamente, e que escola com IDEB melhor e
+      mais perto do campus também manda mais aluno para o vestibular, com ou sem visita, como
+      o relatório da COPERVE de 2024 já mostrava; e que os alunos do noturno se inscrevem
+      menos. A bolsista Ana Clara acrescentou que os alunos visitados compareceram muito mais
+      à Feira das Profissões de setembro, e que a feira por si só puxa inscrição, o que a
+      comissão entendeu ser parte do efeito do projeto. A servidora Tânia informou que a base
+      foi montada com uma linha por aluno (código anônimo, IDEB da escola, distância da
+      escola ao campus, série, turno, se participou da visita, se foi à feira e se se
+      inscreveu no vestibular, por cruzamento de CPF com a COPERVE), cobrindo os alunos de
+      todas as 73 escolas que preencheram o formulário. A comissão deliberou encaminhar a
+      base ao Núcleo de Estatística com a pergunta: quais colunas devem ser levadas em conta
+      na comparação entre visitados e não visitados. Nada mais havendo a tratar, a reunião
+      foi encerrada às 15h20. Lavrei a presente ata, Tânia Ribeiro.
+    edges:
+      - empenho_direcao -> visita_lab
+      - empenho_direcao -> inscreveu_vestibular
+      - ideb_escola -> visita_lab
+      - ideb_escola -> inscreveu_vestibular
+      - distancia_campus_km -> visita_lab
+      - distancia_campus_km -> inscreveu_vestibular
+      - serie -> visita_lab
+      - serie -> inscreveu_vestibular
+      - turno -> inscreveu_vestibular
+      - visita_lab -> participou_feira
+      - participou_feira -> inscreveu_vestibular
+      - visita_lab -> inscreveu_vestibular
+    answer:
+      identifiable: false
+      missing: [empenho_direcao]
+    twin: pt_extensao_visita_lab_sorteio
+    note: >-
+      Mesma ata do gêmeo, com uma frase trocada: em vez de sorteio, a equipe escolheu as
+      escolas pelo empenho da direção, que não foi registrado e também leva à inscrição.
+
+  - id: pt_ecommerce_troca_gratis
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: gerente de e-commerce de uma marca de moda
+    theme: E-commerce de moda
+    title: Primeira troca grátis e recompra
+    treatment: troca_gratis
+    outcome: recomprou_90d
+    columns:
+      troca_gratis: Cliente com a primeira troca grátis habilitada no pedido inicial. Regra automática desde 1/4/2025, primeiro pedido com valor acima de R$ 300 e entrega nas regiões Sul ou Sudeste (1 = sim, 0 = não).
+      recomprou_90d: Fez ao menos um novo pedido em até 90 dias do primeiro (1 = sim, 0 = não).
+      valor_primeiro_pedido: Valor do primeiro pedido, em reais, já com desconto.
+      regiao: Região de entrega do primeiro pedido (Norte, Nordeste, Centro-Oeste, Sudeste ou Sul).
+      canal_aquisicao: Canal de origem da primeira compra pela UTM (instagram, google, influencer ou orgânico).
+      cupom_boas_vindas: Usou o cupom de boas-vindas de 10% no primeiro pedido (1 = sim, 0 = não).
+      fez_troca_60d: Solicitou troca de tamanho ou cor de algum item do primeiro pedido em até 60 dias (1 = sim, 0 = não).
+      nps_7d: Nota de 0 a 10 dada na pesquisa enviada sete dias após a entrega do primeiro pedido (vazio se não respondeu).
+      dia_semana_pedido: Dia da semana do primeiro pedido.
+    story: >-
+      Primeira troca grátis, avaliação (rascunho). Página criada por Fernanda (E-commerce) em
+      03/02/2026; time de BI, por favor complementar. O que é: desde 1/4/2025 a cliente nova
+      ganha a primeira troca com frete grátis nos dois sentidos, conforme a regra que está na
+      descrição da coluna troca_gratis na tabela clientes_novos_2025 (a regra é automática,
+      ninguém escolhe à mão). Por que a página existe: o CFO quer saber se a troca grátis faz
+      a cliente voltar, porque a logística reversa custou R$ 184 mil no ano. O que a gente
+      sabe. Quem gasta mais no primeiro pedido volta mais, sempre foi assim, e Sul/Sudeste
+      recompra mais que o resto porque o frete chega em dois dias. Quem veio pelo cupom de
+      boas-vindas recompra menos (cliente de cupom some) e cliente de influencer recompra mais
+      que a de Google. Quem tem a troca grátis trocou mais (23% contra 9%), e quem troca e
+      acerta o tamanho volta: isso é justamente o que a gente queria que acontecesse. O NPS de
+      sete dias de quem tem troca grátis veio 12 pontos acima, e promotora recompra, isso a
+      gente vê todo mês. Colunas da tabela: troca_gratis, recomprou_90d, valor_primeiro_pedido,
+      regiao, canal_aquisicao, cupom_boas_vindas, fez_troca_60d, nps_7d, dia_semana_pedido.
+      Pergunta pro BI: quais dessas colunas entram na comparação entre quem tem e quem não tem
+      troca grátis, e quais não podem entrar?
+    edges:
+      - valor_primeiro_pedido -> troca_gratis
+      - valor_primeiro_pedido -> recomprou_90d
+      - regiao -> troca_gratis
+      - regiao -> recomprou_90d
+      - canal_aquisicao -> recomprou_90d
+      - cupom_boas_vindas -> valor_primeiro_pedido
+      - cupom_boas_vindas -> recomprou_90d
+      - troca_gratis -> fez_troca_60d
+      - fez_troca_60d -> recomprou_90d
+      - troca_gratis -> nps_7d
+      - nps_7d -> recomprou_90d
+      - troca_gratis -> recomprou_90d
+    answer:
+      identifiable: true
+      adjust_for: [regiao, valor_primeiro_pedido]
+      do_not_adjust_for:
+        fez_troca_60d: Consequência da troca grátis e um dos caminhos até a recompra. Faz parte do efeito.
+        nps_7d: Medido depois da troca grátis e influenciado por ela; é outro caminho até a recompra. Faz parte do efeito.
+      indifferent: [canal_aquisicao, cupom_boas_vindas, dia_semana_pedido]
+    note: >-
+      A regra de quem recebe a troca grátis está só na descrição da coluna. Dois indicadores
+      de que a gerente se orgulha (troca, NPS) são consequências da intervenção.
+
+  - id: pt_ecommerce_estilista_chat
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp para um analista freelancer
+    persona: gerente de e-commerce de uma marca de moda
+    theme: E-commerce de moda
+    title: Atendimento da estilista no chat e gasto em 30 dias
+    treatment: atendimento_estilista
+    outcome: gasto_30d
+    columns:
+      atendimento_estilista: Cliente foi abordada e atendida por uma das estilistas no chat do site durante a sessão de compra, em outubro de 2025 (1 = sim, 0 = não).
+      gasto_30d: Total gasto em pedidos nos 30 dias seguintes à sessão, em reais (0 se não comprou).
+      compras_12m_anteriores: Número de pedidos nos 12 meses anteriores à sessão.
+      faixa_etaria: Faixa etária declarada no cadastro.
+      dispositivo: Dispositivo da sessão (mobile ou desktop).
+      cupom_estilista: Recebeu o cupom de 15% enviado pela estilista ao fim do atendimento (1 = sim, 0 = não). Só quem foi atendida recebe.
+      devolucoes_30d: Número de itens devolvidos dos pedidos feitos nos 30 dias seguintes à sessão.
+    not_in_table:
+      pecas_vistas_sessao: Quantidade de peças que a cliente já tinha olhado na sessão quando a estilista decidiu chamá-la ou não. Aparece no painel do chat na hora, mas o painel não guarda.
+    story: >-
+      Thiago, boa noite, desculpa a hora. Lembra do piloto das estilistas no chat, em outubro?
+      A Jú e a Carol ficavam no painel do chat e puxavam conversa com algumas clientes que
+      estavam navegando, tipo "quer ajuda pra montar o look?". A diretoria achou lindo mas
+      quer número: quanto a conversa com a estilista aumenta o gasto nos 30 dias seguintes.
+      Te mandei a base por e-mail, uma linha por sessão de outubro: se foi atendida, gasto
+      nos 30 dias, pedidos nos 12 meses anteriores, faixa etária, dispositivo, se recebeu o
+      cupom de 15% que a estilista manda no fim do atendimento (só atendida recebe, e cupom
+      vende, né) e itens devolvidos dos pedidos desses 30 dias. Agora o detalhe: perguntei pra
+      Jú como elas escolhiam quem chamar e ela disse que olhavam no painel quantas peças a
+      pessoa já tinha visto na sessão (quem já viu 15 peças tá a fim de comprar) e se era
+      cliente antiga, com vários pedidos, que também compra mais, óbvio. Cliente antiga a
+      gente tem na base. O número de peças vistas aparece no painel na hora mas ele não
+      guarda, já pedi pra TI e não tem log. Cliente mais velha gasta mais, isso você já sabe
+      dos outros trabalhos. E devolução: quem comprou mais devolve mais, lógico, mas quem foi
+      atendida acerta mais o tamanho e devolve menos. Consegue me dar um retorno até quinta?
+      A reunião é sexta cedo.
+    edges:
+      - pecas_vistas_sessao -> atendimento_estilista
+      - pecas_vistas_sessao -> gasto_30d
+      - compras_12m_anteriores -> atendimento_estilista
+      - compras_12m_anteriores -> gasto_30d
+      - faixa_etaria -> gasto_30d
+      - atendimento_estilista -> cupom_estilista
+      - cupom_estilista -> gasto_30d
+      - atendimento_estilista -> gasto_30d
+      - atendimento_estilista -> devolucoes_30d
+      - gasto_30d -> devolucoes_30d
+    answer:
+      identifiable: false
+      missing: [pecas_vistas_sessao]
+    note: >-
+      As estilistas escolheram quem chamar pela intenção de compra que o painel mostrava e
+      não guardou. O histórico de pedidos está na base e resolve só metade; o cupom é
+      consequência do atendimento e a devolução vem depois do gasto.

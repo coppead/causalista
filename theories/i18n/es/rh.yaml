@@ -1,0 +1,248 @@
+# Tradução da ficha de teoria 'rh' para o espanhol.
+#
+# Escrita pelo assistente em 2026-10-06, por delegação do André, diretamente a partir da
+# ficha em português (theories/rh.yaml), frase a frase. A ficha em português é a que
+# vale: este arquivo só traz as palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O espanhol é um idioma reservado (held-out): esta tradução é usada só em testes,
+# nunca em treino.
+
+language: es
+status: revisada
+title: Programa de capacitación en una empresa
+context: >-
+  Una gran empresa de servicios creó un programa de capacitación pagado por ella, con tres
+  meses de clases, y una parte de sus empleados participó. Quiere saber si el programa reduce
+  la salida voluntaria, es decir, la renuncia, en los doce meses posteriores al fin del
+  programa.
+randomized: Los empleados que participaron en el programa fueron elegidos por sorteo.
+closing: Nada más allá de lo descrito influyó en la elección de quiénes participaron en el programa.
+treatment:
+  label: el programa de capacitación
+  dictionary: Participó en el programa de capacitación (1 = sí, 0 = no).
+outcome:
+  label: la salida voluntaria
+  dictionary: Renunció en los doce meses posteriores al fin del programa (1 = sí, 0 = no).
+variables:
+  tempo_empresa:
+    label: la antigüedad en la empresa
+    roles:
+      confounder:
+        dictionary: Meses de antigüedad en la empresa hasta el inicio del programa.
+        to_treatment: >-
+          La empresa ofreció el programa de capacitación con más frecuencia a los empleados con
+          menos antigüedad en la empresa.
+        to_outcome: Los empleados con más antigüedad en la empresa renuncian con menos frecuencia.
+      outcome_cause:
+        dictionary: Meses de antigüedad en la empresa hasta el inicio del programa.
+        to_outcome: Los empleados con más antigüedad en la empresa renuncian con menos frecuencia.
+  avaliacao_desempenho:
+    label: la evaluación de desempeño
+    roles:
+      confounder:
+        dictionary: >-
+          Nota en la evaluación de desempeño realizada en el semestre anterior al inicio del
+          programa, de 0 a 10.
+        to_treatment: >-
+          La empresa eligió para el programa de capacitación con más frecuencia a los empleados
+          con nota más alta en la evaluación de desempeño.
+        to_outcome: >-
+          Los empleados con nota más alta en la evaluación de desempeño renuncian con menos
+          frecuencia.
+      mediator:
+        dictionary: >-
+          Nota en la evaluación de desempeño realizada en el semestre posterior al fin del
+          programa, de 0 a 10.
+        from_treatment: >-
+          Quienes hacen el programa de capacitación reciben una nota más alta en la siguiente
+          evaluación de desempeño.
+        to_outcome: >-
+          Los empleados con nota más alta en la evaluación de desempeño renuncian con menos
+          frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Nota en la evaluación de desempeño realizada en el semestre anterior al inicio del
+          programa, de 0 a 10.
+        to_outcome: >-
+          Los empleados con nota más alta en la evaluación de desempeño renuncian con menos
+          frecuencia.
+  salario:
+    label: el salario
+    roles:
+      confounder:
+        dictionary: Salario mensual en el mes anterior al inicio del programa, en reales.
+        to_treatment: >-
+          La empresa ofreció el programa de capacitación con más frecuencia a los empleados de
+          salario más alto.
+        to_outcome: Los empleados con salario más alto renuncian con menos frecuencia.
+      mediator:
+        dictionary: Salario mensual tres meses después del fin del programa, en reales.
+        from_treatment: >-
+          Quienes hacen el programa de capacitación reciben un adicional por calificación y
+          pasan a tener un salario más alto.
+        to_outcome: Los empleados con salario más alto renuncian con menos frecuencia.
+      outcome_cause:
+        dictionary: Salario mensual en el mes anterior al inicio del programa, en reales.
+        to_outcome: Los empleados con salario más alto renuncian con menos frecuencia.
+  promocao:
+    label: el ascenso
+    roles:
+      confounder:
+        dictionary: Fue ascendido en los doce meses anteriores al inicio del programa (1 = sí, 0 = no).
+        to_treatment: >-
+          La empresa inscribió en el programa de capacitación con más frecuencia a los empleados
+          ascendidos en los meses anteriores, para prepararlos para el nuevo cargo.
+        to_outcome: Los empleados ascendidos renuncian con menos frecuencia.
+      mediator:
+        dictionary: Fue ascendido en los seis meses posteriores al fin del programa (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes hacen el programa de capacitación son ascendidos con más frecuencia en los
+          meses siguientes.
+        to_outcome: Los empleados ascendidos renuncian con menos frecuencia.
+  engajamento:
+    label: el compromiso del empleado
+    hidden_fact: >-
+      Ninguna encuesta hecha por la empresa antes del inicio del programa de capacitación midió
+      el compromiso de los empleados, y por eso el compromiso no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Nota en la encuesta de compromiso realizada en el mes anterior al inicio del programa,
+          de 0 a 10.
+        to_treatment: >-
+          Los empleados más comprometidos se inscribieron en el programa de capacitación con más
+          frecuencia.
+        to_outcome: Los empleados más comprometidos renuncian con menos frecuencia.
+      mediator:
+        dictionary: >-
+          Nota en la encuesta de compromiso realizada tres meses después del fin del programa,
+          de 0 a 10.
+        from_treatment: >-
+          Quienes hacen el programa de capacitación se vuelven más comprometidos en los meses
+          siguientes.
+        to_outcome: Los empleados más comprometidos renuncian con menos frecuencia.
+  procura_emprego:
+    label: la búsqueda de otro empleo
+    hidden_fact: >-
+      La empresa no sabe qué empleados estaban buscando otro empleo, y por eso esa información
+      no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Declaró, en la encuesta interna realizada en el mes anterior al inicio del programa,
+          que estaba buscando otro empleo (1 = sí, 0 = no).
+        to_treatment: >-
+          Los empleados que estaban buscando otro empleo se inscribieron en el programa de
+          capacitación con más frecuencia.
+        to_outcome: Los empleados que buscan otro empleo renuncian con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Declaró, en la encuesta interna realizada en el mes anterior al inicio del programa,
+          que estaba buscando otro empleo (1 = sí, 0 = no).
+        to_outcome: Los empleados que buscan otro empleo renuncian con más frecuencia.
+  proposta_externa:
+    label: la oferta de otra empresa
+    hidden_fact: >-
+      La empresa no sabe qué empleados recibieron una oferta de otra empresa, y por eso esa
+      información no está en la tabla.
+    roles:
+      confounder:
+        dictionary: >-
+          Declaró, en la encuesta interna realizada en el mes anterior al inicio del programa,
+          que había recibido una oferta de empleo de otra empresa en los seis meses anteriores
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          Los empleados que habían recibido una oferta de otra empresa se inscribieron en el
+          programa de capacitación con menos frecuencia.
+        to_outcome: Los empleados que reciben una oferta de otra empresa renuncian con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Declaró, en la encuesta interna realizada en el mes anterior al inicio del programa,
+          que había recibido una oferta de empleo de otra empresa en los seis meses anteriores
+          (1 = sí, 0 = no).
+        to_outcome: Los empleados que reciben una oferta de otra empresa renuncian con más frecuencia.
+  indicacao_gestor:
+    label: la recomendación del jefe
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Fue recomendado por su jefe para el programa, antes del inicio de las clases
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          Los empleados recomendados por su jefe tuvieron prioridad en los cupos y participaron
+          en el programa de capacitación con más frecuencia.
+  unidade_piloto:
+    label: la unidad piloto
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Trabajaba, al inicio del programa, en una de las unidades elegidas para el piloto
+          (1 = sí, 0 = no).
+        to_treatment: >-
+          El programa de capacitación comenzó por algunas unidades piloto, y quienes trabajaban
+          en ellas participaron en el programa con más frecuencia.
+  conversa_rh:
+    label: la conversación con Recursos Humanos
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Tuvo una conversación individual con Recursos Humanos en los tres meses anteriores al
+          inicio del programa (1 = sí, 0 = no).
+        to_treatment: >-
+          Recursos Humanos difundía el programa de capacitación en las conversaciones
+          individuales, y por eso quienes habían conversado con Recursos Humanos participaron en
+          el programa con más frecuencia.
+      collider:
+        dictionary: >-
+          Tuvo una conversación individual con Recursos Humanos en los doce meses posteriores al
+          fin del programa (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes hicieron el programa de capacitación son llamados por Recursos Humanos a una
+          conversación individual con más frecuencia, para evaluar el programa.
+        from_outcome: >-
+          Quienes renuncian tienen una conversación individual con Recursos Humanos con más
+          frecuencia, porque Recursos Humanos hace la entrevista de salida.
+  pesquisa_clima:
+    label: la respuesta a la encuesta de clima laboral
+    roles:
+      collider:
+        dictionary: >-
+          Respondió la encuesta de clima laboral aplicada doce meses después del fin del programa
+          (1 = sí, 0 = no).
+        from_treatment: >-
+          Quienes hicieron el programa de capacitación responden la encuesta de clima laboral con
+          más frecuencia, porque la encuesta incluye preguntas sobre el programa.
+        from_outcome: >-
+          Quienes renuncian suelen dejar la empresa antes de la aplicación de la encuesta de
+          clima laboral y, por eso, responden la encuesta con menos frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Respondió la encuesta de clima laboral aplicada en el año anterior al inicio del
+          programa (1 = sí, 0 = no).
+        to_outcome: >-
+          Los empleados que habían respondido la encuesta de clima laboral del año anterior al
+          inicio del programa renuncian con menos frecuencia.
+  horas_extras:
+    label: las horas extras
+    roles:
+      confounder:
+        dictionary: >-
+          Horas extras por mes, en promedio, en los tres meses anteriores al inicio del
+          programa.
+        to_treatment: >-
+          Los empleados con más horas extras tenían menos tiempo para las clases y participaron
+          en el programa de capacitación con menos frecuencia.
+        to_outcome: Los empleados que hacen más horas extras renuncian con más frecuencia.
+      outcome_cause:
+        dictionary: >-
+          Horas extras por mes, en promedio, en los tres meses anteriores al inicio del
+          programa.
+        to_outcome: Los empleados que hacen más horas extras renuncian con más frecuencia.
+  mes_aniversario:
+    label: el mes de cumpleaños
+    roles:
+      unrelated:
+        dictionary: Mes de cumpleaños del empleado (1 = enero, 12 = diciembre).
+        fact: >-
+          El mes de cumpleaños del empleado no tiene relación con el programa de capacitación ni
+          con la salida voluntaria.

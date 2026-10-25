@@ -1,0 +1,551 @@
+# Simulated human-written cases for TRAINING, file en-02: eight cases in English (US, UK and
+# Canadian voices).
+#
+# Written by a large language model on 2026-10-07, in the role of a real person (the owner of a chain of car
+# washes, a programme officer at a UK housing charity, a data analyst at a ride-hailing company
+# in Toronto, the principal of a charter school network, a marketing manager at a fitness app)
+# describing a dataset the way that person would in a forum post, a quarterly report, an
+# internal wiki page, a chat message or an e-mail to the data team.
+#
+# These cases are TRAINING material: the model answers them, the verifier grades the answer,
+# nothing else is shown to it. They deliberately avoid every scenario of the frozen test set in
+# cases/simulados/. The edges declare the causal diagram the text implies; the checker
+# (scripts/check_cases.py) recomputes every answer from the edges with the verifier.
+
+cases:
+
+  - id: en_wash_club_course_picked
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: owner of a chain of 14 express car washes in the Phoenix area, runs the business from spreadsheets, no analyst on staff
+    theme: Small business / car wash memberships
+    title: Membership selling course at the sites the owner picked
+    twin: en_wash_club_course_coinflip
+    treatment: pitch_course
+    outcome: club_signups_per_1k
+    columns:
+      site_id: Site number, 1 to 14.
+      pitch_course: 1 if the site's pay-station crew went through the two-day Unlimited Club selling course in March 2026, 0 if not.
+      club_signups_per_1k: New Unlimited Club memberships sold April through June, per 1,000 cars washed at the site in the same months.
+      cars_per_day_q1: Average cars washed per day, January through March 2026.
+      tunnel_ft: Tunnel length in feet.
+      pitches_logged_pct: Percent of April-June retail transactions where the attendant tapped "club pitched" on the pay station.
+    not_in_table:
+      manager_quality: How much the owner trusts each site manager to run things properly. His own ranking, in his head, never written down.
+    story: >-
+      Long time lurker, first post. I run 14 express exterior tunnels around Phoenix (Mesa,
+      Chandler, Gilbert, two in Tempe). Back in March I sent the pay-station crews at 6 of my
+      sites through a two-day course on selling the Unlimited Club, about $4k per site all in
+      with the trainer's travel. My bookkeeper wants to know if it paid for itself and honestly
+      so do I.
+
+      What I have is a spreadsheet by site: cars per day for Jan through Mar, tunnel length
+      (the 130-footers push a lot more cars through than the 100s), new club memberships sold
+      April through June per thousand cars, and a percentage off the pay station where the
+      attendant taps a button whenever they pitch the club. That pitch percentage roughly
+      doubled at the trained sites, which I was pretty happy about, and you don't sell a
+      membership you never pitched. Trained sites came in around 31 per thousand vs 19 for
+      the rest.
+
+      How I picked the 6: I didn't overthink it. I went with the managers I trust to actually
+      make the crew do it, and I leaned toward my busier sites because that's where the upside
+      is. If you asked me to rank my managers I could do it in my head but it's not written
+      down anywhere, and a good manager sells more club with or without a course. The busier
+      sites always sold more memberships per car anyway, lots of commuters.
+
+      Is that 31 vs 19 the real lift from the course, or am I kidding myself? What should I be
+      comparing against?
+    edges:
+      - manager_quality -> pitch_course
+      - manager_quality -> club_signups_per_1k
+      - cars_per_day_q1 -> pitch_course
+      - cars_per_day_q1 -> club_signups_per_1k
+      - tunnel_ft -> cars_per_day_q1
+      - pitch_course -> pitches_logged_pct
+      - pitches_logged_pct -> club_signups_per_1k
+      - pitch_course -> club_signups_per_1k
+    answer:
+      identifiable: false
+      missing: [manager_quality]
+    note: >-
+      Traffic is recorded and could be adjusted for, but the owner also picked the managers he
+      trusts, and that ranking lives only in his head while it drives membership sales on its
+      own. The pitch percentage he is proud of is a result of the course.
+
+  - id: en_wash_club_course_coinflip
+    author: ai
+    status: rascunho
+    language: en
+    style: forum post
+    persona: owner of a chain of 14 express car washes in the Phoenix area, runs the business from spreadsheets, no analyst on staff
+    theme: Small business / car wash memberships
+    title: Membership selling course at sites picked by coin flip
+    twin: en_wash_club_course_picked
+    treatment: pitch_course
+    outcome: club_signups_per_1k
+    columns:
+      site_id: Site number, 1 to 14.
+      pitch_course: 1 if the site's pay-station crew went through the two-day Unlimited Club selling course in March 2026, 0 if not.
+      club_signups_per_1k: New Unlimited Club memberships sold April through June, per 1,000 cars washed at the site in the same months.
+      cars_per_day_q1: Average cars washed per day, January through March 2026.
+      tunnel_ft: Tunnel length in feet.
+      pitches_logged_pct: Percent of April-June retail transactions where the attendant tapped "club pitched" on the pay station.
+    not_in_table:
+      manager_quality: How much the owner trusts each site manager to run things properly. His own ranking, in his head, never written down.
+    story: >-
+      Long time lurker, first post. I run 14 express exterior tunnels around Phoenix (Mesa,
+      Chandler, Gilbert, two in Tempe). Back in March I sent the pay-station crews at 6 of my
+      sites through a two-day course on selling the Unlimited Club, about $4k per site all in
+      with the trainer's travel. My bookkeeper wants to know if it paid for itself and honestly
+      so do I.
+
+      What I have is a spreadsheet by site: cars per day for Jan through Mar, tunnel length
+      (the 130-footers push a lot more cars through than the 100s), new club memberships sold
+      April through June per thousand cars, and a percentage off the pay station where the
+      attendant taps a button whenever they pitch the club. That pitch percentage roughly
+      doubled at the trained sites, which I was pretty happy about, and you don't sell a
+      membership you never pitched. Trained sites came in around 31 per thousand vs 19 for
+      the rest.
+
+      How I picked the 6: I flipped a quarter for each site, in the office, with my wife
+      watching and telling me I was nuts. Six heads out of fourteen. A couple of my best
+      managers didn't get it and one I worry about did. If you asked me to rank my managers I
+      could do it in my head but it's not written down anywhere, and a good manager sells more
+      club with or without a course. The busier sites always sold more memberships per car
+      anyway, lots of commuters.
+
+      Is that 31 vs 19 the real lift from the course, or am I kidding myself? What should I be
+      comparing against?
+    edges:
+      - manager_quality -> club_signups_per_1k
+      - cars_per_day_q1 -> club_signups_per_1k
+      - tunnel_ft -> cars_per_day_q1
+      - pitch_course -> pitches_logged_pct
+      - pitches_logged_pct -> club_signups_per_1k
+      - pitch_course -> club_signups_per_1k
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        pitches_logged_pct: Went up because of the course and is how the course sells memberships. Adjusting for it removes the very effect being measured.
+      indifferent: [cars_per_day_q1, site_id, tunnel_ft]
+    note: >-
+      Same post as the twin, with the coin flip in place of the owner's choice. Manager quality
+      and traffic still drive sales, but neither had anything to do with who got the course, so
+      the raw comparison is already fair. The trap is the pitch percentage.
+
+  - id: en_tenancy_settling_visit
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: programme officer at a UK housing charity with about 3,000 homes in the West Midlands, writes the quarterly report for the Board, no statistics training
+    theme: Social housing / tenancy sustainment
+    title: Settling-in visits and rent arrears at six months
+    treatment: settling_visit
+    outcome: arrears_200_m6
+    columns:
+      tenancy_ref: Tenancy reference number.
+      settling_visit: Settling-in visit by a housing officer completed within four weeks of the tenancy start date (1 = yes, 0 = no).
+      arrears_200_m6: Rent account more than £200 in arrears at the end of month six of the tenancy (1 = yes, 0 = no).
+      referral_route: How the household came to us. LA_HOMELESS = local authority homelessness duty; REGISTER = general housing register; TRANSFER = existing tenant moving.
+      household_type: SINGLE, COUPLE, FAMILY (one or more children under 18) or OTHER, as recorded at sign-up.
+      bedrooms: Number of bedrooms in the let property.
+      uc_claim_4wk: Universal Credit housing element claim confirmed in payment by the end of week four of the tenancy (1 = yes, 0 = no; 0 includes households not claiming UC).
+      money_advice_referral: Referral to our money advice partner (Citizens Advice Sandwell) logged against the tenancy at any point in months one to six (1 = yes, 0 = no).
+    story: >-
+      3. Tenancy sustainment: settling-in visits
+
+      3.1 Between April and June, 486 new general-needs tenancies started across the Sandwell
+      and Dudley stock. Housing officers completed a settling-in visit within four weeks for
+      212 of them (44%, against a target of 50%; the Dudley patch carried two vacancies for
+      most of the quarter).
+
+      3.2 In line with the Lettings Policy agreed in January, officers prioritised visits to
+      households referred under the local authority's homelessness duty and to families with
+      children; register and transfer lets were visited where capacity allowed. Both prioritised
+      groups carry a higher arrears risk whether or not anyone visits, and the monitoring
+      needs to allow for that.
+
+      3.3 At six months, 61 of the 486 tenancies (12.6%) held arrears above £200: 9.9% of
+      visited tenancies and 14.6% of the rest. One likely mechanism is Universal Credit. The
+      visit is where the officer checks that the housing element claim is actually in payment,
+      and visited households were noticeably more likely to have the claim confirmed by week
+      four; a confirmed claim is the strongest protection against early arrears we see. Larger
+      properties carry higher rents and, as every year, a higher arrears rate; families are of
+      course allocated the larger properties.
+
+      3.4 Referrals to Citizens Advice Sandwell for money advice reached 94 this quarter.
+      Officers typically make the referral during or shortly after the visit; the income team
+      also refers any account that crosses £200. We note this because the referral figure is
+      sometimes read as a measure of underlying need, and it is not.
+
+      3.5 The Board has asked whether the visits themselves reduce arrears, or whether we are
+      simply visiting the households that were always going to struggle. A recommendation on
+      how the two groups should be compared, using the tenancy-level dataset below, is
+      requested for the September meeting.
+    edges:
+      - referral_route -> settling_visit
+      - referral_route -> arrears_200_m6
+      - household_type -> settling_visit
+      - household_type -> arrears_200_m6
+      - household_type -> bedrooms
+      - bedrooms -> arrears_200_m6
+      - settling_visit -> uc_claim_4wk
+      - uc_claim_4wk -> arrears_200_m6
+      - settling_visit -> arrears_200_m6
+      - settling_visit -> money_advice_referral
+      - arrears_200_m6 -> money_advice_referral
+    answer:
+      identifiable: true
+      adjust_for: [household_type, referral_route]
+      do_not_adjust_for:
+        uc_claim_4wk: Brought about by the visit and the main way the visit prevents arrears. Adjusting for it hides that part of the effect.
+        money_advice_referral: Made by officers after a visit and by the income team once an account is in arrears. Adjusting for it creates a false link between visits and arrears.
+      indifferent: [bedrooms, tenancy_ref]
+    note: >-
+      The policy names the two things that decided who was visited, and both are columns.
+      Bedrooms only matters for arrears. The traps are the UC claim, a result of the visit, and
+      the money advice referral, which follows both the visit and the arrears.
+
+  - id: en_driver_streak_labour_day
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: data analyst on the marketplace team of a ride-hailing company in Toronto, writes the dataset documentation, comfortable with SQL, has not done causal work
+    theme: Ride-hailing / driver incentives
+    title: Streak bonus over the Labour Day weekend and completed trips
+    treatment: streak_offer
+    outcome: trips_wknd
+    columns:
+      driver_id: Hashed driver id.
+      streak_offer: 1 if the driver was shown the Labour Day Streak offer ($45 for every 3 consecutive accepted trips, Sat 06:00 to Mon 03:00). Eligible = four-week acceptance rate below 80% AND home zone on the weekend undersupply list (Scarborough, Etobicoke North, Vaughan, Markham). The offer was then shown to a random 60% of eligible drivers in each zone.
+      trips_wknd: Completed trips between Sat 06:00 and Mon 03:00 of the Labour Day weekend.
+      accept_rate_4wk: Share of dispatch requests the driver accepted in the four weeks before the weekend.
+      home_zone: Zone where most of the driver's trips start, one of 11 GTA zones.
+      tenure_months: Months since the driver's first completed trip.
+      online_hours_wknd: Hours the driver was online in the app during the weekend window.
+      payout_ticket: 1 if the driver opened a support ticket in the Promotions / Payout category between the Saturday and the following Friday.
+    story: >-
+      Labour Day Streak pilot: dataset notes. Owner: Priyanka (Marketplace Analytics, Toronto).
+      Last updated 2026-09-10.
+
+      Table: mkt_streak_labourday_2026, one row per driver with at least one completed GTA trip
+      in August (18,412 rows).
+
+      Background. Ops wanted more supply in the outer zones over the long weekend, and the
+      promo team's answer was the Streak offer. Who saw it is spelled out in the streak_offer
+      definition; the short version is that it went to drivers who had been declining a lot
+      lately, in the zones we expected to run short, and then to 60% of those because Finance
+      capped the budget. Drivers who decline a lot also complete fewer trips in general, and
+      the outer zones have thinner demand, so the offer group is not a random slice of the city.
+      Tenure matters as well (newer drivers decline more and drive less) but it was not part of
+      the rule.
+
+      What we saw. Offer group averaged 27.4 trips over the weekend vs 22.1 for everyone else.
+      Online hours were up about 3.5 for the offer group, which is the number Ops has been
+      showing around, and more hours online means more trips, that part is not controversial.
+
+      Known issue. payout_ticket is noisy. Streak payouts posted on the Tuesday, and a lot of
+      offer-group drivers who fell short of a streak filed tickets, as did drivers who had a
+      slow weekend and assumed they had been shorted on something. Do not use it as a quality
+      signal.
+
+      Open question for Thursday's review: what is the right comparison to get the actual
+      effect of the offer on trips, as opposed to the raw 27.4 vs 22.1?
+    edges:
+      - accept_rate_4wk -> streak_offer
+      - accept_rate_4wk -> trips_wknd
+      - home_zone -> streak_offer
+      - home_zone -> trips_wknd
+      - tenure_months -> accept_rate_4wk
+      - tenure_months -> trips_wknd
+      - streak_offer -> online_hours_wknd
+      - online_hours_wknd -> trips_wknd
+      - streak_offer -> trips_wknd
+      - streak_offer -> payout_ticket
+      - trips_wknd -> payout_ticket
+    answer:
+      identifiable: true
+      adjust_for: [accept_rate_4wk, home_zone]
+      do_not_adjust_for:
+        online_hours_wknd: The offer works by keeping drivers online longer. Adjusting for the hours removes the effect being measured.
+        payout_ticket: Filed by offer-group drivers and by drivers with a slow weekend. Adjusting for it creates a false link between the offer and trips.
+      indifferent: [driver_id, tenure_months]
+    note: >-
+      The eligibility rule sits in the column dictionary, not in the prose. Tenure drives both
+      acceptance and trips but only reaches the offer through the acceptance rate, so it is
+      not needed once that is adjusted for. The KPI Ops shows around is a result of the offer.
+
+  - id: en_rider_winback_push
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: data analyst at a ride-hailing company in Toronto, messaging a colleague before replying to the marketing lead
+    theme: Ride-hailing / rider win-back
+    title: Win-back promo sent from a model score that no longer exists
+    treatment: promo_sent
+    outcome: rides_30d
+    columns:
+      rider_id: Hashed rider id.
+      promo_sent: 1 if the rider got the Aug 12 win-back push and e-mail (3 rides at 20% off, valid 30 days).
+      rides_30d: Completed rides Aug 12 to Sep 10.
+      rides_prior_90d: Completed rides May 14 to Aug 11.
+      home_zone: Zone of the rider's most frequent pickup, one of 11 GTA zones.
+      signup_year: Year the rider account was created.
+      promo_redeemed: 1 if at least one ride was taken with the promo code applied.
+    not_in_table:
+      risk_score: Churn-risk score from the old lifecycle model, built from app session pings and trip history. The pings are kept 30 days, so the score is gone and cannot be rebuilt.
+    story: >-
+      Marco, Jas wants a number for the Aug 12 win-back push (3 rides, 20% off): her deck says
+      +2.1 rides per rider in the 30 days after. the send list was whoever the old lifecycle
+      model flagged as high churn risk, trimmed to under 10 rides in the prior 90 days. that
+      model ran on session pings we keep for 30 days, so the score is gone, not in the extract,
+      can't rebuild it, and it was genuinely good at calling who stops riding. per rider I have:
+      rides prior 90d, rides next 30d, home zone (downtown rides way more than Vaughan), signup
+      year (older accounts ride more, and rode more in the 90d window too), redeemed y/n (~40% of
+      the sent group; redeemed means at least one ride by definition), hashed id. fair
+      comparison in here, or do I tell her the 2.1 is the model talking?
+    edges:
+      - risk_score -> promo_sent
+      - risk_score -> rides_30d
+      - rides_prior_90d -> risk_score
+      - rides_prior_90d -> promo_sent
+      - rides_prior_90d -> rides_30d
+      - home_zone -> rides_30d
+      - signup_year -> rides_prior_90d
+      - signup_year -> rides_30d
+      - promo_sent -> promo_redeemed
+      - promo_redeemed -> rides_30d
+      - promo_sent -> rides_30d
+    answer:
+      identifiable: false
+      missing: [risk_score]
+    note: >-
+      Prior rides are recorded, but the send list also came from a score built on data that
+      has since been deleted, and the score predicted the outcome well. Redemption is a result
+      of the promo.
+
+  - id: en_math_pilot_volunteer_teachers
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: executive principal of a charter school network of seven campuses in San Antonio, former math teacher, reads dashboards but does not run analyses
+    theme: K-12 education / curriculum pilot
+    title: Curriculum pilot taught by the teachers who volunteered
+    treatment: im_pilot
+    outcome: map_math_spring
+    columns:
+      student_id: Network student id.
+      im_pilot: 1 if the student's math teacher piloted Illustrative Math this year, 0 if the teacher stayed on Eureka.
+      map_math_spring: Spring MAP Growth math RIT score.
+      map_math_fall: Fall MAP Growth math RIT score (September window).
+      campus: Campus code (7 campuses).
+      grade: 6, 7 or 8.
+      frl: Qualifies for free or reduced-price lunch (1/0).
+      ell: Current English learner (1/0).
+      pd_hours_teacher: Professional learning hours logged by the student's math teacher in the PD platform, July through April.
+    not_in_table:
+      teacher_strength: How strong a math teacher is, in the principal's own judgment. No field for it anywhere.
+    story: >-
+      Subject: Illustrative Math pilot, what I need before the board retreat
+
+      Dana, Luis,
+
+      The board retreat is Nov 14 and I've promised a straight answer on the IM pilot, so I'd
+      rather be careful than fast.
+
+      Last spring I asked the 6th-8th grade math teachers for volunteers to pilot Illustrative
+      Math this year. Eleven teachers across five of our seven campuses said yes; everyone else
+      stayed on Eureka. The pilot teachers got the full 30-hour IM professional learning
+      sequence over the summer and the PD platform logged their hours; the Eureka teachers
+      logged their usual handful. I believe good PD moves kids' scores, that's why we pay for
+      it, so some of whatever we see is the PD and not the books.
+
+      Here's my worry. The teachers who raised their hands are, if I'm honest, my strongest
+      math teachers. I could rank every math teacher in the network from memory, the
+      volunteers would be at the top, and they would have had the best spring scores on Eureka
+      too. There is no "teacher strength" field in Skyward or in the MAP export and I'd rather
+      not invent one. The volunteers also skew toward Westside and Pearsall, where scores run
+      higher anyway, and because the advanced sections go to the strong teachers, the kids who
+      came in with the higher fall RITs mostly landed in pilot classrooms.
+
+      Attached is the student-level file (about 2,100 kids in grades 6-8): fall and spring MAP
+      math RIT, campus, grade (RIT runs higher with each grade, fall and spring alike), FRL and
+      ELL status (our usual gaps show up in both fall and spring), whether the student's math
+      teacher was in the pilot, the teacher's logged PD hours for the year, and the student id.
+
+      Can we get at the effect of the curriculum on spring RIT from this, and if so what do we
+      adjust for? If the honest answer is that we can't separate the curriculum from the
+      teacher, I need to say that to the board in plain words, so tell me.
+
+      Renata
+    edges:
+      - teacher_strength -> im_pilot
+      - teacher_strength -> map_math_spring
+      - campus -> im_pilot
+      - campus -> map_math_spring
+      - map_math_fall -> im_pilot
+      - map_math_fall -> map_math_spring
+      - frl -> map_math_fall
+      - frl -> map_math_spring
+      - ell -> map_math_fall
+      - ell -> map_math_spring
+      - grade -> map_math_fall
+      - grade -> map_math_spring
+      - im_pilot -> pd_hours_teacher
+      - pd_hours_teacher -> map_math_spring
+      - im_pilot -> map_math_spring
+    answer:
+      identifiable: false
+      missing: [teacher_strength]
+    note: >-
+      Campus and fall score are recorded and would be adjusted for, but the volunteers are the
+      strongest teachers and nothing in the file stands in for that. The PD hours are a
+      consequence of joining the pilot.
+
+  - id: en_attendance_texts_fall
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: executive principal of a charter school network in San Antonio, writing the attendance section of the first-quarter board report
+    theme: K-12 education / attendance
+    title: Weekly attendance texts and fall-quarter absences
+    treatment: attendance_texts
+    outcome: absences_oct_dec
+    columns:
+      student_id: Network student id.
+      attendance_texts: Family enrolled in the weekly attendance text messages from October 1 (1/0).
+      absences_oct_dec: Days absent, October 1 to December 19.
+      absences_sept: Days absent, August 18 (first day of school) to September 30.
+      grade_band: K5 (elementary campuses, grades K-5) or MS (middle school campuses, grades 6-8).
+      campus: Campus code.
+      bus_rider: Assigned to a contracted bus route (1/0).
+      family_conference: 1 if a family conference with the campus took place between October 1 and December 19, whichever side asked for it.
+    story: >-
+      Attendance update (first quarter, through December 19)
+
+      The weekly attendance texts went live October 1 at the four elementary campuses, with the
+      same rule everywhere: any student who missed three or more days between August 18 and
+      September 30 was enrolled, with no opt-out short of removing the phone number from
+      Skyward (two families did; we kept them in the enrolled group). The middle schools were
+      not included this fall. Their Skyward module does not support the texting integration
+      until the January update, so no 6th-8th grader received texts regardless of September
+      absences.
+
+      Context for the numbers that follow. Middle school absence rates run about a day and a
+      half per quarter above elementary, every year. Campus matters beyond grade band, with
+      Eastside consistently highest. Students on a contracted bus route miss fewer days in both
+      September and the fall quarter; we believe this is simply that they have a ride.
+
+      Enrolled students averaged 4.8 days absent between October 1 and December 19, against
+      2.9 for students who were not enrolled. That comparison is plainly unfair to the program,
+      since enrolled students were by definition the ones already missing school in September;
+      the question for the data team is what the fair comparison looks like.
+
+      Family conferences: 212 took place between October and December. Enrolled families were
+      far more likely to request one (every text ends with "reply to schedule a conversation"),
+      and campuses also call in the family of any student who crosses eight absences in the
+      quarter. We mention it because conferences have been floated as a way to split students
+      into "engaged" and "not engaged" families. The student-level file carries the conference
+      flag alongside September absences, fall-quarter absences, grade band, campus, bus status
+      and the student id.
+    edges:
+      - absences_sept -> attendance_texts
+      - absences_sept -> absences_oct_dec
+      - grade_band -> attendance_texts
+      - grade_band -> absences_sept
+      - grade_band -> absences_oct_dec
+      - campus -> grade_band
+      - campus -> absences_sept
+      - campus -> absences_oct_dec
+      - bus_rider -> absences_sept
+      - bus_rider -> absences_oct_dec
+      - attendance_texts -> absences_oct_dec
+      - attendance_texts -> family_conference
+      - absences_oct_dec -> family_conference
+    answer:
+      identifiable: true
+      adjust_for: [absences_sept, grade_band]
+      do_not_adjust_for:
+        family_conference: Requested by texted families and triggered by high absences. Adjusting for it creates a false link between the texts and absences.
+      indifferent: [bus_rider, campus, student_id]
+    note: >-
+      Enrollment followed September absences and the grade band of the campus, both recorded.
+      Campus and bus status drive absences in both windows but only reach the texts through
+      those two, so they can go either way. The conference flag is the trap: it follows both
+      the texts and the absences.
+
+  - id: en_coach_trial_banner
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: marketing manager at a fitness app with about two million users, owns the lifecycle campaigns, reports conversion numbers to the leadership team
+    theme: Consumer software / subscription conversion
+    title: Coach trial banner and paid status at day 45
+    treatment: trial_banner
+    outcome: paid_d45
+    columns:
+      trial_banner: Saw the "14 days of Coach free" banner at least once in the first 7 days after signup (1/0).
+      paid_d45: On any paid plan at day 45 after signup (1/0).
+      platform: ios or android.
+      goal_type: Goal picked at onboarding. lose_weight, get_stronger, run_race or general.
+      signup_channel: paid_social, organic or referral, from the attribution SDK.
+      coach_msgs_14d: Messages exchanged with a coach in the first 14 days after signup.
+      referral_shared: Shared a referral code at any point up to day 60 after signup (1/0).
+    story: >-
+      Subject: Coach trial banner, need the real number by Friday
+
+      Hi team,
+
+      Quick ask. For the H2 review I need the effect of the Coach trial banner (14 days free)
+      on being paid at day 45. Aisha has "banner users convert at 2.3x" in the draft and I don't
+      trust it.
+
+      How the banner was targeted, straight from the Braze campaign: iOS only (Android had the
+      layout bug until September), users who picked "lose weight" at onboarding, and the
+      paid-social cohort because Growth wanted paid ROI to look better. Frequency capping meant
+      plenty of people in those groups never saw it. All three groups convert differently on
+      their own: iOS converts better full stop, weight-loss users are our best payers, and
+      paid-social users are our worst.
+
+      The engagement story I actually like: banner users exchanged about 6x more coach messages
+      in the first two weeks, and we've known for a year that people who talk to a coach early
+      stick around and pay. Also in the extract: whether the user shared a referral code by
+      day 60 (paying users share a lot more, and the trial flow has a share prompt at the end),
+      plus platform, goal and channel.
+
+      So what do I adjust for, and what do I leave alone? Keep it to what I can defend in a
+      10-minute slot.
+
+      Thanks,
+      Tom
+    edges:
+      - platform -> trial_banner
+      - platform -> paid_d45
+      - goal_type -> trial_banner
+      - goal_type -> paid_d45
+      - signup_channel -> trial_banner
+      - signup_channel -> paid_d45
+      - trial_banner -> coach_msgs_14d
+      - coach_msgs_14d -> paid_d45
+      - trial_banner -> paid_d45
+      - trial_banner -> referral_shared
+      - paid_d45 -> referral_shared
+    answer:
+      identifiable: true
+      adjust_for: [goal_type, platform, signup_channel]
+      do_not_adjust_for:
+        coach_msgs_14d: Driven up by the banner and the main way the trial leads to paying. Adjusting for it hides that part of the effect.
+        referral_shared: Prompted by the trial flow and far more common among paying users. Adjusting for it creates a false link between the banner and paying.
+    note: >-
+      Three targeting criteria, all recorded, each with its own effect on conversion. The
+      engagement KPI the manager likes is a result of the banner, and the referral flag follows
+      both the banner and the outcome.

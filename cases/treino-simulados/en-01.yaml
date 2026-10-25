@@ -1,0 +1,504 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-01, oito casos em inglês
+# (vozes dos EUA e do Reino Unido).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (diretor de operações de uma
+# companhia aérea regional, analista de uma cooperativa de crédito no Texas, diretora de um
+# sistema de bibliotecas públicas, gerente de produto de uma empresa de kits de refeição,
+# diretora de pessoas de um hospital em Manchester) descrevendo um conjunto de dados do
+# jeito que essa pessoa escreveria: mensagem de Slack, memorando de uma página, notas de
+# reunião, transcrição de áudio, trecho de relatório para o conselho.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_airline_wilma_draw
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: director of operations at a US regional airline (about 60 aircraft, flying under a mainline partner's brand), no statistics background
+    theme: Airline operations / boarding
+    title: Window-middle-aisle boarding trial, flights picked by coin flip
+    treatment: wilma_boarding
+    outcome: dep_delay_min
+    columns:
+      wilma_boarding: 1 if the flight boarded window-middle-aisle under the trial, 0 if it boarded back-to-front as usual. Departures from ORF, GSO and CHS, Sep 8 to Oct 3, 2025.
+      dep_delay_min: Minutes between scheduled and actual pushback. Negative when early.
+      boarding_min: Minutes from the first boarding pass scanned to door close.
+      complaint_filed: 1 if at least one customer complaint referencing the flight was logged in the CX system within 14 days of departure.
+      load_factor: Passengers boarded divided by seats available.
+      fleet_type: E145 or E175.
+      station: Departure station code.
+      flight_no: Flight number.
+    story: >-
+      @Renata quick one before Friday's ops review. the WILMA boarding trial (window-middle-aisle
+      instead of back-to-front) ran Sep 8 through Oct 3 at ORF, GSO and CHS. want to be clear on
+      how flights got picked because Hank keeps saying we cherry-picked: we did not. every morning
+      Priyanka's script pulled the day's departures at those three stations and flipped a coin per
+      flight, heads boarded WILMA, tails boarded the usual way, and the gate agents found out at
+      the 4am brief. what I see in the dashboard is boarding time down about 3 min on the WILMA
+      flights, which is the whole point, boarding is what eats the turn, and the delay number
+      looks better too. the catch is complaints. CX logged a bunch on WILMA flights, partly people
+      who didn't like being split from their group, and obviously anyone who sat through a 40-min
+      delay fills in the form no matter how they boarded. two things to keep in mind on the data:
+      load factor was all over the place in September with the leisure fall-off, and full flights
+      take longer to board and go out late for a hundred other reasons too; and the 175s board
+      slower than the 145s, that's just the airplane. CHS has also been a mess with the ramp
+      construction, everything out of there is late. can you give me a straight "WILMA moved the
+      delay by X minutes" I can put in front of the board, and tell me which of those columns I
+      should and shouldn't be cutting it by? Hank will try to slice it six ways.
+    edges:
+      - wilma_boarding -> boarding_min
+      - boarding_min -> dep_delay_min
+      - wilma_boarding -> dep_delay_min
+      - load_factor -> boarding_min
+      - load_factor -> dep_delay_min
+      - fleet_type -> boarding_min
+      - station -> dep_delay_min
+      - wilma_boarding -> complaint_filed
+      - dep_delay_min -> complaint_filed
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        boarding_min: Measured during the flight's own boarding and shortened by the new sequence. It is the main way the trial changes the delay, so it is part of the effect being measured.
+        complaint_filed: Logged after departure and driven by both the new boarding sequence and the delay itself. Adjusting for it creates a false link between the two.
+      indifferent: [fleet_type, flight_no, load_factor, station]
+    note: >-
+      A coin flip per flight means the plain comparison is already right. The traps are the
+      boarding-time KPI the director is proud of, which is the mechanism, and the complaints,
+      which are filed after the fact for both reasons.
+
+  - id: en_airline_turntrack
+    author: ai
+    status: rascunho
+    language: en
+    style: meeting notes
+    persona: director of operations at a US regional airline, notes taken by their coordinator at the weekly ops review
+    theme: Airline operations / ground handling
+    title: Tablet turnaround checklist rolled out to the worst and busiest stations first
+    treatment: turntrack_live
+    outcome: turn_time_min
+    columns:
+      turntrack_live: 1 if TurnTrack tablets were live at the departure station. The eleven live stations all switched on between February and May 2025, so over the Jun-Sep window this is a station flag.
+      turn_time_min: Minutes from on-blocks to off-blocks for the flight.
+      otp_2024_station: Departure station's 2024 on-time departure rate, percent of flights pushing back within zero minutes of schedule.
+      daily_deps_station: Scheduled departures per day at the station in the 2025 summer schedule.
+      bags_done_min: Minutes from on-blocks to the last bag cart scanned complete, from the ramp hand-held scans. Available at every station, tablets or not.
+      wx_flag: 1 if an ATC weather program was in effect at the station at scheduled departure time.
+      fleet_type: E175 or CRJ900.
+    story: >-
+      Weekly Ops Review, Oct 2, 2025. Notes: M. Okafor. Present: Dir. Ops, Station Ops, Ramp
+      Standards, Analytics (J.). Item 3, TurnTrack. Live at 11 of 26 stations, last go-live was
+      mid-May, nothing has moved since. Dir.
+      Ops restated how the order was set, since it keeps coming up: the 2024 OTP ranking drove it,
+      worst five stations first, and the big stations (the CLT, DCA and ORD banks) were pulled
+      forward because that's where the minutes are. Same stations are still our slowest turners
+      today, gate congestion and staffing haven't gone anywhere, so the raw TurnTrack vs
+      non-TurnTrack number is not fair and J. agrees. Ramp Standards: bag-load completion is the
+      thing to watch. The tablet prompts the lead when the last cart is due and the bag-load-done
+      stamp is coming in roughly 4 min earlier where tablets are live, and on a 30-min turn
+      bag-load-done pretty much sets the push. Analytics has pulled weather flag and fleet type
+      into the flight-level extract. Weather days are weather days. 175 turns run longer, period.
+      ACTION (J.): produce the effect of TurnTrack on turn time, flight level, Jun-Sep, with
+      whatever adjustments are needed and nothing more. Dir. Ops wants the honest number for the
+      November board, not the dashboard number. ACTION (Ramp): confirm bag-load-done timestamp
+      exists at non-tablet stations. Confirmed in the room, it comes from the hand-held scans at
+      every station. Item 4, de-icing contract, deferred to next week.
+    edges:
+      - otp_2024_station -> turntrack_live
+      - otp_2024_station -> turn_time_min
+      - daily_deps_station -> turntrack_live
+      - daily_deps_station -> turn_time_min
+      - turntrack_live -> bags_done_min
+      - bags_done_min -> turn_time_min
+      - turntrack_live -> turn_time_min
+      - wx_flag -> turn_time_min
+      - fleet_type -> turn_time_min
+    answer:
+      identifiable: true
+      adjust_for: [daily_deps_station, otp_2024_station]
+      do_not_adjust_for:
+        bags_done_min: Stamped during the turn itself and brought forward by the tablets. It is how TurnTrack shortens the turn, so it is part of the effect being measured.
+      indifferent: [fleet_type, wx_flag]
+    note: >-
+      Both reasons a station got tablets early (last year's record and its size) still make its
+      turns longer today. The bag-load-done KPI that Ramp Standards is proud of is the mechanism
+      and must stay out.
+
+  - id: en_cu_skip_hardship
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: lending analyst at a credit union in central Texas (about 90,000 members), writing to the chief lending officer
+    theme: Credit union / auto lending
+    title: Holiday Skip-a-Pay offered to members who called in about hardship
+    twin: en_cu_skip_batch
+    treatment: skip_dec
+    outcome: dq60_h1_2026
+    columns:
+      skip_dec: 1 if the December 2025 payment was skipped under the Holiday Skip-a-Pay program.
+      dq60_h1_2026: 1 if the loan was 60 or more days past due at any point from Jan 1 to Jun 30, 2026.
+      credit_score_orig: Borrower credit score at loan origination.
+      loan_age_months: Months since origination as of Dec 1, 2025.
+      payment_amt: Scheduled monthly payment, dollars.
+      late_12m_prior: Number of payments 30 or more days late in the 12 months before Dec 2025.
+      servicing_contact: 1 if any outbound servicing or collections contact was logged on the loan between Jan 1 and Jun 30, 2026.
+      loan_id: Core system loan number.
+    not_in_table:
+      cash_strain: What the member told the MSR about their finances before the holidays. Free text in the CRM call notes, not in the core, never coded.
+    story: >-
+      MEMO. To Diane Whitfield, Chief Lending Officer. From Marcus Reyes, Lending Analytics. July
+      14, 2026. Re Holiday Skip-a-Pay (Dec 2025) and whether we can measure its effect on
+      delinquency. Background. In December we let auto-loan borrowers skip the December payment,
+      interest accruing and the term extended by one month. Program rules: the loan had to be at
+      least 12 months old with no late payments in the prior 12 months; both facts are in the
+      loan file. Within the eligible group, who actually got the skip came down to the MSRs.
+      Members who called in ahead of the holidays saying things were tight were offered it, and
+      most took it; a handful came through the branches the same way. About 1,900 skips out of
+      roughly 11,000 eligible loans; the extract I have covers the whole auto book, about 14,000
+      loans, eligible or not. My concern is the hardship piece. What a member said on the phone
+      about their situation sits in the CRM call notes as free text; nothing in the core captures
+      it and I am not going to code 1,900 notes by hand. Members who were struggling in December
+      are the members who go 60 days late in the spring, skip or no skip. What I have at loan
+      level: the skip flag, 60-plus days past due at any point January through June, credit
+      score at origination, loan age, payment amount, late payments in the prior 12 months, and
+      a servicing-contact flag. On those: loan age matters on its own, the 12-to-24-month loans
+      are where most of our losses sit; prior lates are the best single predictor of the next
+      one; origination score is three to five years stale for most of this book but it still
+      predicts; and the larger payments are where the charge-offs cluster. The servicing flag
+      lights up for two reasons: we called everyone who skipped in January to confirm the new due
+      date, and collections calls anyone who hits 60 days. Ask. Before I run the comparison I
+      would like a second opinion on whether there is a defensible way to get the skip effect
+      out of this file, or whether we tell the board we cannot, and if we do run it, what in
+      the extract belongs in the comparison and what does not.
+    edges:
+      - cash_strain -> skip_dec
+      - cash_strain -> dq60_h1_2026
+      - loan_age_months -> skip_dec
+      - loan_age_months -> dq60_h1_2026
+      - late_12m_prior -> skip_dec
+      - late_12m_prior -> dq60_h1_2026
+      - credit_score_orig -> dq60_h1_2026
+      - payment_amt -> dq60_h1_2026
+      - skip_dec -> servicing_contact
+      - dq60_h1_2026 -> servicing_contact
+      - skip_dec -> dq60_h1_2026
+    answer:
+      identifiable: false
+      missing: [cash_strain]
+    note: >-
+      The eligibility rules are in the table, but the skip went to members who said they were
+      struggling, which predicts going late and lives only in free-text call notes. Score,
+      loan age and prior lates do not stand in for it. Its twin changes only how the skip was
+      assigned.
+
+  - id: en_cu_skip_batch
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: lending analyst at a credit union in central Texas (about 90,000 members), writing to the chief lending officer
+    theme: Credit union / auto lending
+    title: Holiday Skip-a-Pay applied in a batch that only half ran
+    twin: en_cu_skip_hardship
+    treatment: skip_dec
+    outcome: dq60_h1_2026
+    columns:
+      skip_dec: 1 if the December 2025 payment was skipped under the Holiday Skip-a-Pay program.
+      dq60_h1_2026: 1 if the loan was 60 or more days past due at any point from Jan 1 to Jun 30, 2026.
+      credit_score_orig: Borrower credit score at loan origination.
+      loan_age_months: Months since origination as of Dec 1, 2025.
+      payment_amt: Scheduled monthly payment, dollars.
+      late_12m_prior: Number of payments 30 or more days late in the 12 months before Dec 2025.
+      servicing_contact: 1 if any outbound servicing or collections contact was logged on the loan between Jan 1 and Jun 30, 2026.
+      loan_id: Core system loan number.
+    story: >-
+      MEMO. To Diane Whitfield, Chief Lending Officer. From Marcus Reyes, Lending Analytics. July
+      14, 2026. Re Holiday Skip-a-Pay (Dec 2025) and whether we can measure its effect on
+      delinquency. Background. In December we skipped the December payment on auto loans,
+      interest accruing and the term extended by one month. Program rules: the loan had to be at
+      least 12 months old with no late payments in the prior 12 months; both facts are in the
+      loan file. Within the eligible group there was no offer and no opt-in. The skip was applied
+      by the core in two overnight batches by loan number, and the second batch, loan numbers
+      ending in 5 through 9, never ran because the core went down over the holiday closure and
+      nobody re-ran it. So about 5,400 skips out of roughly 11,000 eligible loans, decided by
+      the last digit of the loan number; the extract I have covers the whole auto book, about
+      14,000 loans, eligible or not. My concern is the eligible group itself. By construction the
+      skipped loans are older and cleaner than the book as a whole, and older, cleaner loans go
+      bad less anyway, so the raw skip vs no-skip comparison flatters the program. What I have
+      at loan level: the skip flag, 60-plus days past due at any point January through June,
+      credit score at origination, loan age, payment amount, late payments in the prior 12
+      months, and a servicing-contact flag. On those: loan age matters on its own, the
+      12-to-24-month loans are where most of our losses sit; prior lates are the best single
+      predictor of the next one; origination score is three to five years stale for most of
+      this book but it still predicts; and the larger payments are where the charge-offs
+      cluster. The servicing flag lights up for two reasons: we called everyone who skipped in
+      January to confirm the new due date, and collections calls anyone who hits 60 days. Ask.
+      Before I run the comparison I would like a second opinion on whether there is a defensible
+      way to get the skip effect out of this file, and what in the extract belongs in the
+      comparison and what does not.
+    edges:
+      - loan_age_months -> skip_dec
+      - loan_age_months -> dq60_h1_2026
+      - late_12m_prior -> skip_dec
+      - late_12m_prior -> dq60_h1_2026
+      - loan_id -> skip_dec
+      - credit_score_orig -> dq60_h1_2026
+      - payment_amt -> dq60_h1_2026
+      - skip_dec -> servicing_contact
+      - dq60_h1_2026 -> servicing_contact
+      - skip_dec -> dq60_h1_2026
+    answer:
+      identifiable: true
+      adjust_for: [late_12m_prior, loan_age_months]
+      do_not_adjust_for:
+        servicing_contact: Logged after the fact and driven by both the skip (the January confirmation call) and the delinquency (the collections call). Adjusting for it creates a false link between the two.
+      indifferent: [credit_score_orig, loan_id, payment_amt]
+    note: >-
+      Same memo as its twin with the assignment changed. The two eligibility rules are recorded
+      and both drive delinquency; the last digit of the loan number decided the rest and drives
+      nothing else. The servicing flag is the column to keep out.
+
+  - id: en_library_fine_free
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: director of a county public library system in the US Midwest (19 branches), reporting to the Board of Trustees
+    theme: Public library / fines policy
+    title: Fine-free pilot at the branches whose Friends groups asked for it
+    treatment: fine_free_branch
+    outcome: checkouts_2025
+    columns:
+      fine_free_branch: 1 if the cardholder's home branch stopped charging overdue fines on Jan 1, 2025.
+      checkouts_2025: Physical and digital checkouts by the cardholder in calendar 2025.
+      checkouts_2024: Physical and digital checkouts by the cardholder in calendar 2024.
+      card_tenure_years: Years since the card was first issued, as of Jan 1, 2025.
+      branch_sqft: Square footage of the home branch building. Bookmobile coded as 300.
+      survey_feb2026: Overall satisfaction with the library, 1 to 5, from the February 2026 patron survey. Blank if the cardholder did not respond.
+      card_id: Patron record number.
+    not_in_table:
+      community_engagement: How engaged the branch's community is with the library (strength of the Friends group, volunteers, program attendance). Not a field anywhere.
+    story: >-
+      Director's Report to the Board of Trustees, March 17, 2026. Item 6. Fine-free pilot, what we
+      can and cannot say after year one. Trustees will recall that seven branches stopped charging
+      overdue fines on January 1, 2025 (Eastside, Riverbend, Oak Park, Northgate, Cedar Hill, the
+      Main Library and the Bookmobile). I want to be candid about how those seven were chosen,
+      because it bears on what the numbers mean. They were the branches whose Friends groups
+      brought the proposal to us and offered to backfill the lost fine revenue for the first year.
+      Those Friends groups are strong because those communities are our most engaged, more program
+      attendance, more volunteers, more holds, year in and year out. The pilot branches were
+      already circulating more per cardholder in 2024 than the other twelve, and I have no doubt
+      they would have grown in 2025 regardless. Staff have assembled a cardholder-level file for
+      everyone with an active card at the start of 2025: whether the home branch went fine-free,
+      checkouts in 2025 and in 2024 (a patron's past borrowing is the best guide we have to their
+      future borrowing), how long they have held a card, the square footage of the home branch
+      (our larger buildings simply circulate more), and their response to the February 2026
+      patron survey. The survey asked about overall satisfaction; fine-free patrons answered more
+      warmly, as one would expect, and our heaviest borrowers always rate us higher. I have asked
+      our data librarian whether this file lets us put a number on what going fine-free did to
+      checkouts, in a way I could defend before the County Commission. My honest expectation is
+      that the engagement of those seven communities is doing much of the work, and we have no
+      field that measures it. I would welcome the Board's guidance on whether to commission an
+      outside review, or to expand the pilot in 2027 by lottery among the remaining branches,
+      which would settle the question properly.
+    edges:
+      - community_engagement -> fine_free_branch
+      - community_engagement -> checkouts_2025
+      - community_engagement -> checkouts_2024
+      - checkouts_2024 -> checkouts_2025
+      - branch_sqft -> checkouts_2025
+      - fine_free_branch -> checkouts_2025
+      - fine_free_branch -> survey_feb2026
+      - checkouts_2025 -> survey_feb2026
+    answer:
+      identifiable: false
+      missing: [community_engagement]
+    note: >-
+      Last year's checkouts look like a fix but are only a shadow of the community engagement
+      that chose the branches and keeps driving borrowing. The survey, taken after the year
+      closed, is a second trap that does not matter once the first one is seen.
+
+  - id: en_mealkit_dessert
+    author: ai
+    status: rascunho
+    language: en
+    style: voice-note transcript
+    persona: product manager at a US meal-kit subscription company (about 200,000 active customers), leaving a voice note for the data scientist
+    theme: Meal-kit subscription / referrals
+    title: Surprise dessert in the box and referrals
+    treatment: dessert_sample
+    outcome: referrals_60d
+    columns:
+      dessert_sample: 1 if the box shipped between Jul 14 and Aug 29, 2025 contained the free chocolate-pot two-pack.
+      referrals_60d: Number of new customers who signed up with this customer's referral code in the 60 days after the box was delivered.
+      plan_type: Plan at the time of the box (Two-Person, Four-Person or Family).
+      delivery_dow: Day of week of the box's scheduled delivery.
+      box_rating: Star rating, 1 to 5, the customer gave that week's box in the app. Blank if not rated.
+      cs_contact_60d: 1 if the customer opened at least one support conversation in the 60 days after the box was delivered.
+      customer_id: Internal customer id.
+    story: >-
+      [Voice note, 2 min 41, auto-transcribed. Jess to Tomasz, Tuesday.] Hey Tomasz, um, so, the
+      dessert thing. Quick recap because you weren't in the sprint review. From like mid-July
+      through the end of August, fulfillment dropped a free two-pack of the chocolate pots into
+      some boxes, no charge, no announcement, just a little card saying surprise. Who got it was
+      not random, I want to be upfront. Ops only had the chiller space on the Tuesday and
+      Wednesday pack shifts, so it's basically people with Tuesday or Wednesday deliveries, and
+      within those shifts they prioritized the Family plan boxes because, um, Mira's theory was
+      families, more mouths, more word of mouth. Which, fair, Family plan customers already refer
+      at like twice the rate of two-person plans, they always have. What I'm trying to get to is
+      the referral number. Referrals in the sixty days after the box. We saw the box ratings pop,
+      people loved the chocolate pots, the rating that week was noticeably up on the sample boxes,
+      and you know happy raters refer, that's the whole funnel we drew on the whiteboard. One more
+      thing in the extract, there's the CS contact flag, like did they write to support in those
+      sixty days, and that one's messy because we got a wave of "is this nut free" emails from
+      sample customers and then separately anyone whose referral credit didn't post writes in. So.
+      Can you tell me what the dessert actually did to referrals, like a number I can take to Q4
+      planning, and, um, what in that extract to leave alone. Thanks, bye.
+    edges:
+      - plan_type -> dessert_sample
+      - plan_type -> referrals_60d
+      - delivery_dow -> dessert_sample
+      - dessert_sample -> box_rating
+      - box_rating -> referrals_60d
+      - dessert_sample -> referrals_60d
+      - dessert_sample -> cs_contact_60d
+      - referrals_60d -> cs_contact_60d
+    answer:
+      identifiable: true
+      adjust_for: [plan_type]
+      do_not_adjust_for:
+        box_rating: Given the week of the sample box and lifted by the dessert. It is the funnel the team drew, so it is part of the effect being measured.
+        cs_contact_60d: Opened after the box and driven by both the sample (allergen questions) and the referrals (credit not posting). Adjusting for it creates a false link between the two.
+      indifferent: [customer_id, delivery_dow]
+    note: >-
+      Plan type drove both the sample and the referrals; delivery day only drove the sample.
+      The rating is the proud KPI and the mechanism, and the support flag is filed after the
+      fact for both reasons.
+
+  - id: en_nhs_self_rostering
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: director of people at an NHS acute trust in Manchester, writing a paper for the People Committee
+    theme: Hospital workforce / sickness absence
+    title: Self-rostering pilot on the wards whose managers put themselves forward
+    treatment: self_roster_ward
+    outcome: sick_days_pilot
+    columns:
+      self_roster_ward: 1 if the staff member's substantive ward was in the self-rostering pilot (Apr to Sep 2025).
+      sick_days_pilot: Calendar days of sickness absence recorded Apr to Sep 2025.
+      sick_days_prior: Calendar days of sickness absence recorded Oct 2024 to Mar 2025.
+      afc_band: Agenda for Change pay band, 2 to 7.
+      contracted_hours: Contracted hours per week.
+      ward_agency_rate: Agency shifts per 100 rostered shifts on the staff member's ward, Apr to Sep 2025.
+      ward_beds: Bed count of the ward.
+      survey_rota_oct25: Response to "I am satisfied with my rota" in the October 2025 Staff Survey, 1 to 5. Blank if the survey was not completed.
+      staff_id: ESR assignment number.
+    not_in_table:
+      manager_grip: How tightly the ward manager runs the ward (rotas out early, low vacancy, things followed up). Known to everyone, recorded nowhere.
+    story: >-
+      People Committee, 18 November 2025. Paper 7. Self-rostering pilot: six-month sickness absence
+      and a caution on interpretation. Author: Director of People. 7.1 Purpose. To update the
+      Committee on the self-rostering pilot (April to September 2025) and to seek a steer on how
+      far the headline figure can be pushed. 7.2 Background. Eight adult inpatient wards moved to
+      team self-rostering on the e-roster system from 1 April. Participation was by expression of
+      interest from ward managers; we had fourteen expressions and took eight on readiness. 7.3
+      Headline. Sickness absence on the pilot wards ran at 4.1% against 5.6% on the eight
+      comparator wards over April to September. The pilot wards also used markedly fewer agency
+      shifts, which we attribute in part to the rota being built around people's lives;
+      agency-heavy wards are harder places to work and the staff on them go off sick more, so
+      some of any absence effect would run through that. 7.4 Data. Workforce Information has built
+      a staff-level file for all registered nurses and HCAs on the sixteen wards: pilot ward or
+      not, sickness days in the six months, sickness days in the six months before the pilot
+      (October 2024 to March 2025), Agenda for Change band, contracted hours, the ward's agency
+      shifts per 100 rostered shifts over the pilot period, the ward's bed count, and the
+      individual's answer to the rota question in the October 2025 Staff Survey. Sickness is
+      sticky: colleagues who were off a great deal last winter were off a great deal this summer.
+      Band and hours matter on their own; our Band 2 and 3 colleagues and our full-time staff
+      carry more absence. On the survey item, pilot-ward staff were warmer about their rota, and
+      colleagues who have had long spells off tend to score everything lower. 7.5 A caution. I
+      should be frank with the Committee that the managers who came forward are, for the most
+      part, the ones who already ran the tightest wards: rotas out six weeks ahead, low vacancy
+      and therefore little agency to begin with, the kind of grip that shows in every indicator
+      we hold, sickness included. Their wards were already lower on absence in the winter before
+      the pilot. That grip is not recorded anywhere as a variable; it is simply known. 7.6 Ask.
+      Whether the Committee is content for the Trust to cite an absence effect of the pilot from
+      this file and, if so, on what basis; or whether we present the 4.1% against 5.6% as
+      descriptive only until the second wave, which I propose be allocated by ballot among the
+      wards that have expressed interest.
+    edges:
+      - manager_grip -> self_roster_ward
+      - manager_grip -> sick_days_pilot
+      - manager_grip -> sick_days_prior
+      - manager_grip -> ward_agency_rate
+      - sick_days_prior -> sick_days_pilot
+      - afc_band -> sick_days_pilot
+      - contracted_hours -> sick_days_pilot
+      - self_roster_ward -> ward_agency_rate
+      - ward_agency_rate -> sick_days_pilot
+      - self_roster_ward -> sick_days_pilot
+      - self_roster_ward -> survey_rota_oct25
+      - sick_days_pilot -> survey_rota_oct25
+    answer:
+      identifiable: false
+      missing: [manager_grip]
+    note: >-
+      The wards volunteered through managers whose grip drives absence and is recorded nowhere.
+      Prior-winter sickness and the agency rate are both shadows of it, not substitutes. The
+      caution sits late in the paper, after the proud headline and the data list.
+
+  - id: en_library_auto_renew
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: director of a county public library system in the US Midwest, messaging the data librarian
+    theme: Public library / automatic renewals
+    title: Opt-in automatic renewals and overdue items
+    treatment: auto_renew_optin
+    outcome: overdue_items_2025
+    columns:
+      auto_renew_optin: 1 if the cardholder opted in to automatic renewals by Apr 30, 2025.
+      overdue_items_2025: Count of items returned late or still overdue, May 1 to Dec 31, 2025.
+      email_on_file: 1 if an email address was on the patron record as of Apr 1, 2025.
+      checkouts_2024: Items checked out in calendar 2024.
+      age_band: Age band on the patron record (under 18, 18-34, 35-64, 65 and over).
+      renewals_2025: Count of renewals, automatic or patron-initiated, May 1 to Dec 31, 2025.
+    not_in_table:
+      on_top_of_things: Whether the patron is the kind of person who reads the library's emails and brings books back on time. Nothing in the ILS captures it.
+    story: >-
+      Dana, board wants the auto-renew number. recap: in April we emailed everyone with an email
+      on file and asked them to opt in to automatic renewals, about 40% did. the email crowd
+      already gets courtesy notices so they return on time more anyway, and our over-65s have the
+      fewest emails on file and the fewest overdues. my worry: the people who read a library
+      email and click the button are the people who bring books back on time, you know the type,
+      and nothing in Polaris captures that. renewals went through the roof for the opt-ins,
+      that's the feature working, every renewal is an overdue that didn't happen. 2024 checkouts
+      are in the file too, heavy borrowers rack up more overdues, just volume. is there a real
+      number in there or do I tell the board "can't tell"? need it Thursday.
+    edges:
+      - email_on_file -> auto_renew_optin
+      - email_on_file -> overdue_items_2025
+      - on_top_of_things -> auto_renew_optin
+      - on_top_of_things -> overdue_items_2025
+      - age_band -> email_on_file
+      - age_band -> overdue_items_2025
+      - checkouts_2024 -> overdue_items_2025
+      - auto_renew_optin -> renewals_2025
+      - renewals_2025 -> overdue_items_2025
+      - auto_renew_optin -> overdue_items_2025
+    answer:
+      identifiable: false
+      missing: [on_top_of_things]
+    note: >-
+      Email on file and age are recorded and can be adjusted for, but opting in was the
+      patron's own choice, and the trait behind that choice also keeps books coming back on
+      time. The renewals count is the feature working, not a fix.

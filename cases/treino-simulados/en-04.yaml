@@ -1,0 +1,510 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-04, oito casos em inglês
+# (vozes dos EUA e do Reino Unido).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (reitor de assuntos estudantis de um
+# community college, dona de três clínicas veterinárias no Oregon, líder de sucesso do cliente
+# em uma empresa de software de folha de pagamento, gerente de compras de um grupo hoteleiro
+# britânico, analista de uma agência estadual de trabalho) descrevendo um conjunto de dados do
+# jeito que essa pessoa escreveria: trecho de relatório ao conselho, e-mail ao time de dados,
+# página de wiki interna, mensagem de chat, trecho de relatório trimestral.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_cc_ride_free_lottery
+    author: ai
+    status: rascunho
+    language: en
+    style: board paper excerpt
+    persona: dean of students at a two-campus community college in the US Midwest (about 9,000 students), reporting to the Board of Trustees
+    theme: Community college / student transport
+    title: Ride Free transit pass drawn by lottery and fall credits completed
+    treatment: ride_free
+    outcome: credits_completed_fall
+    columns:
+      ride_free: 1 if the student was drawn for a Ride Free county transit pass in the August 2025 lottery and the pass was loaded to their student ID before the first day of class.
+      credits_completed_fall: Credits completed with a grade of C or better, or P, in fall 2025.
+      campus: Home campus on the fall 2025 record. Main, Eastside or Online.
+      pell_eligible: 1 if Pell-eligible on the 2025-26 FAFSA.
+      swipes_fall: Number of days with at least one building-entry card swipe at either campus, Aug 25 to Dec 12, 2025.
+      survey_jan26: Response to "I feel the College supports me", 1 to 5, on the January 2026 Welcome Week survey. Blank if not completed.
+      student_id: Colleague ID.
+    story: >-
+      Dean of Students' Report to the Board of Trustees, February 10, 2026. Item 5. Ride Free
+      pilot, fall 2025. Trustees approved the Ride Free transit pass in June on the understanding
+      that we would come back with an honest answer on whether it helps students finish their
+      classes, not only on whether they like it (they do). How the passes were given out. The
+      County Transit Authority funded 400 passes for the fall term. We opened a request form the
+      first week of August and received 1,140 requests from registered students, from both
+      campuses and a fair number of online students who come in for labs. With 400 to give,
+      Institutional Research drew 400 names at random on August 15 with the Authority's grants
+      officer in the room. Nothing but the draw decided who got a pass, and every pass was on the
+      student's ID card before the first day of class. The file IR has built is those 1,140
+      requesters, one row each. What is in it, and what I would say about each piece. Credits
+      completed in the fall, which is our measure. Home campus: Eastside students are
+      overwhelmingly part-time and complete fewer credits in any term, pass or no pass. Pell
+      eligibility: our Pell-eligible students complete fewer credits, as they do across the
+      sector. Days on campus, from the building swipe readers: pass holders came in noticeably
+      more days, which is the whole theory of the pass (you cannot complete a class you cannot
+      get to), and students who are on campus more days complete more; the online students barely
+      swipe, as you would expect. And the Welcome Week survey item on feeling supported by the
+      College, which pass holders answered more warmly, and which students who had a good fall
+      also answer more warmly in every year we have run it. The Board asked for the effect in
+      credits, and IR will produce it. Before they do, I have asked them to be deliberate about
+      which of these columns the comparison should be cut by, because I have seen more than one
+      pilot undone by a well-meaning adjustment.
+    edges:
+      - ride_free -> swipes_fall
+      - swipes_fall -> credits_completed_fall
+      - ride_free -> credits_completed_fall
+      - campus -> credits_completed_fall
+      - campus -> swipes_fall
+      - pell_eligible -> credits_completed_fall
+      - ride_free -> survey_jan26
+      - credits_completed_fall -> survey_jan26
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        swipes_fall: Counted during the term and raised by the pass. Getting to campus is how the pass is meant to help, so it is part of the effect being measured.
+        survey_jan26: Answered in January, after the term closed, and warmer both because of the pass and because of a good fall. Adjusting for it creates a false link between the two.
+      indifferent: [campus, pell_eligible, student_id]
+    note: >-
+      A draw among the requesters means the plain comparison is already right. The traps are the
+      days-on-campus count the dean is proud of, which is the mechanism, and the January survey,
+      which is only dated in the column dictionary.
+
+  - id: en_vet_laser_surgeon_call
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: owner of three veterinary clinics in the Portland, Oregon suburbs, a veterinarian herself, writing to the analytics team of the purchasing group her clinics joined
+    theme: Veterinary clinics / post-operative care
+    title: Post-op laser session at the surgeon's discretion and incision rechecks
+    twin: en_vet_laser_unit_repair
+    treatment: laser_tx
+    outcome: incision_issue_14d
+    columns:
+      laser_tx: 1 if the patient received a therapeutic laser session on the incision before discharge.
+      incision_issue_14d: 1 if the patient was seen for an incision problem (dehiscence, infection, seroma, licking damage) within 14 days of surgery.
+      clinic: Tigard, Beaverton or Lake Oswego.
+      surgery_month: Month of the procedure, 4 to 9 (April to September 2026).
+      procedure_type: Spay, neuter, mass removal or other soft tissue.
+      patient_weight_kg: Weight recorded at the pre-op check.
+      review_30d: 1 if the owner posted an online review of the clinic within 30 days of the surgery, from the review-monitoring tool linked to the PIMS.
+      patient_id: PIMS patient number.
+    not_in_table:
+      closure_concern: How happy the surgeon was with the incision at closure (oozing, thin skin, a slow close). In the surgery note as prose, if anywhere; no field.
+    story: >-
+      Subject: laser data, incision rechecks. Hi Marcus, following up on Tuesday's call, here is
+      the background for whoever picks this up on your side. We bought three therapeutic laser
+      units in January, one per clinic, and whether a given incision got a session before
+      discharge was the surgeon's call. I asked the three of them straight last week and they
+      were honest: they lasered the incisions they were least happy with, more oozing than they
+      liked, thin skin, a closure that took longer than it should have, which are of course the
+      incisions most likely to come back on you anyway, and they lasered the big incisions, mass
+      removals pretty much always. How an incision looked at closure is in the
+      surgery note as prose if it is anywhere; there is no field for it and I would not trust a
+      text search. Dr. Alvarez at Tigard lasers nearly everything regardless, the other two are
+      pickier. One more wrinkle: Beaverton's unit went back to the manufacturer the second week
+      of May and did not come back until the last week of July, so nothing at Beaverton got
+      lasered in that window whatever the surgeon thought. Things you should know about the file
+      (one row per soft-tissue surgery, April through September). Beaverton is our walk-in-heavy
+      clinic with more big outdoor dogs, and our incisions there come back more no matter what
+      we do; Lake Oswego owners follow the discharge sheet to the letter. Summer is bad for
+      incisions everywhere, lakes, licking, heat. Spays come back more than neuters and mass
+      removals most of all, and heavier dogs more. Reviews: owners love the laser, it is a bit
+      of theatre, so we get a wave of reviews from laser patients; and of course anyone whose
+      incision opened up writes a review too, not the kind we frame. What I want from you is the
+      effect of the laser session on incision rechecks within 14 days, with a clear note on
+      which columns you held constant and which you deliberately did not, and if this file
+      cannot give an honest number, please say so rather than give me one. Thanks, Hannah
+      Lindqvist, DVM.
+    edges:
+      - closure_concern -> laser_tx
+      - closure_concern -> incision_issue_14d
+      - procedure_type -> laser_tx
+      - procedure_type -> incision_issue_14d
+      - clinic -> laser_tx
+      - clinic -> incision_issue_14d
+      - clinic -> patient_weight_kg
+      - surgery_month -> laser_tx
+      - surgery_month -> incision_issue_14d
+      - patient_weight_kg -> incision_issue_14d
+      - laser_tx -> incision_issue_14d
+      - laser_tx -> review_30d
+      - incision_issue_14d -> review_30d
+    answer:
+      identifiable: false
+      missing: [closure_concern]
+    note: >-
+      Clinic, month and procedure type are recorded and can be adjusted for, but the surgeons
+      lasered the incisions they liked least, and that judgement, which also predicts the
+      recheck, lives only in prose. Its twin changes only who decided.
+
+  - id: en_vet_laser_unit_repair
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: owner of three veterinary clinics in the Portland, Oregon suburbs, a veterinarian herself, writing to the analytics team of the purchasing group her clinics joined
+    theme: Veterinary clinics / post-operative care
+    title: Post-op laser session by clinic policy, with one unit away for repair, and incision rechecks
+    twin: en_vet_laser_surgeon_call
+    treatment: laser_tx
+    outcome: incision_issue_14d
+    columns:
+      laser_tx: 1 if the patient received a therapeutic laser session on the incision before discharge.
+      incision_issue_14d: 1 if the patient was seen for an incision problem (dehiscence, infection, seroma, licking damage) within 14 days of surgery.
+      clinic: Tigard, Beaverton or Lake Oswego.
+      surgery_month: Month of the procedure, 4 to 9 (April to September 2026).
+      procedure_type: Spay, neuter, mass removal or other soft tissue.
+      patient_weight_kg: Weight recorded at the pre-op check.
+      review_30d: 1 if the owner posted an online review of the clinic within 30 days of the surgery, from the review-monitoring tool linked to the PIMS.
+      patient_id: PIMS patient number.
+    story: >-
+      Subject: laser data, incision rechecks. Hi Marcus, following up on Tuesday's call, here is
+      the background for whoever picks this up on your side. We bought three therapeutic laser
+      units in January, one per clinic, and the policy from day one was that every soft-tissue
+      surgery gets a session on the incision before discharge, spays, neuters, mass removals,
+      all of it, no picking and choosing, and as far as I can tell from the charge codes the
+      techs stuck to it, give or take the odd miss on a busy day. The wrinkle that makes this
+      worth analysing: Beaverton's unit went back
+      to the manufacturer the second week of May and did not come back until the last week of
+      July, so about two and a half months of Beaverton surgeries went home without a session.
+      Nothing else about who got lasered varied; it is the clinic and the month, full stop.
+      Things you should know about the file (one row per soft-tissue surgery, April through
+      September). Beaverton is our walk-in-heavy clinic with more big outdoor dogs, and our
+      incisions there come back more no matter what we do; Lake Oswego owners follow the
+      discharge sheet to the letter. Summer is bad for incisions everywhere, lakes, licking,
+      heat. Spays come back more than neuters and mass removals most of all, and heavier dogs
+      more. Reviews: owners love the laser, it is a bit of theatre, so we get a wave of reviews
+      from laser patients; and of course anyone whose incision opened up writes a review too,
+      not the kind we frame. What I want from you is the effect of the laser session on incision
+      rechecks within 14 days, with a clear note on which columns you held constant and which
+      you deliberately did not. Thanks, Hannah Lindqvist, DVM.
+    edges:
+      - clinic -> laser_tx
+      - clinic -> incision_issue_14d
+      - clinic -> patient_weight_kg
+      - surgery_month -> laser_tx
+      - surgery_month -> incision_issue_14d
+      - procedure_type -> incision_issue_14d
+      - patient_weight_kg -> incision_issue_14d
+      - laser_tx -> incision_issue_14d
+      - laser_tx -> review_30d
+      - incision_issue_14d -> review_30d
+    answer:
+      identifiable: true
+      adjust_for: [clinic, surgery_month]
+      do_not_adjust_for:
+        review_30d: Posted after the surgery and driven both by the laser (owners like it) and by the incision problem (owners complain). Adjusting for it creates a false link between the two.
+      indifferent: [patient_id, patient_weight_kg, procedure_type]
+    note: >-
+      Same e-mail as its twin with the assignment changed. Who got lasered was set by clinic and
+      month alone, and both also move the recheck rate. Procedure type and weight drive only the
+      outcome; the review is the column to keep out.
+
+  - id: en_payroll_named_csm
+    author: ai
+    status: rascunho
+    language: en
+    style: internal wiki page
+    persona: customer success lead at a US payroll software company serving small businesses (about 6,000 accounts), documenting a dataset for the analytics team
+    theme: Payroll software / customer success
+    title: Named CSM coverage for the noisiest accounts and January ticket volume
+    treatment: named_csm
+    outcome: jan_tickets
+    columns:
+      named_csm: 1 if the account was moved from the pooled CS queue to a named customer success manager on 1 Jul 2025.
+      jan_tickets: Support tickets opened by the account, 1 to 31 Jan 2026.
+      employees_paid: Employees on the account's last payroll run in June 2025.
+      tax_notice_12m: 1 if the account forwarded at least one agency tax notice to us between Jul 2024 and Jun 2025.
+      plan_tier: Core, Plus or Premium, as of Jul 2025.
+      config_fixes_q4: Configuration corrections logged by CS on the account, Oct to Dec 2025 (tax jurisdictions, pay schedules, benefit deductions).
+      nps_feb26: 0 to 10 score on the relationship NPS survey sent the first week of February 2026. Blank if no response.
+      account_id: CRM account key.
+    story: >-
+      Named CSM coverage, Q3 2025 cohort: dataset notes. Owner: Customer Success (Dani Okoro).
+      Last edited 2026-03-04. Purpose. This page documents the account-level extract behind the
+      "did named coverage reduce January ticket volume" question that keeps coming up in the
+      CS/Analytics sync. One row per account active on 1 Jul 2025 (6,112 accounts). How accounts
+      were assigned. On 1 Jul 2025 Ops moved roughly 1,400 accounts from the pooled queue to
+      named CSMs. The list was built from two rules, both of which are in the extract: every
+      account with 75 or more employees on its June payroll run, and every account that had
+      forwarded us an agency tax notice in the previous twelve months. Nothing else went into
+      the list and CSMs could not add or drop accounts. We chose those rules because they pick
+      out our noisiest accounts in January: more employees means more W-2 corrections, and an
+      account that has had a notice has something off in its setup and keeps generating notices
+      and tickets until it is fixed. What the named CSMs did. The main thing was setup audits in
+      Q4: tax jurisdictions, pay schedules, benefit deductions. The config-fix count is the
+      number the team is proudest of (2.3 corrections per named account against 0.4 in the pool),
+      and a clean setup is precisely what keeps January quiet, so expect it to carry a good part
+      of whatever the effect is. Other columns. Plan tier: Premium includes phone support, so
+      Premium accounts open more tickets for the same problem; tier did not play into the
+      assignment. NPS: the relationship survey score. Named accounts score higher, and accounts
+      that had a rough January score us lower, which is no surprise to anyone who has read the
+      verbatims. Account ID is the CRM key. Open question for Analytics. The effect of named
+      coverage on January tickets, with an explicit list of which columns were adjusted for and
+      which were left out on purpose. Please add your answer below rather than in Slack.
+    edges:
+      - employees_paid -> named_csm
+      - employees_paid -> jan_tickets
+      - tax_notice_12m -> named_csm
+      - tax_notice_12m -> jan_tickets
+      - plan_tier -> jan_tickets
+      - named_csm -> config_fixes_q4
+      - config_fixes_q4 -> jan_tickets
+      - named_csm -> jan_tickets
+      - named_csm -> nps_feb26
+      - jan_tickets -> nps_feb26
+    answer:
+      identifiable: true
+      adjust_for: [employees_paid, tax_notice_12m]
+      do_not_adjust_for:
+        config_fixes_q4: Logged in Q4, after the assignment, and produced by the named CSMs' audits. It is how named coverage is meant to quiet January, so it is part of the effect being measured.
+        nps_feb26: Collected in February, after the January tickets, and moved both by named coverage and by how bad January was. Adjusting for it creates a false link between the two.
+      indifferent: [account_id, plan_tier]
+    note: >-
+      Both assignment rules are recorded and both drive tickets. The config-fix KPI is the
+      mechanism, and the NPS is a survey whose date appears only in the column dictionary.
+
+  - id: en_hotel_preferred_supplier
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: procurement manager at a UK hotel group (38 hotels across England and Scotland), writing to the group's data team before the ExCo pack
+    theme: Hospitality / procurement
+    title: Preferred-supplier mandate for the hotels inside the distributor's delivery zones and Q3 food cost
+    treatment: preferred_mandate
+    outcome: food_cost_pct_q3
+    columns:
+      preferred_mandate: 1 if the hotel was in wave 1 of the F&B preferred-supplier mandate, live from 1 July 2026.
+      food_cost_pct_q3: Food cost as a percentage of food revenue, July to September 2026, from the hotel P&L.
+      fb_revenue_2025: Food and beverage revenue, calendar 2025, GBP.
+      outlet_type: Full-service (restaurant and banqueting) or limited (breakfast and bar only).
+      compliance_pct_q3: Share of F&B purchase value placed with preferred suppliers, July to September 2026, from the e-procurement platform.
+      occupancy_q3: Room occupancy, July to September 2026, percent.
+      head_chef_tenure_yrs: Years the current head chef has been in post at 1 July 2026.
+    not_in_table:
+      in_depot_zone: Whether the hotel sits inside one of the distributor's next-day delivery zones around its three depots. A map in the distributor's PDF; never coded against the property master.
+    story: >-
+      Subject: Preferred-supplier mandate, Q3 food cost, what we can claim. Hi Rob, hi team.
+      Before the Q3 numbers go into the ExCo pack I would like your view on what we can and
+      cannot say about the F&B preferred-supplier mandate, because Finance is already drafting
+      a slide. Background. Wave 1 went live on 1 July at 14 of our 38 hotels. The 14 were chosen
+      like this: the distributor can only guarantee next-day delivery to hotels inside the zones
+      around its three depots, so wave 1 had to be inside those zones, and within the zones we
+      took the hotels with the largest 2025 F&B revenue first. The zone is a map in the
+      distributor's PDF; nobody has coded it against the property master and I am not sure
+      anyone could, the edges are vague. Here is my worry. Inside the zones we were already
+      buying a good deal from those depots before any mandate, at better prices, simply because
+      that is where the depots are; the hotels out in the Highlands and in Cornwall have always
+      paid what they pay. So the wave 1 hotels had a cost advantage before 1 July that has
+      nothing to do with the mandate, and I cannot see it in the data. Compliance is the KPI
+      everyone is pleased with, 91% of F&B spend through preferred suppliers in wave 1 against
+      38% elsewhere in Q3, and compliance is of course how the mandate is meant to move the cost
+      line in the first place. On the rest of the file: our biggest F&B hotels get better pricing
+      on volume regardless, full-service outlets run a higher food cost percentage than
+      breakfast-and-bar sites, and the full-service hotels are our biggest F&B earners.
+      Occupancy helps the ratio, and Scotland had a strong summer. A head chef who has been in
+      post for years runs a tighter kitchen than one who arrived in the spring. Question: can we
+      put a number on the effect of the mandate on Q3 food cost from this file and, if so, what
+      should be held constant? If the honest answer is that we cannot, I would rather say so to
+      ExCo than have Finance's slide unpicked in November. Best, Fiona Marsh, Group Procurement.
+    edges:
+      - in_depot_zone -> preferred_mandate
+      - in_depot_zone -> food_cost_pct_q3
+      - fb_revenue_2025 -> preferred_mandate
+      - fb_revenue_2025 -> food_cost_pct_q3
+      - outlet_type -> fb_revenue_2025
+      - outlet_type -> food_cost_pct_q3
+      - preferred_mandate -> compliance_pct_q3
+      - compliance_pct_q3 -> food_cost_pct_q3
+      - preferred_mandate -> food_cost_pct_q3
+      - occupancy_q3 -> food_cost_pct_q3
+      - head_chef_tenure_yrs -> food_cost_pct_q3
+    answer:
+      identifiable: false
+      missing: [in_depot_zone]
+    note: >-
+      The revenue rule is recorded, but the first rule, being inside a delivery zone, is a map
+      nobody coded, and the zone also gave those hotels cheaper food before the mandate. Nobody
+      chose by judgement here; the missing factor is geography. The compliance KPI is the
+      mechanism.
+
+  - id: en_cc_early_alert_swipes
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: dean of students at a two-campus community college in the US Midwest, messaging the institutional research analyst
+    theme: Community college / early alerts
+    title: Week-4 early alerts with coach calls and passing the course, with attendance from swipe readers
+    treatment: alert_wk4
+    outcome: passed
+    columns:
+      alert_wk4: 1 if a faculty early alert was raised on the student in this course by the end of week 4 of fall 2025. Every alert triggers a success-coach call within two business days.
+      passed: 1 if the final grade in the course was C or better.
+      attend_wk1_4: Share of scheduled class meetings in weeks 1 to 4 at which the student's card was read by the classroom swipe reader.
+      lms_grade_wk4: Gradebook percentage in the LMS at the end of week 4.
+      course_level: Developmental (0xx) or college-level (1xx and above).
+      section_size: Headcount in the section at census.
+      prior_gpa: Cumulative GPA at the start of fall 2025. Blank for first-term students.
+    story: >-
+      Priya, favor before the Feb board packet: do the week-4 early alerts (plus the coach call
+      each one triggers within 2 days) move pass rates? One row per student per course. The raw
+      gap worries me, faculty flag the students they haven't seen in class and the ones tanking
+      in the gradebook, and those fail with or without a call. Good news is attendance isn't a
+      guess anymore, the classroom swipe readers went live in August so weeks 1-4 attendance is
+      in the file. Dev ed faculty flag about twice as often and dev ed pass rates are lower
+      anyway. Small sections flag more, you notice people when there are 12 of them. Prior GPA is
+      in there too, it shows up in the week-4 grades and in the final grade. Tell me what you
+      adjusted for and why? Tomorrow afternoon is fine.
+    edges:
+      - attend_wk1_4 -> alert_wk4
+      - attend_wk1_4 -> passed
+      - lms_grade_wk4 -> alert_wk4
+      - lms_grade_wk4 -> passed
+      - course_level -> alert_wk4
+      - course_level -> passed
+      - section_size -> alert_wk4
+      - prior_gpa -> lms_grade_wk4
+      - prior_gpa -> passed
+      - alert_wk4 -> passed
+    answer:
+      identifiable: true
+      adjust_for: [attend_wk1_4, course_level, lms_grade_wk4]
+      indifferent: [prior_gpa, section_size]
+    note: >-
+      Three reasons for a flag, all recorded, all driving the grade. Prior GPA reaches the flag
+      only through the week-4 grade, so it adds nothing once that is in; section size drives only
+      the flag. No column spoils the effect here.
+
+  - id: en_payroll_conference
+    author: ai
+    status: rascunho
+    language: en
+    style: chat message
+    persona: customer success lead at a US payroll software company, messaging the analyst on the revenue team
+    theme: Payroll software / customer events
+    title: User conference attendance and renewal in the following quarter
+    treatment: attended_conf
+    outcome: renewed
+    columns:
+      attended_conf: 1 if at least one user on the account registered and checked in at the company's user conference in Nashville, May 12-13, 2026.
+      renewed: 1 if the account renewed at its renewal date. File covers accounts with a renewal date between Jun 1 and Sep 30, 2026.
+      arr: Annual recurring revenue at Jan 1, 2026, dollars.
+      logins_q1: Admin-user logins, Jan to Mar 2026.
+      tenure_yrs: Years since the account went live, at Jan 1, 2026.
+      region: Sales region on the account. Southeast, Northeast, Central or West.
+      new_features_jun_aug: Features switched on for the first time between Jun and Aug 2026, from the feature-flag log.
+    not_in_table:
+      admin_enthusiasm: How much the account's payroll admin likes the product and wants to be involved. No field for it.
+    story: >-
+      Sam, quick one. Finance wants to book Nashville as "conference drove renewals" because
+      accounts that sent someone renewed at 94% vs 81% for the rest of the Jun-Sep renewal
+      cohort. Before I sign off on that: attendance was whoever bought a ticket, and the admins
+      who fly to Nashville are the ones who already love us. You can see it in the Q1 logins,
+      those accounts were in the product constantly before anyone booked a flight, and heavy
+      users renew, usage is usage. There's no field for how much a customer likes us, obviously.
+      Bigger accounts sent people more and bigger accounts renew more. Southeast came in droves
+      because it's a drive for them. The attendees did switch on a pile of new features over the
+      summer after the product sessions, and accounts using more of the product renew, which is
+      kind of the point of the conference. Older accounts renew more, that's just tenure. Is 94
+      vs 81 defensible with what's in the file, or do I tell finance no?
+    edges:
+      - admin_enthusiasm -> attended_conf
+      - admin_enthusiasm -> renewed
+      - admin_enthusiasm -> logins_q1
+      - logins_q1 -> renewed
+      - arr -> attended_conf
+      - arr -> renewed
+      - region -> attended_conf
+      - tenure_yrs -> renewed
+      - attended_conf -> new_features_jun_aug
+      - new_features_jun_aug -> renewed
+      - attended_conf -> renewed
+    answer:
+      identifiable: false
+      missing: [admin_enthusiasm]
+    note: >-
+      Self-selection: the accounts that bought tickets are the ones that already liked the
+      product. Q1 logins are a shadow of that liking, not a substitute, and the feature count is
+      the conference working.
+
+  - id: en_ui_job_search_review
+    author: ai
+    status: rascunho
+    language: en
+    style: quarterly report excerpt
+    persona: research analyst in the unemployment insurance division of a US state workforce agency, writing the quarterly report to the advisory council
+    theme: Public policy / unemployment insurance
+    title: Week-5 Job Search Review scheduled by profiling score and office distance, and weeks of benefits paid
+    treatment: jsr_scheduled
+    outcome: weeks_paid
+    columns:
+      jsr_scheduled: 1 if the claimant was scheduled for an in-person Job Search Review in week 5 of the claim under the 2025 protocol. Attendance is a condition of continued payment.
+      weeks_paid: Weeks of regular UI benefits paid in the benefit year, 0 to 26.
+      profiling_score: Worker Profiling score at claim filing, 0 to 100, from the Division's statistical model. Higher means more likely to exhaust benefits.
+      office_within_30mi: 1 if an American Job Center lies within 30 road miles of the claimant's address at filing. One of the two scheduling criteria in the 2025 protocol, only claimants with a Center in range were scheduled. Zero mostly in the rural counties.
+      industry: Two-digit NAICS sector of the separating employer.
+      base_period_wages: Total base-period wages, dollars.
+      appeal_filed: 1 if the claimant filed an appeal of any determination on the claim during the benefit year.
+      claimant_id: Hashed claimant identifier.
+    story: >-
+      Quarterly Report to the Unemployment Insurance Advisory Council, quarter ending September
+      30, 2026. Section 4. Job Search Review protocol: first outcome measurement. 4.1. Under the
+      protocol adopted July 1, 2025, new claimants with a Worker Profiling score of 60 or above
+      were scheduled for an in-person Job Search Review at an American Job Center in the fifth
+      week of the claim, subject to the logistical criterion set out in the protocol. Scheduling
+      was automatic from the claim record; Center staff could neither add nor remove claimants.
+      Of 48,212 new claims filed July through September 2025, 14,890 (30.9 percent) were
+      scheduled. Attendance is a condition of continued payment, and non-attenders are stopped
+      until they attend, so the Division treats scheduling and attendance as the same event.
+      4.2. The Research Unit has assembled a claimant-level file for all 48,212 claims: weeks
+      of regular benefits paid in the benefit year, the profiling score at filing, the
+      logistical flag, the two-digit sector of the separating employer, base-period wages,
+      whether an appeal was filed on the claim during the benefit year, and a hashed identifier.
+      4.3. Observations relevant to interpretation. The profiling score is the model's estimate
+      of the likelihood of exhausting benefits, and claimants with high scores draw more weeks
+      whether or not they are reviewed; that is what the score is for. The model's inputs
+      include the sector of the separating employer, and sector also matters on its own account:
+      construction and accommodation claimants cycle on and off the rolls faster than
+      manufacturing claimants with the same score. Claimants in the rural counties of the state
+      draw more weeks in every analysis the Division has published, which reflects the thinness
+      of local labor markets rather than anything about the claimants. Higher base-period wages
+      are associated with fewer weeks. Appeals arise for two reasons in this cohort: the Review
+      generates work-search determinations that claimants appeal, and claimants whose benefits
+      are stopped or end early appeal more often than those paid through. 4.4. The Council has
+      asked for an estimate of the effect of the Review on weeks paid. The Research Unit requests
+      that the Council's methodological subcommittee advise on which columns of the file should
+      be adjusted for in that estimate and which should not, before the estimate is produced.
+    edges:
+      - profiling_score -> jsr_scheduled
+      - profiling_score -> weeks_paid
+      - industry -> profiling_score
+      - industry -> weeks_paid
+      - office_within_30mi -> jsr_scheduled
+      - office_within_30mi -> weeks_paid
+      - base_period_wages -> weeks_paid
+      - jsr_scheduled -> appeal_filed
+      - weeks_paid -> appeal_filed
+      - jsr_scheduled -> weeks_paid
+    answer:
+      identifiable: true
+      adjust_for: [office_within_30mi, profiling_score]
+      do_not_adjust_for:
+        appeal_filed: Filed during the benefit year, after the Review and after benefits were paid or stopped, and driven by both. Adjusting for it creates a false link between the two.
+      indifferent: [base_period_wages, claimant_id, industry]
+    note: >-
+      The score band is in the text, but the second scheduling criterion, having an office
+      within 30 miles, is spelled out only in the column dictionary, and the text says rural
+      claimants draw more weeks. Sector feeds the score and drives weeks on its own, yet the
+      score already blocks that path.

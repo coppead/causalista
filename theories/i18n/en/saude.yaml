@@ -1,0 +1,215 @@
+# Tradução da ficha de teoria 'saude' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. Lida por inteiro, frase a frase
+# contra a ficha em português, e corrigida pelo assistente em 2026-10-06, por delegação
+# do André. A ficha em português, theories/saude.yaml, é a que vale: este arquivo só
+# traz as palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# O que a leitura de 2026-10-06 corrigiu:
+#   - as nove frases que a revisão independente de 2026-10-05 mudou em português
+#     (internação anterior, pronto-socorro, fragilidade, central de enfermagem e
+#     auditoria médica), que ainda traziam o texto antigo;
+#   - "with more frequency" (decalque) por "more frequently";
+#   - "nursing center" (que em inglês soa como uma clínica) por "nurse line";
+#   - "the pilot program" por "the program's pilot" (é o piloto do programa);
+#   - descrições de coluna em que o sujeito não era o beneficiário.
+
+language: en
+status: revisada
+title: Monitoring program at a health plan operator
+context: A health plan operator enrolled part of its beneficiaries in a monitoring program, in which a
+  nurse agrees on a care plan with the beneficiary and follows up on the treatment. The operator wants
+  to know whether the monitoring program reduces hospitalization in the following twelve months.
+randomized: The beneficiaries enrolled in the monitoring program were selected by lottery.
+closing: Nothing other than what was described influenced who entered the monitoring program.
+treatment:
+  label: the monitoring program
+  dictionary: Was enrolled in the monitoring program (1 = yes, 0 = no).
+outcome:
+  label: hospitalization
+  dictionary: Was hospitalized in the twelve months following the start of the program (1 = yes, 0 = no).
+variables:
+  idade:
+    label: the age of the beneficiary
+    roles:
+      confounder:
+        dictionary: Age of the beneficiary at the start of the program, in years.
+        to_treatment: The operator enrolled older beneficiaries more frequently in the monitoring program.
+        to_outcome: Older beneficiaries are hospitalized more frequently.
+      outcome_cause:
+        dictionary: Age of the beneficiary at the start of the program, in years.
+        to_outcome: Older beneficiaries are hospitalized more frequently.
+  doencas_cronicas:
+    label: chronic diseases
+    roles:
+      confounder:
+        dictionary: Had two or more chronic diseases registered at the start of the program (1 = yes,
+          0 = no).
+        to_treatment: Beneficiaries with two or more chronic diseases were enrolled in the monitoring
+          program more frequently.
+        to_outcome: Beneficiaries with two or more chronic diseases are hospitalized more frequently.
+      outcome_cause:
+        dictionary: Had two or more chronic diseases registered at the start of the program (1 = yes,
+          0 = no).
+        to_outcome: Beneficiaries with two or more chronic diseases are hospitalized more frequently.
+  internacao_anterior:
+    label: previous hospitalization
+    roles:
+      confounder:
+        dictionary: Was hospitalized in the twelve months before the start of the program (1 = yes, 0
+          = no).
+        to_treatment: Beneficiaries who had been hospitalized in the previous year were enrolled in the
+          monitoring program more frequently.
+        to_outcome: Beneficiaries who were hospitalized in the year before the monitoring program are
+          hospitalized again more frequently.
+      outcome_cause:
+        dictionary: Was hospitalized in the twelve months before the start of the program (1 = yes, 0
+          = no).
+        to_outcome: Beneficiaries who were hospitalized in the year before the monitoring program are
+          hospitalized again more frequently.
+  consultas:
+    label: outpatient consultations
+    roles:
+      confounder:
+        dictionary: Number of outpatient consultations in the six months before the start of the program.
+        to_treatment: Beneficiaries who went to more outpatient consultations were enrolled in the
+          monitoring program more frequently.
+        to_outcome: Beneficiaries who go to more outpatient consultations treat problems earlier and are
+          hospitalized less.
+      mediator:
+        dictionary: Number of outpatient consultations in the six months after the start of the program.
+        from_treatment: The care plan of the monitoring program includes routine consultations, and
+          participants go to more outpatient consultations in the following months.
+        to_outcome: Beneficiaries who go to more outpatient consultations treat problems earlier and are
+          hospitalized less.
+      outcome_cause:
+        dictionary: Number of outpatient consultations in the six months before the start of the program.
+        to_outcome: Beneficiaries who go to more outpatient consultations treat problems earlier and are
+          hospitalized less.
+  pronto_socorro:
+    label: the visit to the emergency room
+    roles:
+      confounder:
+        dictionary: Visited the emergency room in the six months before the start of the program (1 =
+          yes, 0 = no).
+        to_treatment: Beneficiaries who had visited the emergency room were enrolled in the monitoring
+          program more frequently.
+        to_outcome: Beneficiaries who visit the emergency room are hospitalized more frequently.
+      mediator:
+        dictionary: Visited the emergency room in the six months after the start of the program (1 = yes,
+          0 = no).
+        from_treatment: Beneficiaries who participate in the monitoring program visit the emergency room
+          less in the following months.
+        to_outcome: Beneficiaries who visit the emergency room are hospitalized more frequently.
+      outcome_cause:
+        dictionary: Visited the emergency room in the six months before the start of the program (1 =
+          yes, 0 = no).
+        to_outcome: Beneficiaries who visit the emergency room are hospitalized more frequently.
+  adesao_medicacao:
+    label: adherence to medication
+    roles:
+      confounder:
+        dictionary: Adherence to medication score on the health questionnaire answered before the start
+          of the program, from 0 to 10.
+        to_treatment: The operator enrolled beneficiaries with lower adherence to medication in the
+          monitoring program more frequently.
+        to_outcome: Beneficiaries with higher adherence to medication have fewer crises and are
+          hospitalized less.
+      mediator:
+        dictionary: Adherence to medication score on the health questionnaire answered six months after
+          the start of the program, from 0 to 10.
+        from_treatment: The nurse of the monitoring program checks the use of medicines, and participants
+          begin to have higher adherence to medication.
+        to_outcome: Beneficiaries with higher adherence to medication have fewer crises and are
+          hospitalized less.
+  fragilidade:
+    label: the frailty of the beneficiary
+    hidden_fact: The operator does not have an assessment of the frailty of the beneficiaries, and therefore
+      frailty is not in the table.
+    roles:
+      confounder:
+        dictionary: Frailty score on the clinical assessment made before the start of the program, from
+          0 to 10 (the higher, the more frail).
+        to_treatment: Frailer beneficiaries accepted the invitation to the monitoring program more frequently.
+        to_outcome: Frailer beneficiaries are hospitalized more frequently.
+      outcome_cause:
+        dictionary: Frailty score on the clinical assessment made before the start of the program, from
+          0 to 10 (the higher, the more frail).
+        to_outcome: Frailer beneficiaries are hospitalized more frequently.
+  apoio_familiar:
+    label: family support at home
+    hidden_fact: The operator does not know which beneficiaries have family support at home, and therefore
+      this information is not in the table.
+    roles:
+      confounder:
+        dictionary: Had a relative at home who helped with their health care, at the start of the program
+          (1 = yes, 0 = no).
+        to_treatment: Beneficiaries with family support at home accepted the invitation to the monitoring
+          program more frequently.
+        to_outcome: Beneficiaries with family support at home are hospitalized less.
+      outcome_cause:
+        dictionary: Had a relative at home who helped with their health care, at the start of the program
+          (1 = yes, 0 = no).
+        to_outcome: Beneficiaries with family support at home are hospitalized less.
+  tabagismo:
+    label: smoking
+    hidden_fact: The operator does not know which beneficiaries smoke, and therefore this information
+      is not in the table.
+    roles:
+      confounder:
+        dictionary: Was a smoker at the start of the program (1 = yes, 0 = no).
+        to_treatment: Smokers accepted the invitation to the monitoring program less frequently.
+        to_outcome: Smokers are hospitalized more frequently.
+      mediator:
+        dictionary: Was a smoker six months after the start of the program (1 = yes, 0 = no).
+        from_treatment: The monitoring program includes support to quit smoking, and those who participate
+          smoke less in the following months.
+        to_outcome: Smokers are hospitalized more frequently.
+  indicacao_medica:
+    label: the doctor's referral
+    roles:
+      treatment_cause:
+        dictionary: Was referred to the monitoring program by their doctor before the start of the program
+          (1 = yes, 0 = no).
+        to_treatment: Some of the doctors in the network referred their patients to the monitoring program,
+          and those who were referred were enrolled more frequently.
+  cidade_piloto:
+    label: pilot city
+    roles:
+      treatment_cause:
+        dictionary: Lives in one of the cities chosen for the program's pilot (1 = yes, 0 = no).
+        to_treatment: The monitoring program started in some pilot cities, and people who live there were
+          enrolled more frequently.
+  ligacao_enfermagem:
+    label: the call from the nurse line
+    roles:
+      treatment_cause:
+        dictionary: Received a call from the nurse line in the three months before the start of the program
+          (1 = yes, 0 = no).
+        to_treatment: The nurse line invited beneficiaries to the monitoring program during its calls, and
+          those who had received a call were enrolled more frequently.
+      collider:
+        dictionary: Received a call from the nurse line in the twelve months after the start of the program
+          (1 = yes, 0 = no).
+        from_treatment: The nurse line more frequently calls beneficiaries who are in the monitoring program,
+          to run the program's satisfaction survey.
+        from_outcome: The nurse line more frequently calls beneficiaries who have been discharged from a
+          hospitalization, to follow up on their recovery.
+  auditoria_medica:
+    label: review by medical audit
+    roles:
+      collider:
+        dictionary: Had care reviewed by the operator's medical audit in the twelve months after the start
+          of the program (1 = yes, 0 = no).
+        from_treatment: The medical audit more frequently reviews the care of beneficiaries who are in the
+          monitoring program, to evaluate the program.
+        from_outcome: The medical audit more frequently reviews the care of beneficiaries who were
+          hospitalized, to check the hospital bill.
+  dia_vencimento:
+    label: the due date of the monthly fee
+    roles:
+      unrelated:
+        dictionary: The day of the month when the plan's monthly fee is due.
+        fact: The due date of the monthly fee has no relation to the monitoring program nor to
+          hospitalization.

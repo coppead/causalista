@@ -1,0 +1,270 @@
+# Tradução da ficha de teoria 'varejo' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. Lida por inteiro e corrigida pelo
+# assistente em 2026-10-06, frase a frase contra a ficha em português, por delegação do
+# André. A ficha em português, theories/varejo.yaml, é a que vale: este arquivo só
+# traz as palavras, e a sua estrutura tem de espelhar a da ficha.
+#
+# A leitura de 2026-10-06 incorporou as frases que a revisão independente de 2026-10-05
+# mudou em português (theories/i18n/pendentes-2026-10-05.json): pesquisa sobre preços
+# em vez de pesquisa de opinião, o índice de sensibilidade a preço calculado com as
+# compras anteriores, o motivo do contato com o atendimento, e "o que comprar" em vez
+# de "onde usar" o desconto. Corrigiu também descrições de coluna que falavam de
+# "clientes" no plural, e trocou decalques do português por inglês corrente
+# ("return to buy" -> "buy again", "the sending" -> "when the coupon was sent").
+
+language: en
+status: revisada
+title: Discount coupon in a retail chain
+context: >-
+  A retail chain sent a discount coupon to some of its customers: 15% off the next
+  purchase, valid for 60 days. It wants to know whether the coupon increases repurchase,
+  that is, the share of customers who buy again in the 60 days after the coupon was sent.
+randomized: The customers who received the coupon were chosen at random.
+closing: Nothing other than what was described influenced the choice of who received the coupon.
+treatment:
+  label: the coupon
+  dictionary: Received the discount coupon (1 = yes, 0 = no).
+outcome:
+  label: repurchase
+  dictionary: >-
+    Bought from the chain again in the 60 days after the coupon was sent (1 = yes, 0 = no).
+variables:
+  gasto_anual:
+    label: the customer's spending
+    roles:
+      confounder:
+        dictionary: >-
+          Amount spent at the chain in the twelve months before the coupon was sent,
+          in reais.
+        to_treatment: The chain sent the coupon more often to customers who spent more at the chain.
+        to_outcome: Customers who spend more at the chain are more likely to buy again.
+      outcome_cause:
+        dictionary: >-
+          Amount spent at the chain in the twelve months before the coupon was sent,
+          in reais.
+        to_outcome: Customers who spend more at the chain are more likely to buy again.
+  frequencia_compras:
+    label: the purchase frequency
+    roles:
+      confounder:
+        dictionary: >-
+          Number of purchases at the chain in the twelve months before the coupon was
+          sent.
+        to_treatment: >-
+          The chain sent the coupon more often to customers who bought more times a
+          year.
+        to_outcome: Customers who buy more times a year are more likely to buy again.
+      outcome_cause:
+        dictionary: >-
+          Number of purchases at the chain in the twelve months before the coupon was
+          sent.
+        to_outcome: Customers who buy more times a year are more likely to buy again.
+  dias_sem_comprar:
+    label: the time since the last purchase
+    roles:
+      confounder:
+        dictionary: Days between the last purchase at the chain and the day the coupon was sent.
+        to_treatment: >-
+          The chain sent the coupon more often to customers who had gone longer without
+          buying, to try to win those customers back.
+        to_outcome: >-
+          Customers who have gone longer without buying from the chain are less likely to buy again.
+      outcome_cause:
+        dictionary: Days between the last purchase at the chain and the day the coupon was sent.
+        to_outcome: >-
+          Customers who have gone longer without buying from the chain are less likely to buy again.
+  programa_fidelidade:
+    label: the loyalty program
+    roles:
+      confounder:
+        dictionary: >-
+          Was a member of the chain's loyalty program on the date the coupon was sent
+          (1 = yes, 0 = no).
+        to_treatment: The chain sent the coupon more often to members of the loyalty program.
+        to_outcome: Members of the loyalty program are more likely to buy again.
+      mediator:
+        dictionary: >-
+          Was a member of the chain's loyalty program 30 days after the coupon was
+          sent (1 = yes, 0 = no).
+        from_treatment: >-
+          The coupon message invites the customer to join the loyalty program, and so
+          customers who receive the coupon join the loyalty program more often.
+        to_outcome: Members of the loyalty program are more likely to buy again.
+      outcome_cause:
+        dictionary: >-
+          Was a member of the chain's loyalty program on the date the coupon was sent
+          (1 = yes, 0 = no).
+        to_outcome: Members of the loyalty program are more likely to buy again.
+  abriu_app:
+    label: the use of the app
+    roles:
+      confounder:
+        dictionary: >-
+          Opened the chain's app in the 30 days before the coupon was sent (1 = yes, 0
+          = no).
+        to_treatment: >-
+          Some of the coupons were sent as app notifications, and so customers who had been
+          opening the app received the coupon more often.
+        to_outcome: Customers who open the chain's app are more likely to buy again.
+      mediator:
+        dictionary: >-
+          Opened the chain's app in the 30 days after the coupon was sent (1 = yes, 0
+          = no).
+        from_treatment: >-
+          The coupon is stored in the app, and so customers who receive the coupon open the
+          app more in the following weeks.
+        to_outcome: Customers who open the chain's app are more likely to buy again.
+  visitas_site:
+    label: the website visits
+    roles:
+      mediator:
+        dictionary: >-
+          Number of visits to the chain's website in the 30 days after the coupon was
+          sent.
+        from_treatment: >-
+          Customers who receive the coupon visit the chain's website more in the following
+          weeks, to choose what to buy with the discount.
+        to_outcome: Customers who visit the chain's website more are more likely to buy again.
+      outcome_cause:
+        dictionary: >-
+          Number of visits to the chain's website in the 30 days before the coupon was
+          sent.
+        to_outcome: Customers who visit the chain's website more are more likely to buy again.
+  avaliacao_precos:
+    label: the rating of the prices
+    roles:
+      confounder:
+        dictionary: >-
+          Score from 0 to 10 for how much the customer thinks the chain's prices are good
+          value, in the survey about prices run before the coupon was sent.
+        to_treatment: >-
+          The chain sent the coupon more often to customers who thought the chain's prices
+          were poor value.
+        to_outcome: >-
+          Customers who think the chain's prices are good value are more likely to buy
+          again.
+      mediator:
+        dictionary: >-
+          Score from 0 to 10 for how much the customer thinks the chain's prices are good
+          value, in the survey about prices run 30 days after the coupon was sent.
+        from_treatment: >-
+          Customers who receive the coupon come to see the chain's prices as better
+          value.
+        to_outcome: >-
+          Customers who think the chain's prices are good value are more likely to buy
+          again.
+  sensibilidade_preco:
+    label: the price sensitivity
+    hidden_fact: >-
+      The chain did not keep its customers' price sensitivity index, and so price
+      sensitivity is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          The customer's price sensitivity index, from 0 to 10, computed from the purchases
+          made before the coupon was sent (the higher it is, the more the customer compares
+          prices before buying).
+        to_treatment: The chain sent the coupon more often to more price-sensitive customers.
+        to_outcome: >-
+          More price-sensitive customers are less likely to buy again, because they look for
+          the cheapest store on every purchase.
+      outcome_cause:
+        dictionary: >-
+          The customer's price sensitivity index, from 0 to 10, computed from the purchases
+          made before the coupon was sent (the higher it is, the more the customer compares
+          prices before buying).
+        to_outcome: >-
+          More price-sensitive customers are less likely to buy again, because they look for
+          the cheapest store on every purchase.
+  renda:
+    label: the customer's income
+    hidden_fact: The chain does not have its customers' income, and so income is not in the table.
+    roles:
+      confounder:
+        dictionary: Estimated monthly income of the customer, in reais.
+        to_treatment: >-
+          Lower-income customers sign up more often to receive the chain's offers, and so
+          they received the coupon more often.
+        to_outcome: Higher-income customers are more likely to buy again.
+      outcome_cause:
+        dictionary: Estimated monthly income of the customer, in reais.
+        to_outcome: Higher-income customers are more likely to buy again.
+  lista_desejos:
+    label: the wish list
+    hidden_fact: >-
+      The chain does not keep the history of its customers' wish lists, and so the wish
+      list is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Had a product saved in the wish list of the website or the app on the date the
+          coupon was sent (1 = yes, 0 = no).
+        to_treatment: >-
+          The chain sent the coupon more often to customers who had a product saved in their
+          wish list.
+        to_outcome: >-
+          Customers who have a product saved in their wish list already intend to buy and are
+          more likely to buy again.
+      outcome_cause:
+        dictionary: >-
+          Had a product saved in the wish list of the website or the app on the date the
+          coupon was sent (1 = yes, 0 = no).
+        to_outcome: >-
+          Customers who have a product saved in their wish list already intend to buy and are
+          more likely to buy again.
+  contato_atendimento:
+    label: the contact with customer service
+    roles:
+      collider:
+        dictionary: >-
+          Contacted customer service in the 60 days after the coupon was sent (1 =
+          yes, 0 = no).
+        from_treatment: >-
+          Customers who receive the coupon contact customer service more, to ask how to use
+          the discount.
+        from_outcome: >-
+          Customers who buy again contact customer service more, to track a delivery or ask
+          for an exchange.
+      outcome_cause:
+        dictionary: >-
+          Contacted customer service in the three months before the coupon was sent (1
+          = yes, 0 = no).
+        to_outcome: Customers who had to contact customer service are less likely to buy again.
+  respondeu_pesquisa:
+    label: the response to the satisfaction survey
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Answered the chain's satisfaction survey in the three months before the coupon was
+          sent (1 = yes, 0 = no).
+        to_treatment: >-
+          The chain used the coupon as a thank-you to customers who had answered the
+          satisfaction survey, and so those who had answered received the coupon more often.
+      collider:
+        dictionary: >-
+          Answered the chain's satisfaction survey in the 60 days after the coupon was sent
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          The coupon message carries the invitation to the satisfaction survey, and so
+          customers who receive the coupon answer the satisfaction survey more often.
+        from_outcome: >-
+          The chain invites customers to the satisfaction survey after every purchase, and so
+          customers who buy again answer the satisfaction survey more often.
+  loja_piloto:
+    label: the pilot store
+    roles:
+      treatment_cause:
+        dictionary: >-
+          The customer's main store is one of the stores chosen for the coupon pilot
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The coupon rollout started at a few pilot stores, and customers of those stores
+          received the coupon more often.
+  mes_aniversario:
+    label: the birthday month
+    roles:
+      unrelated:
+        dictionary: The customer's birthday month (1 = January, 12 = December).
+        fact: The customer's birthday month has nothing to do with the coupon or with repurchase.

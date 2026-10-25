@@ -1,0 +1,11 @@
+name: Idea or question
+description: A question about the project, or an idea for the next release.
+labels: [question]
+body:
+  - type: textarea
+    id: text
+    attributes:
+      label: Your question or idea
+      description: Ideas outside the current release go to the list in section 10 of the specification (ESPECIFICACAO.md, in Portuguese); say if yours is already there.
+    validations:
+      required: true

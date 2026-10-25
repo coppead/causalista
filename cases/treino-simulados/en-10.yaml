@@ -1,0 +1,530 @@
+# Casos que simulam texto de pessoa, para TREINO: arquivo en-10, oito casos em inglês
+# (vozes dos EUA e do Reino Unido).
+#
+# Escritos pelo assistente em 2026-10-07, no papel de pessoas (analista de uma agência estadual
+# de trabalho e emprego, diretor de uma liga esportiva juvenil, analista de risco de uma
+# financeira de crédito imobiliário, diretora de pessoas de um hospital em Manchester, dono
+# de uma rede de lava-rápidos) descrevendo um conjunto de dados do jeito que essa pessoa
+# escreveria: mensagem de Slack, memorando de uma página, pergunta a um consultor, e-mail
+# ao time de dados, transcrição de áudio.
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são o teste: nenhum cenário do conjunto congelado em cases/simulados/ é reutilizado.
+# As setas declaram o diagrama causal que o texto implica; o verificador recalcula cada
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: en_wfa_week3_call
+    author: ai
+    status: rascunho
+    language: en
+    style: Slack message
+    persona: analyst in the unemployment insurance division of a state workforce agency in the Upper Midwest, messaging a colleague on the analytics team
+    theme: Public workforce agency / unemployment insurance
+    title: Week-3 reemployment check-in call, every other claimant on the list
+    treatment: checkin_call
+    outcome: off_ui_wk16
+    columns:
+      checkin_call: 1 if the claimant received the Reemployment Services week-3 check-in call. Initial claims effective Feb 1 to Apr 25, 2026.
+      off_ui_wk16: 1 if the claimant filed no weekly certification for benefit week 16 or any later week, through week 26.
+      jobs_logged_wk4_8: Work-search contacts the claimant entered in the portal for benefit weeks 4 through 8.
+      wba: Weekly benefit amount, dollars. Computed from base-period wages at filing.
+      base_wages: Total base-period wages, dollars.
+      naics2: Two-digit NAICS code of the separating employer.
+      job_center: Job center assigned from the ZIP code of residence.
+      survey_wk20: 1 if the claimant returned the claimant experience survey mailed in benefit week 20.
+      claim_id: Claim number.
+    story: >-
+      @Luis one for you before I take anything to the deputy secretary. the week-3 check-in
+      calls. recap: for initial claims effective Feb 1 through Apr 25 the RES unit called
+      claimants at the start of their third benefit week, 15 minutes, go over the work-search
+      rule, show them the job board, that's it. they could not call everyone so Carla's staff
+      sorted each week's new-claim list by claim number and called every other row. no skipping
+      anybody because they looked like a hard case, I asked, she was religious about it. what the
+      dashboard shows: the called group enters a lot more work-search contacts in weeks 4 through
+      8 (that is literally what the call tells them to do, and people who log more contacts get
+      off benefits sooner, that's the whole theory of the thing), and exits by week 16 are up
+      maybe 2.5 points. deputy sec wants a clean "the call moved exits by X points" for the
+      legislature. in the extract besides the call flag and the week-16 exit I've got weekly
+      benefit amount (which is just a formula off base-period wages, and the bigger the check the
+      slower people leave, we all know that), the base-period wages themselves (higher earners
+      have more options, they go faster), 2-digit NAICS of the last employer (construction clears
+      out in April no matter what we do), the job center from the home ZIP (Milwaukee is a
+      different labor market from the Fox Valley), and the week-20 claimant survey return flag,
+      which the called folks return more because they recognize a name on the letter, and
+      honestly so does anyone who just landed a job and is feeling good about us. which of those
+      do I need to cut the comparison by, and which ones are going to wreck it if I do? I don't
+      want to over-engineer this but I also don't want Hal from the Fiscal Bureau picking it apart.
+    edges:
+      - claim_id -> checkin_call
+      - checkin_call -> jobs_logged_wk4_8
+      - jobs_logged_wk4_8 -> off_ui_wk16
+      - checkin_call -> off_ui_wk16
+      - base_wages -> wba
+      - wba -> off_ui_wk16
+      - base_wages -> off_ui_wk16
+      - naics2 -> off_ui_wk16
+      - job_center -> off_ui_wk16
+      - checkin_call -> survey_wk20
+      - off_ui_wk16 -> survey_wk20
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        jobs_logged_wk4_8: Entered in the weeks after the call and raised by it. It is the way the call is supposed to work, so it is part of the effect being measured.
+        survey_wk20: Returned after week 16 and driven by both the call (a familiar name on the letter) and having left benefits (a good mood). Adjusting for it creates a false link between the two.
+      indifferent: [base_wages, claim_id, job_center, naics2, wba]
+    note: >-
+      Every other row of a list sorted by claim number is as good as a coin flip, so the plain
+      comparison is right. The traps are the work-search KPI, which is the mechanism, and the
+      survey return, which comes after the fact for both reasons.
+
+  - id: en_wfa_rapid_response
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: analyst in the research and evaluation unit of a state workforce agency in the Upper Midwest, writing to the director of the Dislocated Worker unit
+    theme: Public workforce agency / mass layoffs
+    title: On-site Rapid Response sessions and wages two quarters after the layoff
+    treatment: rr_session
+    outcome: emp_q2
+    columns:
+      rr_session: 1 if an on-site Rapid Response information session was held for the worker's layoff event before the separation date. WARN events with separations Jul 2024 to Jun 2025.
+      emp_q2: 1 if UI wage records show wages from any employer in the second full calendar quarter after separation.
+      event_size: Number of affected workers listed on the employer's WARN notice.
+      notice_days: Calendar days between the WARN notice filing and the worker's separation date.
+      wda: Workforce development area of the worksite, 1 to 11.
+      age: Age at separation, from the WARN worker list.
+      tenure_yrs: Years with the separating employer, from the WARN worker list where the employer provided it.
+      rr_survey: Satisfaction rating, 1 to 5, from the Rapid Response survey mailed to every worker on the WARN list six months after separation. Blank if not returned.
+      worker_id: Row identifier.
+    story: >-
+      MEMORANDUM. To Janelle Okoro, Director, Dislocated Worker Unit. From Sam Petrakis, Research
+      and Evaluation. September 3, 2026. Re whether the on-site Rapid Response sessions can be
+      shown to move reemployment. You asked for a number on the on-site sessions for the federal
+      report. I want to lay out what the file can and cannot support before I produce one. What
+      the sessions are. When an employer files a WARN notice, the Rapid Response team tries to
+      get on site before the separations to walk the workers through UI filing, the job centers
+      and the training money. Of the 212 WARN events with separations between July 2024 and June
+      2025, 71 had a session. How events got one. Three things decided it, and all three are in
+      the file I built from the WARN lists and the UI wage records. The team prioritized the large
+      events, which is also where the local labor market takes the hardest hit: 400 people out of
+      one plant in a town of 9,000 do not get reabsorbed the way 60 do. The team reliably covers
+      only workforce areas 3 and 7, where the two coordinators sit; the other nine areas got a
+      session when a coordinator could drive out, which was rarely, and those areas are very
+      different labor markets to begin with. And the team needs lead time: with a full 60-day
+      notice they are in, when the notice arrives two weeks before the doors close they are not,
+      and a worker who learned two months out has had two months to line something up whether or
+      not we showed up. Other fields. Age and years with the employer, both from the worker
+      lists; older and longer-tenured workers take longer to find the next job, that has held in
+      every cohort I have looked at. And the satisfaction rating from the survey the unit mails
+      out, which has been running around 4.3 and which I know you are pleased with; I would note
+      that the people who send it back skew toward those who are working again, and toward those
+      who met the team in person. What I propose. To report the effect of a session on having
+      wages in the second quarter after separation. Before I run it I would like your view on
+      which of these fields should be held constant in the comparison and which should be left
+      out of it, since the federal reviewers will ask.
+    edges:
+      - event_size -> rr_session
+      - event_size -> emp_q2
+      - wda -> rr_session
+      - wda -> emp_q2
+      - notice_days -> rr_session
+      - notice_days -> emp_q2
+      - age -> emp_q2
+      - tenure_yrs -> emp_q2
+      - rr_session -> emp_q2
+      - rr_session -> rr_survey
+      - emp_q2 -> rr_survey
+    answer:
+      identifiable: true
+      adjust_for: [event_size, notice_days, wda]
+      do_not_adjust_for:
+        rr_survey: Mailed six months after separation and returned more by those back at work and by those who met the team. Adjusting for it creates a false link between the session and reemployment.
+      indifferent: [age, tenure_yrs, worker_id]
+    note: >-
+      Three recorded things decided which events got a session, and each of them also moves
+      reemployment on its own. The survey the director is pleased with is mailed after the
+      outcome window and answered for both reasons.
+
+  - id: en_league_sideline_scored
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: executive director of a youth soccer league in the Atlanta suburbs (about 4,500 players, 300 volunteer coaches), former high-school coach, no analytics background, writing to a parent who runs an analytics consultancy
+    theme: Youth sports league / coach training
+    title: Positive Sideline workshop, seats by the spring conduct score, with the score on the coach's record
+    twin: en_league_sideline_paper
+    treatment: coach_workshop
+    outcome: reregistered_spring
+    columns:
+      coach_workshop: 1 if the player's fall 2025 head coach attended the Positive Sideline workshop in August 2025.
+      reregistered_spring: 1 if the player registered for the spring 2026 season by the February 15 deadline.
+      coach_spring_score: Age-group commissioner's sideline-conduct score for the coach at the end of the spring 2025 season, 1 (poor) to 5 (excellent).
+      coach_seasons: Seasons the coach has coached in the league, counting fall 2025.
+      age_group: Player's fall 2025 age group, U6 through U14.
+      sideline_incidents: Referee-reported sideline incidents (coach or spectator warnings and dismissals) logged against the player's team during the fall 2025 season.
+      player_id: Registration system player number.
+    story: >-
+      Hi Priya, you offered to look at our numbers when we talked at the U12 tournament, so I'm
+      taking you up on it. Last August we ran a workshop for coaches called Positive Sideline,
+      three hours on a Saturday at the Mount Pisgah fields, mostly about how you talk to
+      nine-year-olds and how you handle their parents. We had room for 140 and we have just over
+      300 coaches. Here's how the seats went. Our age-group commissioners score every coach 1 to
+      5 on sideline conduct at the end of each season, and since 2024 they enter that score on
+      the coach's record in SportsEngine. Anybody at a 2 or below on the spring score was told to
+      come or lose the team, and they all came. The rest of the seats we filled from the 3s,
+      alphabetically, until we ran out; nobody at a 4 or 5 went. What I want to know is whether
+      the workshop keeps kids in the league, so the thing I'm looking at is whether the player
+      came back for spring. I pulled a player-level export: whether the player's fall coach went
+      to the workshop, whether the player registered for spring, the coach's spring score, how
+      many seasons the coach has been with us (our long-timers tend to score better and kids tend
+      to stick with them), the player's age group (we bleed kids at U13 and U14 no matter what we
+      do), and the number of referee-reported sideline incidents on the team in the fall. The
+      incident count is the one I'm proudest of, it dropped a lot on the workshop coaches' teams,
+      and I don't need a study to tell me nobody re-registers a kid after a season of parents
+      screaming at the ref. Our board meets in May. I know the low-scored coaches lose more kids
+      anyway, which is why I'm nervous about just comparing attendees to non-attendees. What
+      should I be comparing on, and is there anything in that export I should leave alone?
+    edges:
+      - coach_spring_score -> coach_workshop
+      - coach_spring_score -> reregistered_spring
+      - coach_spring_score -> sideline_incidents
+      - coach_seasons -> coach_spring_score
+      - coach_seasons -> reregistered_spring
+      - age_group -> reregistered_spring
+      - coach_workshop -> sideline_incidents
+      - sideline_incidents -> reregistered_spring
+      - coach_workshop -> reregistered_spring
+    answer:
+      identifiable: true
+      adjust_for: [coach_spring_score]
+      do_not_adjust_for:
+        sideline_incidents: Logged during the fall season and cut by the workshop. It is how the workshop is supposed to keep kids in the league, so it is part of the effect being measured.
+      indifferent: [age_group, coach_seasons, player_id]
+    note: >-
+      Seats went strictly by the recorded spring score, which also predicts who loses players,
+      so the score is the one column to hold constant. The incident count the director is proud
+      of is the mechanism. Its twin moves the score to a paper binder.
+
+  - id: en_league_sideline_paper
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: executive director of a youth soccer league in the Atlanta suburbs (about 4,500 players, 300 volunteer coaches), former high-school coach, no analytics background, writing to a parent who runs an analytics consultancy
+    theme: Youth sports league / coach training
+    title: Positive Sideline workshop, seats by the spring conduct score, with the score in a binder
+    twin: en_league_sideline_scored
+    treatment: coach_workshop
+    outcome: reregistered_spring
+    columns:
+      coach_workshop: 1 if the player's fall 2025 head coach attended the Positive Sideline workshop in August 2025.
+      reregistered_spring: 1 if the player registered for the spring 2026 season by the February 15 deadline.
+      coach_seasons: Seasons the coach has coached in the league, counting fall 2025.
+      age_group: Player's fall 2025 age group, U6 through U14.
+      sideline_incidents: Referee-reported sideline incidents (coach or spectator warnings and dismissals) logged against the player's team during the fall 2025 season.
+      player_id: Registration system player number.
+    not_in_table:
+      coach_spring_score: Age-group commissioner's sideline-conduct score for the coach at the end of the spring 2025 season, 1 to 5, on the paper forms in the binder. Never entered in the registration system.
+    story: >-
+      Hi Priya, you offered to look at our numbers when we talked at the U12 tournament, so I'm
+      taking you up on it. Last August we ran a workshop for coaches called Positive Sideline,
+      three hours on a Saturday at the Mount Pisgah fields, mostly about how you talk to
+      nine-year-olds and how you handle their parents. We had room for 140 and we have just over
+      300 coaches. Here's how the seats went. Our age-group commissioners score every coach 1 to
+      5 on sideline conduct at the end of each season, on a paper form they hand in at the
+      commissioners' meeting; the forms live in a binder in Dale's garage and have never been
+      typed in anywhere. Anybody at a 2 or below on the spring score was told to come or lose the
+      team, and they all came. The rest of the seats we filled from the 3s, alphabetically, until
+      we ran out; nobody at a 4 or 5 went. What I want to know is whether the workshop keeps kids
+      in the league, so the thing I'm looking at is whether the player came back for spring. I
+      pulled a player-level export: whether the player's fall coach went to the workshop, whether
+      the player registered for spring, how many seasons the coach has been with us (our
+      long-timers tend to score better and kids tend to stick with them), the player's age group
+      (we bleed kids at U13 and U14 no matter what we do), and the number of referee-reported
+      sideline incidents on the team in the fall. The incident count is the one I'm proudest of,
+      it dropped a lot on the workshop coaches' teams, and I don't need a study to tell me nobody
+      re-registers a kid after a season of parents screaming at the ref. Our board meets in May. I
+      know the low-scored coaches lose more kids anyway, which is why I'm nervous about just
+      comparing attendees to non-attendees. What should I be comparing on, and is there anything
+      in that export I should leave alone?
+    edges:
+      - coach_spring_score -> coach_workshop
+      - coach_spring_score -> reregistered_spring
+      - coach_spring_score -> sideline_incidents
+      - coach_seasons -> coach_spring_score
+      - coach_seasons -> reregistered_spring
+      - age_group -> reregistered_spring
+      - coach_workshop -> sideline_incidents
+      - sideline_incidents -> reregistered_spring
+      - coach_workshop -> reregistered_spring
+    answer:
+      identifiable: false
+      missing: [coach_spring_score]
+    note: >-
+      Same letter as its twin, but the score that decided the seats and predicts who loses
+      players was never typed in. Seasons coached is a shadow of it, not a substitute.
+
+  - id: en_mortgage_hbe_course
+    author: ai
+    status: rascunho
+    language: en
+    style: e-mail to the data team
+    persona: credit risk analyst at a regional non-bank mortgage lender based in Dallas (about $5 billion a year in originations), writing to the data engineering team
+    theme: Mortgage lending / borrower education
+    title: Homebuyer education certificate pushed by the loan officers, and 60-day delinquency within two years
+    treatment: hbe_cert
+    outcome: dq60_24m
+    columns:
+      hbe_cert: 1 if a certificate from a HUD-approved homebuyer education course was in the file at closing. Purchase loans closed Jan to Dec 2024.
+      dq60_24m: 1 if the loan was ever 60 or more days past due within 24 months of the first payment date.
+      first_time: 1 if the borrower was flagged first-time homebuyer on the application.
+      fico: Representative credit score at application.
+      dti: Back-end debt-to-income ratio as underwritten, percent.
+      ltv: Loan-to-value at closing, percent.
+      property_state: State of the subject property.
+      hardship_app: 1 if a loss-mitigation application was received from the borrower within 24 months of the first payment date.
+      loan_num: Loan number.
+    not_in_table:
+      lo_read: The loan officer's sense of how shaky the borrower was. How the paperwork came in, whether they answered the phone, whether the story held together. Lives in the loan officer's head; the notes field in the LOS is blank on nearly every file.
+    story: >-
+      Subject: HBE extract, and a question before you build it. Hi Prashant, Megan. Risk
+      committee wants to know whether the homebuyer education course does anything to early
+      delinquency, so they can decide whether to pay for it on every first-time-buyer loan next
+      year instead of leaving it to the branches. I need an extract and I want to talk it through
+      before you spend time on it. Background, since neither of you was here for this. In 2024
+      the retail channel offered the course (the online HUD-approved one, about three hours) to
+      first-time buyers only, no cost to the borrower, certificate goes in the file at closing.
+      About 2,100 of the 7,400 first-time-buyer purchase loans we closed last year have one.
+      Nobody who wasn't a first-time buyer got it. Within the first-time buyers, who took it was
+      up to the loan officers, and I've talked to enough of them to know how that went: they
+      pushed it on the borrowers they were nervous about. Some of that is right there on the
+      1003, the 640 scores, the 47 DTIs. But a lot of it was the LO's read of the person, whether
+      the pay stubs showed up on time, whether they picked up the phone, whether the story held
+      together, and none of that gets written down. The notes field in Encompass is empty on
+      almost every file. The borrowers an LO is nervous about are, in my experience, the ones who
+      go sixty days late, course or no course. For the extract, per loan: the certificate flag,
+      ever 60-plus in the first 24 months, the first-time flag, FICO, DTI, LTV at closing
+      (first-time buyers run higher LTVs, and LTV predicts default on its own, though I don't
+      think the LOs looked at it when deciding who to push), property state (the Oklahoma loans
+      have been a problem since the plant closures), and whether we received a loss-mit
+      application in the 24 months. On that last one, two things: the course spends a whole
+      module on calling your servicer before you miss a payment, and the HBE borrowers do apply
+      at a higher clip; and obviously the people who are sixty days down are the ones who apply
+      for help. My question for you two, and loop in Dr. Hahn if she has a minute: given how the
+      course was assigned, is there a version of this comparison that would stand up at
+      committee, and if so which of those fields does it need and which would be a mistake to
+      include? I'd rather tell them we can't than hand them a number that falls apart. Thanks,
+      Renee.
+    edges:
+      - lo_read -> hbe_cert
+      - lo_read -> dq60_24m
+      - first_time -> hbe_cert
+      - first_time -> dq60_24m
+      - first_time -> ltv
+      - fico -> hbe_cert
+      - fico -> dq60_24m
+      - dti -> hbe_cert
+      - dti -> dq60_24m
+      - ltv -> dq60_24m
+      - property_state -> dq60_24m
+      - hbe_cert -> dq60_24m
+      - hbe_cert -> hardship_app
+      - dq60_24m -> hardship_app
+    answer:
+      identifiable: false
+      missing: [lo_read]
+    note: >-
+      Score, DTI and the first-time flag are recorded and explain part of who got pushed to the
+      course, but the loan officer's read of the borrower explains the rest and predicts going
+      late, and it was never written down. The loss-mitigation flag is a second trap, filed
+      after the fact for both reasons.
+
+  - id: en_nhs_parking_permit_en10
+    author: ai
+    status: rascunho
+    language: en
+    style: one-page memo
+    persona: Director of Workforce at an NHS teaching hospital trust in Manchester, writing to the Chief Operating Officer
+    theme: Hospital workforce / punctuality
+    title: Staff parking permits and late clock-ins, April to September
+    treatment: parking_permit
+    outcome: late_clockins_6m
+    columns:
+      parking_permit: 1 if the staff member held a staff car-parking permit for the Oxford Road site on 1 April 2025.
+      late_clockins_6m: Number of shifts clocked in more than 10 minutes after the rostered start, April to September 2025, from the time-and-attendance system.
+      distance_miles: Road distance in miles from the home postcode held on ESR to the site.
+      early_shift_pct: Share of the staff member's rostered shifts starting before 07:30, October 2024 to March 2025.
+      drives_to_work: 1 if the staff member gave car as their usual mode of travel to work in the May 2025 staff travel survey. Blank if the survey was not completed.
+      division: Clinical division (Medicine, Surgery, Theatres and Critical Care, Women's and Children's, Corporate).
+      afc_band: Agenda for Change pay band, 2 to 8a.
+      assignment_no: ESR assignment number.
+    story: >-
+      To the Chief Operating Officer. From the Director of Workforce. 14 October 2025. Re staff
+      parking permits and punctuality, what the April to September data can tell us. 1. Purpose.
+      You asked whether the permit scheme can be shown to improve punctuality, ahead of the
+      Finance and Performance Committee's review of the £410k of parking income forgone. This
+      note sets out what we hold and asks for a steer on how far to push it. 2. How permits are
+      allocated. Since the 2023 policy, permits for the Oxford Road site are scored on two things
+      only, both taken from ESR and the roster: road distance from the home postcode (five miles
+      or more scores), and the proportion of shifts in the preceding six months starting before
+      07:30, when the Metrolink and the 42 are not yet running at a useful frequency. Roughly
+      2,900 of the 7,100 substantive staff on site held a permit on 1 April. Nothing else goes
+      into the scoring; the appeals panel held that line all year. 3. The headline. Permit
+      holders clocked in late, more than ten minutes after the rostered start, on 2.1% of shifts
+      between April and September, against 3.4% for staff without a permit. I am wary of that
+      comparison. Colleagues who live further out are late more often for every reason there is,
+      permit or no permit, and early starts are where lateness concentrates in the first place,
+      because that is when public transport lets people down. 4. Travel survey. The May staff
+      travel survey asked about usual mode of travel. Permit holders overwhelmingly drive, which
+      is rather the point of the permit, and colleagues who drive are late less often than those
+      on the bus. I take this as the scheme working as intended. 5. Other fields in the file.
+      Division (Theatres monitors the clock-in far more tightly than Medicine, and it shows in
+      the counts) and Agenda for Change band (our Band 2 and 3 colleagues carry more lateness, as
+      they carry more of everything). 6. Ask. Whether the Committee can be given an effect of
+      holding a permit on late clock-ins from this file, and on what basis the comparison should
+      be made, in particular which of the fields above should be held constant and which should
+      not be. I would prefer a defensible modest number to the headline.
+    edges:
+      - distance_miles -> parking_permit
+      - distance_miles -> late_clockins_6m
+      - early_shift_pct -> parking_permit
+      - early_shift_pct -> late_clockins_6m
+      - parking_permit -> drives_to_work
+      - distance_miles -> drives_to_work
+      - early_shift_pct -> drives_to_work
+      - drives_to_work -> late_clockins_6m
+      - parking_permit -> late_clockins_6m
+      - division -> late_clockins_6m
+      - afc_band -> late_clockins_6m
+    answer:
+      identifiable: true
+      adjust_for: [distance_miles, early_shift_pct]
+      do_not_adjust_for:
+        drives_to_work: Reported in May, after the permits were issued, and changed by holding one. Driving is how the permit is meant to get people in on time, so it is part of the effect being measured.
+      indifferent: [afc_band, assignment_no, division]
+    note: >-
+      Permits were scored on two recorded things, and both also drive lateness on their own.
+      The travel survey the director reads as the scheme working is the mechanism, measured
+      after the permits went out, and must stay out.
+
+  - id: en_carwash_ceramic_month
+    author: ai
+    status: rascunho
+    language: en
+    style: voice-note transcript
+    persona: owner of a chain of nine express car washes on the west side of Houston, runs the business off POS reports, no analyst on staff, leaving a voice memo for the bookkeeper who pulls the exports
+    theme: Car wash chain / membership retention
+    title: Free month of Ceramic Unlimited handed out by the pay-station attendants
+    treatment: ceramic_upgrade
+    outcome: active_6m
+    columns:
+      ceramic_upgrade: 1 if the member was given the free one-month Ceramic Unlimited upgrade at the pay station between March 2 and April 12, 2026.
+      active_6m: 1 if the membership was still active on October 12, 2026 (not cancelled, card not declined for 60 days or more).
+      washes_prior_90d: Washes recorded on the member's plate in the 90 days before March 2, 2026.
+      washes_mar_apr: Washes recorded on the member's plate from March 2 to April 30, 2026.
+      home_site: Site where the membership was sold, 1 to 9.
+      plan_tenure_m: Months since the membership started, as of March 1, 2026.
+      vehicle_type: Sedan, SUV or truck, other. From the plate lookup.
+      member_id: POS member number.
+    not_in_table:
+      car_pride: How much the member fusses over the car, the wipe-the-door-jambs type. The attendants know it on sight; nothing in the POS records it.
+    story: >-
+      [Voice memo, 3 min 12, auto-transcribed. Ray to Gabe, Thursday evening.] Hey Gabe, it's
+      Ray, um, I'm sitting at the Katy Freeway store waiting on the chemical guy so let me get
+      this out of my head. The ceramic thing. Back in March, March 2nd through about the 12th of
+      April, I had the pay station folks at the six stores that have the ceramic arch give out a
+      free month of Ceramic Unlimited to members, bump 'em up from the basic plan, no charge, see
+      if they'd stick around. The other three stores don't have the arch so nobody there got it.
+      I didn't give the attendants a list, that's the problem, I told 'em use your judgment, and
+      what they did was they gave it to the regulars, the people they know by name, the ones
+      who've been with us a while, and if I'm honest the ones with the nice trucks who, you know,
+      they're wiping down the door jambs in the vacuum bay on a Sunday. Those folks aren't going
+      anywhere whether I give 'em ceramic or not, that's what I'm afraid of, and there's nothing
+      in the POS that says who's like that, the attendants just know. What I want from you is,
+      did the free month actually keep people, like are they still active in October, six months
+      out. Things you've got in the export: how many washes they did in the 90 days before March,
+      how many in March and April, which the ceramic people came in a bunch more during the free
+      month to get their money's worth and I figure the more you come in the more it's a habit,
+      home store, how long they've been a member, vehicle type off the plate lookup, member
+      number. Oh and the home store matters on its own, the Westheimer store has that lot problem
+      and people quit there regardless, and the regulars and the long-timers, they renew no
+      matter what, they always have. So what is it, can you get me a real number out of this or
+      do I need to do it properly next year with a list? Call me back, I'm here till seven.
+    edges:
+      - car_pride -> ceramic_upgrade
+      - car_pride -> active_6m
+      - car_pride -> washes_prior_90d
+      - car_pride -> washes_mar_apr
+      - washes_prior_90d -> ceramic_upgrade
+      - washes_prior_90d -> active_6m
+      - plan_tenure_m -> ceramic_upgrade
+      - plan_tenure_m -> active_6m
+      - home_site -> ceramic_upgrade
+      - home_site -> active_6m
+      - ceramic_upgrade -> washes_mar_apr
+      - washes_mar_apr -> active_6m
+      - ceramic_upgrade -> active_6m
+    answer:
+      identifiable: false
+      missing: [car_pride]
+    note: >-
+      Prior washes, tenure and home store are recorded and explain part of who got the upgrade,
+      but the attendants also went by how much the member fusses over the car, which keeps
+      people renewing and is recorded nowhere. The washes during the free month are the
+      mechanism, not a fix.
+
+  - id: en_carwash_welcome_texts
+    author: ai
+    status: rascunho
+    language: en
+    style: question to a consultant
+    persona: owner of a chain of nine express car washes on the west side of Houston, writing to the consultant who set up the membership CRM
+    theme: Car wash chain / new-member onboarding
+    title: Welcome text series and still a member at 90 days
+    treatment: welcome_texts
+    outcome: active_90d
+    columns:
+      welcome_texts: 1 if the member received the three-message welcome text series in the first 30 days of membership. Memberships started January to August 2026.
+      active_90d: 1 if the membership was active 90 days after the start date.
+      signup_channel: How the membership was sold. Pay station, attendant tablet, or website.
+      signup_month: Month the membership started, 2026-01 to 2026-08.
+      home_site: Site of signup, 1 to 9.
+      winback_d120: 1 if the member was sent the $9.99 win-back text at day 120. Sent to members who had cancelled by then and had received the welcome series, the only mobile numbers we trusted.
+      member_id: POS member number.
+    story: >-
+      Hey Marcus, quick one, you set up the welcome text flow for us in January so you'll know
+      this better than me. I want to know if those three texts actually keep new members past 90
+      days. Here's the wrinkle. The flow only fires if there's a mobile number on the account,
+      and the website signup form didn't ask for one until your June update, so from January to
+      May basically the pay-station and tablet signups got the texts and the website signups
+      didn't, and from June on everybody did. Website signups are a different animal anyway,
+      they're the $9.99 first-month deal hunters and they cancel like crazy. And the month
+      matters on its own, our spring signups stick and the July-August crowd drops off when
+      school starts, every year. Gabe's win-back text flag from the summer is in the export too,
+      use it or don't, your call, and home store, Westheimer loses people regardless. Can you
+      tell me what to line up before I compare texted to not texted, and what to ignore? Thanks
+      man.
+    edges:
+      - signup_channel -> welcome_texts
+      - signup_channel -> active_90d
+      - signup_month -> welcome_texts
+      - signup_month -> active_90d
+      - welcome_texts -> active_90d
+      - home_site -> active_90d
+      - welcome_texts -> winback_d120
+      - active_90d -> winback_d120
+    answer:
+      identifiable: true
+      adjust_for: [signup_channel, signup_month]
+      do_not_adjust_for:
+        winback_d120: Sent at day 120, after the outcome, and only to members who had cancelled and had received the welcome series. Adjusting for it creates a false link between the two.
+      indifferent: [home_site, member_id]
+    note: >-
+      Channel and month together decided who got the texts, and each moves retention on its
+      own. The win-back flag is mentioned in passing; only the column dictionary says it was
+      sent after the fact to members picked by both the texts and the cancellation.

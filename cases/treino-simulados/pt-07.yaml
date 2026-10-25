@@ -1,0 +1,577 @@
+# Casos simulados para TREINO, em português do Brasil: oito textos escritos como uma
+# pessoa escreveria.
+#
+# Escritos pelo assistente em 2026-10-07, a pedido do André, no papel de cinco pessoas: a
+# gerente de cobrança de uma operadora de cartões, um produtor rural de laranja, a
+# gerente de uma rede de óticas, uma analista de dados de um clube de assinatura de
+# vinhos e o diretor de operações de uma transportadora de cargas frias. Cada texto tem
+# o estilo do canal em que a pessoa escreveria (e-mail ao chefe, fórum de analytics,
+# WhatsApp, ata de reunião, página de wiki interna).
+#
+# Estes casos servem ao treino por reforço (o modelo responde, o verificador dá a nota).
+# Não são casos de teste: nenhum cenário do conjunto congelado de cases/simulados/ se
+# repete aqui. As setas declaram o diagrama que o texto implica; o verificador confere a
+# resposta a partir delas (scripts/check_cases.py). Status rascunho até a revisão.
+
+cases:
+
+  - id: pt_cartoes_repasse_externo
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de cobrança de uma operadora de cartões
+    theme: Cobrança de cartão de crédito, repasse de contas a escritório externo
+    title: Repasse ao escritório externo e recuperação em 90 dias
+    twin: pt_cartoes_repasse_externo_nota
+    treatment: repasse_externo
+    outcome: pagou_90d
+    columns:
+      repasse_externo: >-
+        Conta repassada ao escritório externo (Recupera+) ao completar 30 dias de atraso
+        (1 = sim; 0 = ficou com a equipe interna).
+      pagou_90d: Quitou ou renegociou o saldo em atraso até o 90º dia de atraso (1 = sim, 0 = não).
+      saldo_atraso: Saldo em atraso no 30º dia, em reais.
+      score_interno: >-
+        Score de risco do modelo interno na data do 30º dia de atraso, de 0 a 1000 (quanto
+        maior, menor o risco).
+      acionamentos: >-
+        Número de contatos com o cliente (ligação atendida, SMS, WhatsApp) entre o 30º e o
+        90º dia de atraso.
+      reclamacao: >-
+        Registrou reclamação sobre a cobrança (SAC, Procon ou consumidor.gov) até o 120º dia
+        de atraso (1 = sim, 0 = não).
+      canal_emissao: Canal em que o cartão foi emitido (app, loja parceira ou telemarketing).
+    not_in_table:
+      impressao_supervisora: >-
+        A leitura que a supervisora da equipe interna faz, ouvindo as ligações dos primeiros
+        30 dias, sobre se o cliente tem intenção de pagar. Não é anotada em lugar nenhum.
+    story: >-
+      Ricardo, bom dia. Segue o que levantei sobre o Recupera+ antes da renovação do
+      contrato, que vence em novembro. Peguei todas as contas que completaram 30 dias de
+      atraso entre março e junho (41.380 CPFs) e marquei quais foram repassadas pra eles no
+      dia 30 e quais ficaram com o nosso time. No bruto, a recuperação em 90 dias do externo
+      é pior que a nossa, 23% contra 31%, mas não acho que dá pra levar esse número pro
+      comitê, e queria tua opinião. O ponto é como as contas vão pra lá. A regra formal é
+      saldo: acima de R$ 3 mil vai pro externo, porque eles têm estrutura pra negociar valor
+      grande, e saldo grande a gente sabe que paga menos. O modelo de risco também entra:
+      quem está com score baixo no dia 30 vai pro externo quase sempre, e score baixo paga
+      menos, por definição. Mas tem uma parte que ninguém escreve. A Cláudia, que
+      supervisiona o time interno, ouve as ligações dos primeiros 30 dias e manda pro
+      externo quem ela sente que não vai pagar de jeito nenhum, mesmo com saldo pequeno e
+      score ok. E ela acerta bastante: quem ela marca assim quase nunca paga. Só que isso é
+      a cabeça dela, não tem campo no sistema. Do lado deles, o que fazem de diferente é
+      acionar muito mais (média de 14 contatos por conta contra 6 nossos entre o dia 30 e o
+      90), e mais contato é mais pagamento, isso é pacífico. Eles também têm alçada pra
+      desconto maior no à vista, o que por si só já deve mexer na recuperação. O efeito
+      colateral é a reclamação: a agressividade deles gera Procon e consumidor.gov, e
+      também reclama mais quem não pagou e continua sendo cobrado depois do dia 90. O
+      extrato do CRM tem saldo no dia 30, score, acionamentos, flag de reclamação até o dia
+      120 e o canal de emissão do cartão (veio junto, não sei se serve pra algo). Dá pra
+      tirar alguma conclusão séria sobre o efeito do repasse com isso, ou preciso desenhar
+      um teste antes de novembro? Abraço, Fernanda.
+    edges:
+      - saldo_atraso -> repasse_externo
+      - saldo_atraso -> pagou_90d
+      - score_interno -> repasse_externo
+      - score_interno -> pagou_90d
+      - impressao_supervisora -> repasse_externo
+      - impressao_supervisora -> pagou_90d
+      - repasse_externo -> acionamentos
+      - acionamentos -> pagou_90d
+      - repasse_externo -> pagou_90d
+      - repasse_externo -> reclamacao
+      - pagou_90d -> reclamacao
+    answer:
+      identifiable: false
+      missing: [impressao_supervisora]
+    note: >-
+      Saldo e score explicam parte do repasse e estão na tabela; a impressão da supervisora,
+      que também decide o repasse e prevê o pagamento, ficou só na cabeça dela. Os
+      acionamentos são consequência do repasse e a reclamação é registrada depois do prazo
+      de pagamento.
+
+  - id: pt_cartoes_repasse_externo_nota
+    author: ai
+    status: rascunho
+    language: pt
+    style: e-mail para o chefe
+    persona: gerente de cobrança de uma operadora de cartões
+    theme: Cobrança de cartão de crédito, repasse de contas a escritório externo
+    title: Repasse ao escritório externo, com a nota da supervisora no sistema
+    twin: pt_cartoes_repasse_externo
+    treatment: repasse_externo
+    outcome: pagou_90d
+    columns:
+      repasse_externo: >-
+        Conta repassada ao escritório externo (Recupera+) ao completar 30 dias de atraso
+        (1 = sim; 0 = ficou com a equipe interna).
+      pagou_90d: Quitou ou renegociou o saldo em atraso até o 90º dia de atraso (1 = sim, 0 = não).
+      saldo_atraso: Saldo em atraso no 30º dia, em reais.
+      score_interno: >-
+        Score de risco do modelo interno na data do 30º dia de atraso, de 0 a 1000 (quanto
+        maior, menor o risco).
+      nota_intencao: >-
+        Nota de intenção de pagar, de 1 a 5, dada pela supervisora da equipe interna no CRM
+        antes da decisão de repasse, com base nas ligações dos primeiros 30 dias.
+      acionamentos: >-
+        Número de contatos com o cliente (ligação atendida, SMS, WhatsApp) entre o 30º e o
+        90º dia de atraso.
+      reclamacao: >-
+        Registrou reclamação sobre a cobrança (SAC, Procon ou consumidor.gov) até o 120º dia
+        de atraso (1 = sim, 0 = não).
+      canal_emissao: Canal em que o cartão foi emitido (app, loja parceira ou telemarketing).
+    story: >-
+      Ricardo, bom dia. Segue o que levantei sobre o Recupera+ antes da renovação do
+      contrato, que vence em novembro. Peguei todas as contas que completaram 30 dias de
+      atraso entre março e junho (41.380 CPFs) e marquei quais foram repassadas pra eles no
+      dia 30 e quais ficaram com o nosso time. No bruto, a recuperação em 90 dias do externo
+      é pior que a nossa, 23% contra 31%, mas não acho que dá pra levar esse número pro
+      comitê, e queria tua opinião. O ponto é como as contas vão pra lá. A regra formal é
+      saldo: acima de R$ 3 mil vai pro externo, porque eles têm estrutura pra negociar valor
+      grande, e saldo grande a gente sabe que paga menos. O modelo de risco também entra:
+      quem está com score baixo no dia 30 vai pro externo quase sempre, e score baixo paga
+      menos, por definição. E tem o filtro da Cláudia, que supervisiona o time interno: ela
+      ouve as ligações dos primeiros 30 dias e dá uma nota de 1 a 5 de intenção de pagar
+      pra cada conta, no CRM mesmo, antes de decidir o repasse; nota 1 e 2 vão pro externo
+      mesmo com saldo pequeno e score ok. E ela acerta bastante: nota 1 quase nunca paga.
+      Do lado deles, o que fazem de diferente é acionar muito mais (média de 14 contatos
+      por conta contra 6 nossos entre o dia 30 e o 90), e mais contato é mais pagamento,
+      isso é pacífico. Eles também têm alçada pra desconto maior no à vista, o que por si
+      só já deve mexer na recuperação. O efeito colateral é a reclamação: a agressividade
+      deles gera Procon e consumidor.gov, e também reclama mais quem não pagou e continua
+      sendo cobrado depois do dia 90. O extrato do CRM tem saldo no dia 30, score, a nota
+      da Cláudia, acionamentos, flag de reclamação até o dia 120 e o canal de emissão do
+      cartão (veio junto, não sei se serve pra algo). Dá pra tirar alguma conclusão séria
+      sobre o efeito do repasse com isso, ou preciso desenhar um teste antes de novembro?
+      Abraço, Fernanda.
+    edges:
+      - saldo_atraso -> repasse_externo
+      - saldo_atraso -> pagou_90d
+      - score_interno -> repasse_externo
+      - score_interno -> pagou_90d
+      - nota_intencao -> repasse_externo
+      - nota_intencao -> pagou_90d
+      - repasse_externo -> acionamentos
+      - acionamentos -> pagou_90d
+      - repasse_externo -> pagou_90d
+      - repasse_externo -> reclamacao
+      - pagou_90d -> reclamacao
+    answer:
+      identifiable: true
+      adjust_for: [nota_intencao, saldo_atraso, score_interno]
+      do_not_adjust_for:
+        acionamentos: >-
+          Contados depois do repasse e consequência dele: o escritório aciona mais, e isso faz
+          parte do efeito que se quer medir.
+        reclamacao: >-
+          Registrada até o 120º dia, depois do prazo de pagamento, e causada tanto pelo
+          repasse quanto pelo não pagamento. Ajustar por ela cria uma associação falsa.
+      indifferent: [canal_emissao]
+    note: >-
+      Gêmeo do caso anterior: a leitura da supervisora virou uma nota no CRM, preenchida
+      antes do repasse. Com ela na tabela, os três motivos do repasse estão cobertos.
+
+  - id: pt_laranja_colmeias
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: produtor rural de laranja, sem formação em estatística
+    theme: Citricultura, colmeias alugadas na florada
+    title: Colmeias na florada e caixas por pé
+    treatment: colmeias
+    outcome: caixas_por_pe
+    columns:
+      colmeias: >-
+        Talhão recebeu caixas de abelha alugadas durante a florada de setembro de 2025
+        (1 = sim, 0 = não).
+      caixas_por_pe: Caixas de 40,8 kg colhidas por planta na safra 2026, média do talhão.
+      idade_talhao: Anos desde o plantio do talhão, em 2025.
+      variedade: Variedade do talhão (Pera, Valência ou Hamlin).
+      distancia_sede: Distância do talhão até a sede da fazenda pela estrada interna, em km.
+      pegamento: >-
+        Porcentagem de flores que viraram fruto, contada em 20 ramos por talhão em novembro
+        de 2025, dois meses depois da florada.
+      talhao: Código do talhão no mapa da fazenda (T01 a T38).
+    story: >-
+      Tio Beto aqui. Lembra das abelhas? Fechei com um apicultor de Bebedouro e ele pôs
+      caixa em 14 dos 38 talhões na florada de setembro, 9 mil reais. Agora na colheita
+      quero saber se valeu. A planilha tem caixa por pé, idade, variedade, distância da
+      sede, código do talhão e o pegamento que eu e o Zé contamos em novembro. A escolha não
+      foi científica: o apicultor não quis entrar na estrada de terra do fundo, então as
+      caixas ficaram perto da sede (mesmo chão, não muda nada na produção), e eu pedi pra
+      priorizar os talhões velhos, que já tão em plena produção. Pé velho dá mais caixa
+      mesmo. Variedade eu não olhei, mas Pera dá menos que Valência aqui. A abelha é pra
+      melhorar o pegamento, e pegamento vira caixa; nos talhões com caixa o pegamento deu
+      bem mais alto. Que coluna eu uso pra comparar direito? Te mando um saco de laranja kkk
+    edges:
+      - distancia_sede -> colmeias
+      - idade_talhao -> colmeias
+      - idade_talhao -> caixas_por_pe
+      - variedade -> caixas_por_pe
+      - colmeias -> pegamento
+      - pegamento -> caixas_por_pe
+    answer:
+      identifiable: true
+      adjust_for: [idade_talhao]
+      do_not_adjust_for:
+        pegamento: >-
+          Contado dois meses depois da florada e é o caminho pelo qual as abelhas agem.
+          Ajustar por ele apaga o efeito que se quer medir.
+      indifferent: [distancia_sede, variedade, talhao]
+    note: >-
+      A distância da sede decidiu onde as caixas ficaram, mas não mexe na produção; a
+      variedade mexe na produção, mas não entrou na escolha. Só a idade do talhão faz as
+      duas coisas. O pegamento, o número de que o produtor mais gosta, é consequência das
+      abelhas.
+
+  - id: pt_oticas_crediario
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: gerente de uma rede de óticas
+    theme: Varejo de óticas, piloto de crediário próprio
+    title: Crediário próprio e faturamento do semestre
+    treatment: crediario
+    outcome: vendas_sem1_2026
+    columns:
+      crediario: >-
+        Loja entrou no piloto do crediário próprio (carnê da casa) em janeiro de 2026
+        (1 = sim, 0 = não).
+      vendas_sem1_2026: Faturamento da loja no 1º semestre de 2026, em R$ mil.
+      vendas_sem2_2025: Faturamento da loja no 2º semestre de 2025, em R$ mil.
+      renda_bairro: Renda domiciliar média do bairro da loja, em salários mínimos (IBGE).
+      tipo_ponto: >-
+        Tipo de ponto: shopping ou rua.
+      vendedores: Número de vendedores na loja em dezembro de 2025.
+    not_in_table:
+      gerente_engajado: >-
+        O julgamento do regional sobre quais gerentes de loja abraçam um projeto novo e
+        tocam a loja com mais empenho. Nunca foi formalizado.
+    story: >-
+      Ata da reunião de gerentes regionais, 14/07/2026, sala 2, das 9h15 às 10h40.
+      Presentes: Marcos (regional interior), Priscila (regional capital), Dênis
+      (financeiro), Lu (BI) e Renata (gerente da rede). 1. Piloto do crediário. Dênis
+      apresentou os números: as 12 lojas com carnê cresceram 18% no 1º semestre sobre o
+      mesmo período de 2025; as outras 31 cresceram 6%. Pediu aprovação para levar o carnê
+      à rede toda em outubro. 2. Renata perguntou como as 12 lojas foram escolhidas. Marcos
+      explicou que a escolha foi dele, em dezembro: olhou o faturamento do 2º semestre de
+      2025 (preferiu lojas que já vendiam bem, para o carnê não "carregar loja fraca") e a
+      renda do bairro (carnê faz mais sentido onde a renda é menor). Disse também que
+      escolheu lojas cujo gerente ele sabia que ia abraçar o projeto, porque gerente que
+      abraça projeto faz a loja vender, com ou sem carnê. Renata observou que esse último
+      critério não consta em nenhum lugar, e Marcos confirmou: "é o meu conhecimento das
+      pessoas". 3. Lu lembrou que loja que vendia bem no 2º semestre continua vendendo bem,
+      que bairro de renda maior fatura mais, que loja de shopping vende mais que loja de
+      rua e que loja com mais vendedores também vende mais. Ponto e número de vendedores,
+      porém, não pesaram na escolha das 12; Marcos concordou. 4. Lu vai montar a base por
+      loja com: flag do piloto, faturamento do 1º semestre de 2026, faturamento do 2º
+      semestre de 2025, renda do bairro, tipo de ponto e vendedores em dezembro. Renata
+      pediu que Lu diga, antes do comitê de agosto, se dá para medir o efeito do carnê com
+      essa base ou se os 18% não servem para nada. Encaminhamentos: Lu entrega a análise
+      até 28/07; Dênis traz o custo de inadimplência do carnê. Próxima reunião em 04/08.
+    edges:
+      - vendas_sem2_2025 -> crediario
+      - vendas_sem2_2025 -> vendas_sem1_2026
+      - renda_bairro -> crediario
+      - renda_bairro -> vendas_sem1_2026
+      - tipo_ponto -> vendas_sem1_2026
+      - vendedores -> vendas_sem1_2026
+      - gerente_engajado -> crediario
+      - gerente_engajado -> vendas_sem1_2026
+      - crediario -> vendas_sem1_2026
+    answer:
+      identifiable: false
+      missing: [gerente_engajado]
+    note: >-
+      Dois critérios da escolha estão na tabela (faturamento anterior e renda do bairro). O
+      terceiro, o gerente que o regional sabia que abraçaria o projeto, é conhecimento
+      pessoal dele e faz a loja vender de qualquer jeito.
+
+  - id: pt_oticas_cupom_segundo_par
+    author: ai
+    status: rascunho
+    language: pt
+    style: pergunta em um fórum de analytics
+    persona: gerente de uma rede de óticas, sem formação em dados
+    theme: Varejo de óticas, cupom de segundo par enviado por sorteio
+    title: Cupom de segundo par sorteado e recompra em 12 meses
+    treatment: cupom
+    outcome: recomprou_12m
+    columns:
+      cupom: >-
+        Recebeu por e-mail, em 02/03/2026, cupom de 50% no segundo par, válido por 60 dias
+        (1 = sim, 0 = não).
+      recomprou_12m: Fez nova compra na rede nos 12 meses seguintes a 02/03/2026 (1 = sim, 0 = não).
+      grau_alto: >-
+        Última receita antes de março de 2026 com esférico acima de 4 graus em pelo menos um
+        olho (1 = sim, 0 = não).
+      visitou_loja_60d: >-
+        Visitou alguma loja da rede nos 60 dias de validade do cupom, pelo CPF registrado no
+        caixa ou na prova de armação (1 = sim, 0 = não).
+      respondeu_pesquisa: Respondeu à pesquisa de satisfação enviada em março de 2027 (1 = sim, 0 = não).
+    story: >-
+      Título: comparação simples basta quando a escolha foi sorteada? Oi pessoal, não sou da
+      área de dados (toco uma rede de óticas, 43 lojas), então desculpem se a pergunta é
+      básica. Em março do ano passado mandamos um cupom de 50% no segundo par pra metade dos
+      clientes que tinham comprado em 2025. A escolha foi sorteio puro, a agência usou uma
+      função de aleatório na planilha, eu conferi. Agora, com 12 meses fechados, quero saber
+      se o cupom aumentou a recompra. A base que tenho por cliente: se recebeu o cupom, se
+      recomprou em 12 meses, se tinha grau alto na última receita (gente de grau alto troca
+      óculos mais, pelo que a gente vê), se visitou loja nos 60 dias do cupom (pelo CPF no
+      caixa ou na prova de armação) e se respondeu à pesquisa de satisfação que mandamos
+      agora em março de 2027. Minha dúvida: uma consultora disse que preciso "controlar por"
+      essas outras variáveis, senão o resultado sai enviesado. Mas pra mim, se foi sorteio,
+      é só comparar quem recebeu com quem não recebeu, não? E tem coisa aí que acho que
+      atrapalha mais que ajuda: o cupom claramente trouxe gente pra loja nos 60 dias, e quem
+      vai na loja compra. E a pesquisa, quem mais respondeu foi quem tinha recebido o cupom
+      (nosso e-mail já era familiar) e quem comprou de novo, naturalmente. Estou pensando
+      errado? Vale a pena fazer o modelo com tudo ou mantenho a conta simples?
+    edges:
+      - cupom -> recomprou_12m
+      - cupom -> visitou_loja_60d
+      - visitou_loja_60d -> recomprou_12m
+      - grau_alto -> recomprou_12m
+      - cupom -> respondeu_pesquisa
+      - recomprou_12m -> respondeu_pesquisa
+    answer:
+      identifiable: true
+      adjust_for: []
+      do_not_adjust_for:
+        visitou_loja_60d: >-
+          Medida depois do envio e consequência do cupom: as visitas são o caminho pelo qual
+          o cupom gera recompra.
+        respondeu_pesquisa: >-
+          Pesquisa enviada um ano depois, respondida mais por quem recebeu o cupom e por quem
+          recomprou. Ajustar por ela cria uma associação falsa entre cupom e recompra.
+      indifferent: [grau_alto]
+    note: >-
+      Como houve sorteio, a comparação simples já dá o efeito. O erro possível é seguir o
+      conselho de pôr tudo no modelo e ajustar pelas visitas e pela pesquisa.
+
+  - id: pt_vinhos_curadoria
+    author: ai
+    status: rascunho
+    language: pt
+    style: mensagem de WhatsApp
+    persona: analista de dados de um clube de assinatura de vinhos
+    theme: Clube de assinatura de vinhos, curadoria individual do sommelier
+    title: Curadoria individual e cancelamento em 6 meses
+    treatment: curadoria
+    outcome: cancelou_6m
+    columns:
+      curadoria: >-
+        Assinante passou a receber a caixa montada individualmente pelo sommelier a partir
+        de abril de 2026 (1 = sim; 0 = caixa padrão do mês).
+      cancelou_6m: Cancelou a assinatura entre abril e setembro de 2026 (1 = sim, 0 = não).
+      plano: Plano contratado antes de abril de 2026 (mensal, trimestral ou anual).
+      meses_casa: Meses como assinante até março de 2026.
+      nota_media: >-
+        Nota média, de 1 a 5, dada pelo assinante no app aos vinhos recebidos de abril a
+        setembro de 2026.
+      ticket_medio: Valor médio da caixa do assinante no 1º trimestre de 2026, em reais.
+      dia_cobranca: Dia do mês em que a assinatura é cobrada.
+    not_in_table:
+      reclamou_vinho: >-
+        Assinante reclamou de algum vinho recebido, no chat do Intercom, entre janeiro e
+        março de 2026. Fica só no Intercom.
+    story: >-
+      Ju, me tira uma dúvida rápida? Tô fechando a análise da curadoria individual pro board
+      de outubro e travei. Contexto: em abril o Rafa (sommelier) começou a montar caixa
+      individual pra parte dos assinantes, uns 1.900, e o resto continuou com a caixa
+      padrão. Quero medir se a curadoria segura o cliente, cancelamento em 6 meses. No
+      warehouse tenho plano, meses de casa, ticket médio do 1º tri, a nota média que a
+      pessoa deu no app pros vinhos de abril a setembro e o dia da cobrança (veio junto no
+      extract, ignora). A curadoria foi oferecida só pra quem tá no trimestral ou no anual,
+      porque mensal cancela muito e não compensa o trabalho do Rafa, e dentro desses o Rafa
+      priorizou quem tem ticket alto, porque é onde ele tem mais vinho pra escolher. Ticket
+      alto também cancela menos, assinante antigo também, isso a gente já sabe. Minha ideia
+      era entrar com a nota média no modelo, porque quem recebe curadoria dá nota mais alta
+      e nota alta cancela menos, faz sentido? E uma coisa que me incomoda: o atendimento
+      também mandava pro Rafa quem tinha reclamado de vinho no chat no 1º tri, tipo "esse
+      aqui tá insatisfeito, dá uma atenção". Reclamou no chat é o maior preditor de
+      cancelamento que a gente tem. Mas o Intercom nunca foi integrado no warehouse, então
+      isso eu não tenho. Dá pra fazer alguma coisa ou tô ferrada?
+    edges:
+      - plano -> curadoria
+      - plano -> cancelou_6m
+      - ticket_medio -> curadoria
+      - ticket_medio -> cancelou_6m
+      - meses_casa -> cancelou_6m
+      - curadoria -> nota_media
+      - nota_media -> cancelou_6m
+      - curadoria -> cancelou_6m
+      - reclamou_vinho -> curadoria
+      - reclamou_vinho -> cancelou_6m
+    answer:
+      identifiable: false
+      missing: [reclamou_vinho]
+    note: >-
+      Plano e ticket estão na tabela; a reclamação no chat, que também levou à curadoria e
+      prevê o cancelamento, ficou em outro sistema. A nota média, que a analista quer pôr no
+      modelo, é consequência da curadoria.
+
+  - id: pt_vinhos_frete_gratis
+    author: ai
+    status: rascunho
+    language: pt
+    style: página de wiki interna
+    persona: analista de dados de um clube de assinatura de vinhos
+    theme: Clube de assinatura de vinhos, frete grátis por critério de elegibilidade
+    title: Frete grátis e renovação do plano anual
+    treatment: frete_gratis
+    outcome: renovou
+    columns:
+      frete_gratis: >-
+        Assinante passou a ter frete grátis em todas as caixas a partir de 01/07/2025
+        (1 = sim, 0 = não). Critério: ticket médio do 1º semestre de 2025 acima de R$ 220 ou
+        endereço em capital atendida por CD próprio.
+      renovou: >-
+        Renovou o plano anual no vencimento, entre janeiro e junho de 2026 (1 = sim,
+        0 = não).
+      ticket_medio_s1: Valor médio da caixa de janeiro a junho de 2025, em reais.
+      capital_cd: >-
+        Endereço de entrega em capital com centro de distribuição próprio (SP, RJ, BH ou
+        Curitiba) (1 = sim, 0 = não).
+      pedidos_avulsos: >-
+        Número de pedidos fora da caixa mensal entre 01/07/2025 e a data de vencimento do
+        plano.
+      indicou_amigo: >-
+        Indicou pelo menos um amigo pelo programa de indicação nos 90 dias seguintes à data
+        de vencimento (1 = sim, 0 = não).
+      idade: Idade do assinante no cadastro, em anos.
+      canal_aquisicao: Canal em que o assinante entrou (Instagram, Google, indicação ou evento).
+      id_assinante: Identificador interno do assinante.
+    story: >-
+      Frete grátis (jul/2025): efeito sobre a renovação do plano anual. Página de referência
+      da análise pedida pelo Growth. Dona: Carla (dados). Última edição: 02/09/2026. O que
+      aconteceu. Em 01/07/2025 passamos a dar frete grátis em todas as caixas para dois
+      grupos: assinantes com ticket médio acima de R$ 220 no 1º semestre de 2025 e
+      assinantes com endereço em capital atendida por CD próprio (SP, RJ, BH, Curitiba),
+      onde o frete nos custa pouco. Os demais seguiram pagando frete. A pergunta do Growth é
+      se o frete grátis fez o assinante renovar o plano anual no vencimento (jan a jun/2026).
+      Por que a comparação direta não serve. Os dois critérios de elegibilidade mexem na
+      renovação por conta própria. Quem gasta mais por caixa renova mais, isso é consistente
+      em todos os cortes desde 2023. E nas capitais com CD a entrega chega em 2 dias em vez
+      de 7, o que por si só segura o assinante, com ou sem frete grátis. Outras colunas da
+      base. pedidos_avulsos: pedidos fora da caixa entre jul/2025 e o vencimento. Subiu
+      muito com o frete grátis (era o objetivo comercial), e assinante que compra avulso
+      renova mais. indicou_amigo: indicação nos 90 dias depois do vencimento. Quem tem frete
+      grátis indica mais (é o argumento que a pessoa usa com o amigo), e quem renovou indica
+      mais, obviamente. idade: assinante mais velho renova mais; não entrou na
+      elegibilidade. canal_aquisicao e id_assinante: vieram no extract. Base.
+      analytics.renovacao_frete_2026, uma linha por assinante com vencimento entre jan e
+      jun/2026 (n = 7.412). Pendente. Decidir o conjunto de ajuste e fechar o número para a
+      reunião de 15/09. Comentários no Slack, canal de dados.
+    edges:
+      - ticket_medio_s1 -> frete_gratis
+      - ticket_medio_s1 -> renovou
+      - capital_cd -> frete_gratis
+      - capital_cd -> renovou
+      - frete_gratis -> pedidos_avulsos
+      - pedidos_avulsos -> renovou
+      - frete_gratis -> renovou
+      - frete_gratis -> indicou_amigo
+      - renovou -> indicou_amigo
+      - idade -> renovou
+    answer:
+      identifiable: true
+      adjust_for: [capital_cd, ticket_medio_s1]
+      do_not_adjust_for:
+        pedidos_avulsos: >-
+          Contados depois de julho e consequência do frete grátis. Fazem parte do efeito que
+          se quer medir.
+        indicou_amigo: >-
+          Registrada nos 90 dias depois do vencimento e causada tanto pelo frete grátis
+          quanto pela renovação. Ajustar por ela cria uma associação falsa.
+      indifferent: [idade, canal_aquisicao, id_assinante]
+    note: >-
+      Os dois critérios de elegibilidade são as duas colunas a ajustar. Os pedidos avulsos
+      são o KPI comercial do frete grátis e a indicação acontece depois do vencimento.
+
+  - id: pt_frio_telemetria
+    author: ai
+    status: rascunho
+    language: pt
+    style: ata de reunião
+    persona: diretor de operações de uma transportadora de cargas frias
+    theme: Logística de cargas refrigeradas, telemetria de temperatura nos baús
+    title: Telemetria de temperatura e rejeição da carga no destino
+    treatment: telemetria
+    outcome: rejeicao
+    columns:
+      telemetria: >-
+        Viagem feita com baú equipado com sensor de temperatura com transmissão em tempo real
+        para a central (1 = sim; 0 = só o registrador de bordo, lido depois).
+      rejeicao: >-
+        Carga recusada total ou parcialmente no destino por desvio de temperatura (1 = sim,
+        0 = não).
+      tipo_carga: >-
+        Tipo de carga da viagem: farma ou alimentos.
+      idade_bau: Idade do baú frigorífico na data da viagem, em anos.
+      km_viagem: Distância da viagem, em km.
+      alertas: >-
+        Número de alertas de temperatura recebidos pela central durante a viagem (0 para baús
+        sem telemetria).
+      ocorrencia_cliente: >-
+        Cliente abriu ocorrência formal sobre a entrega até 15 dias depois dela (1 = sim,
+        0 = não).
+      numero_cte: Número do conhecimento de transporte (CT-e) da viagem.
+    not_in_table:
+      espera_doca: >-
+        Tempo que o caminhão ficou esperando para descarregar na doca do cliente. Não é
+        registrado.
+    story: >-
+      Ata da reunião semanal de operações, 22/09/2026, Contagem. Presentes: Alexandre
+      (diretor de operações), Sueli (manutenção), Tadeu (torre de controle), Bia (comercial)
+      e Pedro (TI e dados). 1. Telemetria nos baús. Alexandre abriu com o número do Pedro:
+      entre março e agosto, as viagens com telemetria tiveram 2,1% de rejeição por
+      temperatura, contra 4,8% das viagens sem. Bia quer usar isso na proposta para o
+      cliente novo de farma. Alexandre pediu cautela: "a gente escolheu onde colocar, não
+      foi cara ou coroa". 2. Sueli explicou a ordem de instalação: começaram pelos baús que
+      rodam farma, porque os laboratórios exigem rastreabilidade, e pelos baús mais novos,
+      porque os de mais de 8 anos serão vendidos no ano que vem e não compensa investir.
+      Lembrou que baú velho perde temperatura mais rápido e que farma recusa por meio grau
+      fora da faixa, enquanto alimento é mais tolerante. 3. Tadeu disse que a telemetria
+      trabalha de duas formas: a central recebe o alerta e liga para o motorista ajustar o
+      equipamento ou parar, e o motorista que sabe que está sendo visto cuida mais da porta
+      e do pré-resfriamento. Pediu que não se compare só viagem com alerta e sem alerta,
+      porque alerta só existe onde tem sensor. 4. Bia trouxe o lado do cliente: com a
+      telemetria o cliente recebe o relatório da viagem e abre ocorrência quando vê qualquer
+      oscilação, mesmo sem recusar a carga; e quem recusou carga abre ocorrência sempre. O
+      número de ocorrências subiu e o comercial está apanhando por isso. 5. Tadeu lembrou
+      ainda que viagem longa recusa mais e que a espera na doca do cliente, que às vezes
+      passa de 4 horas com o motor desligado, é o que mais derruba a temperatura, mas
+      ninguém registra esse tempo. A distância, pelo menos, está no sistema; o número do
+      CT-e também, porque é a chave da viagem. Encaminhamento: Pedro monta a base por viagem
+      (telemetria, rejeição, tipo de carga, idade do baú, km, alertas, ocorrência do cliente,
+      CT-e) e traz na próxima semana uma estimativa do efeito da telemetria que dê para pôr
+      na proposta da Bia. Alexandre quer saber o que entra na conta e o que fica de fora.
+    edges:
+      - tipo_carga -> telemetria
+      - tipo_carga -> rejeicao
+      - idade_bau -> telemetria
+      - idade_bau -> rejeicao
+      - telemetria -> alertas
+      - alertas -> rejeicao
+      - telemetria -> rejeicao
+      - telemetria -> ocorrencia_cliente
+      - rejeicao -> ocorrencia_cliente
+      - km_viagem -> rejeicao
+      - espera_doca -> rejeicao
+    answer:
+      identifiable: true
+      adjust_for: [idade_bau, tipo_carga]
+      do_not_adjust_for:
+        alertas: >-
+          Só existem onde há sensor e são um dos caminhos pelos quais a telemetria evita a
+          rejeição. Fazem parte do efeito que se quer medir.
+        ocorrencia_cliente: >-
+          Aberta até 15 dias depois da entrega e causada tanto pela telemetria quanto pela
+          rejeição. Ajustar por ela cria uma associação falsa.
+      indifferent: [km_viagem, numero_cte]
+    note: >-
+      A espera na doca não está na tabela, mas só mexe na rejeição, não na instalação, e por
+      isso não impede a medida. Os alertas e a ocorrência do cliente são as armadilhas.

@@ -1,0 +1,254 @@
+# Tradução da ficha de teoria 'educacao' para o inglês.
+#
+# Feita por um modelo aberto (qwen3.5:35b) e conferida por outro (granite4.1:30b),
+# em 2026-10-04, com scripts/translate_theory.py. A ficha em português,
+# theories/educacao.yaml, é a que vale: este arquivo só traz as palavras, e a sua
+# estrutura tem de espelhar a da ficha.
+#
+# Lida por inteiro e corrigida pelo assistente em 2026-10-06, por delegação do André,
+# frase a frase contra a ficha em português (que mudou em 2026-10-05 depois da revisão
+# independente; as trocas estão em theories/i18n/pendentes-2026-10-05.json). As frases
+# que diziam a mesma coisa que a ficha foram mantidas; as demais foram reescritas.
+
+language: en
+status: revisada
+title: Tutoring in an undergraduate course
+context: >-
+  A university opened individual tutoring in an undergraduate course: starting in the
+  fifth week of classes, some students began to have one meeting per week with a tutor to
+  ask questions about the course material. The university wants to know if the tutoring
+  increases the final grade in the course.
+randomized: The students who participated in the tutoring were selected by lottery.
+closing: Nothing other than what was described influenced who participated in the tutoring.
+treatment:
+  label: the tutoring
+  dictionary: Participated in the course tutoring (1 = yes, 0 = no).
+outcome:
+  label: the final grade
+  dictionary: Final grade in the course, from 0 to 10.
+variables:
+  media_anterior:
+    label: the student's previous average
+    roles:
+      confounder:
+        dictionary: >-
+          Average of the student's grades in the semesters before the tutoring semester,
+          from 0 to 10.
+        to_treatment: >-
+          Students with a lower previous average participated in the tutoring more
+          frequently because they received the invitation before the other students.
+        to_outcome: Students with a higher previous average get a higher final grade.
+      outcome_cause:
+        dictionary: >-
+          Average of the student's grades in the semesters before the tutoring semester,
+          from 0 to 10.
+        to_outcome: Students with a higher previous average get a higher final grade.
+  presenca_aulas:
+    label: class attendance
+    roles:
+      confounder:
+        dictionary: >-
+          Attended at least 75% of the course classes in the four weeks before the tutoring
+          started (1 = yes, 0 = no).
+        to_treatment: >-
+          The tutoring was announced in class, and therefore students with higher class
+          attendance participated in the tutoring more frequently.
+        to_outcome: Students with higher class attendance get a higher final grade.
+      mediator:
+        dictionary: >-
+          Attended at least 75% of the course classes in the four weeks after the tutoring
+          started (1 = yes, 0 = no).
+        from_treatment: >-
+          Students who participate in the tutoring have higher attendance in the course
+          classes in the following weeks.
+        to_outcome: Students with higher class attendance get a higher final grade.
+      outcome_cause:
+        dictionary: >-
+          Attended at least 75% of the course classes in the four weeks before the tutoring
+          started (1 = yes, 0 = no).
+        to_outcome: Students with higher class attendance get a higher final grade.
+  horas_estudo:
+    label: study hours
+    roles:
+      confounder:
+        dictionary: >-
+          Average weekly hours of self-study for the course in the four weeks before the
+          start of the tutoring.
+        to_treatment: >-
+          Students who already studied more hours per week for the course participated in
+          the tutoring more frequently.
+        to_outcome: Students who study more hours per week for the course get a higher final grade.
+      mediator:
+        dictionary: >-
+          Average weekly hours of self-study for the course in the four weeks after the
+          start of the tutoring.
+        from_treatment: >-
+          Students who participate in the tutoring prepare for the meetings with the tutor
+          and start studying more hours per week for the course.
+        to_outcome: Students who study more hours per week for the course get a higher final grade.
+      outcome_cause:
+        dictionary: >-
+          Average weekly hours of self-study for the course in the four weeks before the
+          start of the tutoring.
+        to_outcome: Students who study more hours per week for the course get a higher final grade.
+  exercicios_entregues:
+    label: the exercises submitted
+    roles:
+      mediator:
+        dictionary: >-
+          Number of exercises from the problem sets submitted by the student in the four
+          weeks after the start of the tutoring.
+        from_treatment: >-
+          The tutor helps solve the problem sets, and students who participate in the
+          tutoring submit more exercises in the following weeks.
+        to_outcome: >-
+          Students who submit more exercises from the problem sets get a higher final grade.
+      outcome_cause:
+        dictionary: >-
+          Number of exercises from the problem sets submitted by the student in the four
+          weeks before the start of the tutoring.
+        to_outcome: >-
+          Students who submit more exercises from the problem sets get a higher final grade.
+  motivacao:
+    label: the student's motivation
+    hidden_fact: >-
+      The students' motivation was not measured before the start of the tutoring, and
+      therefore it is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Motivation score for the course on the questionnaire given in the week before the
+          start of the tutoring, from 0 to 10.
+        to_treatment: >-
+          Students who were more motivated about the course participated in the tutoring
+          more frequently.
+        to_outcome: Students who are more motivated about the course get a higher final grade.
+      mediator:
+        dictionary: >-
+          Motivation score for the course on the questionnaire given four weeks after the
+          start of the tutoring, from 0 to 10.
+        from_treatment: >-
+          Students who participate in the tutoring become more motivated about the course
+          in the following weeks.
+        to_outcome: Students who are more motivated about the course get a higher final grade.
+  base_prerequisito:
+    label: the foundation in the prerequisite content
+    hidden_fact: >-
+      The course did not give a placement test, and therefore the students' foundation in
+      the prerequisite content is not in the table.
+    roles:
+      confounder:
+        dictionary: >-
+          Grade on the placement test on the prerequisite content, given in the first week
+          of classes, from 0 to 10.
+        to_treatment: >-
+          Students with a weaker foundation in the prerequisite content participated in the
+          tutoring more frequently because they struggled more and sought out the tutoring.
+        to_outcome: >-
+          Students with a stronger foundation in the prerequisite content get a higher
+          final grade.
+      outcome_cause:
+        dictionary: >-
+          Grade on the placement test on the prerequisite content, given in the first week
+          of classes, from 0 to 10.
+        to_outcome: >-
+          Students with a stronger foundation in the prerequisite content get a higher
+          final grade.
+  trabalha:
+    label: the student's job or internship
+    hidden_fact: >-
+      The university does not record which students work, and therefore this information
+      is not in the table.
+    roles:
+      confounder:
+        dictionary: Had a job or an internship at the beginning of the semester (1 = yes, 0 = no).
+        to_treatment: >-
+          Students who work have fewer free time slots and participated in the tutoring less
+          frequently.
+        to_outcome: Students who work arrive more tired at the exams and get a lower final grade.
+      outcome_cause:
+        dictionary: Had a job or an internship at the beginning of the semester (1 = yes, 0 = no).
+        to_outcome: Students who work arrive more tired at the exams and get a lower final grade.
+  bolsista:
+    label: the scholarship
+    roles:
+      confounder:
+        dictionary: >-
+          Was receiving a scholarship from the university at the beginning of the semester
+          (1 = yes, 0 = no).
+        to_treatment: >-
+          The course coordination office reserved part of the tutoring slots for scholarship
+          holders, and therefore scholarship holders participated in the tutoring more
+          frequently.
+        to_outcome: >-
+          Scholarship holders lose the scholarship if they do poorly in the course, and
+          therefore they get a higher final grade.
+      outcome_cause:
+        dictionary: >-
+          Was receiving a scholarship from the university at the beginning of the semester
+          (1 = yes, 0 = no).
+        to_outcome: >-
+          Scholarship holders lose the scholarship if they do poorly in the course, and
+          therefore they get a higher final grade.
+  reprovacao_anterior:
+    label: the previous failure in the course
+    roles:
+      confounder:
+        dictionary: Had already failed this course in a previous semester (1 = yes, 0 = no).
+        to_treatment: >-
+          Students who had already failed the course had priority for the slots and
+          participated in the tutoring more frequently.
+        to_outcome: Students who have already failed the course get a lower final grade.
+      outcome_cause:
+        dictionary: Had already failed this course in a previous semester (1 = yes, 0 = no).
+        to_outcome: Students who have already failed the course get a lower final grade.
+  turma_piloto:
+    label: the pilot class
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Was enrolled in one of the classes chosen for the tutoring pilot (1 = yes, 0 = no).
+        to_treatment: >-
+          Some classes of the course were chosen for a pilot and had more tutoring slots,
+          and students from those classes participated in the tutoring more frequently.
+  atendimento_coordenacao:
+    label: the appointment with the course coordination office
+    roles:
+      treatment_cause:
+        dictionary: >-
+          Had an appointment with the course coordination office in the four weeks before
+          the tutoring started (1 = yes, 0 = no).
+        to_treatment: >-
+          The course coordination office told students about the tutoring slots during
+          appointments, and therefore students who had had an appointment with the
+          coordination office participated in the tutoring more frequently.
+      collider:
+        dictionary: >-
+          Had an appointment with the course coordination office after the tutoring started,
+          up to the enrollment for the next semester (1 = yes, 0 = no).
+        from_treatment: >-
+          The course coordination office calls in students who participate in the tutoring
+          more often, for a follow-up appointment.
+        from_outcome: >-
+          Students with a lower final grade go to the course coordination office more often
+          after the grades are released, to ask for guidance on how to retake the course.
+  pesquisa_avaliacao:
+    label: the response to the course evaluation survey
+    roles:
+      collider:
+        dictionary: >-
+          Answered the course evaluation survey, opened after the final grades were released
+          (1 = yes, 0 = no).
+        from_treatment: >-
+          The tutor asks the tutoring students to answer the course evaluation survey, and
+          students who participate in the tutoring answer the survey more often.
+        from_outcome: >-
+          Students with a higher final grade answer the course evaluation survey more often.
+  matricula_par:
+    label: the parity of the student ID number
+    roles:
+      unrelated:
+        dictionary: The student's ID number is even (1 = yes, 0 = no).
+        fact: >-
+          Having an even or odd student ID number has no relation to the tutoring or to the final
+          grade.
