@@ -675,7 +675,7 @@ Os três cartões no Hub foram comparados byte a byte com os arquivos de `docs/c
 **Depende do André**
 
 1. ~~Abrir os três repositórios do Hugging Face ao público~~ Feito em 25 de outubro e verificado.
-2. ~~Preencher o perfil da organização `coppead` no GitHub~~ Feito pelo André em 25 de outubro: nome "COPPEAD / UFRJ", descrição em inglês sobre pesquisa aberta em IA aplicada a decisões de gestão, site, local e e-mail institucional. Falta só, se quiser, verificar o domínio da escola no GitHub.
+2. ~~Preencher o perfil da organização `coppead` no GitHub~~ Feito pelo André em 25 de outubro: nome "COPPEAD / UFRJ", descrição em inglês sobre pesquisa aberta em IA aplicada a decisões de gestão, site, local e e-mail institucional. Falta só, se quiser, verificar o domínio da escola no GitHub. No Hugging Face, o André pôs o logo, o nome "COPPEAD / UFRJ" e o site; a descrição lá é o cartão da organização, um Space chamado `coppead/README` cujo `index.html` é o que a página mostra: criado em 25 de outubro com o mesmo texto do GitHub e os links do modelo, do GGUF, dos dados e do código, conferido com uma captura da página.
 3. Decidir se o e-mail institucional, que já está público no perfil da organização, entra também no README, no código de conduta e nos cartões; hoje esses textos apontam para as issues.
 4. ~~Repetir o achatamento do histórico nos três repositórios do Hub~~ Feito pelo André em 25 de outubro, depois do último reenvio; conferido: um commit em cada, mesmos arquivos, cartões iguais aos locais.
 5. Fornecer uma chave de API de um modelo de fronteira, se quiser a linha que falta no placar.
