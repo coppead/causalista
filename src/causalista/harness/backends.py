@@ -59,17 +59,32 @@ class OllamaModel:
             object.__setattr__(self, "label", self.model + suffix)
 
     def __call__(self, task: Task) -> Reply:
-        body = {
-            "model": self.model,
-            "messages": [{"role": "user", "content": build_prompt(task)}],
-            "stream": False,
-            "options": {"temperature": 0, "seed": 0, "num_predict": self.max_tokens, "num_ctx": self.context},
-        }
+        prompt = build_prompt(task)
+        options = {"temperature": 0, "seed": 0, "num_predict": self.max_tokens, "num_ctx": self.context}
+        started = time.time()
+        if self.think is False:
+            # Thinking off is rendered here, not by the server. Ollama's chat endpoint does not reliably
+            # close the thinking block for Qwen3-family models (checked with Ollama 0.32.15: with
+            # `think: false` the prompt ends right after `<|im_start|>assistant`, and the model opens
+            # `<think>` by itself), so the exact prompt the model was trained and measured on is sent raw.
+            body = {"model": self.model, "prompt": chatml_prompt(prompt, thinking=False), "raw": True, "stream": False, "options": options}
+            reply = _post(f"{self.host}/api/generate", body)
+            return Reply(reply["response"], time.time() - started, reply.get("eval_count"))
+        body = {"model": self.model, "messages": [{"role": "user", "content": prompt}], "stream": False, "options": options}
         if self.think is not None:
             body["think"] = self.think
-        started = time.time()
         reply = _post(f"{self.host}/api/chat", body)
         return Reply(reply["message"]["content"], time.time() - started, reply.get("eval_count"))
+
+
+def chatml_prompt(prompt: str, *, thinking: bool) -> str:
+    """One user turn in the Qwen3 chat format, with the thinking block closed when thinking is off.
+
+    This is what `tokenizer.apply_chat_template([...], add_generation_prompt=True, enable_thinking=False)`
+    produces for the Qwen3 family, and therefore what the published model saw in training and measurement.
+    """
+    opener = "<think>\n" if thinking else "<think>\n\n</think>\n\n"
+    return f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n{opener}"
 
 
 @dataclass(frozen=True)

@@ -8,6 +8,7 @@ from causalista.harness.backends import (
     OllamaModel,
     OpenAIModel,
     Reply,
+    chatml_prompt,
     Responder,
     Rule,
 )
@@ -39,6 +40,7 @@ __all__ = [
     "Rule",
     "SavedWorld",
     "by",
+    "chatml_prompt",
     "load_world",
     "load_worlds",
     "format_consultation",
