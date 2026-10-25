@@ -14,7 +14,7 @@
 
 Um analista causal pequeno e local, que diz quando não pode responder. Você descreve uma tabela (as colunas e como os dados foram gerados) e diz qual coluna é a intervenção e qual é o resultado. O Causalista decide por quais colunas ajustar; um estimador separado calcula então o efeito com intervalo de confiança. Quando os dados não respondem à pergunta, ele diz **não identificável** e explica o que falta. O modelo nunca vê as linhas.
 
-É um ajuste fino de 4 bilhões de parâmetros do Qwen3-4B, que roda em um notebook, treinado em mundos sintéticos de resposta conhecida e avaliado por um verificador que conhece o grafo causal verdadeiro. A versão 0.1.0 foi publicada em 25 de outubro de 2026 pela COPPEAD/UFRJ, sob a licença Apache 2.0.
+É um ajuste fino de 4 bilhões de parâmetros do Qwen3-4B, que roda em um notebook, treinado em mundos sintéticos de resposta conhecida e avaliado por um verificador que conhece o grafo causal verdadeiro. A versão 0.1.0 do modelo foi publicada em 25 de outubro de 2026 pela COPPEAD/UFRJ, sob a licença Apache 2.0; o código está na versão 0.1.1 ([CHANGELOG](CHANGELOG.md)).
 
 ## Resultados
 
@@ -143,7 +143,7 @@ André Fonseca, COPPEAD, Instituto de Pós-Graduação e Pesquisa em Administra�
   author    = {Fonseca, André},
   title     = {Causalista: a small, local model that decides what to adjust for and says when the data cannot answer},
   year      = {2026},
-  version   = {0.1.0},
+  version   = {0.1.1},
   publisher = {COPPEAD/UFRJ},
   url       = {https://github.com/coppead/causalista},
   note      = {Model: \url{https://huggingface.co/coppead/causalista-4b}}

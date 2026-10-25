@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-10-25
+
+Code-only patch release. The model, the GGUF files and the dataset are unchanged and stay at version 0.1.0 on the Hugging Face Hub.
+
 ### Added
 - `scripts/ask.py` and `causalista.harness.ask`: ask the model about a table of your own (CSV, story, column dictionary) and run the estimator on its answer.
 - `rule:all` and `rule:none` as English aliases of the naive strategies `rule:tudo` and `rule:nada`.
@@ -31,5 +35,6 @@ First release.
 - **Release**: merged weights and both adapters (`coppead/causalista-4b`), GGUF Q4_K_M and Q8_0 with an Ollama Modelfile (`coppead/causalista-4b-GGUF`), and the dataset with the five world sets used for development and measurement, every written case, the training examples and every recorded answer on them (`coppead/causalista-worlds`). Apache 2.0.
 - **Not claimed**: that the model beats frontier models, or recovers effects of real experiments. Every number is on synthetic data with a known answer; see the model card.
 
-[Unreleased]: https://github.com/coppead/causalista/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/coppead/causalista/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/coppead/causalista/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/coppead/causalista/releases/tag/v0.1.0

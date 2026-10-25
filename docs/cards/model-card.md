@@ -220,7 +220,7 @@ Full history, decisions and every measurement: `docs/status.md` in the repositor
 |---|---|---|
 | 0.1.0 | 2026-10-25 (files uploaded 2026-10-24) | first release: supervised fine-tuning plus the reinforcement step described above |
 
-New versions get a new tag in the code repository, a new entry in its `CHANGELOG.md`, and a new revision here; errata are listed in the CHANGELOG.
+The code repository has its own patch versions (0.1.1 on 2026-10-25: `scripts/ask.py`, the Ollama thinking-off fix, documentation after the audits); they do not change the weights. New model versions get a new tag in the code repository, a new entry in its `CHANGELOG.md`, and a new revision here; errata are listed in the CHANGELOG.
 
 ## License and citation
 

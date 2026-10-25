@@ -14,7 +14,7 @@
 
 A small, local causal analyst that says when it cannot answer. You describe a table (its columns and how the data were generated) and name the intervention and the outcome columns. Causalista decides which columns to adjust for; a separate estimator then computes the effect with a confidence interval. When the data cannot answer the question, it says **not identifiable** and explains what is missing. The model never sees the rows.
 
-It is a 4B-parameter fine-tune of Qwen3-4B that runs on a laptop, trained on synthetic worlds with known answers and scored by a verifier that knows the true causal graph. Version 0.1.0 was released on 2026-10-25 by COPPEAD/UFRJ (the business school of the Federal University of Rio de Janeiro) under Apache 2.0.
+It is a 4B-parameter fine-tune of Qwen3-4B that runs on a laptop, trained on synthetic worlds with known answers and scored by a verifier that knows the true causal graph. Model version 0.1.0 was released on 2026-10-25 by COPPEAD/UFRJ (the business school of the Federal University of Rio de Janeiro) under Apache 2.0; the code is at version 0.1.1 ([CHANGELOG](CHANGELOG.md)).
 
 ## Results
 
@@ -174,7 +174,7 @@ André Fonseca, COPPEAD Graduate School of Business, Federal University of Rio d
   author    = {Fonseca, André},
   title     = {Causalista: a small, local model that decides what to adjust for and says when the data cannot answer},
   year      = {2026},
-  version   = {0.1.0},
+  version   = {0.1.1},
   publisher = {COPPEAD/UFRJ},
   url       = {https://github.com/coppead/causalista},
   note      = {Model: \url{https://huggingface.co/coppead/causalista-4b}}
