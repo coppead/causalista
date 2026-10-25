@@ -4,7 +4,20 @@
 
 ## [Unreleased]
 
-## [0.1.0] — 2026-10-24
+### Added
+- `scripts/ask.py` and `causalista.harness.ask`: ask the model about a table of your own (CSV, story, column dictionary) and run the estimator on its answer.
+- `rule:all` and `rule:none` as English aliases of the naive strategies `rule:tudo` and `rule:nada`.
+- English indexes for `docs/`, `theories/`, `cases/`, `configs/` and `scripts/`; a working-language note at the top of the README.
+
+### Changed
+- The console scoreboard prints in English unless the locale is Portuguese; `run_models.py` prints progress and where the records went.
+- `roles_right` is `null` in a summary when no record carries roles to check (written cases), instead of `0.0`.
+- Documentation after three independent audits: exact commands to reproduce every row of the results table, identification blocks and intended-use sections in the cards, glossary of internal names, llama.cpp command with reasoning off.
+
+## [0.1.0] — 2026-10-25
+
+The code was frozen on 2026-10-24 and the three Hugging Face repositories were uploaded that day; the public GitHub repository, the tag and the Release were published on 2026-10-25. The public history is a single commit: it was rewritten on 2026-10-25, before anyone had forked the repository, to remove the name of the AI coding assistant from the history, so clones made before that date diverge.
+
 
 First release.
 

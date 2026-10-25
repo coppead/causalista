@@ -1,4 +1,7 @@
-# Keeps the GitHub Actions used by the workflows up to date.
+# Keeps the GitHub Actions and the Python dependencies up to date.
+# The training stack (torch, Unsloth, TRL, PEFT, transformers) is pinned on purpose: it is the
+# stack the published model was trained with, and torch comes from a CUDA index that Dependabot
+# cannot resolve. Those packages are ignored here and updated by hand between releases.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -9,3 +12,17 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: torch
+      - dependency-name: torchvision
+      - dependency-name: unsloth
+      - dependency-name: unsloth-zoo
+      - dependency-name: transformers
+      - dependency-name: trl
+      - dependency-name: peft
+      - dependency-name: bitsandbytes
+      - dependency-name: accelerate

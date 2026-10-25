@@ -1,6 +1,7 @@
 # Mundos-vitrine: fixados antes do treino, pela regra de configs/split.yaml.
-# Gerado por scripts/pick_showcase.py. Vale para a divisão de temas em vigor; se os
-# temas de teste mudarem, este arquivo é refeito antes de qualquer treino.
+# Gerado por scripts/pick_showcase.py em 2026-10-04 para o conjunto `teste-final`, que foi
+# superado pelo `teste-v3` em 2026-10-05. Fica como registro da proposta; a regra em vigor é a
+# de `showcase:` em configs/split.yaml, que as páginas aplicam diretamente ao conjunto atual.
 
 set: teste-final
 status: proposta

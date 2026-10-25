@@ -1,6 +1,6 @@
 # Modelo para os casos escritos à mão
 
-Entrega da fase 0: cinco casos escritos pelo André. Copie o modelo abaixo, um por caso.
+Entrega da fase 0: cinco casos, escritos pelo assistente a pedido do André e aprovados por delegação depois de revisão independente (`cases/fase0.yaml`). Copie o modelo abaixo, um por caso.
 
 As setas são opcionais. Sem elas, o assistente propõe as setas a partir da história e o André confirma. Com elas, o verificador confere se a resposta bate.
 

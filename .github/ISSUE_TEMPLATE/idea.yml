@@ -6,6 +6,6 @@ body:
     id: text
     attributes:
       label: Your question or idea
-      description: Ideas outside the current release go to the list in section 10 of the specification (ESPECIFICACAO.md, in Portuguese); say if yours is already there.
+      description: Tell us the idea and what it would change; the maintainer checks it against the project's roadmap and replies here.
     validations:
       required: true

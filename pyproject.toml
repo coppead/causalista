@@ -1,11 +1,11 @@
 [project]
 name = "causalista"
 dynamic = ["version"]
-description = "Small, local, honest causal analyst: decides what to adjust for, and says when the data cannot answer."
+description = "A small, local causal analyst: decides which columns to adjust for and says when the data cannot answer."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 authors = [{ name = "André Fonseca" }]
 keywords = ["causal-inference", "adjustment-set", "abstention", "synthetic-data", "small-language-models"]
 classifiers = [
@@ -75,6 +75,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 path = "src/causalista/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/.gitignore", "/.python-version", "/outputs", "/.vscode"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/causalista"]

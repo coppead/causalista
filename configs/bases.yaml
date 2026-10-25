@@ -6,7 +6,7 @@
 # files. All three are public, not gated, and were downloaded to the default cache at
 # the commit recorded here. The training and the harness load a base at this commit.
 #
-# `text_parameters` was measured on this machine, with the libraries of the `train`
+# `text_parameters` was measured on the training machine (one RTX 4090, WSL2), with the libraries of the `train`
 # group (see scripts/README-treino.md).
 
 bases:

@@ -1,3 +1,5 @@
+<!-- Review notes on the eight theory sheets (Portuguese). The sheets were approved on 2026-10-05; this file is the record of what was checked and changed. -->
+
 # Fichas de teoria para aprovar
 
 > **Atualização de 5 de outubro de 2026.** O André decidiu não ler as fichas uma a uma e pediu ao assistente uma revisão independente de todas. Ela foi feita (oito leitores, um por ficha, sem acesso à opinião de quem escreveu), as correções foram aplicadas, e as sete fichas ficaram aprovadas por delegação. O relato está na seção 23 de `docs/status.md`. Os pontos abaixo continuam sendo as escolhas de teoria mais discutíveis de cada ficha e ficam como registro: se um dia o André quiser olhar só o essencial, é por aqui.

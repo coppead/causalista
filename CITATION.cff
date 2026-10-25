@@ -1,9 +1,9 @@
 cff-version: 1.2.0
 message: "If you use Causalista, please cite it as below."
 type: software
-title: "Causalista: a small, local model that decides what to adjust for, and says when the data cannot answer"
+title: "Causalista: a small, local model that decides what to adjust for and says when the data cannot answer"
 version: 0.1.0
-date-released: 2026-10-24
+date-released: 2026-10-25
 license: Apache-2.0
 repository-code: "https://github.com/coppead/causalista"
 url: "https://huggingface.co/coppead/causalista-4b"

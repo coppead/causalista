@@ -4,7 +4,7 @@
 
 ## Read first
 
-- [ESPECIFICACAO.md](ESPECIFICACAO.md) (Portuguese): what is being built, in what order, and the record of each phase gate. Nothing enters a release outside it.
+- [ESPECIFICACAO.md](ESPECIFICACAO.md) (Portuguese): what is being built, in what order, and the record of each phase gate. Nothing goes into a release that is not in it.
 - [docs/status.md](docs/status.md) (Portuguese): the full account of what was done and decided.
 - The README of each package under `src/causalista/` (Portuguese): what it does, what goes in, what comes out.
 - The model and dataset cards in `docs/cards/` (English, with a Portuguese opening).
@@ -23,13 +23,13 @@ Python 3.12. R with the `dagitty` package is only needed to regenerate the refer
 ## Tests
 
 ```bash
-uv run pytest                # the everyday suite (10 to 15 minutes: the worlds are tested on all eight themes)
-uv run pytest -m slow        # exhaustive: every graph of up to five variables (~2 min)
+uv run --no-sync pytest                # the default suite (10 to 15 minutes: the worlds are tested on all eight themes)
+uv run --no-sync pytest -m slow        # exhaustive: every graph of up to five variables (~2 min)
 ```
 
 Run the slow suite after any change under `src/causalista/verifier/`. If the verifier is wrong, everything downstream is wrong, so changes there must keep all four test layers green and `test_safety_net.py` must still catch the planted errors.
 
-## Rules that are not negotiable
+## Non-negotiable rules
 
 - **Targets come from the verifier, never from a model.** Every training answer is derived from the true graph.
 - **Frozen cases never enter training.** `cases/simulados/` (48 cases, frozen on 2026-10-06) and the world set `teste-v3` are for final measurement only. Seeds have reserved ranges (table in `scripts/make_worlds.py`); training never uses a seed below 100,000.
@@ -38,6 +38,6 @@ Run the slow suite after any change under `src/causalista/verifier/`. If the ver
 
 ## Proposing changes
 
-Open an issue first for anything that changes the verifier, the world design, the score or the task format: those are design decisions recorded in the specification. Keep pull requests small, one piece of the project per commit, with commit messages in Portuguese. Pages under `src/causalista/viz/` are generated from records, never drawn by hand.
+Open an issue first for anything that changes the verifier, the world design, the score or the task format: those are design decisions recorded in the specification. Keep pull requests small, one piece of the project per commit. Commit messages in English or Portuguese are both welcome; the maintainer keeps the project's own history in Portuguese. Pages under `src/causalista/viz/` are generated from records, never drawn by hand.
 
 Ideas outside the current release go to the list in section 10 of the specification.
