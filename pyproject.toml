@@ -39,7 +39,7 @@ dev = [
 # Training and local inference with Hugging Face (phases 4 and 5). Not needed by the
 # published runner: the runtime dependencies above stay free of torch.
 train = [
-    "torch>=2.12,<2.13",
+    "torch>=2.12,<2.15",
     "torchvision",
     "transformers>=5.5",
     "peft>=0.18",
