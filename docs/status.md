@@ -2,7 +2,7 @@
 
 <!-- The project's working log, kept in Portuguese. It records what was built, measured and decided, day by day, with every number; the Hugging Face cards (docs/cards/) and the English README summarise it. -->
 
-Situação em 24 de outubro de 2026. O projeto foi construído em sessões de trabalho do André com um assistente de IA ("o assistente", neste documento), de 3 a 7 de outubro, fechado em 18 de outubro, gravado no repositório em 19 e enviado ao Hugging Face em 24.
+Situação em 8 de novembro de 2026. O projeto foi construído em sessões de trabalho do André com um assistente de IA ("o assistente", neste documento), de 3 a 7 de outubro, fechado em 18 de outubro, gravado no repositório em 19, enviado ao Hugging Face em 24, aberto ao público em 25 de outubro e anunciado em 8 de novembro.
 
 ## Em poucas palavras
 
@@ -12,7 +12,7 @@ O Causalista é um modelo pequeno, que roda na máquina da pessoa, treinado para
 - A fase 2 (a fábrica de mundos e o estimador) tem os oito temas, com as fichas revisadas e aprovadas (o telecom pelo André, as outras sete por delegação).
 - A fase 4 (treino supervisionado) produziu o modelo: na prova final, 99% de acerto em 1.515 mundos nunca vistos, nos três idiomas, inclusive em espanhol, que ele nunca treinou. Em texto que imita gente, 67% (69% depois do reforço), contra 96% de um modelo aberto de 27B.
 - A fase 5 (reforço com a nota do verificador) foi feita: três treinos sobre mundos sintéticos não ensinaram nada; dois braços sobre casos tipo humano, em 18 de outubro, decidiram o modelo publicado pela regra escrita antes. O reforço mudou um caso em 32 e um em 48.
-- **Em 18 de outubro o André decidiu fechar a 0.1 e publicar** (seção 35). **Em 24 de outubro os três repositórios subiram para a organização `coppead` no Hugging Face** (seção 36). Estão privados; abri-los ao público é decisão dele.
+- **Em 18 de outubro o André decidiu fechar a 0.1 e publicar** (seção 35). **Em 24 de outubro os três repositórios subiram para a organização `coppead` no Hugging Face** (seção 36) e em 25 foram abertos ao público. **Em 8 de novembro o André anunciou o repositório e o Causalista no LinkedIn** (seções 37 e 38).
 
 ## Situação por fase
 
@@ -24,7 +24,7 @@ O Causalista é um modelo pequeno, que roda na máquina da pessoa, treinado para
 | 3 | Harness e placar de base | Fechada em 18 de outubro por decisão do André, com duas pendências registradas: o modelo de fronteira não foi medido (sem chave de API) e os limiares do critério de pronto não foram fixados. |
 | 4 | Treino supervisionado | Feita. Modelo final medido na prova final em 18 de outubro (seção 35): 99% em 1.515 mundos. |
 | 5 | Treino por reforço (GRPO) | Feita. Três treinos sobre mundos sintéticos (7 de outubro) e dois braços sobre casos tipo humano (18 de outubro); o braço de reforço venceu pela regra e é o modelo publicado, com ganho de um caso em 32 e um em 48 (seção 35). |
-| 6 | Publicação | Enviada em 24 de outubro para a organização `coppead` no Hugging Face: modelo, GGUF e dados, em três repositórios privados (seção 36). O código está público em `coppead/causalista` desde 24 de outubro; falta abrir os três repositórios do Hub. |
+| 6 | Publicação | Feita. Modelo, GGUF e dados enviados em 24 de outubro para a organização `coppead` no Hugging Face e abertos ao público em 25 (seção 36); o código está público em `coppead/causalista` desde 24 de outubro. Anunciada no LinkedIn em 8 de novembro (seção 38). Faltam a demonstração no navegador, que espera uma assinatura, e o DOI. |
 
 ## O que foi feito em 3 de outubro
 
@@ -672,6 +672,24 @@ Os três cartões no Hub foram comparados byte a byte com os arquivos de `docs/c
 
 **Press release (25 de outubro, noite).** A pedido do André, um press release sobre a criação do repositório do COPPEAD no Hugging Face, no formato dos releases das escolas de negócios dos EUA (divulgação imediata, título e subtítulo, dateline, citações, "o que está disponível", boilerplate, contato, marca de fim), para a assessoria de imprensa trabalhar. Posicionamento, nas palavras dele: o COPPEAD quer ser a principal referência em adoção de IA entre as escolas de negócios da América Latina, e o repositório consolida isso. O texto está em um documento compartilhado e em Word na pasta do projeto no Drive (`Press release - COPPEAD no Hugging Face.docx`), com uma segunda página de notas para a assessoria, não publicável: o que já está verificado (números, links, licença, data), o que falta confirmar (as duas citações, que são sugestões; acreditações e números do boilerplate; data e embargo; contato) e sugestões (versões em inglês e espanhol, material visual, porta-voz técnico, o ângulo da honestidade). Decisões do André no texto: a frase de posicionamento fala em escolas de negócios, não em instituições de ensino superior; o intertítulo é "um modelo que ajuda a separar causa de coincidência"; a origem do modelo é dita como é, criado na escola a partir do Qwen3-4B, modelo aberto da Alibaba.
 
+## O que foi feito em 8 de novembro
+
+### 37. Material do anúncio
+
+**Imagens do anúncio (8 de novembro).** O André pretende anunciar nesta semana o repositório do COPPEAD no Hugging Face, com o Causalista como primeiro artefato, e pediu uma imagem. Primeira versão, com quatro números, a nota sobre o texto tipo humano e os dois diagramas: ele não gostou ("sincericídio"; para fora, não dar muitos detalhes). Versão final, pedida por ele: só os dois diagramas e três mensagens (pequeno, 4 bilhões de parâmetros; roda até num laptop, os dados não saem da máquina; desempenho comparável ao de modelos muito maiores, nesta tarefa), caracterizado como o primeiro modelo de IA especializado pelo COPPEAD/UFRJ, aberto e gratuito para a comunidade, com a frase do press release ("separar causa de coincidência"). Duas correções dele no mesmo dia: "especializado", não "criado" (o modelo parte do Qwen3-4B); e a introdução dos diagramas diz "A resposta pode ser duas coisas", não "Ele responde". Em seguida ele perguntou se "separar causa de coincidência" era mesmo a melhor descrição. Parecer do assistente: não; coincidência é acaso, e acaso se resolve com mais dados, enquanto o que o modelo trata é a comparação errada (quem recebeu a intervenção já era diferente), que não melhora com mais dados; a frase serve para imprensa, mas o público primário é acadêmico. A primeira alternativa aprovada, "Essa decisão teve efeito, ou quem a recebeu já era diferente?", ele achou dura ao ver na imagem; a frase final é "A decisão funcionou, ou só pareceu funcionar?" (em inglês, "Did the decision work, or did it just look that way?"), com os dois diagramas como as duas respostas possíveis. O press release ainda usa "um modelo que ajuda a separar causa de coincidência" no intertítulo; a troca lá depende do André. Os números e as ressalvas ficam nos cartões, não na peça de divulgação. Quatro arquivos, gerados de um modelo HTML renderizado pelo Chromium em dobro de resolução: quadrada (1200 x 1200, para o feed do LinkedIn) e larga (1200 x 630, para pré-visualização de link e imprensa), em português e em inglês. O diagrama "dá para medir" é o exemplo do README (campanha de e-mail, compras anteriores como confundidor, visita ao site como mediador); o "não dá para concluir" é ilustrativo, do tema de RH. Cores da identidade do COPPEAD (o roxo do logo) com as fontes das páginas do projeto. Arquivos em `outputs/anuncio/` (fora do git, com o gerador `make.py`, o logo e os HTML) e na pasta do projeto no Drive, em `Anuncio/`. Conferido ao gerar: nenhum elemento fora da área da imagem.
+
+**Demonstração no navegador (8 de novembro, noite).** O André concordou que falta uma demonstração que rode no navegador, um Space no Hugging Face, e perguntou o que precisava fazer para viabilizá-la. O aplicativo foi escrito e testado nesta máquina: Gradio 6.31, Python 3.12, o GGUF Q4_K_M publicado rodando por llama-cpp-python na CPU, com o prompt exato do harness (formato de chat com o bloco de raciocínio fechado, greedy). Campos: idioma (pt/en), exemplo, intervenção, resultado, pergunta opcional, história, dicionário das colunas (uma por linha) e CSV opcional. Sem CSV, os resumos das colunas são inventados a partir das descrições, como o harness faz para os casos escritos, e nada é estimado; com CSV, o caminho é o de `scripts/ask.py` (modelo e estimador). Catorze exemplos embutidos (os cinco de `cases/fase0.yaml` e nove de `cases/simulados/`: quatro em português, três em inglês, dois em espanhol), escolhidos entre os casos que o modelo acerta nas rodadas gravadas, com a resposta gravada pelo mesmo motor nesta data; uma entrada igual a um exemplo devolve a resposta gravada na hora, qualquer edição roda o modelo ao vivo. Teste sem navegador: exemplo gravado (instantâneo), resposta ao vivo, CSV sintético com estimativa (efeito ajustado +0,118 contra diferença simples +0,207 numa tabela gerada para o teste) e mensagens de erro, tudo certo. Tempo na CPU com dois fios, simulando a CPU gratuita do Hub: cerca de 50 segundos por resposta nova (20 s de leitura do prompt, 20 s de geração); estimativa para o Space gratuito, 1 a 2 minutos. Fontes em `outputs/space/` (fora do git), com os scripts de gravação dos exemplos, de teste e de publicação; uma página estática de entrada para a organização, que incorpora o aplicativo, em `outputs/space-static/`.
+
+**O que impede a publicação.** O Hub não cria mais Spaces com Gradio ou Docker sem plano pago, nem na organização nem na conta pessoal; só Spaces estáticos são gratuitos. Tentativa na organização `coppead`: erro 402, "hosting Gradio and Docker Spaces on free cpu-basic requires a Team or Enterprise plan for organization coppead". Tentativa na conta `aladaf`: erro 402, "requires a PRO subscription". Nenhum Space foi criado. Depende do André: assinar o PRO na conta pessoal (o Space fica em `aladaf/causalista`, e a página estática em `coppead/causalista` o incorpora; o PRO também dá acesso a ZeroGPU, que tornaria a resposta rápida) ou o plano Team na organização (o Space fica direto em `coppead/causalista`). Com a assinatura ativa, a publicação leva minutos.
+
+**Achado no press release.** O corpo do texto diz que o modelo acertou 70% nos textos que imitam a escrita de pessoas; o número verificado é 69% (33 de 48), e as notas para a assessoria já dizem 69%. A correção depende do André, no documento do Drive.
+
+**Linha de base de uso antes do anúncio (8 de novembro, pela API do Hub, sem token).** Modelo: 396 downloads; GGUF: 142; conjunto de dados: 48; nenhuma curtida. Serve de ponto de partida para o registro de impacto do artefato.
+
+### 38. O anúncio
+
+**Post no LinkedIn (8 de novembro).** O André publicou o anúncio no LinkedIn: o repositório do COPPEAD/UFRJ no Hugging Face, com o Causalista como primeiro artefato, com as imagens da seção 37. Links indicados pelo assistente para o post, conferidos como públicos na hora: a página da organização (https://huggingface.co/coppead) como link principal, e, para saber mais, o modelo, o GGUF para o Ollama, os dados e o código no GitHub (os quatro endereços de "Onde está cada coisa"). Sem link de demonstração, porque o Space depende da assinatura (acima). Com o anúncio começa o registro de impacto do artefato: a linha de base é a do parágrafo anterior (396, 142 e 48 downloads, nenhuma curtida), lida horas antes do post. Proposta do assistente: ler de novo pela mesma API, sem token, em 15 de novembro e em 8 de dezembro, e anotar aqui, junto com o alcance do post, que só o André vê no LinkedIn.
+
 ## O que falta
 
 **Depende do André**
@@ -681,11 +699,15 @@ Os três cartões no Hub foram comparados byte a byte com os arquivos de `docs/c
 3. Decidir se o e-mail institucional, que já está público no perfil da organização, entra também no README, no código de conduta e nos cartões; hoje esses textos apontam para as issues.
 4. ~~Repetir o achatamento do histórico nos três repositórios do Hub~~ Feito pelo André em 25 de outubro, depois do último reenvio; conferido: um commit em cada, mesmos arquivos, cartões iguais aos locais.
 5. Fornecer uma chave de API de um modelo de fronteira, se quiser a linha que falta no placar.
+6. Assinar o PRO na conta `aladaf` ou o Team na organização `coppead` no Hugging Face, para publicar o Space da demonstração (seção 37); o aplicativo está pronto e testado.
+7. No press release, se a assessoria ainda for usá-lo: trocar o intertítulo pela frase final da imagem e corrigir 70% para 69% (seção 37).
 
 **Trabalho de máquina, depois disso**
 
 1. ~~Conferir as páginas abertas e rodar o começo rápido pelo `hf.co`~~ Feito em 25 de outubro.
 2. Os itens médios da revisão do Hub: compatibilidade com o transformers 4.x, reconversão do GGUF, tabelas parquet, Space das páginas.
+3. Publicar o Space e a página estática da organização assim que a assinatura estiver ativa (`outputs/space/push_space.py` e `outputs/space-static/`, fora do git), testar ao vivo e manter privado até o André aprovar.
+4. Ler downloads e curtidas em 15 de novembro e em 8 de dezembro e registrar na seção 38.
 
 ## Quem decidiu o quê
 
@@ -717,14 +739,15 @@ A lista está na seção "O que falta". Além dela, para depois da publicação:
 
 ## Próximos passos
 
-1. **Abrir a 0.1 ao público no Hugging Face**, quando o André autorizar; o GitHub já está público em `coppead/causalista`.
-2. **Depois, se houver 0.2:** treino supervisionado que misture mundos sintéticos e casos tipo humano (o braço D mostrou o ganho e o custo); casos escritos por pessoas de verdade; o modelo de fronteira no placar.
+1. ~~Anunciar a 0.1~~ Feito em 8 de novembro, no LinkedIn (seção 38).
+2. **Logo depois do anúncio**, na opinião do assistente: a demonstração no navegador (pronta; espera a assinatura), DOI no Zenodo, as leituras de uso de 15 de novembro e 8 de dezembro, e um modelo de fronteira no placar.
+3. **Depois, se houver 0.2:** treino supervisionado que misture mundos sintéticos e casos tipo humano (o braço D mostrou o ganho e o custo); casos escritos por pessoas de verdade; o modelo de fronteira no placar.
 
 ## Onde está cada coisa
 
 **Repositório.** https://github.com/coppead/causalista, público, na organização criada pelo André em 24 de outubro; os cartões no Hugging Face apontam para ele. O repositório privado `aladaf/causalista` guarda o histórico completo de desenvolvimento até o fechamento.
 
-**Hugging Face** (organização `coppead`; privados até o André abrir): o modelo em https://huggingface.co/coppead/causalista-4b, o GGUF em https://huggingface.co/coppead/causalista-4b-GGUF e os dados em https://huggingface.co/datasets/coppead/causalista-worlds.
+**Hugging Face** (organização `coppead`, https://huggingface.co/coppead; públicos desde 25 de outubro): o modelo em https://huggingface.co/coppead/causalista-4b, o GGUF em https://huggingface.co/coppead/causalista-4b-GGUF e os dados em https://huggingface.co/datasets/coppead/causalista-worlds.
 
 | Pasta | Conteúdo |
 |---|---|
