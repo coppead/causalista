@@ -18,7 +18,7 @@ Um analista causal pequeno e local, que diz quando não pode responder. Você de
 
 ## Resultados
 
-Avaliação final: 505 mundos nunca vistos em cada um de três idiomas (1.515 no total), em oito temas de gestão; dois dos temas e um dos idiomas (espanhol) nunca apareceram no treino. Nota por mundo: +1 por um conjunto de ajuste válido ou uma abstenção correta, −1 por um erro confiante, −0,5 por uma abstenção indevida; a tabela mostra a média. Um treino só (semente 0) e decodificação gulosa, então a avaliação é determinística; com 99% de acerto em 1.515 mundos, o intervalo binomial de 95% é de cerca de ±0,5 ponto.
+Avaliação final: 505 mundos nunca vistos em cada um de três idiomas (1.515 no total), em oito temas de gestão; dois dos temas e um dos idiomas (espanhol) nunca apareceram no treino. Nota por mundo: +1 por um conjunto de ajuste válido ou uma abstenção correta, −1 por um erro confiante, −0,5 por uma abstenção indevida; a tabela mostra a média. Um treino só (semente 0) e geração sem sorteio (greedy, em inglês), então a avaliação é determinística, a mesma entrada dá sempre a mesma resposta; com 99% de acerto em 1.515 mundos, o intervalo binomial de 95% é de cerca de ±0,5 ponto.
 
 | Sistema | Nota | Acerto | pt | en | es | Temas reservados (381) |
 |---|---|---|---|---|---|---|
